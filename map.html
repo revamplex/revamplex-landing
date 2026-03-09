@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Revamplex Job Map</title>
+
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+
+<style>
+body { margin:0; }
+#map { height:100vh; }
+</style>
+
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+
+<script>
+
+mapboxgl.accessToken = 'pk.eyJ1IjoicmV2YW1wbGV4IiwiYSI6ImNtbWp0YjZyejE2c2gyd3Bucml6YTMzYzMifQ.qIuzgtSyYxQhR97_SvmNJw';
+
+const map = new mapboxgl.Map({
+container: 'map',
+style: 'mapbox://styles/mapbox/streets-v11',
+center: [-74.0431,40.7376],
+zoom: 12
+});
+
+new mapboxgl.Marker()
+.setLngLat([-74.0431,40.7376])
+.setPopup(new mapboxgl.Popup().setHTML("<h3>Bathroom Remodel</h3><p>$9000 Budget</p>"))
+.addTo(map);
+
+</script>
+
+</body>
+</html>
