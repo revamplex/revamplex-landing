@@ -409,7 +409,8 @@ Authorization:`Bearer ${SUPABASE_KEY}`,
 
 const jobs = await response.json();
 const radius = Number(document.getElementById("radius").value);
-
+const checkedTrades = [...document.querySelectorAll("#filters input:checked")]
+.map(i => i.value);
 jobs.forEach(job => {
 
 if(!checkedTrades.includes(job.Trade)) return;
