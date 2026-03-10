@@ -16,7 +16,8 @@ margin:0;
 width:100%;
 height:100vh;
 }
-  #controls{
+
+#controls{
 position:absolute;
 top:10px;
 left:10px;
@@ -30,6 +31,7 @@ z-index:1;
 </head>
 
 <body>
+
 <div id="controls">
 
 Radius:
@@ -42,13 +44,16 @@ Radius:
 <button onclick="loadJobs()">Refresh Jobs</button>
 
 </div>
+
 <div id="map"></div>
 
 <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
 
 <script>
-  let contractorLatitude;
+
+let contractorLatitude;
 let contractorLongitude;
+let markers = [];
 
 navigator.geolocation.getCurrentPosition(position => {
 
@@ -56,9 +61,10 @@ contractorLatitude = position.coords.latitude;
 contractorLongitude = position.coords.longitude;
 
 });
-  function getDistance(lat1, lon1, lat2, lon2){
 
-const R = 3958.8; // Earth radius miles
+function getDistance(lat1, lon1, lat2, lon2){
+
+const R = 3958.8;
 
 const dLat = (lat2-lat1) * Math.PI / 180;
 const dLon = (lon2-lon1) * Math.PI / 180;
@@ -77,7 +83,9 @@ return R * c;
 }
 
 const MAPBOX_TOKEN = "pk.eyJ1IjoicmV2YW1wbGV4IiwiYSI6ImNtbWp0YjZyejE2c2gyd3Bucml6YTMzYzMifQ.qIuzgtSyYxQhR97_SvmNJw";
+
 const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
+
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
 
 mapboxgl.accessToken = MAPBOX_TOKEN;
@@ -93,6 +101,10 @@ async function loadJobs(){
 
 try{
 
+// clear old markers
+markers.forEach(marker => marker.remove());
+markers = [];
+
 const response = await fetch(`${SUPABASE_URL}/rest/v1/Jobs?select=*`, {
 headers: {
 apikey: SUPABASE_KEY,
@@ -104,14 +116,14 @@ Authorization: `Bearer ${SUPABASE_KEY}`,
 const result = await response.json();
 const jobs = result.data || result;
 
-console.log("Supabase response:",jobs);
-
 if(!Array.isArray(jobs)){
-console.log("Response not an array");
+console.log("Response not array");
 return;
 }
 
-jobs.forEach(job => {const radius = document.getElementById("radius").value;
+const radius = Number(document.getElementById("radius").value);
+
+jobs.forEach(job => {
 
 const distance = getDistance(
 contractorLatitude,
@@ -123,17 +135,19 @@ job.longitude
 if(distance > radius){
 return;
 }
-console.log("JOB DATA:", job);
+
 const popupContent = `
 <h3>${job.Title}</h3>
 <p>${job.Description}</p>
 <strong>${job.Budget}</strong>
 `;
 
-new mapboxgl.Marker()
+const marker = new mapboxgl.Marker()
 .setLngLat([job.longitude, job.latitude])
 .setPopup(new mapboxgl.Popup().setHTML(popupContent))
 .addTo(map);
+
+markers.push(marker);
 
 });
 
@@ -143,10 +157,9 @@ console.error("Error loading jobs:",error);
 
 }
 
-map.on("load",loadJobs);
+map.on("load", loadJobs);
 
 </script>
 
 </body>
-
 </html>
