@@ -52,11 +52,21 @@ cursor:pointer;
 const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
 
+const MAPBOX_TOKEN = "pk.eyJ1IjoicmV2YW1wbGV4IiwiYSI6ImNtbWp0YjZyejE2c2gyd3Bucml6YTMzYzMifQ.qIuzgtSyYxQhR97_SvmNJw";
+
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-window.postJob = async function(){(const MAPBOX_TOKEN = "YOUR_MAPBOX_PUBLIC_TOKEN";
+window.postJob = async function(){
 
+const title = document.getElementById("title").value;
+const description = document.getElementById("description").value;
+const budget = document.getElementById("budget").value;
+const address = document.getElementById("address").value;
+
+try{
+
+// Convert address → coordinates
 const geoResponse = await fetch(
 `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?access_token=${MAPBOX_TOKEN}`
 );
@@ -64,13 +74,9 @@ const geoResponse = await fetch(
 const geoData = await geoResponse.json();
 
 const longitude = geoData.features[0].center[0];
-const latitude = geoData.features[0].center[1];){
+const latitude = geoData.features[0].center[1];
 
-const title = document.getElementById("title").value;
-const description = document.getElementById("description").value;
-const budget = document.getElementById("budget").value;
-const address = document.getElementById("address").value;
-
+// Insert job into Supabase
 const { data, error } = await supabaseClient
 .from("Jobs")
 .insert([
@@ -84,12 +90,17 @@ longitude: longitude
 ]);
 
 if(error){
-alert("Error posting job");
 console.log(error);
+alert("Error posting job");
 return;
 }
 
 alert("Job Posted!");
+
+}catch(err){
+console.log(err);
+alert("Something went wrong");
+}
 
 }
 
