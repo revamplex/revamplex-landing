@@ -35,13 +35,11 @@ z-index:1;
 <div id="controls">
 
 Radius:
-<select id="radius">
+<select id="radius" onchange="updateRadius()">
 <option value="10">10 miles</option>
 <option value="25" selected>25 miles</option>
 <option value="50">50 miles</option>
 </select>
-
-<button onclick="loadJobs()">Refresh Jobs</button>
 
 </div>
 
@@ -51,6 +49,21 @@ Radius:
 
 <script>
 
+const MAPBOX_TOKEN = "pk.eyJ1IjoicmV2YW1wbGV4IiwiYSI6ImNtbWp0YjZyejE2c2gyd3Bucml6YTMzYzMifQ.qIuzgtSyYxQhR97_SvmNJw";
+
+const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
+
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
+
+mapboxgl.accessToken = MAPBOX_TOKEN;
+
+const map = new mapboxgl.Map({
+container: "map",
+style: "mapbox://styles/mapbox/streets-v11",
+center: [-74.0431,40.7376],
+zoom: 12
+});
+
 let contractorLatitude;
 let contractorLongitude;
 let markers = [];
@@ -59,6 +72,13 @@ navigator.geolocation.getCurrentPosition(position => {
 
 contractorLatitude = position.coords.latitude;
 contractorLongitude = position.coords.longitude;
+
+map.flyTo({
+center:[contractorLongitude, contractorLatitude],
+zoom:11
+});
+
+loadJobs();
 
 });
 
@@ -82,44 +102,20 @@ return R * c;
 
 }
 
-const MAPBOX_TOKEN = "pk.eyJ1IjoicmV2YW1wbGV4IiwiYSI6ImNtbWp0YjZyejE2c2gyd3Bucml6YTMzYzMifQ.qIuzgtSyYxQhR97_SvmNJw";
-
-const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
-
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
-
-mapboxgl.accessToken = MAPBOX_TOKEN;
-
-const map = new mapboxgl.Map({
-container: "map",
-style: "mapbox://styles/mapbox/streets-v11",
-center: [-74.0431,40.7376],
-zoom: 12
-});
-
 async function loadJobs(){
 
-try{
-
-// clear old markers
-markers.forEach(marker => marker.remove());
+markers.forEach(m => m.remove());
 markers = [];
 
 const response = await fetch(`${SUPABASE_URL}/rest/v1/Jobs?select=*`, {
-headers: {
+headers:{
 apikey: SUPABASE_KEY,
 Authorization: `Bearer ${SUPABASE_KEY}`,
-"Accept-Profile": "public"
+"Accept-Profile":"public"
 }
 });
 
-const result = await response.json();
-const jobs = result.data || result;
-
-if(!Array.isArray(jobs)){
-console.log("Response not array");
-return;
-}
+const jobs = await response.json();
 
 const radius = Number(document.getElementById("radius").value);
 
@@ -151,15 +147,29 @@ markers.push(marker);
 
 });
 
-}catch(error){
-console.error("Error loading jobs:",error);
 }
 
-}
+function updateRadius(){
 
-map.on("load", loadJobs);
+const radius = Number(document.getElementById("radius").value);
+
+let zoom = 12;
+
+if(radius === 10) zoom = 13;
+if(radius === 25) zoom = 11;
+if(radius === 50) zoom = 10;
+
+map.flyTo({
+center:[contractorLongitude, contractorLatitude],
+zoom:zoom
+});
+
+loadJobs();
+
+}
 
 </script>
 
 </body>
+
 </html>
