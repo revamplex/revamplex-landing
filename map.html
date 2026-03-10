@@ -15,36 +15,52 @@ font-family:Arial;
 display:flex;
 height:100vh;
 overflow:hidden;
+background:#f5f6f7;
 }
 
 /* LEFT JOB PANEL */
 
 #job-list{
-width:320px;
+width:340px;
 background:white;
 overflow-y:auto;
 border-right:1px solid #ddd;
+padding:10px;
 }
 
+/* JOB CARDS */
+
 .job-card{
-padding:14px;
-border-bottom:1px solid #eee;
+background:white;
+padding:16px;
+margin-bottom:12px;
+border-radius:10px;
+box-shadow:0 2px 8px rgba(0,0,0,0.08);
 cursor:pointer;
+transition:all .2s;
 }
 
 .job-card:hover{
-background:#f5f5f5;
+transform:translateY(-2px);
+box-shadow:0 4px 14px rgba(0,0,0,0.15);
 }
 
 .job-title{
 font-weight:bold;
 font-size:20px;
+margin-bottom:4px;
+}
+
+.job-desc{
+font-size:15px;
+color:#555;
 }
 
 .job-budget{
 color:#2a7ae2;
-margin-top:4px;
 font-size:18px;
+margin-top:6px;
+font-weight:bold;
 }
 
 /* MAP */
@@ -57,34 +73,45 @@ flex:1;
 
 #controls{
 position:absolute;
-top:10px;
-left:340px;
+top:16px;
+left:360px;
 background:white;
-padding:14px;
-border-radius:8px;
+padding:14px 18px;
+border-radius:10px;
 z-index:1;
 font-size:18px;
-box-shadow:0 2px 6px rgba(0,0,0,0.2);
+box-shadow:0 4px 12px rgba(0,0,0,0.15);
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+#radius{
+font-size:16px;
+padding:6px 10px;
+border-radius:6px;
+border:1px solid #ccc;
 }
 
 /* BIGGER MARKERS */
 
 .job-marker{
-width:36px;
-height:36px;
+width:38px;
+height:38px;
 background:#ff4d4d;
 border-radius:50%;
 border:4px solid white;
-box-shadow:0 0 8px rgba(0,0,0,0.5);
+box-shadow:0 0 10px rgba(0,0,0,0.45);
 cursor:pointer;
 }
 
-/* BIGGER POPUPS */
+/* POPUPS */
 
 .mapboxgl-popup-content{
 font-size:18px;
 padding:18px;
-max-width:280px;
+border-radius:10px;
+max-width:260px;
 }
 
 .mapboxgl-popup-content h3{
@@ -93,8 +120,8 @@ margin:0 0 8px 0;
 }
 
 .mapboxgl-popup-content p{
-font-size:18px;
-margin:0 0 8px 0;
+font-size:16px;
+margin:0 0 6px 0;
 }
 
 .mapboxgl-popup-content strong{
@@ -112,7 +139,8 @@ color:#2a7ae2;
 
 <div id="controls">
 
-Radius:
+<strong>Radius:</strong>
+
 <select id="radius" onchange="updateRadius()">
 <option value="10">10 miles</option>
 <option value="25" selected>25 miles</option>
@@ -127,11 +155,11 @@ Radius:
 
 <script>
 
-const MAPBOX_TOKEN = "pk.eyJ1IjoicmV2YW1wbGV4IiwiYSI6ImNtbWp0YjZyejE2c2gyd3Bucml6YTMzYzMifQ.qIuzgtSyYxQhR97_SvmNJw";
+const MAPBOX_TOKEN = "YOUR_MAPBOX_TOKEN";
 
 const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
 
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
+const SUPABASE_KEY = "YOUR_SUPABASE_KEY";
 
 mapboxgl.accessToken = MAPBOX_TOKEN;
 
@@ -144,7 +172,9 @@ zoom:11
 
 let contractorLatitude;
 let contractorLongitude;
-let markers = [];
+let markers=[];
+
+/* GET LOCATION */
 
 navigator.geolocation.getCurrentPosition(position => {
 
@@ -160,25 +190,24 @@ loadJobs();
 
 });
 
-/* DISTANCE FUNCTION */
+/* DISTANCE */
 
 function getDistance(lat1, lon1, lat2, lon2){
 
 const R = 3958.8;
 
-const dLat = (lat2-lat1) * Math.PI / 180;
-const dLon = (lon2-lon1) * Math.PI / 180;
+const dLat = (lat2-lat1) * Math.PI/180;
+const dLon = (lon2-lon1) * Math.PI/180;
 
 const a =
-Math.sin(dLat/2) * Math.sin(dLat/2) +
-Math.cos(lat1*Math.PI/180) *
-Math.cos(lat2*Math.PI/180) *
-Math.sin(dLon/2) *
-Math.sin(dLon/2);
+Math.sin(dLat/2)*Math.sin(dLat/2)+
+Math.cos(lat1*Math.PI/180)*
+Math.cos(lat2*Math.PI/180)*
+Math.sin(dLon/2)*Math.sin(dLon/2);
 
-const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+const c = 2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 
-return R * c;
+return R*c;
 
 }
 
@@ -186,10 +215,10 @@ return R * c;
 
 async function loadJobs(){
 
-markers.forEach(m => m.remove());
-markers = [];
+markers.forEach(m=>m.remove());
+markers=[];
 
-document.getElementById("job-list").innerHTML = "";
+document.getElementById("job-list").innerHTML="";
 
 const response = await fetch(`${SUPABASE_URL}/rest/v1/Jobs?select=*`,{
 headers:{
@@ -203,7 +232,7 @@ const jobs = await response.json();
 
 const radius = Number(document.getElementById("radius").value);
 
-jobs.forEach(job => {
+jobs.forEach(job=>{
 
 const distance = getDistance(
 contractorLatitude,
@@ -212,38 +241,38 @@ job.latitude,
 job.longitude
 );
 
-if(distance > radius) return;
+if(distance>radius) return;
 
-/* CREATE BIG MARKER */
+/* MARKER */
 
 const el = document.createElement("div");
-el.className = "job-marker";
+el.className="job-marker";
 
-const popupContent = `
+const popupContent=`
 <h3>${job.Title}</h3>
 <p>${job.Description}</p>
 <strong>${job.Budget}</strong>
 `;
 
-const marker = new mapboxgl.Marker(el)
+const marker=new mapboxgl.Marker(el)
 .setLngLat([job.longitude,job.latitude])
 .setPopup(new mapboxgl.Popup().setHTML(popupContent))
 .addTo(map);
 
 markers.push(marker);
 
-/* CREATE JOB CARD */
+/* JOB CARD */
 
-const card = document.createElement("div");
-card.className = "job-card";
+const card=document.createElement("div");
+card.className="job-card";
 
-card.innerHTML = `
+card.innerHTML=`
 <div class="job-title">${job.Title}</div>
-<div>${job.Description}</div>
+<div class="job-desc">${job.Description}</div>
 <div class="job-budget">${job.Budget}</div>
 `;
 
-card.onclick = () => {
+card.onclick=()=>{
 
 map.flyTo({
 center:[job.longitude,job.latitude],
@@ -268,9 +297,9 @@ const radius = Number(document.getElementById("radius").value);
 
 let zoom = 11;
 
-if(radius === 10) zoom = 13;
-if(radius === 25) zoom = 11;
-if(radius === 50) zoom = 10;
+if(radius===10) zoom=13;
+if(radius===25) zoom=11;
+if(radius===50) zoom=10;
 
 map.flyTo({
 center:[contractorLongitude,contractorLatitude],
