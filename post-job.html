@@ -40,9 +40,7 @@ cursor:pointer;
 
 <input id="budget" placeholder="Budget ($)">
 
-<input id="latitude" placeholder="Latitude">
-
-<input id="longitude" placeholder="Longitude">
+<input id="address" placeholder="Job Address (Street, City)">
 
 <button onclick="postJob()">Submit Job</button>
 
@@ -57,13 +55,21 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-async function postJob(){
+async function postJob(const MAPBOX_TOKEN = "YOUR_MAPBOX_PUBLIC_TOKEN";
+
+const geoResponse = await fetch(
+`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?access_token=${MAPBOX_TOKEN}`
+);
+
+const geoData = await geoResponse.json();
+
+const longitude = geoData.features[0].center[0];
+const latitude = geoData.features[0].center[1];){
 
 const title = document.getElementById("title").value;
 const description = document.getElementById("description").value;
 const budget = document.getElementById("budget").value;
-const latitude = document.getElementById("latitude").value;
-const longitude = document.getElementById("longitude").value;
+const address = document.getElementById("address").value;
 
 const { data, error } = await supabaseClient
 .from("Jobs")
