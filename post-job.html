@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 
 <meta charset="utf-8">
@@ -12,18 +13,39 @@ font-family:Arial;
 max-width:600px;
 margin:auto;
 padding:40px;
+background:#f4f6f8;
 }
 
-input, textarea{
+h1{
+margin-bottom:25px;
+}
+
+input, textarea, select{
+
 width:100%;
-padding:10px;
+padding:12px;
 margin-bottom:15px;
+border-radius:8px;
+border:1px solid #ccc;
+font-size:16px;
+
 }
 
 button{
-padding:12px 20px;
-font-size:16px;
+
+padding:14px;
+font-size:18px;
+background:#2a7ae2;
+color:white;
+border:none;
+border-radius:8px;
 cursor:pointer;
+width:100%;
+
+}
+
+button:hover{
+background:#1f5fb5;
 }
 
 </style>
@@ -36,32 +58,7 @@ cursor:pointer;
 
 <input id="title" placeholder="Job Title">
 
-<textarea id="description" placeholder="Job Description"></textarea>
-
-<input id="budget" placeholder="Budget ($)">
-
-<input id="address" placeholder="Job Address (Street, City)">
-
-<button onclick="postJob()">Submit Job</button>
-
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script>
-
-const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
-
-const MAPBOX_TOKEN = "pk.eyJ1IjoicmV2YW1wbGV4IiwiYSI6ImNtbWp0YjZyejE2c2gyd3Bucml6YTMzYzMifQ.qIuzgtSyYxQhR97_SvmNJw";
-
-const { createClient } = supabase;
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-window.postJob = async function(){
-
-const title = document.getElementById("title").value;
-const description = document.getElementById("description").value;
-  <select id="trade">
+<select id="trade">
 
 <option value="">Select Trade</option>
 
@@ -81,52 +78,98 @@ const description = document.getElementById("description").value;
 <option>Handyman</option>
 
 </select>
+
+<textarea id="description" placeholder="Describe the job"></textarea>
+
+<input id="budget" placeholder="Budget ($)">
+
+<input id="address" placeholder="Job Address (Street, City)">
+
+<button onclick="postJob()">Submit Job</button>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+/* SUPABASE */
+
+const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
+
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
+
+const { createClient } = supabase;
+
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* MAPBOX */
+
+const MAPBOX_TOKEN = "pk.eyJ1IjoicmV2YW1wbGV4IiwiYSI6ImNtbWp0YjZyejE2c2gyd3Bucml6YTMzYzMifQ.qIuzgtSyYxQhR97_SvmNJw";
+
+/* POST JOB */
+
+window.postJob = async function(){
+
+const title = document.getElementById("title").value;
+const trade = document.getElementById("trade").value;
+const description = document.getElementById("description").value;
 const budget = document.getElementById("budget").value;
 const address = document.getElementById("address").value;
 
-try{
+/* ADDRESS → COORDINATES */
 
-// Convert address → coordinates
 const geoResponse = await fetch(
 `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?access_token=${MAPBOX_TOKEN}`
 );
 
 const geoData = await geoResponse.json();
 
+if(!geoData.features.length){
+
+alert("Address not found");
+return;
+
+}
+
 const longitude = geoData.features[0].center[0];
 const latitude = geoData.features[0].center[1];
 
-// Insert job into Supabase
+/* INSERT JOB */
+
 const { data, error } = await supabaseClient
 .from("Jobs")
-.insert([
-  const trade = document.getElementById("trade").value;
-{
+.insert([{
+
 Title: title,
 Trade: trade,
 Description: description,
 Budget: budget,
 latitude: latitude,
 longitude: longitude
-}
-]);
+
+}]);
 
 if(error){
+
 console.log(error);
 alert("Error posting job");
 return;
+
 }
 
-alert("Job Posted!");
+alert("Job Posted Successfully!");
 
-}catch(err){
-console.log(err);
-alert("Something went wrong");
-}
+/* CLEAR FORM */
+
+document.getElementById("title").value="";
+document.getElementById("trade").value="";
+document.getElementById("description").value="";
+document.getElementById("budget").value="";
+document.getElementById("address").value="";
 
 }
 
 </script>
 
 </body>
+
 </html>
