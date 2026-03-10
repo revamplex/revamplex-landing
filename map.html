@@ -412,7 +412,7 @@ const radius = Number(document.getElementById("radius").value);
 
 jobs.forEach(job => {
 
-if(!tradeMatches(job.Title)) return;
+if(!checkedTrades.includes(job.Trade)) return;
 
 const distance = getDistance(
 contractorLatitude,
