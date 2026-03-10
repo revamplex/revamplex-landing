@@ -21,7 +21,7 @@ background:#f4f6f8;
 /* SIDEBAR */
 
 #sidebar{
-width:340px;
+width:360px;
 background:white;
 border-right:1px solid #ddd;
 display:flex;
@@ -37,7 +37,7 @@ background:#fafafa;
 }
 
 #sidebar-header h2{
-margin:0 0 14px 0;
+margin:0 0 10px 0;
 font-size:20px;
 }
 
@@ -49,6 +49,27 @@ padding:10px;
 border-radius:8px;
 border:1px solid #ccc;
 width:100%;
+margin-bottom:12px;
+}
+
+/* FILTERS */
+
+#filters{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:8px;
+font-size:14px;
+margin-top:8px;
+max-height:220px;
+overflow-y:auto;
+padding-right:4px;
+}
+
+#filters label{
+display:flex;
+align-items:flex-start;
+gap:6px;
+line-height:1.2;
 }
 
 /* JOB LIST */
@@ -100,7 +121,7 @@ font-weight:bold;
 flex:1;
 }
 
-/* PIN STYLE */
+/* PIN */
 
 .job-marker{
 background:#ff4d4d;
@@ -115,28 +136,20 @@ display:flex;
 flex-direction:column;
 align-items:center;
 font-size:13px;
+min-width:54px;
+text-align:center;
 }
 
-/* HOT PIN ANIMATION */
+/* HOT PIN */
 
 .hot-pin{
 animation:pulse 1.5s infinite;
 }
 
 @keyframes pulse{
-
-0%{
-box-shadow:0 0 0 0 rgba(255,77,77,0.7);
-}
-
-70%{
-box-shadow:0 0 0 14px rgba(255,77,77,0);
-}
-
-100%{
-box-shadow:0 0 0 0 rgba(255,77,77,0);
-}
-
+0%{box-shadow:0 0 0 0 rgba(255,77,77,0.7);}
+70%{box-shadow:0 0 0 14px rgba(255,77,77,0);}
+100%{box-shadow:0 0 0 0 rgba(255,77,77,0);}
 }
 
 /* POPUPS */
@@ -150,6 +163,10 @@ max-width:260px;
 
 .mapboxgl-popup-content h3{
 font-size:22px;
+margin:0 0 8px 0;
+}
+
+.mapboxgl-popup-content p{
 margin:0 0 8px 0;
 }
 
@@ -168,11 +185,11 @@ flex-direction:column;
 
 #sidebar{
 width:100%;
-height:45%;
+height:48%;
 }
 
 #map{
-height:55%;
+height:52%;
 }
 
 #sidebar-header{
@@ -184,6 +201,10 @@ font-size:18px;
 padding:12px;
 }
 
+#filters{
+grid-template-columns:1fr 1fr;
+max-height:180px;
+}
 }
 
 </style>
@@ -204,6 +225,40 @@ padding:12px;
 <option value="50">50 miles</option>
 </select>
 
+<div id="filters">
+
+<label><input type="checkbox" value="carpentry" checked> Carpentry</label>
+<label><input type="checkbox" value="plumbing" checked> Plumbing</label>
+<label><input type="checkbox" value="electrical" checked> Electrical</label>
+<label><input type="checkbox" value="hvac" checked> HVAC</label>
+<label><input type="checkbox" value="painting" checked> Painting</label>
+<label><input type="checkbox" value="decorating" checked> Decorating</label>
+<label><input type="checkbox" value="masonry" checked> Masonry</label>
+<label><input type="checkbox" value="concrete" checked> Concrete</label>
+<label><input type="checkbox" value="roofing" checked> Roofing</label>
+<label><input type="checkbox" value="flooring" checked> Flooring</label>
+<label><input type="checkbox" value="tiling" checked> Tiling</label>
+<label><input type="checkbox" value="drywall" checked> Drywall</label>
+<label><input type="checkbox" value="insulation" checked> Insulation</label>
+<label><input type="checkbox" value="siding" checked> Siding</label>
+<label><input type="checkbox" value="gutter" checked> Gutters</label>
+<label><input type="checkbox" value="landscaping" checked> Landscaping</label>
+<label><input type="checkbox" value="paving" checked> Paving</label>
+<label><input type="checkbox" value="glazing" checked> Glazing</label>
+<label><input type="checkbox" value="window" checked> Windows</label>
+<label><input type="checkbox" value="door" checked> Doors</label>
+<label><input type="checkbox" value="cabinetry" checked> Cabinetry</label>
+<label><input type="checkbox" value="handyman" checked> Handyman</label>
+<label><input type="checkbox" value="bathroom" checked> Bathroom</label>
+<label><input type="checkbox" value="kitchen" checked> Kitchen</label>
+<label><input type="checkbox" value="general" checked> General</label>
+<label><input type="checkbox" value="framing" checked> Framing</label>
+<label><input type="checkbox" value="trim" checked> Trim Work</label>
+<label><input type="checkbox" value="finish carpentry" checked> Finish Carpentry</label>
+<label><input type="checkbox" value="cabinet" checked> Cabinets</label>
+
+</div>
+
 </div>
 
 <div id="job-list"></div>
@@ -217,13 +272,10 @@ padding:12px;
 <script>
 
 /* MAPBOX */
-
 const MAPBOX_TOKEN = "pk.eyJ1IjoicmV2YW1wbGV4IiwiYSI6ImNtbWp0YjZyejE2c2gyd3Bucml6YTMzYzMifQ.qIuzgtSyYxQhR97_SvmNJw";
 
 /* SUPABASE */
-
 const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
-
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
 
 mapboxgl.accessToken = MAPBOX_TOKEN;
@@ -239,15 +291,14 @@ let contractorLatitude;
 let contractorLongitude;
 let markers=[];
 
-/* GET LOCATION */
-
-navigator.geolocation.getCurrentPosition(position=>{
+/* LOCATION */
+navigator.geolocation.getCurrentPosition(position => {
 
 contractorLatitude = position.coords.latitude;
 contractorLongitude = position.coords.longitude;
 
 map.flyTo({
-center:[contractorLongitude,contractorLatitude],
+center:[contractorLongitude, contractorLatitude],
 zoom:11
 });
 
@@ -256,28 +307,25 @@ loadJobs();
 });
 
 /* DISTANCE */
-
-function getDistance(lat1,lon1,lat2,lon2){
+function getDistance(lat1, lon1, lat2, lon2){
 
 const R = 3958.8;
 
-const dLat = (lat2-lat1)*Math.PI/180;
-const dLon = (lon2-lon1)*Math.PI/180;
+const dLat = (lat2-lat1) * Math.PI / 180;
+const dLon = (lon2-lon1) * Math.PI / 180;
 
 const a =
-Math.sin(dLat/2)*Math.sin(dLat/2)+
-Math.cos(lat1*Math.PI/180)*
-Math.cos(lat2*Math.PI/180)*
-Math.sin(dLon/2)*Math.sin(dLon/2);
+Math.sin(dLat/2) * Math.sin(dLat/2) +
+Math.cos(lat1*Math.PI/180) *
+Math.cos(lat2*Math.PI/180) *
+Math.sin(dLon/2) * Math.sin(dLon/2);
 
-const c = 2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
-return R*c;
-
+return R * c;
 }
 
 /* TRADE ICON */
-
 function getTradeIcon(title){
 
 title = title.toLowerCase();
@@ -286,46 +334,70 @@ if(title.includes("bath")) return "🛁";
 if(title.includes("kitchen")) return "🍳";
 if(title.includes("plumb")) return "🔧";
 if(title.includes("elect")) return "⚡";
+if(title.includes("hvac")) return "❄️";
 if(title.includes("paint")) return "🎨";
-if(title.includes("tile")) return "🧱";
+if(title.includes("decorat")) return "🖼️";
+if(title.includes("masonry")) return "🧱";
+if(title.includes("concrete")) return "🏗️";
+if(title.includes("roof")) return "🏠";
+if(title.includes("floor")) return "🪵";
+if(title.includes("tile")) return "🟫";
+if(title.includes("drywall")) return "🧾";
+if(title.includes("insulation")) return "🧥";
+if(title.includes("siding")) return "🏘️";
+if(title.includes("gutter")) return "🌧️";
+if(title.includes("landscap")) return "🌿";
+if(title.includes("paving")) return "🛣️";
+if(title.includes("glazing")) return "🪟";
+if(title.includes("window")) return "🪟";
+if(title.includes("door")) return "🚪";
+if(title.includes("cabinet")) return "🗄️";
+if(title.includes("carpentry")) return "🪚";
+if(title.includes("framing")) return "🪵";
+if(title.includes("trim")) return "📏";
+if(title.includes("finish carpentry")) return "🪚";
 if(title.includes("deck")) return "🪵";
+if(title.includes("handyman")) return "🛠️";
 
 return "🏠";
+}
 
+/* TRADE MATCH */
+function tradeMatches(title){
+
+let checked = [...document.querySelectorAll("#filters input:checked")].map(i => i.value);
+title = title.toLowerCase();
+
+return checked.some(trade => title.includes(trade));
 }
 
 /* FORMAT BUDGET */
-
 function formatBudget(budget){
 
-let num=parseInt(budget.replace(/[^0-9]/g,""));
+let num = parseInt(String(budget).replace(/[^0-9]/g,""));
 
-if(num>=1000){
-return "$"+Math.round(num/1000)+"K";
-}
+if(isNaN(num)) return "$0";
+if(num >= 1000) return "$" + Math.round(num/1000) + "K";
 
-return "$"+num;
-
+return "$" + num;
 }
 
 /* HOT JOB */
-
 function isHotJob(budget){
 
-let num=parseInt(budget.replace(/[^0-9]/g,""));
+let num = parseInt(String(budget).replace(/[^0-9]/g,""));
+if(isNaN(num)) return false;
 
-return num>=15000;
-
+return num >= 15000;
 }
 
 /* LOAD JOBS */
-
 async function loadJobs(){
 
-markers.forEach(m=>m.remove());
-markers=[];
+markers.forEach(m => m.remove());
+markers = [];
 
-document.getElementById("job-list").innerHTML="";
+document.getElementById("job-list").innerHTML = "";
 
 const response = await fetch(`${SUPABASE_URL}/rest/v1/Jobs?select=*`,{
 headers:{
@@ -336,37 +408,37 @@ Authorization:`Bearer ${SUPABASE_KEY}`,
 });
 
 const jobs = await response.json();
-
 const radius = Number(document.getElementById("radius").value);
 
-jobs.forEach(job=>{
+jobs.forEach(job => {
 
-const distance=getDistance(
+if(!tradeMatches(job.Title)) return;
+
+const distance = getDistance(
 contractorLatitude,
 contractorLongitude,
 job.latitude,
 job.longitude
 );
 
-if(distance>radius) return;
+if(distance > radius) return;
 
 /* PIN */
+const el = document.createElement("div");
 
-const el=document.createElement("div");
+let icon = getTradeIcon(job.Title);
+let budget = formatBudget(job.Budget);
 
-let icon=getTradeIcon(job.Title);
-let budget=formatBudget(job.Budget);
-
-el.className="job-marker";
+el.className = "job-marker";
 
 if(isHotJob(job.Budget)){
 el.classList.add("hot-pin");
 }
 
-el.innerHTML=`${icon}<div>${budget}</div>`;
+el.innerHTML = `${icon}<div>${budget}</div>`;
 
-const marker=new mapboxgl.Marker(el)
-.setLngLat([job.longitude,job.latitude])
+const marker = new mapboxgl.Marker(el)
+.setLngLat([job.longitude, job.latitude])
 .setPopup(new mapboxgl.Popup().setHTML(`
 <h3>${job.Title}</h3>
 <p>${job.Description}</p>
@@ -377,53 +449,50 @@ const marker=new mapboxgl.Marker(el)
 markers.push(marker);
 
 /* JOB CARD */
+const card = document.createElement("div");
+card.className = "job-card";
 
-const card=document.createElement("div");
-card.className="job-card";
-
-card.innerHTML=`
+card.innerHTML = `
 <div class="job-title">${job.Title}</div>
 <div class="job-desc">${job.Description}</div>
 <div class="job-budget">${job.Budget}</div>
 `;
 
-card.onclick=()=>{
-
+card.onclick = () => {
 map.flyTo({
-center:[job.longitude,job.latitude],
+center:[job.longitude, job.latitude],
 zoom:14
 });
-
 marker.togglePopup();
-
 };
 
 document.getElementById("job-list").appendChild(card);
 
 });
-
 }
 
 /* UPDATE RADIUS */
-
 function updateRadius(){
 
-const radius=Number(document.getElementById("radius").value);
+const radius = Number(document.getElementById("radius").value);
 
-let zoom=11;
-
-if(radius===10) zoom=13;
-if(radius===25) zoom=11;
-if(radius===50) zoom=10;
+let zoom = 11;
+if(radius === 10) zoom = 13;
+if(radius === 25) zoom = 11;
+if(radius === 50) zoom = 10;
 
 map.flyTo({
-center:[contractorLongitude,contractorLatitude],
+center:[contractorLongitude, contractorLatitude],
 zoom:zoom
 });
 
 loadJobs();
-
 }
+
+/* FILTER CHANGE */
+document.querySelectorAll("#filters input").forEach(cb => {
+cb.addEventListener("change", loadJobs);
+});
 
 </script>
 
