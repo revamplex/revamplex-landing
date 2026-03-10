@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <title>Revamplex Job Map</title>
 
-<link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet"/>
 
 <style>
 
@@ -35,8 +35,6 @@ box-shadow:0 2px 6px rgba(0,0,0,0.2);
 font-size:18px;
 padding:5px;
 }
-
-/* Popup styling */
 
 .mapboxgl-popup-content{
 font-size:18px;
@@ -91,16 +89,14 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 mapboxgl.accessToken = MAPBOX_TOKEN;
 
 const map = new mapboxgl.Map({
-container: "map",
-style: "mapbox://styles/mapbox/streets-v11",
-center: [-74.0431,40.7376],
-zoom: 12
+container:"map",
+style:"mapbox://styles/mapbox/streets-v11",
+center:[-74.0431,40.7376],
+zoom:11
 });
 
 let contractorLatitude;
 let contractorLongitude;
-
-/* Detect contractor location */
 
 navigator.geolocation.getCurrentPosition(position => {
 
@@ -108,15 +104,13 @@ contractorLatitude = position.coords.latitude;
 contractorLongitude = position.coords.longitude;
 
 map.flyTo({
-center:[contractorLongitude, contractorLatitude],
+center:[contractorLongitude,contractorLatitude],
 zoom:11
 });
 
 loadJobs();
 
 });
-
-/* Distance calculator */
 
 function getDistance(lat1, lon1, lat2, lon2){
 
@@ -138,14 +132,12 @@ return R * c;
 
 }
 
-/* Load jobs */
-
 async function loadJobs(){
 
-const response = await fetch(`${SUPABASE_URL}/rest/v1/Jobs?select=*`, {
+const response = await fetch(`${SUPABASE_URL}/rest/v1/Jobs?select=*`,{
 headers:{
-apikey: SUPABASE_KEY,
-Authorization: `Bearer ${SUPABASE_KEY}`,
+apikey:SUPABASE_KEY,
+Authorization:`Bearer ${SUPABASE_KEY}`,
 "Accept-Profile":"public"
 }
 });
@@ -153,8 +145,6 @@ Authorization: `Bearer ${SUPABASE_KEY}`,
 const jobs = await response.json();
 
 const radius = Number(document.getElementById("radius").value);
-
-/* Convert jobs to geojson */
 
 const features = jobs
 .filter(job => {
@@ -172,13 +162,13 @@ return distance <= radius;
 .map(job => ({
 type:"Feature",
 properties:{
-Title: job.Title,
-Description: job.Description,
-Budget: job.Budget
+Title:job.Title,
+Description:job.Description,
+Budget:job.Budget
 },
 geometry:{
 type:"Point",
-coordinates:[job.longitude, job.latitude]
+coordinates:[job.longitude,job.latitude]
 }
 }));
 
@@ -187,16 +177,10 @@ type:"FeatureCollection",
 features:features
 };
 
-/* Remove old source */
-
 if(map.getSource("jobs")){
-map.removeLayer("clusters");
-map.removeLayer("cluster-count");
-map.removeLayer("unclustered-point");
-map.removeSource("jobs");
+map.getSource("jobs").setData(geojson);
+return;
 }
-
-/* Add clustered source */
 
 map.addSource("jobs",{
 type:"geojson",
@@ -205,8 +189,6 @@ cluster:true,
 clusterMaxZoom:14,
 clusterRadius:50
 });
-
-/* Cluster circles */
 
 map.addLayer({
 id:"clusters",
@@ -219,8 +201,6 @@ paint:{
 }
 });
 
-/* Cluster count numbers */
-
 map.addLayer({
 id:"cluster-count",
 type:"symbol",
@@ -228,12 +208,9 @@ source:"jobs",
 filter:["has","point_count"],
 layout:{
 "text-field":["get","point_count_abbreviated"],
-"text-font":["DIN Offc Pro Medium","Arial Unicode MS Bold"],
 "text-size":16
 }
 });
-
-/* Individual job pins */
 
 map.addLayer({
 id:"unclustered-point",
@@ -247,8 +224,6 @@ paint:{
 "circle-stroke-color":"#fff"
 }
 });
-
-/* Click job pin popup */
 
 map.on("click","unclustered-point",function(e){
 
@@ -266,8 +241,6 @@ new mapboxgl.Popup()
 .addTo(map);
 
 });
-
-/* Zoom into clusters */
 
 map.on("click","clusters",function(e){
 
@@ -292,26 +265,32 @@ zoom:zoom
 
 }
 
-/* Radius change */
-
 function updateRadius(){
 
 const radius = Number(document.getElementById("radius").value);
 
-let zoom = 12;
+let zoom = 11;
 
 if(radius === 10) zoom = 13;
 if(radius === 25) zoom = 11;
 if(radius === 50) zoom = 10;
 
 map.flyTo({
-center:[contractorLongitude, contractorLatitude],
+center:[contractorLongitude,contractorLatitude],
 zoom:zoom
 });
 
 loadJobs();
 
 }
+
+map.on("load",()=>{
+
+if(contractorLatitude){
+loadJobs();
+}
+
+});
 
 </script>
 
