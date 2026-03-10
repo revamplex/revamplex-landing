@@ -53,7 +53,8 @@ Authorization: `Bearer ${SUPABASE_KEY}`,
 }
 });
 
-const jobs = await response.json();
+const result = await response.json();
+const jobs = result.data || result;
 
 console.log("Supabase response:",jobs);
 
