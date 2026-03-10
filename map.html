@@ -17,6 +17,8 @@ height:100vh;
 overflow:hidden;
 }
 
+/* LEFT JOB PANEL */
+
 #job-list{
 width:320px;
 background:white;
@@ -25,7 +27,7 @@ border-right:1px solid #ddd;
 }
 
 .job-card{
-padding:12px;
+padding:14px;
 border-bottom:1px solid #eee;
 cursor:pointer;
 }
@@ -36,33 +38,68 @@ background:#f5f5f5;
 
 .job-title{
 font-weight:bold;
-font-size:18px;
+font-size:20px;
 }
 
 .job-budget{
 color:#2a7ae2;
 margin-top:4px;
+font-size:18px;
 }
+
+/* MAP */
 
 #map{
 flex:1;
 }
+
+/* CONTROLS */
 
 #controls{
 position:absolute;
 top:10px;
 left:340px;
 background:white;
-padding:12px;
+padding:14px;
 border-radius:8px;
 z-index:1;
 font-size:18px;
 box-shadow:0 2px 6px rgba(0,0,0,0.2);
 }
 
-#controls select{
+/* BIGGER MARKERS */
+
+.job-marker{
+width:36px;
+height:36px;
+background:#ff4d4d;
+border-radius:50%;
+border:4px solid white;
+box-shadow:0 0 8px rgba(0,0,0,0.5);
+cursor:pointer;
+}
+
+/* BIGGER POPUPS */
+
+.mapboxgl-popup-content{
 font-size:18px;
-padding:5px;
+padding:18px;
+max-width:280px;
+}
+
+.mapboxgl-popup-content h3{
+font-size:22px;
+margin:0 0 8px 0;
+}
+
+.mapboxgl-popup-content p{
+font-size:18px;
+margin:0 0 8px 0;
+}
+
+.mapboxgl-popup-content strong{
+font-size:20px;
+color:#2a7ae2;
 }
 
 </style>
@@ -74,12 +111,14 @@ padding:5px;
 <div id="job-list"></div>
 
 <div id="controls">
+
 Radius:
 <select id="radius" onchange="updateRadius()">
 <option value="10">10 miles</option>
 <option value="25" selected>25 miles</option>
 <option value="50">50 miles</option>
 </select>
+
 </div>
 
 <div id="map"></div>
@@ -121,6 +160,8 @@ loadJobs();
 
 });
 
+/* DISTANCE FUNCTION */
+
 function getDistance(lat1, lon1, lat2, lon2){
 
 const R = 3958.8;
@@ -140,6 +181,8 @@ const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 return R * c;
 
 }
+
+/* LOAD JOBS */
 
 async function loadJobs(){
 
@@ -171,18 +214,25 @@ job.longitude
 
 if(distance > radius) return;
 
+/* CREATE BIG MARKER */
+
+const el = document.createElement("div");
+el.className = "job-marker";
+
 const popupContent = `
 <h3>${job.Title}</h3>
 <p>${job.Description}</p>
 <strong>${job.Budget}</strong>
 `;
 
-const marker = new mapboxgl.Marker()
+const marker = new mapboxgl.Marker(el)
 .setLngLat([job.longitude,job.latitude])
 .setPopup(new mapboxgl.Popup().setHTML(popupContent))
 .addTo(map);
 
 markers.push(marker);
+
+/* CREATE JOB CARD */
 
 const card = document.createElement("div");
 card.className = "job-card";
@@ -209,6 +259,8 @@ document.getElementById("job-list").appendChild(card);
 });
 
 }
+
+/* UPDATE RADIUS */
 
 function updateRadius(){
 
