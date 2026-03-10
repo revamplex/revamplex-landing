@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="utf-8">
+<title>Post a Job - Revamplex</title>
+
+<style>
+
+body{
+font-family:Arial;
+max-width:600px;
+margin:auto;
+padding:40px;
+}
+
+input, textarea{
+width:100%;
+padding:10px;
+margin-bottom:15px;
+}
+
+button{
+padding:12px 20px;
+font-size:16px;
+cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Post a Renovation Job</h1>
+
+<input id="title" placeholder="Job Title">
+
+<textarea id="description" placeholder="Job Description"></textarea>
+
+<input id="budget" placeholder="Budget ($)">
+
+<input id="latitude" placeholder="Latitude">
+
+<input id="longitude" placeholder="Longitude">
+
+<button onclick="postJob()">Submit Job</button>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<script>
+
+const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function postJob(){
+
+const title = document.getElementById("title").value;
+const description = document.getElementById("description").value;
+const budget = document.getElementById("budget").value;
+const latitude = document.getElementById("latitude").value;
+const longitude = document.getElementById("longitude").value;
+
+const { data, error } = await supabase
+.from("Jobs")
+.insert([
+{
+Title: title,
+Description: description,
+Budget: budget,
+latitude: latitude,
+longitude: longitude
+}
+]);
+
+if(error){
+alert("Error posting job");
+console.log(error);
+return;
+}
+
+alert("Job Posted!");
+
+}
+
+</script>
+
+</body>
+</html>
