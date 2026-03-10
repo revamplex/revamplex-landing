@@ -413,7 +413,9 @@ const checkedTrades = [...document.querySelectorAll("#filters input:checked")]
 .map(i => i.value);
 jobs.forEach(job => {
 
-if(!checkedTrades.includes(job.Trade)) return;
+const jobTrade = (job.Trade || "").toLowerCase();
+const match = checkedTrades.some(t => jobTrade.includes(t));
+if(!match) return;
 
 const distance = getDistance(
 contractorLatitude,
