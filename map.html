@@ -2,18 +2,17 @@
 <html>
 
 <head>
-
 <meta charset="utf-8">
 <title>Revamplex Job Map</title>
 
 <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
 
 <style>
-body {
+body{
 margin:0;
 }
 
-#map {
+#map{
 width:100%;
 height:100vh;
 }
@@ -29,24 +28,25 @@ height:100vh;
 
 <script>
 
-window.onload = async function() {
+const MAPBOX_TOKEN = "pk.eyJ1IjoicmV2YW1wbGV4IiwiYSI6ImNtbWp0YjZyejE2c2gyd3Bucml6YTMzYzMifQ.qIuzgtSyYxQhR97_SvmNJw";
+const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
 
-mapboxgl.accessToken = 'pk.eyJ1IjoicmV2YW1wbGV4IiwiYSI6ImNtbWp0YjZyejE2c2gyd3Bucml6YTMzYzMifQ.qIuzgtSyYxQhR97_SvmNJw';
+mapboxgl.accessToken = MAPBOX_TOKEN;
 
 const map = new mapboxgl.Map({
-container: 'map',
-style: 'mapbox://styles/mapbox/streets-v11',
+container: "map",
+style: "mapbox://styles/mapbox/streets-v11",
 center: [-74.0431,40.7376],
 zoom: 12
 });
 
-const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
+async function loadJobs(){
 
-async function loadJobs() {
+try{
 
-const response = await fetch(`${SUPABASE_URL}/rest/v1/jobs?select=*`, {
-headers: {
+const response = await fetch(`${SUPABASE_URL}/rest/v1/jobs?select=*`,{
+headers:{
 apikey: SUPABASE_KEY,
 Authorization: `Bearer ${SUPABASE_KEY}`
 }
@@ -54,17 +54,17 @@ Authorization: `Bearer ${SUPABASE_KEY}`
 
 const jobs = await response.json();
 
-console.log("Supabase response:", jobs);
+console.log("Supabase response:",jobs);
 
-if (!Array.isArray(jobs)) {
-console.log("Response was not an array");
+if(!Array.isArray(jobs)){
+console.log("Response not an array");
 return;
 }
 
 jobs.forEach(job => {
 
 new mapboxgl.Marker()
-.setLngLat([job.longitude, job.latitude])
+.setLngLat([job.longitude,job.latitude])
 .setPopup(
 new mapboxgl.Popup().setHTML(
 `<h3>${job.title}</h3><p>${job.budget}</p>`
@@ -74,15 +74,13 @@ new mapboxgl.Popup().setHTML(
 
 });
 
+}catch(error){
+console.error("Error loading jobs:",error);
 }
 
-});
-
 }
 
-map.on('load', loadJobs);
-
-}
+map.on("load",loadJobs);
 
 </script>
 
