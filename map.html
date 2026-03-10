@@ -2,6 +2,8 @@
 
 <script>
 
+window.onload = async function() {
+
 mapboxgl.accessToken = 'pk.eyJ1IjoicmV2YW1wbGV4IiwiYSI6ImNtbWp0YjZyejE2c2gyd3Bucml6YTMzYzMifQ.qIuzgtSyYxQhR97_SvmNJw';
 
 const map = new mapboxgl.Map({
@@ -43,5 +45,7 @@ new mapboxgl.Popup().setHTML(
 }
 
 map.on('load', loadJobs);
+
+}
 
 </script>
