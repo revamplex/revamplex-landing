@@ -1,5 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<script>
+
+const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
+
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function loadJobs() {
+
+const { data, error } = await supabase
+.from('jobs')
+.select('*');
+
+data.forEach(job => {
+
+new mapboxgl.Marker()
+.setLngLat([job.longitude, job.latitude])
+.setPopup(
+new mapboxgl.Popup().setHTML(
+"<h3>" + job.title + "</h3><p>" + job.budget + "</p>"
+)
+)
+.addTo(map);
+
+});
+
+}
+
+</script>
 <head>
 <meta charset="utf-8">
 <title>Revamplex Job Map</title>
