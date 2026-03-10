@@ -100,8 +100,10 @@ const latitude = geoData.features[0].center[1];
 const { data, error } = await supabaseClient
 .from("Jobs")
 .insert([
+  const trade = document.getElementById("trade").value;
 {
 Title: title,
+Trade: trade,
 Description: description,
 Budget: budget,
 latitude: latitude,
