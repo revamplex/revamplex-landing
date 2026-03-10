@@ -8,8 +8,10 @@
 <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
 
 <style>
+
 body{
 margin:0;
+font-family:Arial;
 }
 
 #map{
@@ -22,10 +24,41 @@ position:absolute;
 top:10px;
 left:10px;
 background:white;
-padding:10px;
-border-radius:6px;
+padding:12px;
+border-radius:8px;
 z-index:1;
+font-size:18px;
+box-shadow:0 2px 6px rgba(0,0,0,0.2);
 }
+
+#controls select{
+font-size:18px;
+padding:5px;
+}
+
+/* Popup styling */
+
+.mapboxgl-popup-content{
+font-size:18px;
+padding:16px;
+max-width:260px;
+}
+
+.mapboxgl-popup-content h3{
+font-size:22px;
+margin:0 0 8px 0;
+}
+
+.mapboxgl-popup-content p{
+font-size:18px;
+margin:0 0 8px 0;
+}
+
+.mapboxgl-popup-content strong{
+font-size:20px;
+color:#2a7ae2;
+}
+
 </style>
 
 </head>
@@ -66,7 +99,8 @@ zoom: 12
 
 let contractorLatitude;
 let contractorLongitude;
-let markers = [];
+
+/* Detect contractor location */
 
 navigator.geolocation.getCurrentPosition(position => {
 
@@ -81,6 +115,8 @@ zoom:11
 loadJobs();
 
 });
+
+/* Distance calculator */
 
 function getDistance(lat1, lon1, lat2, lon2){
 
@@ -102,10 +138,9 @@ return R * c;
 
 }
 
-async function loadJobs(){
+/* Load jobs */
 
-markers.forEach(m => m.remove());
-markers = [];
+async function loadJobs(){
 
 const response = await fetch(`${SUPABASE_URL}/rest/v1/Jobs?select=*`, {
 headers:{
@@ -119,7 +154,10 @@ const jobs = await response.json();
 
 const radius = Number(document.getElementById("radius").value);
 
-jobs.forEach(job => {
+/* Convert jobs to geojson */
+
+const features = jobs
+.filter(job => {
 
 const distance = getDistance(
 contractorLatitude,
@@ -128,26 +166,133 @@ job.latitude,
 job.longitude
 );
 
-if(distance > radius){
-return;
+return distance <= radius;
+
+})
+.map(job => ({
+type:"Feature",
+properties:{
+Title: job.Title,
+Description: job.Description,
+Budget: job.Budget
+},
+geometry:{
+type:"Point",
+coordinates:[job.longitude, job.latitude]
+}
+}));
+
+const geojson = {
+type:"FeatureCollection",
+features:features
+};
+
+/* Remove old source */
+
+if(map.getSource("jobs")){
+map.removeLayer("clusters");
+map.removeLayer("cluster-count");
+map.removeLayer("unclustered-point");
+map.removeSource("jobs");
 }
 
+/* Add clustered source */
+
+map.addSource("jobs",{
+type:"geojson",
+data:geojson,
+cluster:true,
+clusterMaxZoom:14,
+clusterRadius:50
+});
+
+/* Cluster circles */
+
+map.addLayer({
+id:"clusters",
+type:"circle",
+source:"jobs",
+filter:["has","point_count"],
+paint:{
+"circle-color":"#ff4d4d",
+"circle-radius":25
+}
+});
+
+/* Cluster count numbers */
+
+map.addLayer({
+id:"cluster-count",
+type:"symbol",
+source:"jobs",
+filter:["has","point_count"],
+layout:{
+"text-field":["get","point_count_abbreviated"],
+"text-font":["DIN Offc Pro Medium","Arial Unicode MS Bold"],
+"text-size":16
+}
+});
+
+/* Individual job pins */
+
+map.addLayer({
+id:"unclustered-point",
+type:"circle",
+source:"jobs",
+filter:["!has","point_count"],
+paint:{
+"circle-color":"#ff4d4d",
+"circle-radius":12,
+"circle-stroke-width":3,
+"circle-stroke-color":"#fff"
+}
+});
+
+/* Click job pin popup */
+
+map.on("click","unclustered-point",function(e){
+
+const props = e.features[0].properties;
+
 const popupContent = `
-<h3>${job.Title}</h3>
-<p>${job.Description}</p>
-<strong>${job.Budget}</strong>
+<h3>${props.Title}</h3>
+<p>${props.Description}</p>
+<strong>${props.Budget}</strong>
 `;
 
-const marker = new mapboxgl.Marker()
-.setLngLat([job.longitude, job.latitude])
-.setPopup(new mapboxgl.Popup().setHTML(popupContent))
+new mapboxgl.Popup()
+.setLngLat(e.lngLat)
+.setHTML(popupContent)
 .addTo(map);
 
-markers.push(marker);
+});
+
+/* Zoom into clusters */
+
+map.on("click","clusters",function(e){
+
+const features = map.queryRenderedFeatures(e.point,{
+layers:["clusters"]
+});
+
+const clusterId = features[0].properties.cluster_id;
+
+map.getSource("jobs").getClusterExpansionZoom(clusterId,function(err,zoom){
+
+if(err) return;
+
+map.easeTo({
+center:features[0].geometry.coordinates,
+zoom:zoom
+});
+
+});
 
 });
 
 }
+
+/* Radius change */
 
 function updateRadius(){
 
