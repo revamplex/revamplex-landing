@@ -55,7 +55,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-async function postJob(const MAPBOX_TOKEN = "YOUR_MAPBOX_PUBLIC_TOKEN";
+window.postJob = async function(){(const MAPBOX_TOKEN = "YOUR_MAPBOX_PUBLIC_TOKEN";
 
 const geoResponse = await fetch(
 `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?access_token=${MAPBOX_TOKEN}`
