@@ -16,17 +16,65 @@ margin:0;
 width:100%;
 height:100vh;
 }
+  #controls{
+position:absolute;
+top:10px;
+left:10px;
+background:white;
+padding:10px;
+border-radius:6px;
+z-index:1;
+}
 </style>
 
 </head>
 
 <body>
+<div id="controls">
 
+Radius:
+<select id="radius">
+<option value="10">10 miles</option>
+<option value="25" selected>25 miles</option>
+<option value="50">50 miles</option>
+</select>
+
+<button onclick="loadJobs()">Refresh Jobs</button>
+
+</div>
 <div id="map"></div>
 
 <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
 
 <script>
+  let contractorLatitude;
+let contractorLongitude;
+
+navigator.geolocation.getCurrentPosition(position => {
+
+contractorLatitude = position.coords.latitude;
+contractorLongitude = position.coords.longitude;
+
+});
+  function getDistance(lat1, lon1, lat2, lon2){
+
+const R = 3958.8; // Earth radius miles
+
+const dLat = (lat2-lat1) * Math.PI / 180;
+const dLon = (lon2-lon1) * Math.PI / 180;
+
+const a =
+Math.sin(dLat/2) * Math.sin(dLat/2) +
+Math.cos(lat1*Math.PI/180) *
+Math.cos(lat2*Math.PI/180) *
+Math.sin(dLon/2) *
+Math.sin(dLon/2);
+
+const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+return R * c;
+
+}
 
 const MAPBOX_TOKEN = "pk.eyJ1IjoicmV2YW1wbGV4IiwiYSI6ImNtbWp0YjZyejE2c2gyd3Bucml6YTMzYzMifQ.qIuzgtSyYxQhR97_SvmNJw";
 const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
@@ -63,7 +111,18 @@ console.log("Response not an array");
 return;
 }
 
-jobs.forEach(job => {
+jobs.forEach(job => {const radius = document.getElementById("radius").value;
+
+const distance = getDistance(
+contractorLatitude,
+contractorLongitude,
+job.latitude,
+job.longitude
+);
+
+if(distance > radius){
+return;
+}
 console.log("JOB DATA:", job);
 const popupContent = `
 <h3>${job.Title}</h3>
