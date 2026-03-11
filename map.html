@@ -1761,17 +1761,18 @@
             </div>
           </div>
           <div class="detail-panel">
-            <div class="detail-panel">
-  <h4>Bid Activity</h4>
-  <p>${item.bids.length} contractor${item.bids.length === 1 ? '' : 's'} have submitted bids for this project.</p>
-  <p>Submit your bid to compete for the job.</p>
-
-  <div class="modal-actions">
-    <button class="modal-btn primary bid-btn" data-jobid="${item.id}">
-      Submit Bid
-    </button>
-  </div>
-</div>
+            <h4>Current bids</h4>
+            ${item.bids.length ? `
+              <div class="bid-list">
+                ${item.bids.map(bid => `
+                  <div class="bid-item">
+                    <div class="bid-item-head">
+                      <div class="bid-item-title">${bid.contractor}</div>
+                      <div class="rating-pill">⭐ ${bid.rating}</div>
+                    </div>
+                    <div class="bid-item-sub">${bid.amount} • ${bid.eta}</div>
+                  </div>
+                `).join('')}
               </div>
             ` : '<p>No bids yet.</p>'}
           </div>
