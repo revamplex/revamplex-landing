@@ -1967,32 +1967,32 @@ projectRoomModal.addEventListener('click', e => {
     });
 
     cardsRow.addEventListener('click', e => {
-      ensureUIVisible();
 
-      const button = e.target.closest('[data-action]');
+  const button = e.target.closest('[data-action]');
 
-if (button) {
+  if (button) {
 
-  e.preventDefault();
-  e.stopPropagation();
+    e.preventDefault();
+    e.stopImmediatePropagation();
 
-  const action = button.dataset.action;
-  const id = Number(button.dataset.id);
+    const action = button.dataset.action;
+    const id = Number(button.dataset.id);
 
-  if (action === "bid") {
-    openProjectRoom(id);
+    if (action === "bid") {
+      openProjectRoom(id);
+      return;
+    }
+
+    handleCardAction(action, id);
     return;
   }
 
-  handleCardAction(action, id);
-  return;
-}
+  const card = e.target.closest('.listing-card[data-id]');
+  if (card) {
+    setActive(Number(card.dataset.id), true);
+  }
 
-      const card = e.target.closest('.listing-card[data-id]');
-      if (card) {
-        setActive(Number(card.dataset.id), true);
-      }
-    });
+});
 
     cardsRow.addEventListener('touchstart', ensureUIVisible, { passive: true });
     cardsRow.addEventListener('mousedown', ensureUIVisible);
