@@ -1743,16 +1743,15 @@ const projectRoomJobInfo = document.getElementById('projectRoomJobInfo');
       document.getElementById('jobDescription').value = '';
       document.getElementById('jobTrade').selectedIndex = 0;
     }
-
-    function openDetailModal(item) {
-      if (!item) return;
 function openProjectRoom(jobId) {
+
   const job = jobs.find(entry => entry.id === jobId);
   if (!job) return;
 
   ensureUIVisible();
 
   projectRoomTitle.textContent = `${job.title} • Project Room`;
+
   projectRoomJobInfo.innerHTML = `
     <strong>Trade:</strong> ${job.trade}<br>
     <strong>City:</strong> ${job.city}<br>
@@ -1763,7 +1762,11 @@ function openProjectRoom(jobId) {
   `;
 
   projectRoomModal.classList.add('show');
+
 }
+    function openDetailModal(item) {
+      if (!item) return;
+
       ensureUIVisible();
       detailModal.classList.add('show');
 
