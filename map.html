@@ -1,504 +1,1078 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Revamplex Job Map</title>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
+  <title>Revamp Properties Map</title>
 
-<link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet"/>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
 
-<style>
+  <style>
+    :root {
+      --brand: #f97316;
+      --brand-dark: #ea580c;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: rgba(15, 23, 42, 0.08);
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.14);
+      --shadow-soft: 0 8px 20px rgba(15, 23, 42, 0.10);
+      --radius-xl: 22px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --topbar-height: 118px;
+      --results-height: 210px;
+    }
 
-body{
-margin:0;
-font-family:Arial;
-display:flex;
-height:100vh;
-overflow:hidden;
-background:#f4f6f8;
-}
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-/* SIDEBAR */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+    }
 
-#sidebar{
-width:360px;
-background:white;
-border-right:1px solid #ddd;
-display:flex;
-flex-direction:column;
-}
+    body {
+      position: relative;
+    }
 
-/* HEADER */
+    #app {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
 
-#sidebar-header{
-padding:22px 16px 14px 16px;
-border-bottom:1px solid #eee;
-background:#fafafa;
-}
+    /* TOP BAR */
+    .topbar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 12px 12px 10px;
+      pointer-events: none;
+    }
 
-#sidebar-header h2{
-margin:0 0 10px 0;
-font-size:20px;
-}
+    .topbar-inner {
+      pointer-events: auto;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: var(--shadow-soft);
+      border-radius: 24px;
+      padding: 12px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
 
-/* RADIUS */
+    .search-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
 
-#radius{
-font-size:17px;
-padding:10px;
-border-radius:8px;
-border:1px solid #ccc;
-width:100%;
-margin-bottom:12px;
-}
+    .search-box {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 0 14px;
+      height: 50px;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+    }
 
-/* FILTERS */
+    .search-box input {
+      border: none;
+      outline: none;
+      width: 100%;
+      background: transparent;
+      font-size: 15px;
+      color: var(--text);
+    }
 
-#filters{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:8px;
-font-size:14px;
-margin-top:8px;
-max-height:220px;
-overflow-y:auto;
-padding-right:4px;
-}
+    .search-btn {
+      border: none;
+      outline: none;
+      height: 50px;
+      padding: 0 18px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(249, 115, 22, 0.28);
+      white-space: nowrap;
+    }
 
-#filters label{
-display:flex;
-align-items:flex-start;
-gap:6px;
-line-height:1.2;
-}
+    .filter-row {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
 
-/* JOB LIST */
+    .filter-row::-webkit-scrollbar {
+      display: none;
+    }
 
-#job-list{
-flex:1;
-overflow-y:auto;
-padding:14px;
-}
+    .filter-pill,
+    .filter-select {
+      height: 42px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      padding: 0 14px;
+      font-size: 14px;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+      white-space: nowrap;
+      flex: 0 0 auto;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+    }
 
-/* JOB CARD */
+    .filter-pill.active {
+      background: rgba(249, 115, 22, 0.12);
+      border-color: rgba(249, 115, 22, 0.35);
+      color: var(--brand-dark);
+    }
 
-.job-card{
-background:white;
-padding:16px;
-margin-bottom:16px;
-border-radius:14px;
-box-shadow:0 8px 24px rgba(0,0,0,0.18);
-cursor:pointer;
-transition:all .2s;
-}
+    /* MAP */
+    #map {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
 
-.job-card:hover{
-transform:translateY(-3px);
-box-shadow:0 12px 30px rgba(0,0,0,0.25);
-}
+    .leaflet-container {
+      width: 100%;
+      height: 100%;
+      background: #dbeafe;
+    }
 
-.job-title{
-font-weight:bold;
-font-size:20px;
-margin-bottom:6px;
-}
+    /* FLOATING RESULT COUNT */
+    .results-count {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: calc(var(--topbar-height) + 10px);
+      z-index: 900;
+      background: rgba(15, 23, 42, 0.82);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      backdrop-filter: blur(8px);
+      box-shadow: var(--shadow-soft);
+      pointer-events: none;
+    }
 
-.job-desc{
-font-size:15px;
-color:#555;
-}
+    /* HORIZONTAL BOTTOM RESULTS */
+    .results-shell {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 950;
+      pointer-events: none;
+      padding: 0 0 16px;
+    }
 
-.job-budget{
-color:#2a7ae2;
-font-size:18px;
-margin-top:8px;
-font-weight:bold;
-}
+    .results-shell-inner {
+      pointer-events: none;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
 
-/* MAP */
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px 10px;
+      pointer-events: none;
+    }
 
-#map{
-flex:1;
-}
+    .results-title {
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: var(--shadow-soft);
+      pointer-events: auto;
+    }
 
-/* PIN */
+    .results-arrows {
+      display: flex;
+      gap: 8px;
+      pointer-events: auto;
+    }
 
-.job-marker{
-background:#ff4d4d;
-border-radius:12px;
-padding:6px 10px;
-border:3px solid white;
-box-shadow:0 4px 12px rgba(0,0,0,0.4);
-cursor:pointer;
-color:white;
-font-weight:bold;
-display:flex;
-flex-direction:column;
-align-items:center;
-font-size:13px;
-min-width:54px;
-text-align:center;
-}
+    .arrow-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      border: none;
+      background: rgba(255,255,255,0.94);
+      box-shadow: var(--shadow-soft);
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text);
+    }
 
-/* HOT PIN */
+    .cards-row {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 0 16px 6px;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+      pointer-events: auto;
+    }
 
-.hot-pin{
-animation:pulse 1.5s infinite;
-}
+    .cards-row::-webkit-scrollbar {
+      display: none;
+    }
 
-@keyframes pulse{
-0%{box-shadow:0 0 0 0 rgba(255,77,77,0.7);}
-70%{box-shadow:0 0 0 14px rgba(255,77,77,0);}
-100%{box-shadow:0 0 0 0 rgba(255,77,77,0);}
-}
+    .contractor-card {
+      flex: 0 0 320px;
+      max-width: 320px;
+      min-height: 180px;
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.8);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      scroll-snap-align: center;
+      overflow: hidden;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+      cursor: pointer;
+    }
 
-/* POPUPS */
+    .contractor-card.active {
+      transform: translateY(-6px);
+      box-shadow: 0 18px 38px rgba(249, 115, 22, 0.22);
+      border-color: rgba(249, 115, 22, 0.28);
+    }
 
-.mapboxgl-popup-content{
-font-size:18px;
-padding:18px;
-border-radius:12px;
-max-width:260px;
-}
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 16px 10px;
+    }
 
-.mapboxgl-popup-content h3{
-font-size:22px;
-margin:0 0 8px 0;
-}
+    .card-title-wrap {
+      min-width: 0;
+    }
 
-.mapboxgl-popup-content p{
-margin:0 0 8px 0;
-}
+    .card-name {
+      font-size: 18px;
+      line-height: 1.2;
+      font-weight: 800;
+      margin: 0 0 6px;
+    }
 
-.mapboxgl-popup-content strong{
-font-size:20px;
-color:#2a7ae2;
-}
+    .card-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0;
+    }
 
-/* MOBILE */
+    .rating-pill {
+      background: rgba(15, 23, 42, 0.06);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
 
-@media(max-width:768px){
+    .card-body {
+      padding: 0 16px 14px;
+    }
 
-body{
-flex-direction:column;
-}
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
 
-#sidebar{
-width:100%;
-height:48%;
-}
+    .meta-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 12px;
+    }
 
-#map{
-height:52%;
-}
+    .meta-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
 
-#sidebar-header{
-padding-top:28px;
-}
+    .meta-value {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text);
+    }
 
-#radius{
-font-size:18px;
-padding:12px;
-}
+    .tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
 
-#filters{
-grid-template-columns:1fr 1fr;
-max-height:180px;
-}
-}
+    .tag {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--brand-dark);
+      background: rgba(249, 115, 22, 0.1);
+      padding: 7px 10px;
+      border-radius: 999px;
+    }
 
-</style>
+    .card-actions {
+      display: flex;
+      gap: 10px;
+    }
 
+    .btn-primary,
+    .btn-secondary {
+      flex: 1;
+      height: 42px;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      border: none;
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+      box-shadow: 0 10px 20px rgba(249, 115, 22, 0.22);
+    }
+
+    .btn-secondary {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+    }
+
+    /* CUSTOM MAP PIN */
+    .custom-pin {
+      width: 20px;
+      height: 20px;
+      background: var(--brand);
+      border: 3px solid #fff;
+      border-radius: 50%;
+      box-shadow: 0 8px 18px rgba(249, 115, 22, 0.35);
+    }
+
+    .custom-pin.active {
+      width: 26px;
+      height: 26px;
+      background: #0f172a;
+      border: 4px solid #fff;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.35);
+    }
+
+    /* MAP POPUP */
+    .leaflet-popup-content-wrapper {
+      border-radius: 16px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .leaflet-popup-content {
+      margin: 14px 16px;
+      font-family: Inter, Arial, Helvetica, sans-serif;
+    }
+
+    .popup-name {
+      font-size: 15px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .popup-meta {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    @media (max-width: 900px) {
+      :root {
+        --topbar-height: 122px;
+      }
+
+      .topbar {
+        padding: 10px 10px 8px;
+      }
+
+      .topbar-inner {
+        padding: 10px;
+        border-radius: 20px;
+      }
+
+      .search-row {
+        margin-bottom: 8px;
+      }
+
+      .search-btn {
+        padding: 0 15px;
+      }
+
+      .contractor-card {
+        flex: 0 0 290px;
+        max-width: 290px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      :root {
+        --topbar-height: 128px;
+      }
+
+      .search-row {
+        gap: 8px;
+      }
+
+      .search-box,
+      .search-btn {
+        height: 48px;
+      }
+
+      .search-btn {
+        font-size: 14px;
+      }
+
+      .filter-pill,
+      .filter-select {
+        height: 40px;
+        font-size: 13px;
+      }
+
+      .results-count {
+        top: calc(var(--topbar-height) + 8px);
+        font-size: 12px;
+        padding: 9px 14px;
+      }
+
+      .results-header {
+        padding: 0 12px 8px;
+      }
+
+      .cards-row {
+        padding: 0 12px 6px;
+        gap: 12px;
+      }
+
+      .contractor-card {
+        flex: 0 0 84vw;
+        max-width: 84vw;
+        min-height: 176px;
+      }
+
+      .card-name {
+        font-size: 17px;
+      }
+
+      .meta-grid {
+        gap: 8px;
+      }
+
+      .btn-primary,
+      .btn-secondary {
+        height: 40px;
+      }
+    }
+  </style>
 </head>
-
 <body>
-
-<div id="sidebar">
-
-<div id="sidebar-header">
-
-<h2>Available Jobs</h2>
-
-<select id="radius" onchange="updateRadius()">
-<option value="10">10 miles</option>
-<option value="25" selected>25 miles</option>
-<option value="50">50 miles</option>
-</select>
-
-<div id="filters">
-
-<label><input type="checkbox" value="carpentry" checked> Carpentry</label>
-<label><input type="checkbox" value="plumbing" checked> Plumbing</label>
-<label><input type="checkbox" value="electrical" checked> Electrical</label>
-<label><input type="checkbox" value="hvac" checked> HVAC</label>
-<label><input type="checkbox" value="painting" checked> Painting</label>
-<label><input type="checkbox" value="decorating" checked> Decorating</label>
-<label><input type="checkbox" value="masonry" checked> Masonry</label>
-<label><input type="checkbox" value="concrete" checked> Concrete</label>
-<label><input type="checkbox" value="roofing" checked> Roofing</label>
-<label><input type="checkbox" value="flooring" checked> Flooring</label>
-<label><input type="checkbox" value="tiling" checked> Tiling</label>
-<label><input type="checkbox" value="drywall" checked> Drywall</label>
-<label><input type="checkbox" value="insulation" checked> Insulation</label>
-<label><input type="checkbox" value="siding" checked> Siding</label>
-<label><input type="checkbox" value="gutter" checked> Gutters</label>
-<label><input type="checkbox" value="landscaping" checked> Landscaping</label>
-<label><input type="checkbox" value="paving" checked> Paving</label>
-<label><input type="checkbox" value="glazing" checked> Glazing</label>
-<label><input type="checkbox" value="window" checked> Windows</label>
-<label><input type="checkbox" value="door" checked> Doors</label>
-<label><input type="checkbox" value="cabinetry" checked> Cabinetry</label>
-<label><input type="checkbox" value="handyman" checked> Handyman</label>
-<label><input type="checkbox" value="bathroom" checked> Bathroom</label>
-<label><input type="checkbox" value="kitchen" checked> Kitchen</label>
-<label><input type="checkbox" value="general" checked> General</label>
-<label><input type="checkbox" value="framing" checked> Framing</label>
-<label><input type="checkbox" value="trim" checked> Trim Work</label>
-<label><input type="checkbox" value="finish carpentry" checked> Finish Carpentry</label>
-<label><input type="checkbox" value="cabinet" checked> Cabinets</label>
-
-</div>
-
-</div>
-
-<div id="job-list"></div>
-
-</div>
-
-<div id="map"></div>
-
-<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-
-<script>
-
-/* MAPBOX */
-const MAPBOX_TOKEN = "pk.eyJ1IjoicmV2YW1wbGV4IiwiYSI6ImNtbWp0YjZyejE2c2gyd3Bucml6YTMzYzMifQ.qIuzgtSyYxQhR97_SvmNJw";
-
-/* SUPABASE */
-const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
-
-mapboxgl.accessToken = MAPBOX_TOKEN;
-
-const map = new mapboxgl.Map({
-container:"map",
-style:"mapbox://styles/mapbox/streets-v11",
-center:[-74.0431,40.7376],
-zoom:11
-});
-
-let contractorLatitude;
-let contractorLongitude;
-let markers=[];
-
-/* LOCATION */
-navigator.geolocation.getCurrentPosition(position => {
-
-contractorLatitude = position.coords.latitude;
-contractorLongitude = position.coords.longitude;
-
-map.flyTo({
-center:[contractorLongitude, contractorLatitude],
-zoom:11
-});
-
-loadJobs();
-
-});
-
-/* DISTANCE */
-function getDistance(lat1, lon1, lat2, lon2){
-
-const R = 3958.8;
-
-const dLat = (lat2-lat1) * Math.PI / 180;
-const dLon = (lon2-lon1) * Math.PI / 180;
-
-const a =
-Math.sin(dLat/2) * Math.sin(dLat/2) +
-Math.cos(lat1*Math.PI/180) *
-Math.cos(lat2*Math.PI/180) *
-Math.sin(dLon/2) * Math.sin(dLon/2);
-
-const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-
-return R * c;
-}
-
-/* TRADE ICON */
-function getTradeIcon(title){
-
-title = title.toLowerCase();
-
-if(title.includes("bath")) return "🛁";
-if(title.includes("kitchen")) return "🍳";
-if(title.includes("plumb")) return "🔧";
-if(title.includes("elect")) return "⚡";
-if(title.includes("hvac")) return "❄️";
-if(title.includes("paint")) return "🎨";
-if(title.includes("decorat")) return "🖼️";
-if(title.includes("masonry")) return "🧱";
-if(title.includes("concrete")) return "🏗️";
-if(title.includes("roof")) return "🏠";
-if(title.includes("floor")) return "🪵";
-if(title.includes("tile")) return "🟫";
-if(title.includes("drywall")) return "🧾";
-if(title.includes("insulation")) return "🧥";
-if(title.includes("siding")) return "🏘️";
-if(title.includes("gutter")) return "🌧️";
-if(title.includes("landscap")) return "🌿";
-if(title.includes("paving")) return "🛣️";
-if(title.includes("glazing")) return "🪟";
-if(title.includes("window")) return "🪟";
-if(title.includes("door")) return "🚪";
-if(title.includes("cabinet")) return "🗄️";
-if(title.includes("carpentry")) return "🪚";
-if(title.includes("framing")) return "🪵";
-if(title.includes("trim")) return "📏";
-if(title.includes("finish carpentry")) return "🪚";
-if(title.includes("deck")) return "🪵";
-if(title.includes("handyman")) return "🛠️";
-
-return "🏠";
-}
-
-/* TRADE MATCH */
-function tradeMatches(title){
-
-let checked = [...document.querySelectorAll("#filters input:checked")].map(i => i.value);
-title = title.toLowerCase();
-
-return checked.some(trade => title.includes(trade));
-}
-
-/* FORMAT BUDGET */
-function formatBudget(budget){
-
-let num = parseInt(String(budget).replace(/[^0-9]/g,""));
-
-if(isNaN(num)) return "$0";
-if(num >= 1000) return "$" + Math.round(num/1000) + "K";
-
-return "$" + num;
-}
-
-/* HOT JOB */
-function isHotJob(budget){
-
-let num = parseInt(String(budget).replace(/[^0-9]/g,""));
-if(isNaN(num)) return false;
-
-return num >= 15000;
-}
-
-/* LOAD JOBS */
-async function loadJobs(){
-
-markers.forEach(m => m.remove());
-markers = [];
-
-document.getElementById("job-list").innerHTML = "";
-
-const response = await fetch(`${SUPABASE_URL}/rest/v1/Jobs?select=*`,{
-headers:{
-apikey:SUPABASE_KEY,
-Authorization:`Bearer ${SUPABASE_KEY}`,
-"Accept-Profile":"public"
-}
-});
-
-const jobs = await response.json();
-const radius = Number(document.getElementById("radius").value);
-const checkedTrades = [...document.querySelectorAll("#filters input:checked")]
-.map(i => i.value);
-jobs.forEach(job => {
-
-const jobTrade = (job.Trade || "").toLowerCase();
-const match = checkedTrades.some(t => jobTrade.includes(t));
-if(!match) return;
-
-const distance = getDistance(
-contractorLatitude,
-contractorLongitude,
-job.latitude,
-job.longitude
-);
-
-if(distance > radius) return;
-
-/* PIN */
-const el = document.createElement("div");
-
-let icon = getTradeIcon(job.Title);
-let budget = formatBudget(job.Budget);
-
-el.className = "job-marker";
-
-if(isHotJob(job.Budget)){
-el.classList.add("hot-pin");
-}
-
-el.innerHTML = `${icon}<div>${budget}</div>`;
-
-const marker = new mapboxgl.Marker(el)
-.setLngLat([job.longitude, job.latitude])
-.setPopup(new mapboxgl.Popup().setHTML(`
-<h3>${job.Title}</h3>
-<p>${job.Description}</p>
-<strong>${job.Budget}</strong>
-`))
-.addTo(map);
-
-markers.push(marker);
-
-/* JOB CARD */
-const card = document.createElement("div");
-card.className = "job-card";
-
-card.innerHTML = `
-<div class="job-title">${job.Title}</div>
-<div class="job-desc">${job.Description}</div>
-<div class="job-budget">${job.Budget}</div>
-`;
-
-card.onclick = () => {
-map.flyTo({
-center:[job.longitude, job.latitude],
-zoom:14
-});
-marker.togglePopup();
-};
-
-document.getElementById("job-list").appendChild(card);
-
-});
-}
-
-/* UPDATE RADIUS */
-function updateRadius(){
-
-const radius = Number(document.getElementById("radius").value);
-
-let zoom = 11;
-if(radius === 10) zoom = 13;
-if(radius === 25) zoom = 11;
-if(radius === 50) zoom = 10;
-
-map.flyTo({
-center:[contractorLongitude, contractorLatitude],
-zoom:zoom
-});
-
-loadJobs();
-}
-
-/* FILTER CHANGE */
-document.querySelectorAll("#filters input").forEach(cb => {
-cb.addEventListener("change", loadJobs);
-});
-
-</script>
-
+  <div id="app">
+    <!-- TOP FILTER BAR -->
+    <div class="topbar">
+      <div class="topbar-inner">
+        <div class="search-row">
+          <div class="search-box">
+            <span>🔍</span>
+            <input
+              id="searchInput"
+              type="text"
+              placeholder="Search contractors, trades, city..."
+            />
+          </div>
+          <button class="search-btn" id="searchBtn">Search</button>
+        </div>
+
+        <div class="filter-row">
+          <select id="tradeFilter" class="filter-select">
+            <option value="all">All Trades</option>
+            <option value="Carpentry">Carpentry</option>
+            <option value="Plumbing">Plumbing</option>
+            <option value="Electrical">Electrical</option>
+            <option value="HVAC">HVAC</option>
+            <option value="Painting">Painting</option>
+            <option value="Masonry">Masonry</option>
+            <option value="Roofing">Roofing</option>
+            <option value="Flooring">Flooring</option>
+            <option value="Drywall">Drywall</option>
+            <option value="Siding">Siding</option>
+            <option value="Landscaping">Landscaping</option>
+            <option value="Glazing">Glazing</option>
+            <option value="Cabinetry">Cabinetry</option>
+            <option value="Handyman">Handyman</option>
+          </select>
+
+          <select id="distanceFilter" class="filter-select">
+            <option value="100">Any Distance</option>
+            <option value="5">Within 5 miles</option>
+            <option value="10">Within 10 miles</option>
+            <option value="25">Within 25 miles</option>
+            <option value="50">Within 50 miles</option>
+          </select>
+
+          <select id="ratingFilter" class="filter-select">
+            <option value="0">Any Rating</option>
+            <option value="4.5">4.5+ stars</option>
+            <option value="4.0">4.0+ stars</option>
+            <option value="3.5">3.5+ stars</option>
+          </select>
+
+          <button class="filter-pill active" id="sortDistance">Nearest</button>
+          <button class="filter-pill" id="sortRating">Top Rated</button>
+          <button class="filter-pill" id="resetFilters">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAP -->
+    <div id="map"></div>
+
+    <!-- RESULT COUNT -->
+    <div class="results-count" id="resultsCount">0 contractors found</div>
+
+    <!-- BOTTOM HORIZONTAL RESULTS -->
+    <div class="results-shell">
+      <div class="results-shell-inner">
+        <div class="results-header">
+          <div class="results-title">Swipe left ↔ right to browse results</div>
+          <div class="results-arrows">
+            <button class="arrow-btn" id="scrollLeftBtn">‹</button>
+            <button class="arrow-btn" id="scrollRightBtn">›</button>
+          </div>
+        </div>
+        <div class="cards-row" id="cardsRow"></div>
+      </div>
+    </div>
+  </div>
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <script>
+    /***************************************************************
+     * REPLACE THIS ARRAY WITH YOUR REAL CONTRACTOR DATA
+     * You can later pull this from Supabase / API / database.
+     ***************************************************************/
+    const contractors = [
+      {
+        id: 1,
+        name: "Elite Plumbing & Drain",
+        trade: "Plumbing",
+        rating: 4.9,
+        distance: 2.3,
+        city: "Hackensack, NJ",
+        lat: 40.8859,
+        lng: -74.0435,
+        price: "$$",
+        tags: ["Licensed", "Emergency Service", "Water Heaters"]
+      },
+      {
+        id: 2,
+        name: "Precision Electrical NJ",
+        trade: "Electrical",
+        rating: 4.8,
+        distance: 3.1,
+        city: "Teaneck, NJ",
+        lat: 40.8976,
+        lng: -74.0159,
+        price: "$$",
+        tags: ["Panels", "Lighting", "Wiring"]
+      },
+      {
+        id: 3,
+        name: "North Jersey Roofing Pros",
+        trade: "Roofing",
+        rating: 4.7,
+        distance: 6.2,
+        city: "Paramus, NJ",
+        lat: 40.9445,
+        lng: -74.0754,
+        price: "$$$",
+        tags: ["Shingles", "Repairs", "Flat Roofs"]
+      },
+      {
+        id: 4,
+        name: "Metro Tile & Flooring",
+        trade: "Flooring",
+        rating: 4.6,
+        distance: 4.4,
+        city: "Lodi, NJ",
+        lat: 40.8765,
+        lng: -74.0835,
+        price: "$$",
+        tags: ["Tile", "Hardwood", "Vinyl"]
+      },
+      {
+        id: 5,
+        name: "Garden State Carpentry",
+        trade: "Carpentry",
+        rating: 4.9,
+        distance: 7.5,
+        city: "Ridgefield Park, NJ",
+        lat: 40.8579,
+        lng: -74.0229,
+        price: "$$$",
+        tags: ["Trim", "Framing", "Finish Work"]
+      },
+      {
+        id: 6,
+        name: "Everest HVAC Systems",
+        trade: "HVAC",
+        rating: 4.5,
+        distance: 9.1,
+        city: "Fort Lee, NJ",
+        lat: 40.8509,
+        lng: -73.9701,
+        price: "$$$",
+        tags: ["Heating", "Cooling", "Mini Splits"]
+      },
+      {
+        id: 7,
+        name: "Hudson Drywall & Insulation",
+        trade: "Drywall",
+        rating: 4.4,
+        distance: 5.8,
+        city: "Clifton, NJ",
+        lat: 40.8584,
+        lng: -74.1638,
+        price: "$$",
+        tags: ["Sheetrock", "Taping", "Insulation"]
+      },
+      {
+        id: 8,
+        name: "Masonry Masters NJ",
+        trade: "Masonry",
+        rating: 4.8,
+        distance: 8.7,
+        city: "Fair Lawn, NJ",
+        lat: 40.9404,
+        lng: -74.1318,
+        price: "$$$",
+        tags: ["Block", "Brick", "Concrete"]
+      },
+      {
+        id: 9,
+        name: "Orange Ladder Handyman",
+        trade: "Handyman",
+        rating: 4.3,
+        distance: 2.9,
+        city: "Bogota, NJ",
+        lat: 40.8759,
+        lng: -74.0299,
+        price: "$",
+        tags: ["Repairs", "Punch List", "Installations"]
+      },
+      {
+        id: 10,
+        name: "Prime Cabinet Studio",
+        trade: "Cabinetry",
+        rating: 4.7,
+        distance: 10.4,
+        city: "Englewood, NJ",
+        lat: 40.8929,
+        lng: -73.9726,
+        price: "$$$",
+        tags: ["Kitchen", "Bath", "Custom Millwork"]
+      }
+    ];
+
+    let filteredContractors = [...contractors];
+    let activeCardId = null;
+    let activeSort = "distance";
+    const markers = new Map();
+
+    // MAP SETUP
+    const map = L.map("map", {
+      zoomControl: false,
+      attributionControl: true
+    }).setView([40.8859, -74.0435], 11);
+
+    L.control.zoom({ position: "bottomright" }).addTo(map);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap contributors"
+    }).addTo(map);
+
+    const cardsRow = document.getElementById("cardsRow");
+    const resultsCount = document.getElementById("resultsCount");
+    const searchInput = document.getElementById("searchInput");
+    const searchBtn = document.getElementById("searchBtn");
+    const tradeFilter = document.getElementById("tradeFilter");
+    const distanceFilter = document.getElementById("distanceFilter");
+    const ratingFilter = document.getElementById("ratingFilter");
+    const sortDistanceBtn = document.getElementById("sortDistance");
+    const sortRatingBtn = document.getElementById("sortRating");
+    const resetFiltersBtn = document.getElementById("resetFilters");
+    const scrollLeftBtn = document.getElementById("scrollLeftBtn");
+    const scrollRightBtn = document.getElementById("scrollRightBtn");
+
+    function createPinHTML(isActive = false) {
+      return `<div class="custom-pin ${isActive ? "active" : ""}"></div>`;
+    }
+
+    function clearMarkers() {
+      markers.forEach(marker => map.removeLayer(marker));
+      markers.clear();
+    }
+
+    function renderMarkers(data) {
+      clearMarkers();
+
+      data.forEach(item => {
+        const icon = L.divIcon({
+          className: "",
+          html: createPinHTML(item.id === activeCardId),
+          iconSize: item.id === activeCardId ? [26, 26] : [20, 20],
+          iconAnchor: item.id === activeCardId ? [13, 13] : [10, 10]
+        });
+
+        const marker = L.marker([item.lat, item.lng], { icon }).addTo(map);
+
+        marker.bindPopup(`
+          <div>
+            <div class="popup-name">${item.name}</div>
+            <div class="popup-meta">${item.trade} • ${item.city}</div>
+            <div class="popup-meta">⭐ ${item.rating} • ${item.distance} miles away</div>
+          </div>
+        `);
+
+        marker.on("click", () => {
+          setActiveCard(item.id, true);
+          scrollCardIntoView(item.id);
+        });
+
+        markers.set(item.id, marker);
+      });
+
+      fitMapToVisibleResults();
+    }
+
+    function fitMapToVisibleResults() {
+      if (!filteredContractors.length) return;
+
+      const bounds = L.latLngBounds(
+        filteredContractors.map(item => [item.lat, item.lng])
+      );
+
+      map.fitBounds(bounds, {
+        paddingTopLeft: [30, 140],
+        paddingBottomRight: [30, 260],
+        maxZoom: 13
+      });
+    }
+
+    function renderCards(data) {
+      cardsRow.innerHTML = "";
+
+      if (!data.length) {
+        cardsRow.innerHTML = `
+          <div class="contractor-card" style="flex: 0 0 340px; display:flex; align-items:center; justify-content:center;">
+            <div style="padding:24px; text-align:center;">
+              <div style="font-size:18px; font-weight:800; margin-bottom:8px;">No contractors found</div>
+              <div style="font-size:14px; color:#64748b;">Try changing the search or filters.</div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      data.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "contractor-card";
+        card.dataset.id = item.id;
+
+        if (item.id === activeCardId) {
+          card.classList.add("active");
+        }
+
+        card.innerHTML = `
+          <div class="card-top">
+            <div class="card-title-wrap">
+              <h3 class="card-name">${item.name}</h3>
+              <p class="card-sub">${item.trade} • ${item.city}</p>
+            </div>
+            <div class="rating-pill">⭐ ${item.rating}</div>
+          </div>
+
+          <div class="card-body">
+            <div class="meta-grid">
+              <div class="meta-box">
+                <div class="meta-label">Distance</div>
+                <div class="meta-value">${item.distance} mi</div>
+              </div>
+              <div class="meta-box">
+                <div class="meta-label">Budget</div>
+                <div class="meta-value">${item.price}</div>
+              </div>
+            </div>
+
+            <div class="tags">
+              ${item.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}
+            </div>
+
+            <div class="card-actions">
+              <button class="btn-primary">View Profile</button>
+              <button class="btn-secondary">Message</button>
+            </div>
+          </div>
+        `;
+
+        card.addEventListener("click", () => {
+          setActiveCard(item.id, true);
+        });
+
+        cardsRow.appendChild(card);
+      });
+    }
+
+    function updateResultsCount() {
+      const count = filteredContractors.length;
+      resultsCount.textContent = `${count} contractor${count === 1 ? "" : "s"} found`;
+    }
+
+    function setActiveCard(id, panMap = false) {
+      activeCardId = id;
+
+      document.querySelectorAll(".contractor-card").forEach(card => {
+        card.classList.toggle("active", Number(card.dataset.id) === id);
+      });
+
+      filteredContractors.forEach(item => {
+        const marker = markers.get(item.id);
+        if (!marker) return;
+
+        const isActive = item.id === id;
+        const icon = L.divIcon({
+          className: "",
+          html: createPinHTML(isActive),
+          iconSize: isActive ? [26, 26] : [20, 20],
+          iconAnchor: isActive ? [13, 13] : [10, 10]
+        });
+        marker.setIcon(icon);
+
+        if (isActive) {
+          marker.openPopup();
+          if (panMap) {
+            map.flyTo([item.lat, item.lng], Math.max(map.getZoom(), 13), {
+              duration: 0.5
+            });
+          }
+        } else {
+          marker.closePopup();
+        }
+      });
+    }
+
+    function scrollCardIntoView(id) {
+      const targetCard = [...document.querySelectorAll(".contractor-card")].find(
+        card => Number(card.dataset.id) === id
+      );
+      if (!targetCard) return;
+
+      const left =
+        targetCard.offsetLeft -
+        (cardsRow.clientWidth / 2) +
+        (targetCard.clientWidth / 2);
+
+      cardsRow.scrollTo({
+        left,
+        behavior: "smooth"
+      });
+    }
+
+    function applyFilters() {
+      const searchTerm = searchInput.value.trim().toLowerCase();
+      const selectedTrade = tradeFilter.value;
+      const maxDistance = Number(distanceFilter.value);
+      const minRating = Number(ratingFilter.value);
+
+      filteredContractors = contractors.filter(item => {
+        const matchesSearch =
+          !searchTerm ||
+          item.name.toLowerCase().includes(searchTerm) ||
+          item.trade.toLowerCase().includes(searchTerm) ||
+          item.city.toLowerCase().includes(searchTerm) ||
+          item.tags.some(tag => tag.toLowerCase().includes(searchTerm));
+
+        const matchesTrade =
+          selectedTrade === "all" || item.trade === selectedTrade;
+
+        const matchesDistance = item.distance <= maxDistance;
+        const matchesRating = item.rating >= minRating;
+
+        return matchesSearch && matchesTrade && matchesDistance && matchesRating;
+      });
+
+      if (activeSort === "distance") {
+        filteredContractors.sort((a, b) => a.distance - b.distance);
+      } else if (activeSort === "rating") {
+        filteredContractors.sort((a, b) => b.rating - a.rating);
+      }
+
+      if (!filteredContractors.some(item => item.id === activeCardId)) {
+        activeCardId = filteredContractors.length ? filteredContractors[0].id : null;
+      }
+
+      renderCards(filteredContractors);
+      renderMarkers(filteredContractors);
+      updateResultsCount();
+
+      if (activeCardId) {
+        setActiveCard(activeCardId, false);
+        setTimeout(() => scrollCardIntoView(activeCardId), 100);
+      }
+    }
+
+    function setSort(type) {
+      activeSort = type;
+
+      sortDistanceBtn.classList.toggle("active", type === "distance");
+      sortRatingBtn.classList.toggle("active", type === "rating");
+
+      applyFilters();
+    }
+
+    // Detect centered card while user scrolls horizontally
+    let scrollTimeout = null;
+    cardsRow.addEventListener("scroll", () => {
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+
+      scrollTimeout = setTimeout(() => {
+        const cards = [...document.querySelectorAll(".contractor-card[data-id]")];
+        if (!cards.length) return;
+
+        const rowRect = cardsRow.getBoundingClientRect();
+        const rowCenter = rowRect.left + rowRect.width / 2;
+
+        let closestCard = null;
+        let closestDistance = Infinity;
+
+        cards.forEach(card => {
+          const rect = card.getBoundingClientRect();
+          const cardCenter = rect.left + rect.width / 2;
+          const diff = Math.abs(rowCenter - cardCenter);
+
+          if (diff < closestDistance) {
+            closestDistance = diff;
+            closestCard = card;
+          }
+        });
+
+        if (closestCard) {
+          const id = Number(closestCard.dataset.id);
+          if (id !== activeCardId) {
+            setActiveCard(id, true);
+          }
+        }
+      }, 80);
+    });
+
+    // Button events
+    searchBtn.addEventListener("click", applyFilters);
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") applyFilters();
+    });
+
+    tradeFilter.addEventListener("change", applyFilters);
+    distanceFilter.addEventListener("change", applyFilters);
+    ratingFilter.addEventListener("change", applyFilters);
+
+    sortDistanceBtn.addEventListener("click", () => setSort("distance"));
+    sortRatingBtn.addEventListener("click", () => setSort("rating"));
+
+    resetFiltersBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      tradeFilter.value = "all";
+      distanceFilter.value = "100";
+      ratingFilter.value = "0";
+      setSort("distance");
+    });
+
+    scrollLeftBtn.addEventListener("click", () => {
+      cardsRow.scrollBy({ left: -340, behavior: "smooth" });
+    });
+
+    scrollRightBtn.addEventListener("click", () => {
+      cardsRow.scrollBy({ left: 340, behavior: "smooth" });
+    });
+
+    // Initial render
+    activeCardId = contractors[0]?.id || null;
+    applyFilters();
+
+    // Better mobile viewport behavior
+    window.addEventListener("resize", () => {
+      if (filteredContractors.length) {
+        setTimeout(() => {
+          fitMapToVisibleResults();
+          if (activeCardId) scrollCardIntoView(activeCardId);
+        }, 150);
+      }
+    });
+  </script>
 </body>
-
 </html>
