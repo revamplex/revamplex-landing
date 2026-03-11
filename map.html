@@ -968,7 +968,36 @@
       <div class="detail-stack" id="detailContent"></div>
     </div>
   </div>
+<div class="modal" id="projectRoomModal">
+  <div class="modal-card" style="width:min(1100px, 100%); max-height:min(92vh, 900px);">
+    <div class="modal-head">
+      <h2 class="modal-title" id="projectRoomTitle">Project Room</h2>
+      <button class="close-btn" id="closeProjectRoomModal">×</button>
+    </div>
 
+    <div style="display:grid; grid-template-columns: 320px 1fr; gap:16px;">
+      
+      <div class="detail-panel" id="projectRoomSidebar">
+        <h4>Job Overview</h4>
+        <p id="projectRoomJobInfo">Select a job to view project details.</p>
+      </div>
+
+      <div class="detail-panel">
+        <h4>Workspace</h4>
+        <p>This private room will hold chat, estimating tools, files, scheduling, and call features.</p>
+
+        <div class="badge-row" style="margin-top:12px;">
+          <span class="badge">Chat</span>
+          <span class="badge">Estimate</span>
+          <span class="badge">Files</span>
+          <span class="badge">Schedule</span>
+          <span class="badge">Audio/Video</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
@@ -1362,6 +1391,10 @@
     const detailTitle = document.getElementById('detailTitle');
     const detailContent = document.getElementById('detailContent');
     const closeDetailModal = document.getElementById('closeDetailModal');
+    const projectRoomModal = document.getElementById('projectRoomModal');
+const closeProjectRoomModal = document.getElementById('closeProjectRoomModal');
+const projectRoomTitle = document.getElementById('projectRoomTitle');
+const projectRoomJobInfo = document.getElementById('projectRoomJobInfo');
 
     function populateTradeSelect() {
       jobTradeSelect.innerHTML = TRADE_OPTIONS.map(trade => `<option>${trade}</option>`).join('');
@@ -1713,7 +1746,24 @@
 
     function openDetailModal(item) {
       if (!item) return;
+function openProjectRoom(jobId) {
+  const job = jobs.find(entry => entry.id === jobId);
+  if (!job) return;
 
+  ensureUIVisible();
+
+  projectRoomTitle.textContent = `${job.title} • Project Room`;
+  projectRoomJobInfo.innerHTML = `
+    <strong>Trade:</strong> ${job.trade}<br>
+    <strong>City:</strong> ${job.city}<br>
+    <strong>Budget:</strong> ${job.budget}<br>
+    <strong>Customer:</strong> ${job.customer}<br>
+    <strong>Posted:</strong> ${job.postedAgo}<br><br>
+    ${job.description}
+  `;
+
+  projectRoomModal.classList.add('show');
+}
       ensureUIVisible();
       detailModal.classList.add('show');
 
