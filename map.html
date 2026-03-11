@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Revamp Map v3</title>
+  <title>Revamp Map v4</title>
 
   <link
     rel="stylesheet"
@@ -24,10 +24,6 @@
       --line: rgba(15, 23, 42, 0.08);
       --shadow: 0 18px 42px rgba(15, 23, 42, 0.16);
       --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.1);
-      --radius-xl: 24px;
-      --radius-lg: 18px;
-      --radius-md: 14px;
-      --radius-sm: 12px;
     }
 
     * {
@@ -76,6 +72,7 @@
       z-index: 1000;
       padding: 12px;
       pointer-events: none;
+      transition: transform 0.28s ease;
     }
 
     .topbar-inner {
@@ -146,8 +143,8 @@
     .mini-btn,
     .fab,
     .modal-btn,
-    .bid-btn,
-    .close-btn {
+    .close-btn,
+    .restore-ui-btn {
       border: 0;
       cursor: pointer;
     }
@@ -214,6 +211,7 @@
       backdrop-filter: blur(10px);
       box-shadow: var(--shadow-soft);
       pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
     }
 
     .count-pill {
@@ -238,6 +236,7 @@
       z-index: 960;
       padding: 0 0 16px;
       pointer-events: none;
+      transition: transform 0.28s ease;
     }
 
     .results-shell-inner {
@@ -467,6 +466,29 @@
       box-shadow: 0 12px 26px rgba(15, 23, 42, 0.22);
     }
 
+    .restore-ui-btn {
+      position: absolute;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1100;
+      height: 42px;
+      padding: 0 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.96);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 900;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(255,255,255,0.85);
+      backdrop-filter: blur(10px);
+      display: none;
+    }
+
+    .restore-ui-btn.show {
+      display: block;
+    }
+
     .modal {
       position: fixed;
       inset: 0;
@@ -681,6 +703,23 @@
       margin-bottom: 4px;
     }
 
+    .ui-collapsed .topbar {
+      transform: translateY(-115%);
+    }
+
+    .ui-collapsed .results-shell {
+      transform: translateY(115%);
+    }
+
+    .ui-collapsed .count-pill {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-12px);
+    }
+
+    .ui-collapsed .fab-wrap {
+      opacity: 0.25;
+    }
+
     @media (max-width: 900px) {
       .count-pill { top: 192px; }
       .status-pill { top: 234px; }
@@ -757,6 +796,12 @@
 
       .modal-grid {
         grid-template-columns: 1fr;
+      }
+
+      .restore-ui-btn {
+        top: 12px;
+        height: 40px;
+        font-size: 12px;
       }
     }
   </style>
@@ -844,10 +889,12 @@
 
     <div id="map"></div>
 
+    <button class="restore-ui-btn" id="restoreUiBtn">▲ Show filters & results</button>
+
     <div class="count-pill" id="resultsCount">0 results</div>
     <div class="status-pill" id="statusPill"></div>
 
-    <div class="fab-wrap">
+    <div class="fab-wrap" id="fabWrap">
       <button class="fab" id="postJobBtn">➕ Post a Job</button>
       <button class="fab secondary" id="locateBtn">📍 Center Map</button>
     </div>
@@ -987,8 +1034,7 @@
         responseTime: '22 min',
         projectsCompleted: 241,
         bio: 'Reliable plumbing contractor specializing in kitchens, baths, water heaters, and emergency repairs.',
-        tags: ['Licensed', 'Emergency Service', 'Water Heaters'],
-        bids: []
+        tags: ['Licensed', 'Emergency Service', 'Water Heaters']
       },
       {
         id: 2,
@@ -1007,8 +1053,7 @@
         responseTime: '38 min',
         projectsCompleted: 188,
         bio: 'Panel upgrades, recessed lighting, EV chargers, service calls, and new wiring installations.',
-        tags: ['Panels', 'Lighting', 'Wiring'],
-        bids: []
+        tags: ['Panels', 'Lighting', 'Wiring']
       },
       {
         id: 3,
@@ -1027,8 +1072,7 @@
         responseTime: '1 hr',
         projectsCompleted: 154,
         bio: 'Full tear-offs, repairs, leak investigation, architectural shingles, and flat roof work.',
-        tags: ['Shingles', 'Repairs', 'Flat Roofs'],
-        bids: []
+        tags: ['Shingles', 'Repairs', 'Flat Roofs']
       },
       {
         id: 4,
@@ -1047,8 +1091,7 @@
         responseTime: '45 min',
         projectsCompleted: 132,
         bio: 'Tile, luxury vinyl, hardwood, underlayment prep, and bathroom floor systems.',
-        tags: ['Tile', 'Hardwood', 'Vinyl'],
-        bids: []
+        tags: ['Tile', 'Hardwood', 'Vinyl']
       },
       {
         id: 5,
@@ -1067,8 +1110,7 @@
         responseTime: '27 min',
         projectsCompleted: 205,
         bio: 'Framing, trim, custom carpentry, built-ins, and renovation support for larger remodel projects.',
-        tags: ['Trim', 'Framing', 'Finish Work'],
-        bids: []
+        tags: ['Trim', 'Framing', 'Finish Work']
       },
       {
         id: 6,
@@ -1087,8 +1129,7 @@
         responseTime: '1 hr',
         projectsCompleted: 119,
         bio: 'Heating, cooling, mini-splits, thermostat upgrades, and maintenance plans.',
-        tags: ['Heating', 'Cooling', 'Mini Splits'],
-        bids: []
+        tags: ['Heating', 'Cooling', 'Mini Splits']
       },
       {
         id: 7,
@@ -1107,8 +1148,7 @@
         responseTime: '56 min',
         projectsCompleted: 111,
         bio: 'Drywall hanging, taping, patching, insulation upgrades, and renovation closures.',
-        tags: ['Sheetrock', 'Taping', 'Insulation'],
-        bids: []
+        tags: ['Sheetrock', 'Taping', 'Insulation']
       },
       {
         id: 8,
@@ -1127,8 +1167,7 @@
         responseTime: '42 min',
         projectsCompleted: 143,
         bio: 'Concrete pads, retaining walls, pavers, brickwork, and structural masonry repairs.',
-        tags: ['Block', 'Brick', 'Concrete'],
-        bids: []
+        tags: ['Block', 'Brick', 'Concrete']
       },
       {
         id: 9,
@@ -1147,8 +1186,7 @@
         responseTime: '15 min',
         projectsCompleted: 164,
         bio: 'Punch list repairs, installations, light carpentry, hardware swaps, and maintenance work.',
-        tags: ['Repairs', 'Punch List', 'Installations'],
-        bids: []
+        tags: ['Repairs', 'Punch List', 'Installations']
       },
       {
         id: 10,
@@ -1167,8 +1205,7 @@
         responseTime: '34 min',
         projectsCompleted: 97,
         bio: 'Kitchen renovations, cabinet installs, layout updates, trim-outs, and finish packages.',
-        tags: ['Kitchen Design', 'Cabinets', 'Millwork'],
-        bids: []
+        tags: ['Kitchen Design', 'Cabinets', 'Millwork']
       }
     ];
 
@@ -1278,19 +1315,27 @@
     let activeSort = 'distance';
     let activeId = null;
     let filteredItems = [];
+    let uiCollapsed = false;
     const markers = new Map();
 
-    const map = L.map('map', { zoomControl: false, attributionControl: true }).setView([40.8859, -74.0435], 11);
+    const map = L.map('map', {
+      zoomControl: false,
+      attributionControl: true
+    }).setView([40.8859, -74.0435], 11);
+
     L.control.zoom({ position: 'bottomright' }).addTo(map);
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
+    const app = document.getElementById('app');
     const cardsRow = document.getElementById('cardsRow');
     const resultsCount = document.getElementById('resultsCount');
     const resultsTitle = document.getElementById('resultsTitle');
     const statusPill = document.getElementById('statusPill');
+    const restoreUiBtn = document.getElementById('restoreUiBtn');
 
     const searchInput = document.getElementById('searchInput');
     const searchBtn = document.getElementById('searchBtn');
@@ -1327,6 +1372,22 @@
       statusPill.classList.add('show');
       clearTimeout(showStatus._timer);
       showStatus._timer = setTimeout(() => statusPill.classList.remove('show'), 2200);
+    }
+
+    function collapseUI() {
+      uiCollapsed = true;
+      app.classList.add('ui-collapsed');
+      restoreUiBtn.classList.add('show');
+    }
+
+    function expandUI() {
+      uiCollapsed = false;
+      app.classList.remove('ui-collapsed');
+      restoreUiBtn.classList.remove('show');
+    }
+
+    function ensureUIVisible() {
+      if (uiCollapsed) expandUI();
     }
 
     function getCurrentDataset() {
@@ -1372,6 +1433,7 @@
 
     function renderMarkers(items) {
       clearMarkers();
+
       items.forEach(item => {
         const marker = L.marker([item.lat, item.lng], {
           icon: makeIcon(item, item.id === activeId)
@@ -1380,6 +1442,7 @@
         marker.bindPopup(getPopupHtml(item));
 
         marker.on('click', () => {
+          ensureUIVisible();
           setActive(item.id, true);
           scrollCardIntoView(item.id);
         });
@@ -1392,6 +1455,7 @@
 
     function fitMapToItems(items) {
       if (!items.length) return;
+
       const bounds = L.latLngBounds(items.map(item => [item.lat, item.lng]));
       map.fitBounds(bounds, {
         paddingTopLeft: [30, 200],
@@ -1512,9 +1576,11 @@
 
     function setActive(id, panMap = false) {
       activeId = id;
+
       document.querySelectorAll('.listing-card[data-id]').forEach(card => {
         card.classList.toggle('active', Number(card.dataset.id) === id);
       });
+
       updateMarkerStates();
 
       const item = filteredItems.find(entry => entry.id === id);
@@ -1526,6 +1592,7 @@
     function scrollCardIntoView(id) {
       const target = [...document.querySelectorAll('.listing-card[data-id]')].find(card => Number(card.dataset.id) === id);
       if (!target) return;
+
       const left = target.offsetLeft - (cardsRow.clientWidth / 2) + (target.clientWidth / 2);
       cardsRow.scrollTo({ left, behavior: 'smooth' });
     }
@@ -1582,6 +1649,7 @@
     }
 
     function openJobModal() {
+      ensureUIVisible();
       jobModal.classList.add('show');
     }
 
@@ -1626,9 +1694,11 @@
       currentMode = 'contractor';
       homeownerModeBtn.classList.remove('active');
       contractorModeBtn.classList.add('active');
+
       closeJobForm();
       clearJobForm();
       applyFilters();
+      ensureUIVisible();
       showStatus('Job posted and now visible in Contractor View');
     }
 
@@ -1643,6 +1713,8 @@
 
     function openDetailModal(item) {
       if (!item) return;
+
+      ensureUIVisible();
       detailModal.classList.add('show');
 
       if (item.type === 'contractor') {
@@ -1714,6 +1786,7 @@
         if (demoBidBtn) {
           demoBidBtn.addEventListener('click', () => submitDemoBid(item.id));
         }
+
         const closeSecondary = document.getElementById('detailCloseSecondary');
         if (closeSecondary) {
           closeSecondary.addEventListener('click', closeDetails);
@@ -1728,14 +1801,17 @@
     function submitDemoBid(jobId) {
       const job = jobs.find(entry => entry.id === jobId);
       if (!job) return;
+
       const contractor = contractors[(job.bids.length + 2) % contractors.length];
       const baseNumber = 4500 + (job.bids.length * 1250);
+
       job.bids.push({
         contractor: contractor.name,
         amount: `$${baseNumber.toLocaleString()}`,
         eta: `Start in ${job.bids.length + 1} week${job.bids.length + 1 === 1 ? '' : 's'}`,
         rating: contractor.rating
       });
+
       applyFilters();
       openDetailModal(job);
       showStatus('Demo bid submitted');
@@ -1765,16 +1841,35 @@
       homeownerModeBtn.classList.toggle('active', mode === 'homeowner');
       contractorModeBtn.classList.toggle('active', mode === 'contractor');
       applyFilters();
+      ensureUIVisible();
     }
 
-    searchBtn.addEventListener('click', applyFilters);
-    searchInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter') applyFilters();
+    searchBtn.addEventListener('click', () => {
+      applyFilters();
+      ensureUIVisible();
     });
 
-    tradeFilter.addEventListener('change', applyFilters);
-    distanceFilter.addEventListener('change', applyFilters);
-    ratingFilter.addEventListener('change', applyFilters);
+    searchInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        applyFilters();
+        ensureUIVisible();
+      }
+    });
+
+    tradeFilter.addEventListener('change', () => {
+      applyFilters();
+      ensureUIVisible();
+    });
+
+    distanceFilter.addEventListener('change', () => {
+      applyFilters();
+      ensureUIVisible();
+    });
+
+    ratingFilter.addEventListener('change', () => {
+      applyFilters();
+      ensureUIVisible();
+    });
 
     sortDistanceBtn.addEventListener('click', () => setSort('distance'));
     sortRatingBtn.addEventListener('click', () => setSort('rating'));
@@ -1785,16 +1880,25 @@
       distanceFilter.value = '100';
       ratingFilter.value = '0';
       setSort('distance');
+      ensureUIVisible();
     });
 
     homeownerModeBtn.addEventListener('click', () => setMode('homeowner'));
     contractorModeBtn.addEventListener('click', () => setMode('contractor'));
 
-    scrollLeftBtn.addEventListener('click', () => cardsRow.scrollBy({ left: -340, behavior: 'smooth' }));
-    scrollRightBtn.addEventListener('click', () => cardsRow.scrollBy({ left: 340, behavior: 'smooth' }));
+    scrollLeftBtn.addEventListener('click', () => {
+      ensureUIVisible();
+      cardsRow.scrollBy({ left: -340, behavior: 'smooth' });
+    });
+
+    scrollRightBtn.addEventListener('click', () => {
+      ensureUIVisible();
+      cardsRow.scrollBy({ left: 340, behavior: 'smooth' });
+    });
 
     locateBtn.addEventListener('click', () => {
       fitMapToItems(filteredItems);
+      ensureUIVisible();
       showStatus('Map recentered');
     });
 
@@ -1803,26 +1907,37 @@
     cancelJobBtn.addEventListener('click', closeJobForm);
     submitJobBtn.addEventListener('click', createJobFromForm);
 
+    restoreUiBtn.addEventListener('click', expandUI);
+
     closeDetailModal.addEventListener('click', closeDetails);
+
     detailModal.addEventListener('click', e => {
       if (e.target === detailModal) closeDetails();
     });
+
     jobModal.addEventListener('click', e => {
       if (e.target === jobModal) closeJobForm();
     });
 
     cardsRow.addEventListener('click', e => {
+      ensureUIVisible();
+
       const button = e.target.closest('[data-action]');
       if (button) {
         e.stopPropagation();
         handleCardAction(button.dataset.action, Number(button.dataset.id));
         return;
       }
+
       const card = e.target.closest('.listing-card[data-id]');
       if (card) {
         setActive(Number(card.dataset.id), true);
       }
     });
+
+    cardsRow.addEventListener('touchstart', ensureUIVisible, { passive: true });
+    cardsRow.addEventListener('mousedown', ensureUIVisible);
+    searchInput.addEventListener('focus', ensureUIVisible);
 
     let scrollTimer = null;
     cardsRow.addEventListener('scroll', () => {
@@ -1830,8 +1945,10 @@
       scrollTimer = setTimeout(() => {
         const cards = [...document.querySelectorAll('.listing-card[data-id]')];
         if (!cards.length) return;
+
         const rowRect = cardsRow.getBoundingClientRect();
         const rowCenter = rowRect.left + rowRect.width / 2;
+
         let closestId = null;
         let closestDiff = Infinity;
 
@@ -1839,6 +1956,7 @@
           const rect = card.getBoundingClientRect();
           const center = rect.left + rect.width / 2;
           const diff = Math.abs(center - rowCenter);
+
           if (diff < closestDiff) {
             closestDiff = diff;
             closestId = Number(card.dataset.id);
@@ -1849,6 +1967,14 @@
           setActive(closestId, true);
         }
       }, 70);
+    });
+
+    map.on('click', () => {
+      if (!uiCollapsed) {
+        collapseUI();
+      } else {
+        expandUI();
+      }
     });
 
     window.addEventListener('resize', () => {
