@@ -1970,11 +1970,23 @@ projectRoomModal.addEventListener('click', e => {
       ensureUIVisible();
 
       const button = e.target.closest('[data-action]');
-      if (button) {
-        e.stopPropagation();
-        handleCardAction(button.dataset.action, Number(button.dataset.id));
-        return;
-      }
+
+if (button) {
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  const action = button.dataset.action;
+  const id = Number(button.dataset.id);
+
+  if (action === "bid") {
+    openProjectRoom(id);
+    return;
+  }
+
+  handleCardAction(action, id);
+  return;
+}
 
       const card = e.target.closest('.listing-card[data-id]');
       if (card) {
