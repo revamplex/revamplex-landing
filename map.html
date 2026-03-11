@@ -974,7 +974,15 @@
       <h2 class="modal-title" id="projectRoomTitle">Project Room</h2>
       <button class="close-btn" id="closeProjectRoomModal">×</button>
     </div>
+closeProjectRoomModal.addEventListener('click', () => {
+  projectRoomModal.classList.remove('show');
+});
 
+projectRoomModal.addEventListener('click', e => {
+  if (e.target === projectRoomModal) {
+    projectRoomModal.classList.remove('show');
+  }
+});
     <div style="display:grid; grid-template-columns: 320px 1fr; gap:16px;">
       
       <div class="detail-panel" id="projectRoomSidebar">
@@ -1871,8 +1879,8 @@ function openProjectRoom(jobId) {
       }
 
       if (action === 'bid') {
-        submitDemoBid(id);
-      }
+  openProjectRoom(id);
+}
     }
 
     function setMode(mode) {
