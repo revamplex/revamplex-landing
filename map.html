@@ -2,11 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-  />
-  <title>Revamp Properties Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Revamp Map v3</title>
 
   <link
     rel="stylesheet"
@@ -19,18 +16,18 @@
     :root {
       --brand: #f97316;
       --brand-dark: #ea580c;
+      --brand-soft: rgba(249, 115, 22, 0.12);
       --bg: #f8fafc;
-      --card: #ffffff;
+      --card: rgba(255, 255, 255, 0.96);
       --text: #0f172a;
       --muted: #64748b;
-      --border: rgba(15, 23, 42, 0.08);
-      --shadow: 0 10px 30px rgba(15, 23, 42, 0.14);
-      --shadow-soft: 0 8px 20px rgba(15, 23, 42, 0.10);
-      --radius-xl: 22px;
+      --line: rgba(15, 23, 42, 0.08);
+      --shadow: 0 18px 42px rgba(15, 23, 42, 0.16);
+      --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.1);
+      --radius-xl: 24px;
       --radius-lg: 18px;
       --radius-md: 14px;
-      --topbar-height: 118px;
-      --results-height: 210px;
+      --radius-sm: 12px;
     }
 
     * {
@@ -40,128 +37,25 @@
 
     html, body {
       margin: 0;
-      padding: 0;
       width: 100%;
       height: 100%;
+      overflow: hidden;
       font-family: Inter, Arial, Helvetica, sans-serif;
       background: var(--bg);
       color: var(--text);
-      overflow: hidden;
     }
 
-    body {
-      position: relative;
+    button, input, select, textarea {
+      font: inherit;
     }
 
     #app {
+      position: relative;
       width: 100%;
       height: 100%;
-      position: relative;
       overflow: hidden;
     }
 
-    /* TOP BAR */
-    .topbar {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      padding: 12px 12px 10px;
-      pointer-events: none;
-    }
-
-    .topbar-inner {
-      pointer-events: auto;
-      background: rgba(255, 255, 255, 0.92);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.7);
-      box-shadow: var(--shadow-soft);
-      border-radius: 24px;
-      padding: 12px;
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-
-    .search-row {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .search-box {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 0 14px;
-      height: 50px;
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
-    }
-
-    .search-box input {
-      border: none;
-      outline: none;
-      width: 100%;
-      background: transparent;
-      font-size: 15px;
-      color: var(--text);
-    }
-
-    .search-btn {
-      border: none;
-      outline: none;
-      height: 50px;
-      padding: 0 18px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
-      color: #fff;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 8px 20px rgba(249, 115, 22, 0.28);
-      white-space: nowrap;
-    }
-
-    .filter-row {
-      display: flex;
-      gap: 10px;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-
-    .filter-row::-webkit-scrollbar {
-      display: none;
-    }
-
-    .filter-pill,
-    .filter-select {
-      height: 42px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #fff;
-      color: var(--text);
-      padding: 0 14px;
-      font-size: 14px;
-      font-weight: 600;
-      outline: none;
-      cursor: pointer;
-      white-space: nowrap;
-      flex: 0 0 auto;
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
-    }
-
-    .filter-pill.active {
-      background: rgba(249, 115, 22, 0.12);
-      border-color: rgba(249, 115, 22, 0.35);
-      color: var(--brand-dark);
-    }
-
-    /* MAP */
     #map {
       position: absolute;
       inset: 0;
@@ -174,78 +68,219 @@
       background: #dbeafe;
     }
 
-    /* FLOATING RESULT COUNT */
-    .results-count {
+    .topbar {
       position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 12px;
+      pointer-events: none;
+    }
+
+    .topbar-inner {
+      pointer-events: auto;
+      max-width: 1180px;
+      margin: 0 auto;
+      border-radius: 26px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(255, 255, 255, 0.75);
+    }
+
+    .search-row,
+    .mode-row,
+    .filter-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .search-row {
+      margin-bottom: 10px;
+    }
+
+    .mode-row {
+      margin-bottom: 10px;
+    }
+
+    .filter-row {
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .filter-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .search-box {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 52px;
+      border-radius: 18px;
+      padding: 0 15px;
+      background: #fff;
+      border: 1px solid var(--line);
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.04);
+    }
+
+    .search-box input {
+      width: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--text);
+      font-size: 15px;
+    }
+
+    .search-btn,
+    .mode-btn,
+    .filter-pill,
+    .filter-select,
+    .action-btn,
+    .mini-btn,
+    .fab,
+    .modal-btn,
+    .bid-btn,
+    .close-btn {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .search-btn {
+      height: 52px;
+      padding: 0 18px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+      color: white;
+      font-weight: 800;
+      box-shadow: 0 10px 22px rgba(249, 115, 22, 0.28);
+    }
+
+    .mode-btn {
+      flex: 1;
+      height: 44px;
+      border-radius: 14px;
+      background: #fff;
+      border: 1px solid var(--line);
+      font-weight: 800;
+      color: var(--text);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+    }
+
+    .mode-btn.active {
+      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+      color: white;
+      box-shadow: 0 8px 18px rgba(249, 115, 22, 0.24);
+    }
+
+    .filter-select,
+    .filter-pill {
+      flex: 0 0 auto;
+      height: 42px;
+      border-radius: 999px;
+      padding: 0 14px;
+      background: #fff;
+      border: 1px solid var(--line);
+      color: var(--text);
+      font-weight: 700;
+      white-space: nowrap;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+    }
+
+    .filter-pill.active {
+      background: var(--brand-soft);
+      color: var(--brand-dark);
+      border-color: rgba(249, 115, 22, 0.28);
+    }
+
+    .count-pill,
+    .status-pill {
+      position: absolute;
+      z-index: 950;
       left: 50%;
       transform: translateX(-50%);
-      top: calc(var(--topbar-height) + 10px);
-      z-index: 900;
-      background: rgba(15, 23, 42, 0.82);
-      color: #fff;
-      padding: 10px 16px;
       border-radius: 999px;
+      padding: 10px 15px;
+      background: rgba(15, 23, 42, 0.82);
+      color: white;
       font-size: 13px;
-      font-weight: 700;
-      backdrop-filter: blur(8px);
+      font-weight: 800;
+      backdrop-filter: blur(10px);
       box-shadow: var(--shadow-soft);
       pointer-events: none;
     }
 
-    /* HORIZONTAL BOTTOM RESULTS */
+    .count-pill {
+      top: 182px;
+    }
+
+    .status-pill {
+      top: 224px;
+      background: rgba(249, 115, 22, 0.9);
+      display: none;
+    }
+
+    .status-pill.show {
+      display: block;
+    }
+
     .results-shell {
       position: absolute;
       left: 0;
       right: 0;
       bottom: 0;
-      z-index: 950;
-      pointer-events: none;
+      z-index: 960;
       padding: 0 0 16px;
+      pointer-events: none;
     }
 
     .results-shell-inner {
-      pointer-events: none;
       max-width: 1400px;
       margin: 0 auto;
     }
 
     .results-header {
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
+      gap: 12px;
       padding: 0 16px 10px;
       pointer-events: none;
     }
 
     .results-title {
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.7);
+      pointer-events: auto;
       border-radius: 999px;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.8);
       padding: 8px 14px;
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 800;
       box-shadow: var(--shadow-soft);
-      pointer-events: auto;
+      backdrop-filter: blur(10px);
     }
 
-    .results-arrows {
+    .results-actions {
       display: flex;
       gap: 8px;
       pointer-events: auto;
     }
 
-    .arrow-btn {
+    .action-btn {
       width: 42px;
       height: 42px;
       border-radius: 999px;
-      border: none;
-      background: rgba(255,255,255,0.94);
+      background: rgba(255, 255, 255, 0.95);
       box-shadow: var(--shadow-soft);
-      font-size: 18px;
-      font-weight: 700;
-      cursor: pointer;
       color: var(--text);
+      font-size: 18px;
+      font-weight: 900;
     }
 
     .cards-row {
@@ -264,30 +299,29 @@
       display: none;
     }
 
-    .contractor-card {
-      flex: 0 0 320px;
-      max-width: 320px;
-      min-height: 180px;
-      background: rgba(255,255,255,0.96);
-      backdrop-filter: blur(14px);
-      border: 1px solid rgba(255,255,255,0.8);
-      border-radius: var(--radius-xl);
+    .listing-card {
+      flex: 0 0 340px;
+      max-width: 340px;
+      min-height: 236px;
+      border-radius: 24px;
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.85);
       box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
       scroll-snap-align: center;
       overflow: hidden;
       transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
       cursor: pointer;
     }
 
-    .contractor-card.active {
+    .listing-card.active {
       transform: translateY(-6px);
-      box-shadow: 0 18px 38px rgba(249, 115, 22, 0.22);
-      border-color: rgba(249, 115, 22, 0.28);
+      border-color: rgba(249, 115, 22, 0.3);
+      box-shadow: 0 18px 44px rgba(249, 115, 22, 0.2);
     }
 
     .card-top {
       display: flex;
-      align-items: flex-start;
       justify-content: space-between;
       gap: 12px;
       padding: 16px 16px 10px;
@@ -297,31 +331,31 @@
       min-width: 0;
     }
 
-    .card-name {
+    .card-title {
+      margin: 0 0 6px;
       font-size: 18px;
       line-height: 1.2;
-      font-weight: 800;
-      margin: 0 0 6px;
+      font-weight: 900;
     }
 
     .card-sub {
-      font-size: 13px;
-      color: var(--muted);
       margin: 0;
+      color: var(--muted);
+      font-size: 13px;
     }
 
     .rating-pill {
-      background: rgba(15, 23, 42, 0.06);
-      color: var(--text);
       border-radius: 999px;
       padding: 8px 10px;
+      background: rgba(15, 23, 42, 0.06);
       font-size: 13px;
-      font-weight: 800;
+      font-weight: 900;
       white-space: nowrap;
+      height: fit-content;
     }
 
     .card-body {
-      padding: 0 16px 14px;
+      padding: 0 16px 16px;
     }
 
     .meta-grid {
@@ -332,41 +366,55 @@
     }
 
     .meta-box {
-      background: #f8fafc;
-      border: 1px solid var(--border);
       border-radius: 14px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
       padding: 10px 12px;
     }
 
     .meta-label {
+      margin-bottom: 4px;
+      color: var(--muted);
       font-size: 11px;
+      font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      color: var(--muted);
-      margin-bottom: 4px;
-      font-weight: 700;
     }
 
     .meta-value {
       font-size: 14px;
-      font-weight: 800;
-      color: var(--text);
+      font-weight: 900;
     }
 
-    .tags {
+    .badge-row,
+    .info-row,
+    .bid-list {
       display: flex;
-      gap: 8px;
       flex-wrap: wrap;
-      margin-bottom: 14px;
+      gap: 8px;
     }
 
-    .tag {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--brand-dark);
-      background: rgba(249, 115, 22, 0.1);
-      padding: 7px 10px;
+    .badge-row {
+      margin-bottom: 12px;
+    }
+
+    .badge {
       border-radius: 999px;
+      padding: 7px 10px;
+      background: var(--brand-soft);
+      color: var(--brand-dark);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .info-row {
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .info-row strong {
+      color: var(--text);
     }
 
     .card-actions {
@@ -374,48 +422,243 @@
       gap: 10px;
     }
 
-    .btn-primary,
-    .btn-secondary {
+    .mini-btn {
       flex: 1;
       height: 42px;
       border-radius: 14px;
       font-size: 14px;
-      font-weight: 800;
-      cursor: pointer;
+      font-weight: 900;
     }
 
-    .btn-primary {
-      border: none;
-      color: #fff;
+    .mini-btn.primary {
       background: linear-gradient(135deg, var(--brand), var(--brand-dark));
-      box-shadow: 0 10px 20px rgba(249, 115, 22, 0.22);
+      color: white;
+      box-shadow: 0 10px 20px rgba(249, 115, 22, 0.2);
     }
 
-    .btn-secondary {
-      border: 1px solid var(--border);
-      background: #fff;
+    .mini-btn.secondary {
+      background: white;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .fab-wrap {
+      position: absolute;
+      right: 18px;
+      bottom: 236px;
+      z-index: 980;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .fab {
+      height: 52px;
+      border-radius: 999px;
+      padding: 0 18px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+      color: white;
+      font-weight: 900;
+      box-shadow: 0 14px 28px rgba(249, 115, 22, 0.28);
+    }
+
+    .fab.secondary {
+      background: rgba(15, 23, 42, 0.88);
+      box-shadow: 0 12px 26px rgba(15, 23, 42, 0.22);
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(15, 23, 42, 0.56);
+      backdrop-filter: blur(6px);
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-card {
+      width: min(520px, 100%);
+      max-height: min(88vh, 820px);
+      overflow: auto;
+      border-radius: 24px;
+      background: white;
+      box-shadow: 0 26px 60px rgba(15, 23, 42, 0.28);
+      padding: 20px;
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .modal-title {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    .close-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      color: var(--text);
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    .label {
+      font-size: 13px;
+      font-weight: 800;
       color: var(--text);
     }
 
-    /* CUSTOM MAP PIN */
-    .custom-pin {
+    .input,
+    .textarea,
+    .select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 13px;
+      background: white;
+      color: var(--text);
+      outline: none;
+    }
+
+    .textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .modal-btn {
+      flex: 1;
+      height: 46px;
+      border-radius: 14px;
+      font-weight: 900;
+    }
+
+    .modal-btn.primary {
+      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+      color: white;
+    }
+
+    .modal-btn.secondary {
+      background: white;
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+
+    .detail-modal .modal-card {
+      width: min(680px, 100%);
+    }
+
+    .detail-stack {
+      display: grid;
+      gap: 12px;
+    }
+
+    .detail-panel {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: #f8fafc;
+    }
+
+    .detail-panel h4 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .detail-panel p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .bid-item {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: white;
+    }
+
+    .bid-item-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .bid-item-title {
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .bid-item-sub {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .map-pin {
       width: 20px;
       height: 20px;
-      background: var(--brand);
-      border: 3px solid #fff;
       border-radius: 50%;
-      box-shadow: 0 8px 18px rgba(249, 115, 22, 0.35);
+      background: var(--brand);
+      border: 3px solid white;
+      box-shadow: 0 10px 22px rgba(249, 115, 22, 0.34);
     }
 
-    .custom-pin.active {
-      width: 26px;
-      height: 26px;
+    .map-pin.contractor {
+      background: var(--brand);
+    }
+
+    .map-pin.job {
       background: #0f172a;
-      border: 4px solid #fff;
-      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.35);
+      box-shadow: 0 10px 22px rgba(15, 23, 42, 0.34);
     }
 
-    /* MAP POPUP */
+    .map-pin.active {
+      width: 27px;
+      height: 27px;
+      border-width: 4px;
+    }
+
     .leaflet-popup-content-wrapper {
       border-radius: 16px;
       box-shadow: var(--shadow-soft);
@@ -426,52 +669,39 @@
       font-family: Inter, Arial, Helvetica, sans-serif;
     }
 
-    .popup-name {
+    .popup-title {
       font-size: 15px;
-      font-weight: 800;
+      font-weight: 900;
       margin-bottom: 6px;
     }
 
-    .popup-meta {
+    .popup-sub {
       font-size: 13px;
       color: var(--muted);
       margin-bottom: 4px;
     }
 
     @media (max-width: 900px) {
-      :root {
-        --topbar-height: 122px;
-      }
-
-      .topbar {
-        padding: 10px 10px 8px;
-      }
-
-      .topbar-inner {
-        padding: 10px;
-        border-radius: 20px;
-      }
-
-      .search-row {
-        margin-bottom: 8px;
-      }
-
-      .search-btn {
-        padding: 0 15px;
-      }
-
-      .contractor-card {
-        flex: 0 0 290px;
-        max-width: 290px;
+      .count-pill { top: 192px; }
+      .status-pill { top: 234px; }
+      .listing-card {
+        flex-basis: 306px;
+        max-width: 306px;
       }
     }
 
     @media (max-width: 640px) {
-      :root {
-        --topbar-height: 128px;
+      .topbar {
+        padding: 10px;
       }
 
-      .search-row {
+      .topbar-inner {
+        border-radius: 22px;
+        padding: 10px;
+      }
+
+      .search-row,
+      .mode-row {
         gap: 8px;
       }
 
@@ -480,20 +710,19 @@
         height: 48px;
       }
 
-      .search-btn {
-        font-size: 14px;
-      }
-
-      .filter-pill,
-      .filter-select {
-        height: 40px;
+      .mode-btn {
+        height: 42px;
         font-size: 13px;
       }
 
-      .results-count {
-        top: calc(var(--topbar-height) + 8px);
+      .count-pill {
+        top: 186px;
         font-size: 12px;
-        padding: 9px 14px;
+      }
+
+      .status-pill {
+        top: 226px;
+        font-size: 12px;
       }
 
       .results-header {
@@ -501,65 +730,94 @@
       }
 
       .cards-row {
-        padding: 0 12px 6px;
         gap: 12px;
+        padding: 0 12px 6px;
       }
 
-      .contractor-card {
+      .listing-card {
         flex: 0 0 84vw;
         max-width: 84vw;
-        min-height: 176px;
       }
 
-      .card-name {
-        font-size: 17px;
+      .fab-wrap {
+        right: 12px;
+        bottom: 228px;
       }
 
-      .meta-grid {
-        gap: 8px;
+      .fab {
+        height: 48px;
+        padding: 0 15px;
+        font-size: 13px;
       }
 
-      .btn-primary,
-      .btn-secondary {
-        height: 40px;
+      .modal-card {
+        padding: 16px;
+        border-radius: 20px;
+      }
+
+      .modal-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
 <body>
   <div id="app">
-    <!-- TOP FILTER BAR -->
     <div class="topbar">
       <div class="topbar-inner">
         <div class="search-row">
           <div class="search-box">
             <span>🔍</span>
-            <input
-              id="searchInput"
-              type="text"
-              placeholder="Search contractors, trades, city..."
-            />
+            <input id="searchInput" type="text" placeholder="Search contractors, jobs, trades, city..." />
           </div>
           <button class="search-btn" id="searchBtn">Search</button>
+        </div>
+
+        <div class="mode-row">
+          <button class="mode-btn active" id="homeownerMode">🏠 Homeowner View</button>
+          <button class="mode-btn" id="contractorMode">🛠 Contractor View</button>
         </div>
 
         <div class="filter-row">
           <select id="tradeFilter" class="filter-select">
             <option value="all">All Trades</option>
-            <option value="Carpentry">Carpentry</option>
-            <option value="Plumbing">Plumbing</option>
-            <option value="Electrical">Electrical</option>
-            <option value="HVAC">HVAC</option>
-            <option value="Painting">Painting</option>
-            <option value="Masonry">Masonry</option>
-            <option value="Roofing">Roofing</option>
-            <option value="Flooring">Flooring</option>
-            <option value="Drywall">Drywall</option>
-            <option value="Siding">Siding</option>
-            <option value="Landscaping">Landscaping</option>
-            <option value="Glazing">Glazing</option>
-            <option value="Cabinetry">Cabinetry</option>
-            <option value="Handyman">Handyman</option>
+            <option>Kitchen Renovation</option>
+            <option>Bathroom Renovation</option>
+            <option>Additions & Remodeling</option>
+            <option>General Contractors</option>
+            <option>Carpentry</option>
+            <option>Concrete & Masonry</option>
+            <option>Decks & Porches</option>
+            <option>Doors</option>
+            <option>Drywall & Insulation</option>
+            <option>Electrical</option>
+            <option>Fencing</option>
+            <option>Flooring</option>
+            <option>Garage Doors</option>
+            <option>Glass & Mirrors</option>
+            <option>Gutters</option>
+            <option>Handyman Services</option>
+            <option>HVAC</option>
+            <option>Junk Removal</option>
+            <option>Land Surveying</option>
+            <option>Landscaping</option>
+            <option>Lawn Care</option>
+            <option>Locksmith</option>
+            <option>Painting</option>
+            <option>Patios</option>
+            <option>Pest Control</option>
+            <option>Plumbing</option>
+            <option>Pools & Spas</option>
+            <option>Pressure Washing</option>
+            <option>Roofing</option>
+            <option>Septic Systems</option>
+            <option>Siding</option>
+            <option>Solar</option>
+            <option>Sunrooms</option>
+            <option>Tile & Stone</option>
+            <option>Tree Services</option>
+            <option>Water Damage Restoration</option>
+            <option>Windows</option>
           </select>
 
           <select id="distanceFilter" class="filter-select">
@@ -584,24 +842,83 @@
       </div>
     </div>
 
-    <!-- MAP -->
     <div id="map"></div>
 
-    <!-- RESULT COUNT -->
-    <div class="results-count" id="resultsCount">0 contractors found</div>
+    <div class="count-pill" id="resultsCount">0 results</div>
+    <div class="status-pill" id="statusPill"></div>
 
-    <!-- BOTTOM HORIZONTAL RESULTS -->
+    <div class="fab-wrap">
+      <button class="fab" id="postJobBtn">➕ Post a Job</button>
+      <button class="fab secondary" id="locateBtn">📍 Center Map</button>
+    </div>
+
     <div class="results-shell">
       <div class="results-shell-inner">
         <div class="results-header">
-          <div class="results-title">Swipe left ↔ right to browse results</div>
-          <div class="results-arrows">
-            <button class="arrow-btn" id="scrollLeftBtn">‹</button>
-            <button class="arrow-btn" id="scrollRightBtn">›</button>
+          <div class="results-title" id="resultsTitle">Swipe left ↔ right to browse contractors</div>
+          <div class="results-actions">
+            <button class="action-btn" id="scrollLeftBtn">‹</button>
+            <button class="action-btn" id="scrollRightBtn">›</button>
           </div>
         </div>
         <div class="cards-row" id="cardsRow"></div>
       </div>
+    </div>
+  </div>
+
+  <div class="modal" id="jobModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 class="modal-title">Post a Job</h2>
+        <button class="close-btn" id="closeJobModal">×</button>
+      </div>
+
+      <div class="modal-grid">
+        <div class="field full">
+          <label class="label" for="jobTitle">Project title</label>
+          <input class="input" id="jobTitle" placeholder="Kitchen Renovation" />
+        </div>
+
+        <div class="field">
+          <label class="label" for="jobTrade">Trade</label>
+          <select class="select" id="jobTrade"></select>
+        </div>
+
+        <div class="field">
+          <label class="label" for="jobBudget">Budget</label>
+          <input class="input" id="jobBudget" placeholder="$12,000" />
+        </div>
+
+        <div class="field">
+          <label class="label" for="jobCustomer">Customer name</label>
+          <input class="input" id="jobCustomer" placeholder="John D." />
+        </div>
+
+        <div class="field">
+          <label class="label" for="jobCity">City</label>
+          <input class="input" id="jobCity" placeholder="Hackensack, NJ" />
+        </div>
+
+        <div class="field full">
+          <label class="label" for="jobDescription">Project description</label>
+          <textarea class="textarea" id="jobDescription" placeholder="Describe the project scope, materials, timing, and any special details..."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="modal-btn primary" id="submitJobBtn">Post Job</button>
+        <button class="modal-btn secondary" id="cancelJobBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal detail-modal" id="detailModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 class="modal-title" id="detailTitle">Details</h2>
+        <button class="close-btn" id="closeDetailModal">×</button>
+      </div>
+      <div class="detail-stack" id="detailContent"></div>
     </div>
   </div>
 
@@ -612,166 +929,420 @@
   ></script>
 
   <script>
-    /***************************************************************
-     * REPLACE THIS ARRAY WITH YOUR REAL CONTRACTOR DATA
-     * You can later pull this from Supabase / API / database.
-     ***************************************************************/
+    const TRADE_OPTIONS = [
+      'Kitchen Renovation',
+      'Bathroom Renovation',
+      'Additions & Remodeling',
+      'General Contractors',
+      'Carpentry',
+      'Concrete & Masonry',
+      'Decks & Porches',
+      'Doors',
+      'Drywall & Insulation',
+      'Electrical',
+      'Fencing',
+      'Flooring',
+      'Garage Doors',
+      'Glass & Mirrors',
+      'Gutters',
+      'Handyman Services',
+      'HVAC',
+      'Junk Removal',
+      'Land Surveying',
+      'Landscaping',
+      'Lawn Care',
+      'Locksmith',
+      'Painting',
+      'Patios',
+      'Pest Control',
+      'Plumbing',
+      'Pools & Spas',
+      'Pressure Washing',
+      'Roofing',
+      'Septic Systems',
+      'Siding',
+      'Solar',
+      'Sunrooms',
+      'Tile & Stone',
+      'Tree Services',
+      'Water Damage Restoration',
+      'Windows'
+    ];
+
     const contractors = [
       {
         id: 1,
-        name: "Elite Plumbing & Drain",
-        trade: "Plumbing",
+        type: 'contractor',
+        name: 'Elite Plumbing & Drain',
+        trade: 'Plumbing',
         rating: 4.9,
+        reviews: 127,
         distance: 2.3,
-        city: "Hackensack, NJ",
+        city: 'Hackensack, NJ',
         lat: 40.8859,
         lng: -74.0435,
-        price: "$$",
-        tags: ["Licensed", "Emergency Service", "Water Heaters"]
+        price: '$$',
+        licensed: true,
+        insured: true,
+        responseTime: '22 min',
+        projectsCompleted: 241,
+        bio: 'Reliable plumbing contractor specializing in kitchens, baths, water heaters, and emergency repairs.',
+        tags: ['Licensed', 'Emergency Service', 'Water Heaters'],
+        bids: []
       },
       {
         id: 2,
-        name: "Precision Electrical NJ",
-        trade: "Electrical",
+        type: 'contractor',
+        name: 'Precision Electrical NJ',
+        trade: 'Electrical',
         rating: 4.8,
+        reviews: 93,
         distance: 3.1,
-        city: "Teaneck, NJ",
+        city: 'Teaneck, NJ',
         lat: 40.8976,
         lng: -74.0159,
-        price: "$$",
-        tags: ["Panels", "Lighting", "Wiring"]
+        price: '$$',
+        licensed: true,
+        insured: true,
+        responseTime: '38 min',
+        projectsCompleted: 188,
+        bio: 'Panel upgrades, recessed lighting, EV chargers, service calls, and new wiring installations.',
+        tags: ['Panels', 'Lighting', 'Wiring'],
+        bids: []
       },
       {
         id: 3,
-        name: "North Jersey Roofing Pros",
-        trade: "Roofing",
+        type: 'contractor',
+        name: 'North Jersey Roofing Pros',
+        trade: 'Roofing',
         rating: 4.7,
+        reviews: 81,
         distance: 6.2,
-        city: "Paramus, NJ",
+        city: 'Paramus, NJ',
         lat: 40.9445,
         lng: -74.0754,
-        price: "$$$",
-        tags: ["Shingles", "Repairs", "Flat Roofs"]
+        price: '$$$',
+        licensed: true,
+        insured: true,
+        responseTime: '1 hr',
+        projectsCompleted: 154,
+        bio: 'Full tear-offs, repairs, leak investigation, architectural shingles, and flat roof work.',
+        tags: ['Shingles', 'Repairs', 'Flat Roofs'],
+        bids: []
       },
       {
         id: 4,
-        name: "Metro Tile & Flooring",
-        trade: "Flooring",
+        type: 'contractor',
+        name: 'Metro Tile & Flooring',
+        trade: 'Flooring',
         rating: 4.6,
+        reviews: 66,
         distance: 4.4,
-        city: "Lodi, NJ",
+        city: 'Lodi, NJ',
         lat: 40.8765,
         lng: -74.0835,
-        price: "$$",
-        tags: ["Tile", "Hardwood", "Vinyl"]
+        price: '$$',
+        licensed: true,
+        insured: true,
+        responseTime: '45 min',
+        projectsCompleted: 132,
+        bio: 'Tile, luxury vinyl, hardwood, underlayment prep, and bathroom floor systems.',
+        tags: ['Tile', 'Hardwood', 'Vinyl'],
+        bids: []
       },
       {
         id: 5,
-        name: "Garden State Carpentry",
-        trade: "Carpentry",
+        type: 'contractor',
+        name: 'Garden State Carpentry',
+        trade: 'Carpentry',
         rating: 4.9,
+        reviews: 101,
         distance: 7.5,
-        city: "Ridgefield Park, NJ",
+        city: 'Ridgefield Park, NJ',
         lat: 40.8579,
         lng: -74.0229,
-        price: "$$$",
-        tags: ["Trim", "Framing", "Finish Work"]
+        price: '$$$',
+        licensed: true,
+        insured: true,
+        responseTime: '27 min',
+        projectsCompleted: 205,
+        bio: 'Framing, trim, custom carpentry, built-ins, and renovation support for larger remodel projects.',
+        tags: ['Trim', 'Framing', 'Finish Work'],
+        bids: []
       },
       {
         id: 6,
-        name: "Everest HVAC Systems",
-        trade: "HVAC",
+        type: 'contractor',
+        name: 'Everest HVAC Systems',
+        trade: 'HVAC',
         rating: 4.5,
+        reviews: 58,
         distance: 9.1,
-        city: "Fort Lee, NJ",
+        city: 'Fort Lee, NJ',
         lat: 40.8509,
         lng: -73.9701,
-        price: "$$$",
-        tags: ["Heating", "Cooling", "Mini Splits"]
+        price: '$$$',
+        licensed: true,
+        insured: true,
+        responseTime: '1 hr',
+        projectsCompleted: 119,
+        bio: 'Heating, cooling, mini-splits, thermostat upgrades, and maintenance plans.',
+        tags: ['Heating', 'Cooling', 'Mini Splits'],
+        bids: []
       },
       {
         id: 7,
-        name: "Hudson Drywall & Insulation",
-        trade: "Drywall",
+        type: 'contractor',
+        name: 'Hudson Drywall & Insulation',
+        trade: 'Drywall & Insulation',
         rating: 4.4,
+        reviews: 49,
         distance: 5.8,
-        city: "Clifton, NJ",
+        city: 'Clifton, NJ',
         lat: 40.8584,
         lng: -74.1638,
-        price: "$$",
-        tags: ["Sheetrock", "Taping", "Insulation"]
+        price: '$$',
+        licensed: true,
+        insured: true,
+        responseTime: '56 min',
+        projectsCompleted: 111,
+        bio: 'Drywall hanging, taping, patching, insulation upgrades, and renovation closures.',
+        tags: ['Sheetrock', 'Taping', 'Insulation'],
+        bids: []
       },
       {
         id: 8,
-        name: "Masonry Masters NJ",
-        trade: "Masonry",
+        type: 'contractor',
+        name: 'Masonry Masters NJ',
+        trade: 'Concrete & Masonry',
         rating: 4.8,
+        reviews: 72,
         distance: 8.7,
-        city: "Fair Lawn, NJ",
+        city: 'Fair Lawn, NJ',
         lat: 40.9404,
         lng: -74.1318,
-        price: "$$$",
-        tags: ["Block", "Brick", "Concrete"]
+        price: '$$$',
+        licensed: true,
+        insured: true,
+        responseTime: '42 min',
+        projectsCompleted: 143,
+        bio: 'Concrete pads, retaining walls, pavers, brickwork, and structural masonry repairs.',
+        tags: ['Block', 'Brick', 'Concrete'],
+        bids: []
       },
       {
         id: 9,
-        name: "Orange Ladder Handyman",
-        trade: "Handyman",
+        type: 'contractor',
+        name: 'Orange Ladder Handyman',
+        trade: 'Handyman Services',
         rating: 4.3,
+        reviews: 41,
         distance: 2.9,
-        city: "Bogota, NJ",
+        city: 'Bogota, NJ',
         lat: 40.8759,
         lng: -74.0299,
-        price: "$",
-        tags: ["Repairs", "Punch List", "Installations"]
+        price: '$',
+        licensed: true,
+        insured: true,
+        responseTime: '15 min',
+        projectsCompleted: 164,
+        bio: 'Punch list repairs, installations, light carpentry, hardware swaps, and maintenance work.',
+        tags: ['Repairs', 'Punch List', 'Installations'],
+        bids: []
       },
       {
         id: 10,
-        name: "Prime Cabinet Studio",
-        trade: "Cabinetry",
+        type: 'contractor',
+        name: 'Prime Cabinet Studio',
+        trade: 'Kitchen Renovation',
         rating: 4.7,
+        reviews: 84,
         distance: 10.4,
-        city: "Englewood, NJ",
+        city: 'Englewood, NJ',
         lat: 40.8929,
         lng: -73.9726,
-        price: "$$$",
-        tags: ["Kitchen", "Bath", "Custom Millwork"]
+        price: '$$$',
+        licensed: true,
+        insured: true,
+        responseTime: '34 min',
+        projectsCompleted: 97,
+        bio: 'Kitchen renovations, cabinet installs, layout updates, trim-outs, and finish packages.',
+        tags: ['Kitchen Design', 'Cabinets', 'Millwork'],
+        bids: []
       }
     ];
 
-    let filteredContractors = [...contractors];
-    let activeCardId = null;
-    let activeSort = "distance";
+    const jobs = [
+      {
+        id: 1001,
+        type: 'job',
+        title: 'Kitchen Renovation',
+        trade: 'Kitchen Renovation',
+        city: 'Hackensack, NJ',
+        lat: 40.8883,
+        lng: -74.0502,
+        budget: '$18,000',
+        rating: 4.8,
+        reviews: 11,
+        distance: 1.2,
+        customer: 'Jimmy F.',
+        verified: true,
+        postedAgo: '2 hours ago',
+        description: 'Remove existing cabinets, install new shaker cabinets, quartz counters, backsplash, lighting, and paint.',
+        bids: [
+          { contractor: 'Prime Cabinet Studio', amount: '$17,500', eta: 'Start in 3 weeks', rating: 4.7 },
+          { contractor: 'Garden State Carpentry', amount: '$18,900', eta: 'Start in 2 weeks', rating: 4.9 }
+        ]
+      },
+      {
+        id: 1002,
+        type: 'job',
+        title: 'Bathroom Renovation',
+        trade: 'Bathroom Renovation',
+        city: 'Paramus, NJ',
+        lat: 40.9487,
+        lng: -74.0661,
+        budget: '$9,500',
+        rating: 4.6,
+        reviews: 7,
+        distance: 6.6,
+        customer: 'Sarah M.',
+        verified: true,
+        postedAgo: '5 hours ago',
+        description: 'New vanity, tile floor, shower valve, glass door, toilet replacement, and light fixture update.',
+        bids: [
+          { contractor: 'Metro Tile & Flooring', amount: '$9,900', eta: 'Start next Monday', rating: 4.6 }
+        ]
+      },
+      {
+        id: 1003,
+        type: 'job',
+        title: 'Roof Replacement',
+        trade: 'Roofing',
+        city: 'Teaneck, NJ',
+        lat: 40.8999,
+        lng: -74.0062,
+        budget: '$12,000',
+        rating: 4.9,
+        reviews: 18,
+        distance: 3.7,
+        customer: 'Michael R.',
+        verified: true,
+        postedAgo: '1 day ago',
+        description: 'Tear off one layer, replace damaged plywood as needed, install architectural shingles and ridge vent.',
+        bids: [
+          { contractor: 'North Jersey Roofing Pros', amount: '$11,850', eta: 'Start in 10 days', rating: 4.7 }
+        ]
+      },
+      {
+        id: 1004,
+        type: 'job',
+        title: 'Deck Construction',
+        trade: 'Decks & Porches',
+        city: 'Fair Lawn, NJ',
+        lat: 40.9347,
+        lng: -74.1263,
+        budget: '$8,000',
+        rating: 4.5,
+        reviews: 5,
+        distance: 8.4,
+        customer: 'David L.',
+        verified: true,
+        postedAgo: '3 hours ago',
+        description: 'Build new pressure-treated rear deck approximately 14x20 with steps and white vinyl railings.',
+        bids: []
+      },
+      {
+        id: 1005,
+        type: 'job',
+        title: 'Electrical Panel Upgrade',
+        trade: 'Electrical',
+        city: 'Clifton, NJ',
+        lat: 40.8622,
+        lng: -74.1544,
+        budget: '$3,200',
+        rating: 4.7,
+        reviews: 9,
+        distance: 6.1,
+        customer: 'Maria G.',
+        verified: true,
+        postedAgo: '7 hours ago',
+        description: 'Upgrade existing 100-amp electrical service to 200 amps and add room for future circuits.',
+        bids: [
+          { contractor: 'Precision Electrical NJ', amount: '$3,480', eta: 'Start this week', rating: 4.8 }
+        ]
+      }
+    ];
+
+    let currentMode = 'homeowner';
+    let activeSort = 'distance';
+    let activeId = null;
+    let filteredItems = [];
     const markers = new Map();
 
-    // MAP SETUP
-    const map = L.map("map", {
-      zoomControl: false,
-      attributionControl: true
-    }).setView([40.8859, -74.0435], 11);
-
-    L.control.zoom({ position: "bottomright" }).addTo(map);
-
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    const map = L.map('map', { zoomControl: false, attributionControl: true }).setView([40.8859, -74.0435], 11);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      attribution: "&copy; OpenStreetMap contributors"
+      attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    const cardsRow = document.getElementById("cardsRow");
-    const resultsCount = document.getElementById("resultsCount");
-    const searchInput = document.getElementById("searchInput");
-    const searchBtn = document.getElementById("searchBtn");
-    const tradeFilter = document.getElementById("tradeFilter");
-    const distanceFilter = document.getElementById("distanceFilter");
-    const ratingFilter = document.getElementById("ratingFilter");
-    const sortDistanceBtn = document.getElementById("sortDistance");
-    const sortRatingBtn = document.getElementById("sortRating");
-    const resetFiltersBtn = document.getElementById("resetFilters");
-    const scrollLeftBtn = document.getElementById("scrollLeftBtn");
-    const scrollRightBtn = document.getElementById("scrollRightBtn");
+    const cardsRow = document.getElementById('cardsRow');
+    const resultsCount = document.getElementById('resultsCount');
+    const resultsTitle = document.getElementById('resultsTitle');
+    const statusPill = document.getElementById('statusPill');
 
-    function createPinHTML(isActive = false) {
-      return `<div class="custom-pin ${isActive ? "active" : ""}"></div>`;
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const tradeFilter = document.getElementById('tradeFilter');
+    const distanceFilter = document.getElementById('distanceFilter');
+    const ratingFilter = document.getElementById('ratingFilter');
+    const sortDistanceBtn = document.getElementById('sortDistance');
+    const sortRatingBtn = document.getElementById('sortRating');
+    const resetFiltersBtn = document.getElementById('resetFilters');
+    const homeownerModeBtn = document.getElementById('homeownerMode');
+    const contractorModeBtn = document.getElementById('contractorMode');
+    const scrollLeftBtn = document.getElementById('scrollLeftBtn');
+    const scrollRightBtn = document.getElementById('scrollRightBtn');
+    const locateBtn = document.getElementById('locateBtn');
+
+    const postJobBtn = document.getElementById('postJobBtn');
+    const jobModal = document.getElementById('jobModal');
+    const closeJobModal = document.getElementById('closeJobModal');
+    const cancelJobBtn = document.getElementById('cancelJobBtn');
+    const submitJobBtn = document.getElementById('submitJobBtn');
+    const jobTradeSelect = document.getElementById('jobTrade');
+
+    const detailModal = document.getElementById('detailModal');
+    const detailTitle = document.getElementById('detailTitle');
+    const detailContent = document.getElementById('detailContent');
+    const closeDetailModal = document.getElementById('closeDetailModal');
+
+    function populateTradeSelect() {
+      jobTradeSelect.innerHTML = TRADE_OPTIONS.map(trade => `<option>${trade}</option>`).join('');
+    }
+
+    function showStatus(message) {
+      statusPill.textContent = message;
+      statusPill.classList.add('show');
+      clearTimeout(showStatus._timer);
+      showStatus._timer = setTimeout(() => statusPill.classList.remove('show'), 2200);
+    }
+
+    function getCurrentDataset() {
+      return currentMode === 'homeowner' ? contractors : jobs;
+    }
+
+    function makeIcon(item, isActive) {
+      const kind = item.type === 'job' ? 'job' : 'contractor';
+      const size = isActive ? 27 : 20;
+      const anchor = isActive ? 13.5 : 10;
+      return L.divIcon({
+        className: '',
+        html: `<div class="map-pin ${kind} ${isActive ? 'active' : ''}"></div>`,
+        iconSize: [size, size],
+        iconAnchor: [anchor, anchor]
+      });
     }
 
     function clearMarkers() {
@@ -779,300 +1350,519 @@
       markers.clear();
     }
 
-    function renderMarkers(data) {
-      clearMarkers();
-
-      data.forEach(item => {
-        const icon = L.divIcon({
-          className: "",
-          html: createPinHTML(item.id === activeCardId),
-          iconSize: item.id === activeCardId ? [26, 26] : [20, 20],
-          iconAnchor: item.id === activeCardId ? [13, 13] : [10, 10]
-        });
-
-        const marker = L.marker([item.lat, item.lng], { icon }).addTo(map);
-
-        marker.bindPopup(`
+    function getPopupHtml(item) {
+      if (item.type === 'contractor') {
+        return `
           <div>
-            <div class="popup-name">${item.name}</div>
-            <div class="popup-meta">${item.trade} • ${item.city}</div>
-            <div class="popup-meta">⭐ ${item.rating} • ${item.distance} miles away</div>
+            <div class="popup-title">${item.name}</div>
+            <div class="popup-sub">${item.trade} • ${item.city}</div>
+            <div class="popup-sub">⭐ ${item.rating} (${item.reviews} reviews) • ${item.distance} mi</div>
           </div>
-        `);
+        `;
+      }
 
-        marker.on("click", () => {
-          setActiveCard(item.id, true);
+      return `
+        <div>
+          <div class="popup-title">${item.title}</div>
+          <div class="popup-sub">${item.city} • ${item.trade}</div>
+          <div class="popup-sub">Posted by ${item.customer} • ⭐ ${item.rating} (${item.reviews} reviews)</div>
+        </div>
+      `;
+    }
+
+    function renderMarkers(items) {
+      clearMarkers();
+      items.forEach(item => {
+        const marker = L.marker([item.lat, item.lng], {
+          icon: makeIcon(item, item.id === activeId)
+        }).addTo(map);
+
+        marker.bindPopup(getPopupHtml(item));
+
+        marker.on('click', () => {
+          setActive(item.id, true);
           scrollCardIntoView(item.id);
         });
 
         markers.set(item.id, marker);
       });
 
-      fitMapToVisibleResults();
+      fitMapToItems(items);
     }
 
-    function fitMapToVisibleResults() {
-      if (!filteredContractors.length) return;
-
-      const bounds = L.latLngBounds(
-        filteredContractors.map(item => [item.lat, item.lng])
-      );
-
+    function fitMapToItems(items) {
+      if (!items.length) return;
+      const bounds = L.latLngBounds(items.map(item => [item.lat, item.lng]));
       map.fitBounds(bounds, {
-        paddingTopLeft: [30, 140],
+        paddingTopLeft: [30, 200],
         paddingBottomRight: [30, 260],
         maxZoom: 13
       });
     }
 
-    function renderCards(data) {
-      cardsRow.innerHTML = "";
+    function formatCount() {
+      const noun = currentMode === 'homeowner' ? 'contractor' : 'job';
+      const count = filteredItems.length;
+      resultsCount.textContent = `${count} ${noun}${count === 1 ? '' : 's'} found`;
+      resultsTitle.textContent = currentMode === 'homeowner'
+        ? 'Swipe left ↔ right to browse contractors'
+        : 'Swipe left ↔ right to browse customer jobs';
+    }
 
-      if (!data.length) {
+    function contractorCardHtml(item) {
+      return `
+        <div class="card-top">
+          <div class="card-title-wrap">
+            <h3 class="card-title">${item.name}</h3>
+            <p class="card-sub">${item.trade} • ${item.city}</p>
+          </div>
+          <div class="rating-pill">⭐ ${item.rating}</div>
+        </div>
+        <div class="card-body">
+          <div class="meta-grid">
+            <div class="meta-box">
+              <div class="meta-label">Distance</div>
+              <div class="meta-value">${item.distance} mi</div>
+            </div>
+            <div class="meta-box">
+              <div class="meta-label">Reviews</div>
+              <div class="meta-value">${item.reviews}</div>
+            </div>
+          </div>
+          <div class="badge-row">
+            ${item.tags.map(tag => `<span class="badge">${tag}</span>`).join('')}
+          </div>
+          <div class="info-row">
+            <span><strong>Response:</strong> ${item.responseTime}</span>
+            <span><strong>Projects:</strong> ${item.projectsCompleted}</span>
+          </div>
+          <div class="card-actions">
+            <button class="mini-btn primary" data-action="view" data-id="${item.id}">View Profile</button>
+            <button class="mini-btn secondary" data-action="message" data-id="${item.id}">Message</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function jobCardHtml(item) {
+      return `
+        <div class="card-top">
+          <div class="card-title-wrap">
+            <h3 class="card-title">${item.title}</h3>
+            <p class="card-sub">${item.trade} • ${item.city}</p>
+          </div>
+          <div class="rating-pill">⭐ ${item.rating}</div>
+        </div>
+        <div class="card-body">
+          <div class="meta-grid">
+            <div class="meta-box">
+              <div class="meta-label">Budget</div>
+              <div class="meta-value">${item.budget}</div>
+            </div>
+            <div class="meta-box">
+              <div class="meta-label">Bids</div>
+              <div class="meta-value">${item.bids.length}</div>
+            </div>
+          </div>
+          <div class="info-row">
+            <span><strong>Posted by:</strong> ${item.customer}</span>
+            <span><strong>Reviews:</strong> ${item.reviews}</span>
+            <span><strong>Posted:</strong> ${item.postedAgo}</span>
+          </div>
+          <div class="badge-row">
+            ${item.verified ? '<span class="badge">Verified Customer</span>' : ''}
+            <span class="badge">${item.distance} mi away</span>
+          </div>
+          <div class="card-actions">
+            <button class="mini-btn primary" data-action="job-details" data-id="${item.id}">View Job</button>
+            <button class="mini-btn secondary" data-action="bid" data-id="${item.id}">Submit Bid</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCards(items) {
+      if (!items.length) {
         cardsRow.innerHTML = `
-          <div class="contractor-card" style="flex: 0 0 340px; display:flex; align-items:center; justify-content:center;">
-            <div style="padding:24px; text-align:center;">
-              <div style="font-size:18px; font-weight:800; margin-bottom:8px;">No contractors found</div>
-              <div style="font-size:14px; color:#64748b;">Try changing the search or filters.</div>
+          <div class="listing-card" style="display:flex;align-items:center;justify-content:center;">
+            <div style="padding:24px;text-align:center;">
+              <div style="font-size:18px;font-weight:900;margin-bottom:8px;">No results found</div>
+              <div style="font-size:14px;color:#64748b;">Try changing the search or filter settings.</div>
             </div>
           </div>
         `;
         return;
       }
 
-      data.forEach(item => {
-        const card = document.createElement("div");
-        card.className = "contractor-card";
-        card.dataset.id = item.id;
-
-        if (item.id === activeCardId) {
-          card.classList.add("active");
-        }
-
-        card.innerHTML = `
-          <div class="card-top">
-            <div class="card-title-wrap">
-              <h3 class="card-name">${item.name}</h3>
-              <p class="card-sub">${item.trade} • ${item.city}</p>
-            </div>
-            <div class="rating-pill">⭐ ${item.rating}</div>
-          </div>
-
-          <div class="card-body">
-            <div class="meta-grid">
-              <div class="meta-box">
-                <div class="meta-label">Distance</div>
-                <div class="meta-value">${item.distance} mi</div>
-              </div>
-              <div class="meta-box">
-                <div class="meta-label">Budget</div>
-                <div class="meta-value">${item.price}</div>
-              </div>
-            </div>
-
-            <div class="tags">
-              ${item.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}
-            </div>
-
-            <div class="card-actions">
-              <button class="btn-primary">View Profile</button>
-              <button class="btn-secondary">Message</button>
-            </div>
-          </div>
-        `;
-
-        card.addEventListener("click", () => {
-          setActiveCard(item.id, true);
-        });
-
-        cardsRow.appendChild(card);
-      });
+      cardsRow.innerHTML = items.map(item => `
+        <div class="listing-card ${item.id === activeId ? 'active' : ''}" data-id="${item.id}">
+          ${item.type === 'contractor' ? contractorCardHtml(item) : jobCardHtml(item)}
+        </div>
+      `).join('');
     }
 
-    function updateResultsCount() {
-      const count = filteredContractors.length;
-      resultsCount.textContent = `${count} contractor${count === 1 ? "" : "s"} found`;
-    }
-
-    function setActiveCard(id, panMap = false) {
-      activeCardId = id;
-
-      document.querySelectorAll(".contractor-card").forEach(card => {
-        card.classList.toggle("active", Number(card.dataset.id) === id);
-      });
-
-      filteredContractors.forEach(item => {
+    function updateMarkerStates() {
+      filteredItems.forEach(item => {
         const marker = markers.get(item.id);
         if (!marker) return;
-
-        const isActive = item.id === id;
-        const icon = L.divIcon({
-          className: "",
-          html: createPinHTML(isActive),
-          iconSize: isActive ? [26, 26] : [20, 20],
-          iconAnchor: isActive ? [13, 13] : [10, 10]
-        });
-        marker.setIcon(icon);
-
-        if (isActive) {
-          marker.openPopup();
-          if (panMap) {
-            map.flyTo([item.lat, item.lng], Math.max(map.getZoom(), 13), {
-              duration: 0.5
-            });
-          }
-        } else {
-          marker.closePopup();
-        }
+        marker.setIcon(makeIcon(item, item.id === activeId));
+        if (item.id === activeId) marker.openPopup();
       });
+    }
+
+    function setActive(id, panMap = false) {
+      activeId = id;
+      document.querySelectorAll('.listing-card[data-id]').forEach(card => {
+        card.classList.toggle('active', Number(card.dataset.id) === id);
+      });
+      updateMarkerStates();
+
+      const item = filteredItems.find(entry => entry.id === id);
+      if (item && panMap) {
+        map.flyTo([item.lat, item.lng], Math.max(map.getZoom(), 13), { duration: 0.45 });
+      }
     }
 
     function scrollCardIntoView(id) {
-      const targetCard = [...document.querySelectorAll(".contractor-card")].find(
-        card => Number(card.dataset.id) === id
-      );
-      if (!targetCard) return;
+      const target = [...document.querySelectorAll('.listing-card[data-id]')].find(card => Number(card.dataset.id) === id);
+      if (!target) return;
+      const left = target.offsetLeft - (cardsRow.clientWidth / 2) + (target.clientWidth / 2);
+      cardsRow.scrollTo({ left, behavior: 'smooth' });
+    }
 
-      const left =
-        targetCard.offsetLeft -
-        (cardsRow.clientWidth / 2) +
-        (targetCard.clientWidth / 2);
-
-      cardsRow.scrollTo({
-        left,
-        behavior: "smooth"
-      });
+    function sortItems(items) {
+      if (activeSort === 'distance') {
+        items.sort((a, b) => a.distance - b.distance);
+      } else {
+        items.sort((a, b) => b.rating - a.rating);
+      }
     }
 
     function applyFilters() {
-      const searchTerm = searchInput.value.trim().toLowerCase();
+      const source = getCurrentDataset();
+      const query = searchInput.value.trim().toLowerCase();
       const selectedTrade = tradeFilter.value;
       const maxDistance = Number(distanceFilter.value);
       const minRating = Number(ratingFilter.value);
 
-      filteredContractors = contractors.filter(item => {
-        const matchesSearch =
-          !searchTerm ||
-          item.name.toLowerCase().includes(searchTerm) ||
-          item.trade.toLowerCase().includes(searchTerm) ||
-          item.city.toLowerCase().includes(searchTerm) ||
-          item.tags.some(tag => tag.toLowerCase().includes(searchTerm));
+      filteredItems = source.filter(item => {
+        const haystack = item.type === 'contractor'
+          ? [item.name, item.trade, item.city, ...(item.tags || [])].join(' ').toLowerCase()
+          : [item.title, item.trade, item.city, item.customer, item.description].join(' ').toLowerCase();
 
-        const matchesTrade =
-          selectedTrade === "all" || item.trade === selectedTrade;
-
+        const matchesQuery = !query || haystack.includes(query);
+        const matchesTrade = selectedTrade === 'all' || item.trade === selectedTrade;
         const matchesDistance = item.distance <= maxDistance;
         const matchesRating = item.rating >= minRating;
 
-        return matchesSearch && matchesTrade && matchesDistance && matchesRating;
+        return matchesQuery && matchesTrade && matchesDistance && matchesRating;
       });
 
-      if (activeSort === "distance") {
-        filteredContractors.sort((a, b) => a.distance - b.distance);
-      } else if (activeSort === "rating") {
-        filteredContractors.sort((a, b) => b.rating - a.rating);
+      sortItems(filteredItems);
+
+      if (!filteredItems.some(item => item.id === activeId)) {
+        activeId = filteredItems[0]?.id ?? null;
       }
 
-      if (!filteredContractors.some(item => item.id === activeCardId)) {
-        activeCardId = filteredContractors.length ? filteredContractors[0].id : null;
-      }
+      renderCards(filteredItems);
+      renderMarkers(filteredItems);
+      formatCount();
 
-      renderCards(filteredContractors);
-      renderMarkers(filteredContractors);
-      updateResultsCount();
-
-      if (activeCardId) {
-        setActiveCard(activeCardId, false);
-        setTimeout(() => scrollCardIntoView(activeCardId), 100);
+      if (activeId) {
+        setActive(activeId, false);
+        setTimeout(() => scrollCardIntoView(activeId), 80);
       }
     }
 
     function setSort(type) {
       activeSort = type;
-
-      sortDistanceBtn.classList.toggle("active", type === "distance");
-      sortRatingBtn.classList.toggle("active", type === "rating");
-
+      sortDistanceBtn.classList.toggle('active', type === 'distance');
+      sortRatingBtn.classList.toggle('active', type === 'rating');
       applyFilters();
     }
 
-    // Detect centered card while user scrolls horizontally
-    let scrollTimeout = null;
-    cardsRow.addEventListener("scroll", () => {
-      if (scrollTimeout) clearTimeout(scrollTimeout);
+    function openJobModal() {
+      jobModal.classList.add('show');
+    }
 
-      scrollTimeout = setTimeout(() => {
-        const cards = [...document.querySelectorAll(".contractor-card[data-id]")];
+    function closeJobForm() {
+      jobModal.classList.remove('show');
+    }
+
+    function getFormattedBudget(value) {
+      const trimmed = String(value || '').trim();
+      if (!trimmed) return '$0';
+      return trimmed.startsWith('$') ? trimmed : `$${trimmed}`;
+    }
+
+    function createJobFromForm() {
+      const title = document.getElementById('jobTitle').value.trim() || 'New Job';
+      const trade = document.getElementById('jobTrade').value;
+      const budget = getFormattedBudget(document.getElementById('jobBudget').value);
+      const customer = document.getElementById('jobCustomer').value.trim() || 'New Customer';
+      const city = document.getElementById('jobCity').value.trim() || 'North Jersey, NJ';
+      const description = document.getElementById('jobDescription').value.trim() || 'Customer posted a new project on Revamp.';
+      const center = map.getCenter();
+
+      jobs.unshift({
+        id: Date.now(),
+        type: 'job',
+        title,
+        trade,
+        city,
+        lat: Number(center.lat.toFixed(6)),
+        lng: Number(center.lng.toFixed(6)),
+        budget,
+        rating: 5.0,
+        reviews: 1,
+        distance: 1.0,
+        customer,
+        verified: true,
+        postedAgo: 'Just now',
+        description,
+        bids: []
+      });
+
+      currentMode = 'contractor';
+      homeownerModeBtn.classList.remove('active');
+      contractorModeBtn.classList.add('active');
+      closeJobForm();
+      clearJobForm();
+      applyFilters();
+      showStatus('Job posted and now visible in Contractor View');
+    }
+
+    function clearJobForm() {
+      document.getElementById('jobTitle').value = '';
+      document.getElementById('jobBudget').value = '';
+      document.getElementById('jobCustomer').value = '';
+      document.getElementById('jobCity').value = '';
+      document.getElementById('jobDescription').value = '';
+      document.getElementById('jobTrade').selectedIndex = 0;
+    }
+
+    function openDetailModal(item) {
+      if (!item) return;
+      detailModal.classList.add('show');
+
+      if (item.type === 'contractor') {
+        detailTitle.textContent = item.name;
+        detailContent.innerHTML = `
+          <div class="detail-panel">
+            <h4>${item.trade} • ${item.city}</h4>
+            <p>${item.bio}</p>
+          </div>
+          <div class="modal-grid">
+            <div class="detail-panel">
+              <h4>Reputation</h4>
+              <p>⭐ ${item.rating} rating with ${item.reviews} reviews.</p>
+            </div>
+            <div class="detail-panel">
+              <h4>Performance</h4>
+              <p>${item.projectsCompleted} completed projects and average response time of ${item.responseTime}.</p>
+            </div>
+          </div>
+          <div class="detail-panel">
+            <h4>Qualifications</h4>
+            <p>${item.licensed ? 'Licensed' : 'Unlicensed'} • ${item.insured ? 'Insured' : 'Not insured'} • Budget tier ${item.price}</p>
+          </div>
+          <div class="detail-panel">
+            <h4>Specialties</h4>
+            <div class="badge-row">${item.tags.map(tag => `<span class="badge">${tag}</span>`).join('')}</div>
+          </div>
+        `;
+      } else {
+        detailTitle.textContent = item.title;
+        detailContent.innerHTML = `
+          <div class="detail-panel">
+            <h4>${item.trade} • ${item.city}</h4>
+            <p>${item.description}</p>
+          </div>
+          <div class="modal-grid">
+            <div class="detail-panel">
+              <h4>Customer</h4>
+              <p>${item.customer} • ⭐ ${item.rating} (${item.reviews} reviews) • ${item.verified ? 'Verified customer' : 'Unverified customer'}</p>
+            </div>
+            <div class="detail-panel">
+              <h4>Budget</h4>
+              <p>${item.budget} • Posted ${item.postedAgo} • Approx. ${item.distance} miles away.</p>
+            </div>
+          </div>
+          <div class="detail-panel">
+            <h4>Current bids</h4>
+            ${item.bids.length ? `
+              <div class="bid-list">
+                ${item.bids.map(bid => `
+                  <div class="bid-item">
+                    <div class="bid-item-head">
+                      <div class="bid-item-title">${bid.contractor}</div>
+                      <div class="rating-pill">⭐ ${bid.rating}</div>
+                    </div>
+                    <div class="bid-item-sub">${bid.amount} • ${bid.eta}</div>
+                  </div>
+                `).join('')}
+              </div>
+            ` : '<p>No bids yet.</p>'}
+          </div>
+          <div class="modal-actions">
+            <button class="modal-btn primary bid-btn" data-jobid="${item.id}">Submit Demo Bid</button>
+            <button class="modal-btn secondary" id="detailCloseSecondary">Close</button>
+          </div>
+        `;
+
+        const demoBidBtn = detailContent.querySelector('.bid-btn');
+        if (demoBidBtn) {
+          demoBidBtn.addEventListener('click', () => submitDemoBid(item.id));
+        }
+        const closeSecondary = document.getElementById('detailCloseSecondary');
+        if (closeSecondary) {
+          closeSecondary.addEventListener('click', closeDetails);
+        }
+      }
+    }
+
+    function closeDetails() {
+      detailModal.classList.remove('show');
+    }
+
+    function submitDemoBid(jobId) {
+      const job = jobs.find(entry => entry.id === jobId);
+      if (!job) return;
+      const contractor = contractors[(job.bids.length + 2) % contractors.length];
+      const baseNumber = 4500 + (job.bids.length * 1250);
+      job.bids.push({
+        contractor: contractor.name,
+        amount: `$${baseNumber.toLocaleString()}`,
+        eta: `Start in ${job.bids.length + 1} week${job.bids.length + 1 === 1 ? '' : 's'}`,
+        rating: contractor.rating
+      });
+      applyFilters();
+      openDetailModal(job);
+      showStatus('Demo bid submitted');
+    }
+
+    function handleCardAction(action, id) {
+      const item = [...contractors, ...jobs].find(entry => entry.id === id);
+      if (!item) return;
+
+      if (action === 'view' || action === 'job-details') {
+        openDetailModal(item);
+        return;
+      }
+
+      if (action === 'message') {
+        showStatus(`Message opened for ${item.name}`);
+        return;
+      }
+
+      if (action === 'bid') {
+        submitDemoBid(id);
+      }
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      homeownerModeBtn.classList.toggle('active', mode === 'homeowner');
+      contractorModeBtn.classList.toggle('active', mode === 'contractor');
+      applyFilters();
+    }
+
+    searchBtn.addEventListener('click', applyFilters);
+    searchInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') applyFilters();
+    });
+
+    tradeFilter.addEventListener('change', applyFilters);
+    distanceFilter.addEventListener('change', applyFilters);
+    ratingFilter.addEventListener('change', applyFilters);
+
+    sortDistanceBtn.addEventListener('click', () => setSort('distance'));
+    sortRatingBtn.addEventListener('click', () => setSort('rating'));
+
+    resetFiltersBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      tradeFilter.value = 'all';
+      distanceFilter.value = '100';
+      ratingFilter.value = '0';
+      setSort('distance');
+    });
+
+    homeownerModeBtn.addEventListener('click', () => setMode('homeowner'));
+    contractorModeBtn.addEventListener('click', () => setMode('contractor'));
+
+    scrollLeftBtn.addEventListener('click', () => cardsRow.scrollBy({ left: -340, behavior: 'smooth' }));
+    scrollRightBtn.addEventListener('click', () => cardsRow.scrollBy({ left: 340, behavior: 'smooth' }));
+
+    locateBtn.addEventListener('click', () => {
+      fitMapToItems(filteredItems);
+      showStatus('Map recentered');
+    });
+
+    postJobBtn.addEventListener('click', openJobModal);
+    closeJobModal.addEventListener('click', closeJobForm);
+    cancelJobBtn.addEventListener('click', closeJobForm);
+    submitJobBtn.addEventListener('click', createJobFromForm);
+
+    closeDetailModal.addEventListener('click', closeDetails);
+    detailModal.addEventListener('click', e => {
+      if (e.target === detailModal) closeDetails();
+    });
+    jobModal.addEventListener('click', e => {
+      if (e.target === jobModal) closeJobForm();
+    });
+
+    cardsRow.addEventListener('click', e => {
+      const button = e.target.closest('[data-action]');
+      if (button) {
+        e.stopPropagation();
+        handleCardAction(button.dataset.action, Number(button.dataset.id));
+        return;
+      }
+      const card = e.target.closest('.listing-card[data-id]');
+      if (card) {
+        setActive(Number(card.dataset.id), true);
+      }
+    });
+
+    let scrollTimer = null;
+    cardsRow.addEventListener('scroll', () => {
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => {
+        const cards = [...document.querySelectorAll('.listing-card[data-id]')];
         if (!cards.length) return;
-
         const rowRect = cardsRow.getBoundingClientRect();
         const rowCenter = rowRect.left + rowRect.width / 2;
-
-        let closestCard = null;
-        let closestDistance = Infinity;
+        let closestId = null;
+        let closestDiff = Infinity;
 
         cards.forEach(card => {
           const rect = card.getBoundingClientRect();
-          const cardCenter = rect.left + rect.width / 2;
-          const diff = Math.abs(rowCenter - cardCenter);
-
-          if (diff < closestDistance) {
-            closestDistance = diff;
-            closestCard = card;
+          const center = rect.left + rect.width / 2;
+          const diff = Math.abs(center - rowCenter);
+          if (diff < closestDiff) {
+            closestDiff = diff;
+            closestId = Number(card.dataset.id);
           }
         });
 
-        if (closestCard) {
-          const id = Number(closestCard.dataset.id);
-          if (id !== activeCardId) {
-            setActiveCard(id, true);
-          }
+        if (closestId !== null && closestId !== activeId) {
+          setActive(closestId, true);
         }
-      }, 80);
+      }, 70);
     });
 
-    // Button events
-    searchBtn.addEventListener("click", applyFilters);
-    searchInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") applyFilters();
+    window.addEventListener('resize', () => {
+      setTimeout(() => {
+        if (filteredItems.length) {
+          fitMapToItems(filteredItems);
+          if (activeId) scrollCardIntoView(activeId);
+        }
+      }, 120);
     });
 
-    tradeFilter.addEventListener("change", applyFilters);
-    distanceFilter.addEventListener("change", applyFilters);
-    ratingFilter.addEventListener("change", applyFilters);
-
-    sortDistanceBtn.addEventListener("click", () => setSort("distance"));
-    sortRatingBtn.addEventListener("click", () => setSort("rating"));
-
-    resetFiltersBtn.addEventListener("click", () => {
-      searchInput.value = "";
-      tradeFilter.value = "all";
-      distanceFilter.value = "100";
-      ratingFilter.value = "0";
-      setSort("distance");
-    });
-
-    scrollLeftBtn.addEventListener("click", () => {
-      cardsRow.scrollBy({ left: -340, behavior: "smooth" });
-    });
-
-    scrollRightBtn.addEventListener("click", () => {
-      cardsRow.scrollBy({ left: 340, behavior: "smooth" });
-    });
-
-    // Initial render
-    activeCardId = contractors[0]?.id || null;
+    populateTradeSelect();
+    activeId = contractors[0].id;
     applyFilters();
-
-    // Better mobile viewport behavior
-    window.addEventListener("resize", () => {
-      if (filteredContractors.length) {
-        setTimeout(() => {
-          fitMapToVisibleResults();
-          if (activeCardId) scrollCardIntoView(activeCardId);
-        }, 150);
-      }
-    });
   </script>
 </body>
 </html>
