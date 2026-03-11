@@ -1829,10 +1829,10 @@ function openProjectRoom(jobId) {
           </div>
         `;
 
-        const demoBidBtn = detailContent.querySelector('.bid-btn');
-        if (demoBidBtn) {
-          demoBidBtn.addEventListener('click', () => submitDemoBid(item.id));
-        }
+        const bidBtn = detailContent.querySelector('.bid-btn');
+if (bidBtn) {
+  bidBtn.addEventListener('click', () => openProjectRoom(item.id));
+}
 
         const closeSecondary = document.getElementById('detailCloseSecondary');
         if (closeSecondary) {
