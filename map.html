@@ -1322,7 +1322,7 @@
     ];
 
    const params = new URLSearchParams(window.location.search);
-currentMode = params.get('view') || 'homeowner';
+let currentMode = params.get('view') || 'homeowner';
     let activeSort = 'distance';
     let activeId = null;
     let filteredItems = [];
@@ -2049,7 +2049,8 @@ function openProjectRoom(jobId) {
     populateTradeSelect();
 
 if (!params.get('view')) {
-  window.history.replaceState(null, '', '?view=homeowner');
+  currentMode = 'homeowner';
+  window.history.replaceState(null, '', 'map.html?view=homeowner');
 }
 
 activeId = contractors[0].id;
