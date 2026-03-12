@@ -1322,7 +1322,10 @@
     ];
 
    const params = new URLSearchParams(window.location.search);
-let currentMode = params.get('view') || 'homeowner';
+let currentMode = 'homeowner';
+    if (!window.location.search.includes('view=homeowner')) {
+  window.history.replaceState(null, '', 'map.html?view=homeowner');
+}
     let activeSort = 'distance';
     let activeId = null;
     let filteredItems = [];
