@@ -994,6 +994,7 @@
               <button class="btn btn-soft" onclick="addRow()">Add Line Item</button>
               <button class="btn btn-soft">Save Version</button>
               <button class="btn btn-primary">Generate Proposal PDF</button>
+              <button class="btn btn-primary" onclick="submitBid()">Submit Bid to Customer</button>
             </div>
           </div>
 
@@ -1295,6 +1296,29 @@
     attachEstimateListeners();
     recalcEstimate();
   </script>
+  <script>
+
+function submitBid(){
+
+const params = new URLSearchParams(window.location.search);
+const jobId = params.get("job");
+
+const bidAmount = document.getElementById("grandOut").innerText;
+
+const bidData = {
+job_id: jobId,
+contractor: "Impact Construction",
+amount: bidAmount,
+status: "submitted"
+};
+
+console.log("Bid Submitted:", bidData);
+
+alert("Bid submitted to customer!");
+
+}
+
+</script>
 </body>
 </html>
 
