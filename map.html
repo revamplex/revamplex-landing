@@ -1597,10 +1597,20 @@ const projectRoomJobInfo = document.getElementById('projectRoomJobInfo');
             <span><strong>Projects:</strong> ${item.projectsCompleted}</span>
           </div>
           <div class="card-actions">
-            <button class="mini-btn primary" data-action="view" data-id="${item.id}">View Profile</button>
-            <button class="mini-btn secondary" data-action="message" data-id="${item.id}">Message</button>
-          </div>
-        </div>
+
+<button class="mini-btn primary">
+Message
+</button>
+
+<button class="favorite-btn" onclick="toggleFavorite('job123')">
+🤍
+</button>
+
+<button class="mini-btn secondary" onclick="openProjectRoom('job123')">
+Submit Bid
+</button>
+
+</div>
       `;
     }
 
