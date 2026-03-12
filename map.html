@@ -967,12 +967,6 @@
       <div class="detail-stack" id="detailContent"></div>
     </div>
   </div>
-<div class="modal" id="projectRoomModal">
-  <div class="modal-card" style="width:min(1100px, 100%); max-height:min(92vh, 900px);">
-    <div class="modal-head">
-      <h2 class="modal-title" id="projectRoomTitle">Project Room</h2>
-      <button class="close-btn" id="closeProjectRoomModal">×</button>
-    </div>
 
     <div style="display:grid; grid-template-columns: 320px 1fr; gap:16px;">
       
@@ -1636,7 +1630,7 @@ Message
           </div>
           <div class="card-actions">
             <button class="mini-btn primary" data-action="job-details" data-id="${item.id}">View Job</button>
-<button class="mini-btn secondary" data-action="bid" data-id="${item.id}">
+<button class="mini-btn secondary" onclick="openProjectRoom(${item.id})">
 Submit Bid
 </button>
           </div>
@@ -2394,5 +2388,14 @@ fileUploadInput.addEventListener("change", () => {
   <script>
 
 </script>
+  function openProjectRoom(jobId){
+
+  window.location.href = "project-room.html?job=" + jobId;
+
+}
+  const params = new URLSearchParams(window.location.search);
+const jobId = params.get("job");
+
+console.log("Opening workspace for job:", jobId);
 </body>
 </html>
