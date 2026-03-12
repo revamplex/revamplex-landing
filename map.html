@@ -1883,9 +1883,10 @@ function openProjectRoom(jobId) {
   <p>Bids are submitted privately to the customer.</p>
 </div>
           </div>
-          <div class="modal-actions">
-            <button class="bid-btn" onclick="openProjectRoom('job123')">
-  Submit Bid
+          <div class="card-actions">
+            <button class="mini-btn primary" data-action="job-details" data-id="${item.id}">View Job</button>
+<button class="mini-btn secondary" onclick="openProjectRoom('job123')">
+Submit Bid
 </button>
             <button class="modal-btn secondary" id="detailCloseSecondary">Close</button>
           </div>
