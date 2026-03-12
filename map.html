@@ -1883,7 +1883,7 @@ function openProjectRoom(jobId) {
 </div>
           </div>
           <div class="modal-actions">
-            <button class="modal-btn primary bid-btn" data-jobid="${item.id}">Submit Bid</button>
+            <button onclick="openProjectRoom()">Submit Bid</button>
             <button class="modal-btn secondary" id="detailCloseSecondary">Close</button>
           </div>
         `;
@@ -2383,5 +2383,16 @@ fileUploadInput.addEventListener("change", () => {
 
 });
   </script>
+  <script>
+
+function openProjectRoom() {
+
+  const jobId = "123"; // later this will come from the database
+
+  window.location.href = "project-room.html?job=" + jobId;
+
+}
+
+</script>
 </body>
 </html>
