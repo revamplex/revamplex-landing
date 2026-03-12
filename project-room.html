@@ -797,7 +797,7 @@
         </div>
       </div>
       <div class="top-actions">
-        <button class="btn btn-soft">Back to Project Feed</button>
+        <button class="btn btn-soft" id="backToFeed">Back to Project Feed</button>
         <button class="btn btn-primary">Invite Customer</button>
       </div>
     </div>
@@ -1459,16 +1459,16 @@ function setupChat(){
 
 function setupBackButton(){
 
-  const backBtn = document.querySelector('.top-actions .btn-soft');
+  const backBtn = document.getElementById("backToFeed");
 
   if(!backBtn) return;
 
-  backBtn.addEventListener('click',()=>{
+  backBtn.addEventListener("click", () => {
 
     const params = new URLSearchParams(window.location.search);
-    const mode = params.get("mode") || "contractor";
+    const role = params.get("mode") || localStorage.getItem("revampUserRole") || "contractor";
 
-    window.location.href = `map.html?view=${mode}`;
+    window.location.href = `map.html?view=${role}`;
 
   });
 
