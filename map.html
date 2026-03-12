@@ -1730,9 +1730,17 @@
       document.getElementById('jobTrade').selectedIndex = 0;
     }
 
-    function openProjectRoom(jobId) {
-      window.location.href = `project-room.html?job=${jobId}`;
-    }
+    <script>
+function openProjectRoom(jobId) {
+  const job = jobs.find(entry => entry.id === jobId);
+
+  if (job) {
+    sessionStorage.setItem('revampSelectedJob', JSON.stringify(job));
+  }
+
+  window.location.href = `project-room.html?job=${jobId}`;
+}
+</script>
 
     function openDetailModal(item) {
       if (!item) return;
