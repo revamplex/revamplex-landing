@@ -1027,7 +1027,15 @@ Send
 <input id="markupPercent" placeholder="Markup %" class="input">
 
 </div>
+<div class="detail-panel">
 
+<h4>Project Files</h4>
+
+<input type="file" id="fileUploadInput" multiple>
+
+<div id="fileList"></div>
+
+</div>
 <button id="calculateEstimateBtn" class="mini-btn primary" style="width:100%;margin-bottom:10px;">
 Calculate Estimate
 </button>
@@ -2199,22 +2207,7 @@ calculateEstimateBtn.addEventListener("click", ()=>{
 
   estimateTotal.textContent = "$" + total.toLocaleString();
 
-});<div class="detail-panel">
-
-<h4>Project Files</h4>
-
-<input type="file" id="fileUploadInput" multiple style="
-margin-bottom:10px;
-">
-
-<div id="fileList" style="
-display:flex;
-flex-direction:column;
-gap:6px;
-font-size:14px;
-"></div>
-
-</div>
+});
     /* ======================
    AI ESTIMATE GENERATOR
 ====================== */
