@@ -1037,6 +1037,9 @@ Calculate Estimate
   <button id="generateProposalBtn" class="mini-btn secondary" style="width:100%;margin-bottom:10px;">
 📄 Generate Proposal
 </button>
+  <button id="downloadProposalBtn" class="mini-btn secondary" style="width:100%;margin-bottom:10px;">
+⬇ Download Proposal PDF
+</button>
 <div style="font-weight:900;font-size:18px;">
 Total Estimate: <span id="estimateTotal">$0</span>
 </div>
@@ -1055,6 +1058,7 @@ display:none;
 </div>
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""
   ></script>
@@ -2277,6 +2281,53 @@ generateProposalBtn.addEventListener("click", () => {
 
   <em>This proposal was generated through Revamp. Final pricing subject to site verification.</em>
   `;
+
+});
+    /* ======================
+   PDF PROPOSAL DOWNLOAD
+====================== */
+
+const downloadProposalBtn = document.getElementById("downloadProposalBtn");
+
+downloadProposalBtn.addEventListener("click", () => {
+
+  const { jsPDF } = window.jspdf;
+
+  const doc = new jsPDF();
+
+  const jobInfo = projectRoomJobInfo.innerText;
+  const labor = laborHours.value || 0;
+  const rate = hourlyRate.value || 0;
+  const materials = materialCost.value || 0;
+  const markup = markupPercent.value || 0;
+  const total = estimateTotal.textContent;
+
+  doc.setFontSize(18);
+  doc.text("Revamp Project Proposal", 20, 20);
+
+  doc.setFontSize(12);
+
+  doc.text("Project Details:", 20, 40);
+  doc.text(jobInfo, 20, 50);
+
+  doc.text("Estimate Breakdown:", 20, 90);
+
+  doc.text(`Labor Hours: ${labor}`, 20, 100);
+  doc.text(`Hourly Rate: $${rate}`, 20, 110);
+  doc.text(`Material Cost: $${materials}`, 20, 120);
+  doc.text(`Markup: ${markup}%`, 20, 130);
+
+  doc.setFontSize(14);
+  doc.text(`Total Proposal Price: ${total}`, 20, 150);
+
+  doc.setFontSize(10);
+  doc.text(
+    "This proposal was generated through Revamp. Final pricing subject to site verification.",
+    20,
+    170
+  );
+
+  doc.save("Revamp-Proposal.pdf");
 
 });
   </script>
