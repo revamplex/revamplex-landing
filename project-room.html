@@ -1466,20 +1466,13 @@ function setupBackButton(){
   backBtn.addEventListener('click',()=>{
 
     const params = new URLSearchParams(window.location.search);
-    const modeParam = params.get("mode");
+    const mode = params.get("mode") || "contractor";
 
-    // homeowner workspace
-    if(modeParam === "homeowner"){
-     const params = new URLSearchParams(window.location.search);
-const mode = params.get("mode");
+    window.location.href = `map.html?view=${mode}`;
 
-if (mode === "homeowner") {
-  window.location.href = `map.html?view=${mode}`;
-} else {
-  window.location.href = "map.html?view=contractor";
+  });
+
 }
-      return;
-    }
 
     // contractor workspace (default)
     window.location.href = "map.html?view=contractor";
