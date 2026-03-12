@@ -1224,10 +1224,64 @@ function currency(value) {
   }).format(value || 0);
 }
 
-/* ---------- READ JOB FROM URL ---------- */
+/* ---------- LOAD SELECTED JOB ---------- */
 
 const params = new URLSearchParams(window.location.search);
 const jobId = params.get("job") || "demo";
+const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null");
+
+/* ---------- POPULATE PAGE FROM JOB ---------- */
+
+function loadProjectRoom() {
+  if (!savedJob) return;
+
+  const titleEl = document.querySelector(".project-title h2");
+  const subEl = document.querySelector(".project-title p");
+  const stats = document.querySelectorAll(".mini-stats .value");
+  const summaryLines = document.querySelectorAll(".side-summary .summary-line strong");
+  const notesBox = document.querySelector("textarea");
+  const customerNameInput = document.querySelector('.signature-box input[type="text"]');
+
+  const projectTitle = savedJob.title || "Project Workspace";
+  const projectTrade = savedJob.trade || "General Project";
+  const projectCity = savedJob.city || "Unknown City";
+  const projectCustomer = savedJob.customer || "Customer";
+  const projectBudget = savedJob.budget || "$0";
+  const projectPostedAgo = savedJob.postedAgo || "Recently";
+  const projectDescription = savedJob.description || "No description provided.";
+
+  titleEl.textContent = projectTitle;
+  subEl.textContent = `Project ID: ${savedJob.id} • ${projectCity} • Customer: ${projectCustomer} • Trade: ${projectTrade}`;
+
+  if (stats[0]) stats[0].textContent = projectBudget;
+  if (stats[1]) stats[1].textContent = "Schedule TBD";
+  if (stats[2]) stats[2].textContent = "Pending Signature";
+  if (stats[3]) stats[3].textContent = "TBD";
+
+  if (summaryLines[0]) summaryLines[0].textContent = projectTrade;
+  if (summaryLines[1]) summaryLines[1].textContent = "To Be Scheduled";
+  if (summaryLines[2]) summaryLines[2].textContent = "TBD";
+  if (summaryLines[3]) summaryLines[3].textContent = "v1.0";
+  if (summaryLines[4]) summaryLines[4].textContent = "Customer + Assigned Contractor Only";
+
+  if (notesBox) {
+    notesBox.value = `Project Description:
+${projectDescription}
+
+Budget:
+${projectBudget}
+
+Posted:
+${projectPostedAgo}
+
+Estimate Notes:
+Includes labor, material, disposal, and standard site protection. Permit costs are included where required. Fixtures and finish materials may be owner-selected or contractor-approved equivalent of similar quality and cost.`;
+  }
+
+  if (customerNameInput) {
+    customerNameInput.value = projectCustomer;
+  }
+}
 
 /* ---------- TILE CALCULATOR ---------- */
 
@@ -1242,10 +1296,8 @@ function calculateTile() {
   const area = length * width;
   const withWaste = area * (1 + waste / 100);
   const boxCount = Math.ceil(withWaste / perBox);
-
   const tileSqFt = (tileLength * tileWidth) / 144;
   const tileCount = tileSqFt > 0 ? Math.ceil(withWaste / tileSqFt) : 0;
-
   const thinsetBags = Math.max(1, Math.ceil(withWaste / 50));
   const groutBags = Math.max(1, Math.ceil(withWaste / 90));
 
@@ -1257,25 +1309,20 @@ function calculateTile() {
   document.getElementById('groutOut').textContent = groutBags + ' bags';
 }
 
-/* ---------- ESTIMATE SPREADSHEET ---------- */
+/* ---------- ESTIMATE ---------- */
 
 function recalcEstimate() {
-
   const rows = document.querySelectorAll('#estimateTable tbody tr');
   let subtotal = 0;
 
   rows.forEach(row => {
-
     const qty = parseFloat(row.querySelector('.qty')?.value) || 0;
     const unitCost = parseFloat(row.querySelector('.unitCost')?.value) || 0;
     const laborCost = parseFloat(row.querySelector('.laborCost')?.value) || 0;
-
     const total = qty * (unitCost + laborCost);
 
     row.querySelector('.lineTotal').textContent = currency(total);
-
     subtotal += total;
-
   });
 
   const markup = subtotal * 0.15;
@@ -1286,51 +1333,69 @@ function recalcEstimate() {
   document.getElementById('markupOut').textContent = currency(markup);
   document.getElementById('taxOut').textContent = currency(tax);
   document.getElementById('grandOut').textContent = currency(grand);
-
 }
 
-/* ---------- ADD ESTIMATE ROW ---------- */
-
-function addRow(){
-
+function addRow() {
   const tbody = document.querySelector('#estimateTable tbody');
-
   const tr = document.createElement('tr');
 
   tr.innerHTML = `
-  <td><input class="table-input" value="New Item" /></td>
-  <td><input class="table-input qty" type="number" value="1" step="0.01"></td>
-  <td><input class="table-input" value="unit"></td>
-  <td><input class="table-input unitCost" type="number" value="0" step="0.01"></td>
-  <td><input class="table-input laborCost" type="number" value="0" step="0.01"></td>
-  <td class="lineTotal">$0.00</td>
+    <td><input class="table-input" value="New Item" /></td>
+    <td><input class="table-input qty" type="number" value="1" step="0.01" /></td>
+    <td><input class="table-input" value="unit" /></td>
+    <td><input class="table-input unitCost" type="number" value="0" step="0.01" /></td>
+    <td><input class="table-input laborCost" type="number" value="0" step="0.01" /></td>
+    <td class="lineTotal">$0.00</td>
   `;
 
   tbody.appendChild(tr);
-
   attachEstimateListeners();
-
   recalcEstimate();
-
 }
 
-/* ---------- LISTENERS ---------- */
-
-function attachEstimateListeners(){
-
+function attachEstimateListeners() {
   document.querySelectorAll('.qty, .unitCost, .laborCost').forEach(input => {
-
     input.removeEventListener('input', recalcEstimate);
     input.addEventListener('input', recalcEstimate);
-
   });
+}
 
+/* ---------- CHAT ---------- */
+
+function setupChat() {
+  const chatInput = document.querySelector('.chat-compose input');
+  const sendBtn = document.querySelector('.chat-compose button');
+  const messages = document.querySelector('.messages');
+
+  if (!chatInput || !sendBtn || !messages) return;
+
+  sendBtn.addEventListener('click', () => {
+    const text = chatInput.value.trim();
+    if (!text) return;
+
+    const message = document.createElement('div');
+    message.className = 'message contractor';
+    message.innerHTML = `<strong>Impact Construction</strong>${text}`;
+    messages.appendChild(message);
+
+    chatInput.value = '';
+  });
+}
+
+/* ---------- BACK BUTTON ---------- */
+
+function setupBackButton() {
+  const backBtn = document.querySelector('.top-actions .btn-soft');
+  if (!backBtn) return;
+
+  backBtn.addEventListener('click', () => {
+    window.location.href = 'index.html';
+  });
 }
 
 /* ---------- SUBMIT BID ---------- */
 
-function submitBid(){
-
+function submitBid() {
   const bidAmount = document.getElementById("grandOut").innerText;
 
   const bidData = {
@@ -1342,17 +1407,17 @@ function submitBid(){
   };
 
   console.log("Bid Submitted:", bidData);
-
   alert("Bid submitted to customer!");
-
 }
 
 /* ---------- INIT ---------- */
 
+loadProjectRoom();
 calculateTile();
 attachEstimateListeners();
 recalcEstimate();
-
+setupChat();
+setupBackButton();
 </script>
 </body>
 </html>
