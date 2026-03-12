@@ -1270,7 +1270,8 @@ function applyWorkspaceMode(){
 /* ---------- POPULATE PAGE ---------- */
 
 function loadProjectRoom() {
-
+const params = new URLSearchParams(window.location.search);
+const mode = params.get("mode") || "homeowner";
   if (!savedJob) return;
 
   const titleEl = document.querySelector(".project-title h2");
@@ -1473,7 +1474,7 @@ function setupBackButton(){
 const mode = params.get("mode");
 
 if (mode === "homeowner") {
-  window.location.href = "map.html?view=homeowner";
+  window.location.href = `map.html?view=${mode}`;
 } else {
   window.location.href = "map.html?view=contractor";
 }
