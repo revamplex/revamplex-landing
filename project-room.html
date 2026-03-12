@@ -1469,7 +1469,14 @@ function setupBackButton(){
 
     // homeowner workspace
     if(modeParam === "homeowner"){
-      window.location.href = "map.html?view=homeowner";
+     const params = new URLSearchParams(window.location.search);
+const mode = params.get("mode");
+
+if (mode === "homeowner") {
+  window.location.href = "map.html?view=homeowner";
+} else {
+  window.location.href = "map.html?view=contractor";
+}
       return;
     }
 
