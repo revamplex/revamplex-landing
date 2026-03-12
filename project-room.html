@@ -1468,7 +1468,7 @@ function setupBackButton(){
   backBtn.addEventListener("click", () => {
 
     const params = new URLSearchParams(window.location.search);
-    const role = params.get("mode") || localStorage.getItem("revampUserRole") || "contractor";
+    const role = params.get("mode") || "contractor";
 
     window.location.href = `map.html?view=${role}`;
 
