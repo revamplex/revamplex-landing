@@ -914,7 +914,7 @@
             </div>
           </div>
         </section>
-
+<div class="contractor-tools">
         <section class="panel">
           <div class="panel-header">
             <div>
@@ -1214,9 +1214,14 @@
     <p class="footer-note">Revamp Project Room prototype • Private homeowner + contractor workspace • Ready to connect to Supabase / auth / database next</p>
   </div>
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
+ <script>
+
+/* ---------- MODE DETECTION ---------- */
+
+const params = new URLSearchParams(window.location.search);
 const mode = params.get("mode") || "contractor";
+const jobId = params.get("job") || "demo";
+
 /* ---------- HELPERS ---------- */
 
 function currency(value) {
@@ -1228,13 +1233,31 @@ function currency(value) {
 
 /* ---------- LOAD SELECTED JOB ---------- */
 
-const params = new URLSearchParams(window.location.search);
-const jobId = params.get("job") || "demo";
 const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null");
 
-/* ---------- POPULATE PAGE FROM JOB ---------- */
+/* ---------- MODE SWITCH ---------- */
+
+function applyWorkspaceMode(){
+
+  if(mode === "homeowner"){
+
+    document.querySelectorAll(".contractor-tools").forEach(el=>{
+      el.style.display="none";
+    });
+
+    const title = document.querySelector(".brand h1");
+    if(title){
+      title.textContent = "Revamp Project Room™ — Homeowner Workspace";
+    }
+
+  }
+
+}
+
+/* ---------- POPULATE PAGE ---------- */
 
 function loadProjectRoom() {
+
   if (!savedJob) return;
 
   const titleEl = document.querySelector(".project-title h2");
@@ -1253,7 +1276,9 @@ function loadProjectRoom() {
   const projectDescription = savedJob.description || "No description provided.";
 
   titleEl.textContent = projectTitle;
-  subEl.textContent = `Project ID: ${savedJob.id} • ${projectCity} • Customer: ${projectCustomer} • Trade: ${projectTrade}`;
+
+  subEl.textContent =
+    `Project ID: ${savedJob.id} • ${projectCity} • Customer: ${projectCustomer} • Trade: ${projectTrade}`;
 
   if (stats[0]) stats[0].textContent = projectBudget;
   if (stats[1]) stats[1].textContent = "Schedule TBD";
@@ -1267,7 +1292,8 @@ function loadProjectRoom() {
   if (summaryLines[4]) summaryLines[4].textContent = "Customer + Assigned Contractor Only";
 
   if (notesBox) {
-    notesBox.value = `Project Description:
+    notesBox.value =
+`Project Description:
 ${projectDescription}
 
 Budget:
@@ -1277,17 +1303,19 @@ Posted:
 ${projectPostedAgo}
 
 Estimate Notes:
-Includes labor, material, disposal, and standard site protection. Permit costs are included where required. Fixtures and finish materials may be owner-selected or contractor-approved equivalent of similar quality and cost.`;
+Includes labor, material, disposal, and standard site protection. Permit costs are included where required. Fixtures may be owner-selected or contractor-approved equivalent.`;
   }
 
   if (customerNameInput) {
     customerNameInput.value = projectCustomer;
   }
+
 }
 
 /* ---------- TILE CALCULATOR ---------- */
 
-function calculateTile() {
+function calculateTile(){
+
   const length = parseFloat(document.getElementById('length').value) || 0;
   const width = parseFloat(document.getElementById('width').value) || 0;
   const tileLength = parseFloat(document.getElementById('tileLength').value) || 0;
@@ -1296,130 +1324,177 @@ function calculateTile() {
   const perBox = parseFloat(document.getElementById('perBox').value) || 1;
 
   const area = length * width;
-  const withWaste = area * (1 + waste / 100);
+  const withWaste = area * (1 + waste/100);
   const boxCount = Math.ceil(withWaste / perBox);
-  const tileSqFt = (tileLength * tileWidth) / 144;
-  const tileCount = tileSqFt > 0 ? Math.ceil(withWaste / tileSqFt) : 0;
-  const thinsetBags = Math.max(1, Math.ceil(withWaste / 50));
-  const groutBags = Math.max(1, Math.ceil(withWaste / 90));
 
-  document.getElementById('areaOut').textContent = area.toFixed(2) + ' sqft';
-  document.getElementById('wasteOut').textContent = withWaste.toFixed(2) + ' sqft';
-  document.getElementById('boxesOut').textContent = boxCount + ' boxes';
-  document.getElementById('tileCountOut').textContent = tileCount + ' tiles';
-  document.getElementById('thinsetOut').textContent = thinsetBags + ' bags';
-  document.getElementById('groutOut').textContent = groutBags + ' bags';
+  const tileSqFt = (tileLength * tileWidth)/144;
+  const tileCount = tileSqFt>0 ? Math.ceil(withWaste/tileSqFt) : 0;
+
+  const thinsetBags = Math.max(1,Math.ceil(withWaste/50));
+  const groutBags = Math.max(1,Math.ceil(withWaste/90));
+
+  document.getElementById('areaOut').textContent = area.toFixed(2)+" sqft";
+  document.getElementById('wasteOut').textContent = withWaste.toFixed(2)+" sqft";
+  document.getElementById('boxesOut').textContent = boxCount+" boxes";
+  document.getElementById('tileCountOut').textContent = tileCount+" tiles";
+  document.getElementById('thinsetOut').textContent = thinsetBags+" bags";
+  document.getElementById('groutOut').textContent = groutBags+" bags";
+
 }
 
 /* ---------- ESTIMATE ---------- */
 
-function recalcEstimate() {
-  const rows = document.querySelectorAll('#estimateTable tbody tr');
-  let subtotal = 0;
+function recalcEstimate(){
 
-  rows.forEach(row => {
-    const qty = parseFloat(row.querySelector('.qty')?.value) || 0;
-    const unitCost = parseFloat(row.querySelector('.unitCost')?.value) || 0;
-    const laborCost = parseFloat(row.querySelector('.laborCost')?.value) || 0;
-    const total = qty * (unitCost + laborCost);
+  const rows = document.querySelectorAll('#estimateTable tbody tr');
+
+  let subtotal=0;
+
+  rows.forEach(row=>{
+
+    const qty=parseFloat(row.querySelector('.qty')?.value)||0;
+    const unitCost=parseFloat(row.querySelector('.unitCost')?.value)||0;
+    const laborCost=parseFloat(row.querySelector('.laborCost')?.value)||0;
+
+    const total = qty*(unitCost+laborCost);
 
     row.querySelector('.lineTotal').textContent = currency(total);
-    subtotal += total;
+
+    subtotal+=total;
+
   });
 
-  const markup = subtotal * 0.15;
-  const tax = (subtotal + markup) * 0.06625;
-  const grand = subtotal + markup + tax;
+  const markup=subtotal*0.15;
+  const tax=(subtotal+markup)*0.06625;
+  const grand=subtotal+markup+tax;
 
   document.getElementById('subtotalOut').textContent = currency(subtotal);
   document.getElementById('markupOut').textContent = currency(markup);
   document.getElementById('taxOut').textContent = currency(tax);
   document.getElementById('grandOut').textContent = currency(grand);
+
 }
 
-function addRow() {
-  const tbody = document.querySelector('#estimateTable tbody');
-  const tr = document.createElement('tr');
+function addRow(){
 
-  tr.innerHTML = `
-    <td><input class="table-input" value="New Item" /></td>
-    <td><input class="table-input qty" type="number" value="1" step="0.01" /></td>
-    <td><input class="table-input" value="unit" /></td>
-    <td><input class="table-input unitCost" type="number" value="0" step="0.01" /></td>
-    <td><input class="table-input laborCost" type="number" value="0" step="0.01" /></td>
-    <td class="lineTotal">$0.00</td>
-  `;
+  const tbody=document.querySelector('#estimateTable tbody');
+
+  const tr=document.createElement('tr');
+
+  tr.innerHTML=
+`
+<td><input class="table-input" value="New Item"/></td>
+<td><input class="table-input qty" type="number" value="1"/></td>
+<td><input class="table-input" value="unit"/></td>
+<td><input class="table-input unitCost" type="number" value="0"/></td>
+<td><input class="table-input laborCost" type="number" value="0"/></td>
+<td class="lineTotal">$0.00</td>
+`;
 
   tbody.appendChild(tr);
+
   attachEstimateListeners();
+
   recalcEstimate();
+
 }
 
-function attachEstimateListeners() {
-  document.querySelectorAll('.qty, .unitCost, .laborCost').forEach(input => {
-    input.removeEventListener('input', recalcEstimate);
-    input.addEventListener('input', recalcEstimate);
+function attachEstimateListeners(){
+
+  document.querySelectorAll('.qty,.unitCost,.laborCost').forEach(input=>{
+
+    input.removeEventListener('input',recalcEstimate);
+
+    input.addEventListener('input',recalcEstimate);
+
   });
+
 }
 
 /* ---------- CHAT ---------- */
 
-function setupChat() {
-  const chatInput = document.querySelector('.chat-compose input');
-  const sendBtn = document.querySelector('.chat-compose button');
-  const messages = document.querySelector('.messages');
+function setupChat(){
 
-  if (!chatInput || !sendBtn || !messages) return;
+  const chatInput=document.querySelector('.chat-compose input');
+  const sendBtn=document.querySelector('.chat-compose button');
+  const messages=document.querySelector('.messages');
 
-  sendBtn.addEventListener('click', () => {
-    const text = chatInput.value.trim();
-    if (!text) return;
+  if(!chatInput||!sendBtn||!messages)return;
 
-    const message = document.createElement('div');
-    message.className = 'message contractor';
-    message.innerHTML = `<strong>Impact Construction</strong>${text}`;
+  sendBtn.addEventListener('click',()=>{
+
+    const text=chatInput.value.trim();
+
+    if(!text)return;
+
+    const message=document.createElement('div');
+
+    message.className='message contractor';
+
+    message.innerHTML=`<strong>Impact Construction</strong>${text}`;
+
     messages.appendChild(message);
 
-    chatInput.value = '';
+    chatInput.value='';
+
   });
+
 }
 
 /* ---------- BACK BUTTON ---------- */
 
-function setupBackButton() {
-  const backBtn = document.querySelector('.top-actions .btn-soft');
-  if (!backBtn) return;
+function setupBackButton(){
 
-  backBtn.addEventListener('click', () => {
-    window.location.href = 'index.html';
+  const backBtn=document.querySelector('.top-actions .btn-soft');
+
+  if(!backBtn)return;
+
+  backBtn.addEventListener('click',()=>{
+
+    window.location.href='index.html';
+
   });
+
 }
 
 /* ---------- SUBMIT BID ---------- */
 
-function submitBid() {
-  const bidAmount = document.getElementById("grandOut").innerText;
+function submitBid(){
 
-  const bidData = {
-    job_id: jobId,
-    contractor: "Impact Construction",
-    amount: bidAmount,
-    status: "submitted",
-    timestamp: new Date().toISOString()
+  const bidAmount=document.getElementById("grandOut").innerText;
+
+  const bidData={
+
+    job_id:jobId,
+    contractor:"Impact Construction",
+    amount:bidAmount,
+    status:"submitted",
+    timestamp:new Date().toISOString()
+
   };
 
-  console.log("Bid Submitted:", bidData);
+  console.log("Bid Submitted:",bidData);
+
   alert("Bid submitted to customer!");
+
 }
 
 /* ---------- INIT ---------- */
 
+applyWorkspaceMode();
+
 loadProjectRoom();
+
 calculateTile();
+
 attachEstimateListeners();
+
 recalcEstimate();
+
 setupChat();
+
 setupBackButton();
+
 </script>
 </body>
 </html>
