@@ -1031,7 +1031,9 @@ Send
 <button id="calculateEstimateBtn" class="mini-btn primary" style="width:100%;margin-bottom:10px;">
 Calculate Estimate
 </button>
-
+<button id="aiEstimateBtn" class="mini-btn secondary" style="width:100%;margin-bottom:10px;">
+🤖 Generate Estimate with AI
+</button>
 <div style="font-weight:900;font-size:18px;">
 Total Estimate: <span id="estimateTotal">$0</span>
 </div>
@@ -2178,6 +2180,52 @@ calculateEstimateBtn.addEventListener("click", ()=>{
 
   const markupAmount = subtotal * (markup / 100);
 
+  const total = subtotal + markupAmount;
+
+  estimateTotal.textContent = "$" + total.toLocaleString();
+
+});
+    /* ======================
+   AI ESTIMATE GENERATOR
+====================== */
+
+const aiEstimateBtn = document.getElementById("aiEstimateBtn");
+
+aiEstimateBtn.addEventListener("click", () => {
+
+  const jobText = projectRoomJobInfo.textContent.toLowerCase();
+
+  let labor = 20;
+  let materials = 2000;
+
+  if(jobText.includes("kitchen")){
+    labor = 80;
+    materials = 6000;
+  }
+
+  if(jobText.includes("bathroom")){
+    labor = 40;
+    materials = 3000;
+  }
+
+  if(jobText.includes("roof")){
+    labor = 50;
+    materials = 5000;
+  }
+
+  if(jobText.includes("deck")){
+    labor = 35;
+    materials = 2500;
+  }
+
+  laborHours.value = labor;
+  hourlyRate.value = 95;
+  materialCost.value = materials;
+  markupPercent.value = 20;
+
+  const laborCost = labor * 95;
+  const subtotal = laborCost + materials;
+  const markupAmount = subtotal * 0.20;
   const total = subtotal + markupAmount;
 
   estimateTotal.textContent = "$" + total.toLocaleString();
