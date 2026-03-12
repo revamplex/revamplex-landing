@@ -1270,8 +1270,6 @@ function applyWorkspaceMode(){
 /* ---------- POPULATE PAGE ---------- */
 
 function loadProjectRoom() {
-const params = new URLSearchParams(window.location.search);
-const mode = params.get("mode") || "homeowner";
   if (!savedJob) return;
 
   const titleEl = document.querySelector(".project-title h2");
