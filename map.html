@@ -2199,7 +2199,22 @@ calculateEstimateBtn.addEventListener("click", ()=>{
 
   estimateTotal.textContent = "$" + total.toLocaleString();
 
-});
+});<div class="detail-panel">
+
+<h4>Project Files</h4>
+
+<input type="file" id="fileUploadInput" multiple style="
+margin-bottom:10px;
+">
+
+<div id="fileList" style="
+display:flex;
+flex-direction:column;
+gap:6px;
+font-size:14px;
+"></div>
+
+</div>
     /* ======================
    AI ESTIMATE GENERATOR
 ====================== */
@@ -2328,6 +2343,38 @@ downloadProposalBtn.addEventListener("click", () => {
   );
 
   doc.save("Revamp-Proposal.pdf");
+
+});
+    /* ======================
+   PROJECT FILE UPLOADS
+====================== */
+
+const fileUploadInput = document.getElementById("fileUploadInput");
+const fileList = document.getElementById("fileList");
+
+fileUploadInput.addEventListener("change", () => {
+
+  const files = fileUploadInput.files;
+
+  for(let file of files){
+
+    const fileItem = document.createElement("div");
+
+    fileItem.style.padding = "8px";
+    fileItem.style.border = "1px solid #e2e8f0";
+    fileItem.style.borderRadius = "8px";
+    fileItem.style.background = "#ffffff";
+
+    fileItem.innerHTML = `
+      📎 ${file.name} 
+      <span style="color:#64748b;font-size:12px;">
+      (${Math.round(file.size/1024)} KB)
+      </span>
+    `;
+
+    fileList.appendChild(fileItem);
+
+  }
 
 });
   </script>
