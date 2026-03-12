@@ -1885,12 +1885,16 @@ function openProjectRoom(jobId) {
     }
 
     function setMode(mode) {
-      currentMode = mode;
-      homeownerModeBtn.classList.toggle('active', mode === 'homeowner');
-      contractorModeBtn.classList.toggle('active', mode === 'contractor');
-      applyFilters();
-      ensureUIVisible();
-    }
+  currentMode = mode;
+
+  window.history.replaceState(null, '', `map.html?view=${mode}`);
+
+  homeownerModeBtn.classList.toggle('active', mode === 'homeowner');
+  contractorModeBtn.classList.toggle('active', mode === 'contractor');
+
+  applyFilters();
+  ensureUIVisible();
+}
 
     searchBtn.addEventListener('click', () => {
       applyFilters();
