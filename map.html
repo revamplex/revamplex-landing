@@ -1636,7 +1636,7 @@ Message
           </div>
           <div class="card-actions">
             <button class="mini-btn primary" data-action="job-details" data-id="${item.id}">View Job</button>
-<button class="mini-btn secondary" onclick="openProjectRoom(${item.id})">
+<button class="mini-btn secondary" data-action="bid" data-id="${item.id}">
 Submit Bid
 </button>
           </div>
@@ -1885,7 +1885,7 @@ function openProjectRoom(jobId) {
 </div>
           </div>
           <div class="card-actions">
-<button class="mini-btn secondary" onclick="openProjectRoom('job123')">
+<button class="mini-btn secondary bid-btn" data-id="${item.id}">
 Submit Bid
 </button>
             <button class="mini-btn primary" id="detailCloseSecondary">Close</button>
