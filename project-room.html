@@ -1215,6 +1215,8 @@
   </div>
 
   <script>
+    const params = new URLSearchParams(window.location.search);
+const mode = params.get("mode") || "contractor";
 /* ---------- HELPERS ---------- */
 
 function currency(value) {
