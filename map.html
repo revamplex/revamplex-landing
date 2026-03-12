@@ -1322,7 +1322,8 @@
       }
     ];
 
-    let currentMode = 'homeowner';
+   const params = new URLSearchParams(window.location.search);
+let currentMode = params.get('view') || 'homeowner'; let currentMode = 'homeowner';
     let activeSort = 'distance';
     let activeId = null;
     let filteredItems = [];
@@ -2065,5 +2066,6 @@ if(view === "contractor"){
     homeownerBtn.classList.add("active");
     contractorBtn.classList.remove("active");
 }
+  const MODE = new URLSearchParams(location.search).get("view") || "homeowner";
 </body>
 </html>
