@@ -1240,6 +1240,8 @@ const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null
 
 function applyWorkspaceMode(){
 
+  const inviteBtn = document.querySelector('.top-actions .btn-primary');
+
   if(mode === "homeowner"){
 
     document.querySelectorAll(".contractor-tools").forEach(el=>{
@@ -1249,6 +1251,16 @@ function applyWorkspaceMode(){
     const title = document.querySelector(".brand h1");
     if(title){
       title.textContent = "Revamp Project Room™ — Homeowner Workspace";
+    }
+
+    if(inviteBtn){
+      inviteBtn.textContent = "Invite Contractor";
+    }
+
+  } else {
+
+    if(inviteBtn){
+      inviteBtn.textContent = "Invite Customer";
     }
 
   }
