@@ -1220,7 +1220,11 @@
 /* ---------- MODE DETECTION ---------- */
 
 const params = new URLSearchParams(window.location.search);
-const mode = params.get("mode") || "contractor";
+let mode = params.get("mode");
+
+if(!mode){
+  mode = localStorage.getItem("revampUserRole") || "contractor";
+}
 const jobId = params.get("job") || "demo";
 
 /* ---------- HELPERS ---------- */
