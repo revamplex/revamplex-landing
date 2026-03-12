@@ -1458,13 +1458,21 @@ function setupChat(){
 
 function setupBackButton(){
 
-  const backBtn=document.querySelector('.top-actions .btn-soft');
+  const backBtn = document.querySelector('.top-actions .btn-soft');
 
-  if(!backBtn)return;
+  if(!backBtn) return;
 
   backBtn.addEventListener('click',()=>{
 
-    window.location.href='index.html';
+    if(mode === "homeowner"){
+
+      window.location.href = "map.html?view=homeowner";
+
+    }else{
+
+      window.location.href = "map.html?view=contractor";
+
+    }
 
   });
 
