@@ -1856,9 +1856,17 @@ function openProjectRoom(jobId) {
       }
 
       if (action === 'message') {
-        showStatus(`Message opened for ${item.name || item.title}`);
-        return;
-      }
+
+  const contractor = contractors.find(c => c.id === id);
+
+  if (contractor) {
+    sessionStorage.setItem('revampSelectedContractor', JSON.stringify(contractor));
+  }
+
+  window.location.href = `project-room.html?mode=homeowner&contractor=${id}`;
+
+  return;
+}
 
       if (action === 'bid') {
         openProjectRoom(id);
