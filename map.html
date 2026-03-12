@@ -1322,8 +1322,7 @@
     ];
 
    const params = new URLSearchParams(window.location.search);
-const params = new URLSearchParams(window.location.search);
-let currentMode = params.get('view') || 'homeowner';
+currentMode = params.get('view') || 'homeowner';
     let activeSort = 'distance';
     let activeId = null;
     let filteredItems = [];
