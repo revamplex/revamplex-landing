@@ -985,21 +985,6 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-// Detect URL view mode
-const params = new URLSearchParams(window.location.search);
-const view = params.get("view");
-
-// Buttons
-const homeownerBtn = document.querySelector(".homeowner-view");
-const contractorBtn = document.querySelector(".contractor-view");
-
-if(view === "contractor"){
-    contractorBtn.classList.add("active");
-    homeownerBtn.classList.remove("active");
-}else{
-    homeownerBtn.classList.add("active");
-    contractorBtn.classList.remove("active");
-}
   <script>
     const TRADE_OPTIONS = [
       'Kitchen Renovation',
