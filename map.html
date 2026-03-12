@@ -2050,5 +2050,20 @@ function openProjectRoom(jobId) {
     activeId = contractors[0].id;
     applyFilters();
   </script>
+  // Detect URL view mode
+const params = new URLSearchParams(window.location.search);
+const view = params.get("view");
+
+// Buttons
+const homeownerBtn = document.querySelector(".homeowner-view");
+const contractorBtn = document.querySelector(".contractor-view");
+
+if(view === "contractor"){
+    contractorBtn.classList.add("active");
+    homeownerBtn.classList.remove("active");
+}else{
+    homeownerBtn.classList.add("active");
+    contractorBtn.classList.remove("active");
+}
 </body>
 </html>
