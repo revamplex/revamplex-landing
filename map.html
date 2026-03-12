@@ -1034,10 +1034,21 @@ Calculate Estimate
 <button id="aiEstimateBtn" class="mini-btn secondary" style="width:100%;margin-bottom:10px;">
 🤖 Generate Estimate with AI
 </button>
+  <button id="generateProposalBtn" class="mini-btn secondary" style="width:100%;margin-bottom:10px;">
+📄 Generate Proposal
+</button>
 <div style="font-weight:900;font-size:18px;">
 Total Estimate: <span id="estimateTotal">$0</span>
 </div>
-
+<div id="proposalOutput" style="
+margin-top:14px;
+padding:12px;
+border:1px solid #e2e8f0;
+border-radius:12px;
+background:#f8fafc;
+font-size:14px;
+display:none;
+"></div>
 </div>
     </div>
   </div>
@@ -2229,6 +2240,43 @@ aiEstimateBtn.addEventListener("click", () => {
   const total = subtotal + markupAmount;
 
   estimateTotal.textContent = "$" + total.toLocaleString();
+
+});
+    /* ======================
+   PROPOSAL GENERATOR
+====================== */
+
+const generateProposalBtn = document.getElementById("generateProposalBtn");
+const proposalOutput = document.getElementById("proposalOutput");
+
+generateProposalBtn.addEventListener("click", () => {
+
+  const labor = laborHours.value || 0;
+  const rate = hourlyRate.value || 0;
+  const materials = materialCost.value || 0;
+  const markup = markupPercent.value || 0;
+  const total = estimateTotal.textContent;
+
+  const jobText = projectRoomJobInfo.innerHTML;
+
+  proposalOutput.style.display = "block";
+
+  proposalOutput.innerHTML = `
+  <strong>Revamp Project Proposal</strong><br><br>
+
+  <strong>Project:</strong><br>
+  ${jobText}<br><br>
+
+  <strong>Estimate Breakdown</strong><br>
+  Labor Hours: ${labor}<br>
+  Hourly Rate: $${rate}<br>
+  Material Cost: $${materials}<br>
+  Markup: ${markup}%<br><br>
+
+  <strong>Total Proposal Price:</strong> ${total}<br><br>
+
+  <em>This proposal was generated through Revamp. Final pricing subject to site verification.</em>
+  `;
 
 });
   </script>
