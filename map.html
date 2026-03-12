@@ -1601,6 +1601,7 @@ const projectRoomJobInfo = document.getElementById('projectRoomJobInfo');
 Message
 </button>
 </div>
+</div>
       `;
     }
 
@@ -1635,7 +1636,7 @@ Message
           </div>
           <div class="card-actions">
             <button class="mini-btn primary" data-action="job-details" data-id="${item.id}">View Job</button>
-<button class="mini-btn secondary" onclick="openProjectRoom('job123')">
+<button class="mini-btn secondary" onclick="openProjectRoom(${item.id})">
 Submit Bid
 </button>
           </div>
@@ -2388,22 +2389,9 @@ fileUploadInput.addEventListener("change", () => {
   </script>
   <script>
 
-function openProjectRoom() {
-
-  const jobId = "123"; // later this will come from the database
-
-  window.location.href = "project-room.html?job=" + jobId;
-
-}
 
 </script>
   <script>
-
-function openProjectRoom(jobId){
-
-window.location.href = "project-room.html?job=" + jobId;
-
-}
 
 </script>
 </body>
