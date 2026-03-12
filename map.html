@@ -1866,7 +1866,7 @@ function openProjectRoom(jobId) {
     sessionStorage.setItem('revampSelectedContractor', JSON.stringify(contractor));
   }
 
-  window.location.href = `project-room.html?mode=homeowner&contractor=${id}`;
+  window.location.href = `project-room.html?mode=contractor&job=${jobId}`;
 
   return;
 }
