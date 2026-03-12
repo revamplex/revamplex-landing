@@ -1732,6 +1732,7 @@
 
     <script>
 function openProjectRoom(jobId) {
+
   const job = jobs.find(entry => entry.id === jobId);
 
   if (job) {
@@ -1739,6 +1740,7 @@ function openProjectRoom(jobId) {
   }
 
   window.location.href = `project-room.html?job=${jobId}`;
+
 }
 </script>
 
