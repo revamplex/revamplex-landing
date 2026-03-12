@@ -11,6 +11,7 @@
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""
   />
+
   <style>
     :root {
       --brand: #f97316;
@@ -143,7 +144,8 @@
     .fab,
     .modal-btn,
     .close-btn,
-    .restore-ui-btn {
+    .restore-ui-btn,
+    .favorite-btn {
       border: 0;
       cursor: pointer;
     }
@@ -385,8 +387,7 @@
     }
 
     .badge-row,
-    .info-row,
-    .bid-list {
+    .info-row {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
@@ -418,6 +419,7 @@
     .card-actions {
       display: flex;
       gap: 10px;
+      align-items: center;
     }
 
     .mini-btn {
@@ -438,6 +440,25 @@
       background: white;
       color: var(--text);
       border: 1px solid var(--line);
+    }
+
+    .favorite-btn {
+      flex: 0 0 42px;
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: white;
+      color: var(--text);
+      border: 1px solid var(--line);
+      font-size: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .favorite-btn.active {
+      background: #fff7ed;
+      border-color: rgba(249, 115, 22, 0.3);
     }
 
     .fab-wrap {
@@ -629,31 +650,6 @@
       color: var(--muted);
       line-height: 1.5;
       font-size: 14px;
-    }
-
-    .bid-item {
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 12px;
-      background: white;
-    }
-
-    .bid-item-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 6px;
-    }
-
-    .bid-item-title {
-      font-size: 14px;
-      font-weight: 900;
-    }
-
-    .bid-item-sub {
-      color: var(--muted);
-      font-size: 13px;
     }
 
     .map-pin {
@@ -968,100 +964,9 @@
     </div>
   </div>
 
-    <div style="display:grid; grid-template-columns: 320px 1fr; gap:16px;">
-      
-      <div class="detail-panel" id="projectRoomSidebar">
-        <h4>Job Overview</h4>
-        <p id="projectRoomJobInfo">Select a job to view project details.</p>
-      </div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-      <div class="detail-panel" style="display:flex;flex-direction:column;height:500px;">
-
-<h4>Project Chat</h4>
-
-<div id="chatMessages" style="
-flex:1;
-overflow-y:auto;
-background:#ffffff;
-border:1px solid #e2e8f0;
-border-radius:12px;
-padding:12px;
-margin-bottom:10px;
-display:flex;
-flex-direction:column;
-gap:8px;
-"></div>
-
-<div style="display:flex;gap:8px;">
-<input id="chatInput" placeholder="Type a message..." style="
-flex:1;
-border:1px solid #e2e8f0;
-border-radius:10px;
-padding:10px;
-outline:none;
-"/>
-
-<button id="sendChatBtn" class="mini-btn primary" style="flex:0 0 110px;">
-Send
-</button>
-</div>
-
-</div>
-<div class="detail-panel">
-
-<h4>Estimate Builder</h4>
-
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-
-<input id="laborHours" placeholder="Labor Hours" class="input">
-<input id="hourlyRate" placeholder="Hourly Rate ($)" class="input">
-
-<input id="materialCost" placeholder="Material Cost ($)" class="input">
-<input id="markupPercent" placeholder="Markup %" class="input">
-
-</div>
-<div class="detail-panel">
-
-<h4>Project Files</h4>
-
-<input type="file" id="fileUploadInput" multiple>
-
-<div id="fileList"></div>
-
-</div>
-<button id="calculateEstimateBtn" class="mini-btn primary" style="width:100%;margin-bottom:10px;">
-Calculate Estimate
-</button>
-<button id="aiEstimateBtn" class="mini-btn secondary" style="width:100%;margin-bottom:10px;">
-🤖 Generate Estimate with AI
-</button>
-  <button id="generateProposalBtn" class="mini-btn secondary" style="width:100%;margin-bottom:10px;">
-📄 Generate Proposal
-</button>
-  <button id="downloadProposalBtn" class="mini-btn secondary">
-⬇ Download Proposal PDF
-</button>
-<div style="font-weight:900;font-size:18px;">
-Total Estimate: <span id="estimateTotal">$0</span>
-</div>
-<div id="proposalOutput" style="
-margin-top:14px;
-padding:12px;
-border:1px solid #e2e8f0;
-border-radius:12px;
-background:#f8fafc;
-font-size:14px;
-display:none;
-"></div>
-</div>
-    </div>
-  </div>
-</div>
- <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<script>
+  <script>
     const TRADE_OPTIONS = [
       'Kitchen Renovation',
       'Bathroom Renovation',
@@ -1448,10 +1353,6 @@ display:none;
     const detailTitle = document.getElementById('detailTitle');
     const detailContent = document.getElementById('detailContent');
     const closeDetailModal = document.getElementById('closeDetailModal');
-    const projectRoomModal = document.getElementById('projectRoomModal');
-const closeProjectRoomModal = document.getElementById('closeProjectRoomModal');
-const projectRoomTitle = document.getElementById('projectRoomTitle');
-const projectRoomJobInfo = document.getElementById('projectRoomJobInfo');
 
     function populateTradeSelect() {
       jobTradeSelect.innerHTML = TRADE_OPTIONS.map(trade => `<option>${trade}</option>`).join('');
@@ -1482,6 +1383,29 @@ const projectRoomJobInfo = document.getElementById('projectRoomJobInfo');
 
     function getCurrentDataset() {
       return currentMode === 'homeowner' ? contractors : jobs;
+    }
+
+    function getFavorites() {
+      return JSON.parse(localStorage.getItem('revampFavorites') || '[]');
+    }
+
+    function isFavorite(jobId) {
+      return getFavorites().includes(jobId);
+    }
+
+    function toggleFavorite(jobId) {
+      let favorites = getFavorites();
+
+      if (favorites.includes(jobId)) {
+        favorites = favorites.filter(id => id !== jobId);
+        showStatus('Removed from favorites');
+      } else {
+        favorites.push(jobId);
+        showStatus('Saved to favorites');
+      }
+
+      localStorage.setItem('revampFavorites', JSON.stringify(favorites));
+      renderCards(filteredItems);
     }
 
     function makeIcon(item, isActive) {
@@ -1591,15 +1515,16 @@ const projectRoomJobInfo = document.getElementById('projectRoomJobInfo');
             <span><strong>Projects:</strong> ${item.projectsCompleted}</span>
           </div>
           <div class="card-actions">
-<button class="mini-btn primary">
-Message
-</button>
-</div>
-</div>
+            <button class="mini-btn secondary" data-action="view" data-id="${item.id}">View Profile</button>
+            <button class="mini-btn primary" data-action="message" data-id="${item.id}">Message</button>
+          </div>
+        </div>
       `;
     }
 
     function jobCardHtml(item) {
+      const fav = isFavorite(item.id);
+
       return `
         <div class="card-top">
           <div class="card-title-wrap">
@@ -1629,10 +1554,11 @@ Message
             <span class="badge">${item.distance} mi away</span>
           </div>
           <div class="card-actions">
-            <button class="mini-btn primary" data-action="job-details" data-id="${item.id}">View Job</button>
-<button class="mini-btn secondary" onclick="openProjectRoom(${item.id})">
-Submit Bid
-</button>
+            <button class="mini-btn secondary" data-action="job-details" data-id="${item.id}">View Job</button>
+            <button class="favorite-btn ${fav ? 'active' : ''}" data-action="favorite" data-id="${item.id}" title="Save to favorites">
+              ${fav ? '❤️' : '🤍'}
+            </button>
+            <button class="mini-btn primary" data-action="bid" data-id="${item.id}">Submit Bid</button>
           </div>
         </div>
       `;
@@ -1803,27 +1729,11 @@ Submit Bid
       document.getElementById('jobDescription').value = '';
       document.getElementById('jobTrade').selectedIndex = 0;
     }
-function openProjectRoom(jobId) {
 
-  const job = jobs.find(entry => entry.id === jobId);
-  if (!job) return;
+    function openProjectRoom(jobId) {
+      window.location.href = `project-room.html?job=${jobId}`;
+    }
 
-  ensureUIVisible();
-
-  projectRoomTitle.textContent = `${job.title} • Project Room`;
-
-  projectRoomJobInfo.innerHTML = `
-    <strong>Trade:</strong> ${job.trade}<br>
-    <strong>City:</strong> ${job.city}<br>
-    <strong>Budget:</strong> ${job.budget}<br>
-    <strong>Customer:</strong> ${job.customer}<br>
-    <strong>Posted:</strong> ${job.postedAgo}<br><br>
-    ${job.description}
-  `;
-
-  projectRoomModal.classList.add('show');
-
-}
     function openDetailModal(item) {
       if (!item) return;
 
@@ -1855,14 +1765,21 @@ function openProjectRoom(jobId) {
             <h4>Specialties</h4>
             <div class="badge-row">${item.tags.map(tag => `<span class="badge">${tag}</span>`).join('')}</div>
           </div>
+          <div class="card-actions">
+            <button class="mini-btn primary" data-action="message" data-id="${item.id}">Message</button>
+            <button class="mini-btn secondary" id="detailCloseSecondary">Close</button>
+          </div>
         `;
       } else {
+        const fav = isFavorite(item.id);
+
         detailTitle.textContent = item.title;
         detailContent.innerHTML = `
           <div class="detail-panel">
             <h4>${item.trade} • ${item.city}</h4>
             <p>${item.description}</p>
           </div>
+
           <div class="modal-grid">
             <div class="detail-panel">
               <h4>Customer</h4>
@@ -1873,52 +1790,31 @@ function openProjectRoom(jobId) {
               <p>${item.budget} • Posted ${item.postedAgo} • Approx. ${item.distance} miles away.</p>
             </div>
           </div>
+
           <div class="detail-panel">
-  <h4>Bidding</h4>
-  <p>Bids are submitted privately to the customer.</p>
-</div>
+            <h4>Bidding</h4>
+            <p>Bids are submitted privately to the customer. Other contractors cannot see your bid.</p>
           </div>
+
           <div class="card-actions">
-<button class="mini-btn secondary bid-btn" data-id="${item.id}">
-Submit Bid
-</button>
-            <button class="mini-btn primary" id="detailCloseSecondary">Close</button>
+            <button class="mini-btn secondary" data-action="favorite" data-id="${item.id}">
+              ${fav ? '❤️ Favorited' : '🤍 Favorite'}
+            </button>
+            <button class="mini-btn primary" data-action="bid" data-id="${item.id}">
+              Submit Bid
+            </button>
           </div>
         `;
+      }
 
-        const bidBtn = detailContent.querySelector('.bid-btn');
-if (bidBtn) {
-  bidBtn.addEventListener('click', () => openProjectRoom(item.id));
-}
-
-        const closeSecondary = document.getElementById('detailCloseSecondary');
-        if (closeSecondary) {
-          closeSecondary.addEventListener('click', closeDetails);
-        }
+      const closeSecondary = document.getElementById('detailCloseSecondary');
+      if (closeSecondary) {
+        closeSecondary.addEventListener('click', closeDetails);
       }
     }
 
     function closeDetails() {
       detailModal.classList.remove('show');
-    }
-
-    function submitDemoBid(jobId) {
-      const job = jobs.find(entry => entry.id === jobId);
-      if (!job) return;
-
-      const contractor = contractors[(job.bids.length + 2) % contractors.length];
-      const baseNumber = 4500 + (job.bids.length * 1250);
-
-      job.bids.push({
-        contractor: contractor.name,
-        amount: `$${baseNumber.toLocaleString()}`,
-        eta: `Start in ${job.bids.length + 1} week${job.bids.length + 1 === 1 ? '' : 's'}`,
-        rating: contractor.rating
-      });
-
-      applyFilters();
-      openDetailModal(job);
-      showStatus('Demo bid submitted');
     }
 
     function handleCardAction(action, id) {
@@ -1931,13 +1827,21 @@ if (bidBtn) {
       }
 
       if (action === 'message') {
-        showStatus(`Message opened for ${item.name}`);
+        showStatus(`Message opened for ${item.name || item.title}`);
         return;
       }
 
       if (action === 'bid') {
-  openProjectRoom(id);
-}
+        openProjectRoom(id);
+        return;
+      }
+
+      if (action === 'favorite') {
+        toggleFavorite(id);
+        if (detailModal.classList.contains('show') && item.type === 'job') {
+          openDetailModal(item);
+        }
+      }
     }
 
     function setMode(mode) {
@@ -2018,46 +1922,41 @@ if (bidBtn) {
     detailModal.addEventListener('click', e => {
       if (e.target === detailModal) closeDetails();
     });
-closeProjectRoomModal.addEventListener('click', () => {
-  projectRoomModal.classList.remove('show');
-});
 
-projectRoomModal.addEventListener('click', e => {
-  if (e.target === projectRoomModal) {
-    projectRoomModal.classList.remove('show');
-  }
-});
     jobModal.addEventListener('click', e => {
       if (e.target === jobModal) closeJobForm();
     });
 
     cardsRow.addEventListener('click', e => {
+      const button = e.target.closest('[data-action]');
 
-  const button = e.target.closest('[data-action]');
+      if (button) {
+        e.preventDefault();
+        e.stopPropagation();
 
-  if (button) {
+        const action = button.dataset.action;
+        const id = Number(button.dataset.id);
+        handleCardAction(action, id);
+        return;
+      }
 
-    e.preventDefault();
-    e.stopImmediatePropagation();
+      const card = e.target.closest('.listing-card[data-id]');
+      if (card) {
+        setActive(Number(card.dataset.id), true);
+      }
+    });
 
-    const action = button.dataset.action;
-    const id = Number(button.dataset.id);
+    detailContent.addEventListener('click', e => {
+      const button = e.target.closest('[data-action]');
+      if (!button) return;
 
-    if (action === "bid") {
-      openProjectRoom(id);
-      return;
-    }
+      e.preventDefault();
+      e.stopPropagation();
 
-    handleCardAction(action, id);
-    return;
-  }
-
-  const card = e.target.closest('.listing-card[data-id]');
-  if (card) {
-    setActive(Number(card.dataset.id), true);
-  }
-
-});
+      const action = button.dataset.action;
+      const id = Number(button.dataset.id);
+      handleCardAction(action, id);
+    });
 
     cardsRow.addEventListener('touchstart', ensureUIVisible, { passive: true });
     cardsRow.addEventListener('mousedown', ensureUIVisible);
@@ -2113,289 +2012,6 @@ projectRoomModal.addEventListener('click', e => {
     populateTradeSelect();
     activeId = contractors[0].id;
     applyFilters();
-    const chatMessages = document.getElementById("chatMessages");
-const chatInput = document.getElementById("chatInput");
-const sendChatBtn = document.getElementById("sendChatBtn");
-
-function addChatMessage(text, sender="contractor"){
-
-  const msg = document.createElement("div");
-
-  msg.style.padding = "8px 12px";
-  msg.style.borderRadius = "10px";
-  msg.style.maxWidth = "75%";
-  msg.style.fontSize = "14px";
-
-  if(sender === "contractor"){
-    msg.style.background = "#f97316";
-    msg.style.color = "white";
-    msg.style.alignSelf = "flex-end";
-  }else{
-    msg.style.background = "#f1f5f9";
-    msg.style.alignSelf = "flex-start";
-  }
-
-  msg.textContent = text;
-
-  chatMessages.appendChild(msg);
-
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-sendChatBtn.addEventListener("click", ()=>{
-
-  const text = chatInput.value.trim();
-
-  if(!text) return;
-
-  addChatMessage(text,"contractor");
-
-  chatInput.value = "";
-
-  setTimeout(simulateCustomerReply, 1200);
-
-});
-    function simulateCustomerReply(){
-
-  const replies = [
-
-    "Thanks for reaching out. What would your estimate be?",
-    "When could you start the project?",
-    "Do you provide materials or should I purchase them?",
-    "Could you come by to look at the job first?",
-    "Do you have photos of similar work?",
-    "Are you licensed and insured?",
-    "How long would the project take?"
-
-  ];
-
-  const randomReply = replies[Math.floor(Math.random() * replies.length)];
-
-  addChatMessage(randomReply,"customer");
-
-}
-    /* ======================
-   ESTIMATE BUILDER
-====================== */
-
-const laborHours = document.getElementById("laborHours");
-const hourlyRate = document.getElementById("hourlyRate");
-const materialCost = document.getElementById("materialCost");
-const markupPercent = document.getElementById("markupPercent");
-const calculateEstimateBtn = document.getElementById("calculateEstimateBtn");
-const estimateTotal = document.getElementById("estimateTotal");
-
-calculateEstimateBtn.addEventListener("click", ()=>{
-
-  const labor = Number(laborHours.value) || 0;
-  const rate = Number(hourlyRate.value) || 0;
-  const materials = Number(materialCost.value) || 0;
-  const markup = Number(markupPercent.value) || 0;
-
-  const laborCost = labor * rate;
-
-  const subtotal = laborCost + materials;
-
-  const markupAmount = subtotal * (markup / 100);
-
-  const total = subtotal + markupAmount;
-
-  estimateTotal.textContent = "$" + total.toLocaleString();
-
-});
-    /* ======================
-   AI ESTIMATE GENERATOR
-====================== */
-
-const aiEstimateBtn = document.getElementById("aiEstimateBtn");
-
-aiEstimateBtn.addEventListener("click", () => {
-
-  const jobText = projectRoomJobInfo.textContent.toLowerCase();
-
-  let labor = 20;
-  let materials = 2000;
-
-  if(jobText.includes("kitchen")){
-    labor = 80;
-    materials = 6000;
-  }
-
-  if(jobText.includes("bathroom")){
-    labor = 40;
-    materials = 3000;
-  }
-
-  if(jobText.includes("roof")){
-    labor = 50;
-    materials = 5000;
-  }
-
-  if(jobText.includes("deck")){
-    labor = 35;
-    materials = 2500;
-  }
-
-  laborHours.value = labor;
-  hourlyRate.value = 95;
-  materialCost.value = materials;
-  markupPercent.value = 20;
-
-  const laborCost = labor * 95;
-  const subtotal = laborCost + materials;
-  const markupAmount = subtotal * 0.20;
-  const total = subtotal + markupAmount;
-
-  estimateTotal.textContent = "$" + total.toLocaleString();
-
-});
-    /* ======================
-   PROPOSAL GENERATOR
-====================== */
-
-const generateProposalBtn = document.getElementById("generateProposalBtn");
-const proposalOutput = document.getElementById("proposalOutput");
-
-generateProposalBtn.addEventListener("click", () => {
-
-  const labor = laborHours.value || 0;
-  const rate = hourlyRate.value || 0;
-  const materials = materialCost.value || 0;
-  const markup = markupPercent.value || 0;
-  const total = estimateTotal.textContent;
-
-  const jobText = projectRoomJobInfo.innerHTML;
-
-  proposalOutput.style.display = "block";
-
-  proposalOutput.innerHTML = `
-  <strong>Revamp Project Proposal</strong><br><br>
-
-  <strong>Project:</strong><br>
-  ${jobText}<br><br>
-
-  <strong>Estimate Breakdown</strong><br>
-  Labor Hours: ${labor}<br>
-  Hourly Rate: $${rate}<br>
-  Material Cost: $${materials}<br>
-  Markup: ${markup}%<br><br>
-
-  <strong>Total Proposal Price:</strong> ${total}<br><br>
-
-  <em>This proposal was generated through Revamp. Final pricing subject to site verification.</em>
-  `;
-
-});
-    /* ======================
-   PDF PROPOSAL DOWNLOAD
-====================== */
-
-/* ======================
-   PDF PROPOSAL DOWNLOAD
-====================== */
-
-const downloadProposalBtn = document.getElementById("downloadProposalBtn");
-
-downloadProposalBtn.addEventListener("click", () => {
-
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  const jobInfo = projectRoomJobInfo.innerText;
-  const labor = laborHours.value || 0;
-  const rate = hourlyRate.value || 0;
-  const materials = materialCost.value || 0;
-  const markup = markupPercent.value || 0;
-  const total = estimateTotal.textContent;
-
-  doc.setFontSize(18);
-  doc.text("Revamp Project Proposal", 20, 20);
-
-  doc.setFontSize(12);
-
-  const lines = doc.splitTextToSize(jobInfo, 170);
-
-  doc.text("Project Details:", 20, 40);
-  doc.text(lines, 20, 50);
-
-  let y = 60 + lines.length * 6;
-
-  doc.text("Estimate Breakdown:", 20, y);
-  y += 10;
-
-  doc.text(`Labor Hours: ${labor}`, 20, y);
-  y += 8;
-
-  doc.text(`Hourly Rate: $${rate}`, 20, y);
-  y += 8;
-
-  doc.text(`Material Cost: $${materials}`, 20, y);
-  y += 8;
-
-  doc.text(`Markup: ${markup}%`, 20, y);
-  y += 12;
-
-  doc.setFontSize(14);
-  doc.text(`Total Proposal Price: ${total}`, 20, y);
-
-  doc.setFontSize(10);
-  doc.text(
-    "This proposal was generated through Revamp. Final pricing subject to site verification.",
-    20,
-    y + 20
-  );
-
-  doc.save("Revamp-Proposal.pdf");
-
-});
-    /* ======================
-   PROJECT FILE UPLOADS
-====================== */
-
-const fileUploadInput = document.getElementById("fileUploadInput");
-const fileList = document.getElementById("fileList");
-
-fileUploadInput.addEventListener("change", () => {
-
-  const files = fileUploadInput.files;
-
-  for(let file of files){
-
-    const fileItem = document.createElement("div");
-
-    fileItem.style.padding = "8px";
-    fileItem.style.border = "1px solid #e2e8f0";
-    fileItem.style.borderRadius = "8px";
-    fileItem.style.background = "#ffffff";
-
-    fileItem.innerHTML = `
-      📎 ${file.name} 
-      <span style="color:#64748b;font-size:12px;">
-      (${Math.round(file.size/1024)} KB)
-      </span>
-    `;
-
-    fileList.appendChild(fileItem);
-
-  }
-
-});
   </script>
-  <script>
-
-
-</script>
-  <script>
-
-</script>
-  function openProjectRoom(jobId){
-
-  window.location.href = "project-room.html?job=" + jobId;
-
-}
-  const params = new URLSearchParams(window.location.search);
-const jobId = params.get("job");
-
-console.log("Opening workspace for job:", jobId);
 </body>
 </html>
