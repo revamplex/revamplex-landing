@@ -1014,7 +1014,29 @@ Send
 </div>
 
 </div>
+<div class="detail-panel">
 
+<h4>Estimate Builder</h4>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+
+<input id="laborHours" placeholder="Labor Hours" class="input">
+<input id="hourlyRate" placeholder="Hourly Rate ($)" class="input">
+
+<input id="materialCost" placeholder="Material Cost ($)" class="input">
+<input id="markupPercent" placeholder="Markup %" class="input">
+
+</div>
+
+<button id="calculateEstimateBtn" class="mini-btn primary" style="width:100%;margin-bottom:10px;">
+Calculate Estimate
+</button>
+
+<div style="font-weight:900;font-size:18px;">
+Total Estimate: <span id="estimateTotal">$0</span>
+</div>
+
+</div>
     </div>
   </div>
 </div>
@@ -2132,6 +2154,35 @@ sendChatBtn.addEventListener("click", ()=>{
   addChatMessage(randomReply,"customer");
 
 }
+    /* ======================
+   ESTIMATE BUILDER
+====================== */
+
+const laborHours = document.getElementById("laborHours");
+const hourlyRate = document.getElementById("hourlyRate");
+const materialCost = document.getElementById("materialCost");
+const markupPercent = document.getElementById("markupPercent");
+const calculateEstimateBtn = document.getElementById("calculateEstimateBtn");
+const estimateTotal = document.getElementById("estimateTotal");
+
+calculateEstimateBtn.addEventListener("click", ()=>{
+
+  const labor = Number(laborHours.value) || 0;
+  const rate = Number(hourlyRate.value) || 0;
+  const materials = Number(materialCost.value) || 0;
+  const markup = Number(markupPercent.value) || 0;
+
+  const laborCost = labor * rate;
+
+  const subtotal = laborCost + materials;
+
+  const markupAmount = subtotal * (markup / 100);
+
+  const total = subtotal + markupAmount;
+
+  estimateTotal.textContent = "$" + total.toLocaleString();
+
+});
   </script>
 </body>
 </html>
