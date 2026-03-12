@@ -2110,7 +2110,28 @@ sendChatBtn.addEventListener("click", ()=>{
 
   chatInput.value = "";
 
+  setTimeout(simulateCustomerReply, 1200);
+
 });
+    function simulateCustomerReply(){
+
+  const replies = [
+
+    "Thanks for reaching out. What would your estimate be?",
+    "When could you start the project?",
+    "Do you provide materials or should I purchase them?",
+    "Could you come by to look at the job first?",
+    "Do you have photos of similar work?",
+    "Are you licensed and insured?",
+    "How long would the project take?"
+
+  ];
+
+  const randomReply = replies[Math.floor(Math.random() * replies.length)];
+
+  addChatMessage(randomReply,"customer");
+
+}
   </script>
 </body>
 </html>
