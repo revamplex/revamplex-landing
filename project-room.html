@@ -1277,29 +1277,17 @@ function applyWorkspaceMode(){
 
 /* ---------- BACK BUTTON ---------- */
 
-function setupBackButton(){
+function goBackToFeed(){
 
-  const backBtn = document.getElementById("backToFeed");
+  const params = new URLSearchParams(window.location.search);
 
-  if(!backBtn) return;
+  const role = params.get("mode");
 
-  backBtn.addEventListener("click", () => {
-
-    const params = new URLSearchParams(window.location.search);
-
-    let role = params.get("mode");
-
-    if(!role){
-      role = localStorage.getItem("revampUserRole");
-    }
-
-    if(role !== "contractor"){
-      role = "homeowner";
-    }
-
-    window.location.href = `map.html?view=${role}`;
-
-  });
+  if(role === "contractor"){
+    window.location.href = "map.html?view=contractor";
+  }else{
+    window.location.href = "map.html?view=homeowner";
+  }
 
 }
 }
