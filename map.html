@@ -2575,7 +2575,14 @@ const registered = localStorage.getItem("revamplex_registered");
 if(!registered){
   welcomeOverlay.style.display = "flex";
 }
-    setMapInteractivity(false);
+    const registered = localStorage.getItem("revamplex_registered");
+
+if(!registered){
+  welcomeOverlay.style.display = "flex";
+  setMapInteractivity(false);
+}else{
+  setMapInteractivity(true);
+}
   </script>
 </body>
 </html>
