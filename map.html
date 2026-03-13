@@ -1218,7 +1218,7 @@
   </div>
 
   <!-- WELCOME OVERLAY -->
-  <div id="welcomeOverlay" style="display:none;">
+  <div id="welcomeOverlay">
     <div class="welcomeCard" id="welcomeCard">
       <img src="revamplex-logo.png" class="welcomeLogo" alt="RevampLEX Logo">
 
@@ -1687,7 +1687,9 @@
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
-
+setTimeout(() => {
+  map.invalidateSize();
+},300);
     const app = document.getElementById('app');
     const cardsRow = document.getElementById('cardsRow');
     const resultsCount = document.getElementById('resultsCount');
