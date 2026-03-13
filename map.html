@@ -156,7 +156,11 @@
     .modal-btn,
     .close-btn,
     .restore-ui-btn,
-    .favorite-btn {
+    .favorite-btn,
+    .welcome-role-btn,
+    .welcome-submit-btn,
+    .welcome-back-btn,
+    .demoBtn {
       border: 0;
       cursor: pointer;
     }
@@ -729,6 +733,221 @@
       opacity: 0.25;
     }
 
+    /* WELCOME OVERLAY */
+
+    #welcomeOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5000;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    #welcomeOverlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .welcomeCard {
+      width: min(520px, calc(100vw - 24px));
+      max-height: calc(100vh - 24px);
+      overflow: auto;
+      background: white;
+      border-radius: 22px;
+      padding: 28px;
+      text-align: center;
+      box-shadow: 0 26px 60px rgba(15, 23, 42, 0.28);
+      border: 1px solid rgba(255,255,255,0.8);
+    }
+
+    .welcomeLogo {
+      width: 180px;
+      max-width: 70%;
+      margin-bottom: 14px;
+    }
+
+    .welcomeTitle {
+      margin: 0 0 8px;
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--text);
+    }
+
+    .welcomeSub {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .welcomeRoleGrid {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .welcome-role-btn {
+      width: 100%;
+      min-height: 58px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      font-weight: 900;
+      font-size: 15px;
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    .welcome-role-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .welcome-role-btn.homeowner {
+      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+      color: white;
+      box-shadow: 0 10px 22px rgba(249, 115, 22, 0.22);
+    }
+
+    .welcome-role-btn.contractor {
+      background: #0f172a;
+      color: white;
+      box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18);
+    }
+
+    .demoBtn {
+      margin-top: 2px;
+      background: none;
+      color: var(--muted);
+      font-weight: 700;
+      padding: 4px 0;
+    }
+
+    .demoBtn:hover {
+      color: var(--brand);
+    }
+
+    .welcomeFormWrap {
+      display: none;
+      text-align: left;
+      margin-top: 14px;
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+    }
+
+    .welcomeFormWrap.show {
+      display: block;
+    }
+
+    .welcomeRolePill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: var(--brand-soft);
+      color: var(--brand-dark);
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .welcomeGrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .welcomeField {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .welcomeField.full {
+      grid-column: 1 / -1;
+    }
+
+    .welcomeLabel {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .welcomeInput,
+    .welcomeSelect,
+    .welcomeTextarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 13px;
+      background: white;
+      color: var(--text);
+      outline: none;
+    }
+
+    .welcomeTextarea {
+      min-height: 88px;
+      resize: vertical;
+    }
+
+    .welcomeNote {
+      margin: 0 0 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: #fff7ed;
+      color: #9a3412;
+      font-size: 13px;
+      line-height: 1.45;
+      display: none;
+    }
+
+    .welcomeNote.show {
+      display: block;
+    }
+
+    .contractorFields,
+    .homeownerFields {
+      display: none;
+    }
+
+    .contractorFields.show,
+    .homeownerFields.show {
+      display: contents;
+    }
+
+    .welcomeActions {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .welcome-submit-btn,
+    .welcome-back-btn {
+      flex: 1;
+      height: 46px;
+      border-radius: 14px;
+      font-weight: 900;
+    }
+
+    .welcome-submit-btn {
+      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+      color: white;
+    }
+
+    .welcome-back-btn {
+      background: white;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
     @media (max-width: 900px) {
       .count-pill { top: 192px; }
       .status-pill { top: 234px; }
@@ -804,7 +1023,8 @@
         border-radius: 20px;
       }
 
-      .modal-grid {
+      .modal-grid,
+      .welcomeGrid {
         grid-template-columns: 1fr;
       }
 
@@ -813,69 +1033,20 @@
         height: 40px;
         font-size: 12px;
       }
+
+      .welcomeCard {
+        padding: 20px;
+        border-radius: 20px;
+      }
+
+      .welcomeTitle {
+        font-size: 24px;
+      }
+
+      .welcomeActions {
+        flex-direction: column;
+      }
     }
-    /* WELCOME OVERLAY */
-
-#welcomeOverlay{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(15,23,42,0.65);
-display:flex;
-align-items:center;
-justify-content:center;
-z-index:5000;
-backdrop-filter:blur(6px);
-}
-
-.welcomeCard{
-width:420px;
-background:white;
-border-radius:22px;
-padding:34px;
-text-align:center;
-box-shadow:0 26px 60px rgba(15,23,42,0.28);
-}
-
-.welcomeLogo{
-width:180px;
-margin-bottom:18px;
-}
-
-.roleBtn{
-width:100%;
-height:50px;
-margin-top:12px;
-border-radius:14px;
-border:0;
-font-weight:800;
-cursor:pointer;
-}
-
-.roleBtn.homeowner{
-background:linear-gradient(135deg,var(--brand),var(--brand-dark));
-color:white;
-}
-
-.roleBtn.contractor{
-background:#0f172a;
-color:white;
-}
-
-.demoBtn{
-margin-top:14px;
-background:none;
-border:none;
-color:var(--muted);
-font-weight:700;
-cursor:pointer;
-}
-
-.demoBtn:hover{
-color:var(--brand);
-}
   </style>
 </head>
 <body>
@@ -1046,7 +1217,129 @@ color:var(--brand);
     </div>
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- WELCOME OVERLAY -->
+  <div id="welcomeOverlay">
+    <div class="welcomeCard" id="welcomeCard">
+      <img src="revamplex-logo.png" class="welcomeLogo" alt="RevampLEX Logo">
+
+      <h2 class="welcomeTitle">Welcome to Revamplex</h2>
+      <p class="welcomeSub">
+        Choose your role to get started. Homeowners always use Revamplex for free.
+        Pro Contractors will receive a free 3-month trial before future subscription billing begins.
+      </p>
+
+      <div id="welcomeRoleChooser">
+        <div class="welcomeRoleGrid">
+          <button class="welcome-role-btn homeowner" onclick="startSignup('homeowner')">
+            🏠 I am a Homeowner
+          </button>
+
+          <button class="welcome-role-btn contractor" onclick="startSignup('contractor')">
+            🛠 Pro Contractor
+          </button>
+        </div>
+
+        <button class="demoBtn" onclick="exploreDemo()">Explore Map Demo</button>
+      </div>
+
+      <div class="welcomeFormWrap" id="welcomeFormWrap">
+        <div class="welcomeRolePill" id="welcomeRolePill">Homeowner Registration</div>
+
+        <p class="welcomeNote" id="contractorTrialNote">
+          Pro Contractors will start with a <strong>free 3-month trial</strong>. Subscription billing can be connected later.
+        </p>
+
+        <div class="welcomeGrid">
+          <div class="welcomeField">
+            <label class="welcomeLabel" for="welcomeFullName">Full Name</label>
+            <input class="welcomeInput" id="welcomeFullName" type="text" placeholder="John Smith">
+          </div>
+
+          <div class="welcomeField">
+            <label class="welcomeLabel" for="welcomeEmail">Email</label>
+            <input class="welcomeInput" id="welcomeEmail" type="email" placeholder="name@email.com">
+          </div>
+
+          <div class="welcomeField">
+            <label class="welcomeLabel" for="welcomePhone">Phone</label>
+            <input class="welcomeInput" id="welcomePhone" type="tel" placeholder="(555) 555-5555">
+          </div>
+
+          <div class="welcomeField">
+            <label class="welcomeLabel" for="welcomePassword">Password</label>
+            <input class="welcomeInput" id="welcomePassword" type="password" placeholder="Create password">
+          </div>
+
+          <div class="welcomeField full">
+            <label class="welcomeLabel" for="welcomeAddress">Address / City / State</label>
+            <input class="welcomeInput" id="welcomeAddress" type="text" placeholder="Hackensack, NJ">
+          </div>
+
+          <div class="homeownerFields" id="homeownerFields">
+            <div class="welcomeField full">
+              <label class="welcomeLabel" for="welcomeProjectType">Project Type</label>
+              <select class="welcomeSelect" id="welcomeProjectType">
+                <option value="">Select project type</option>
+              </select>
+            </div>
+
+            <div class="welcomeField full">
+              <label class="welcomeLabel" for="welcomeProjectNotes">Project Notes</label>
+              <textarea class="welcomeTextarea" id="welcomeProjectNotes" placeholder="Tell us what kind of project you need help with..."></textarea>
+            </div>
+          </div>
+
+          <div class="contractorFields" id="contractorFields">
+            <div class="welcomeField">
+              <label class="welcomeLabel" for="welcomeCompany">Company Name</label>
+              <input class="welcomeInput" id="welcomeCompany" type="text" placeholder="ABC Contracting LLC">
+            </div>
+
+            <div class="welcomeField">
+              <label class="welcomeLabel" for="welcomeTrade">Primary Trade</label>
+              <select class="welcomeSelect" id="welcomeTrade">
+                <option value="">Select trade</option>
+              </select>
+            </div>
+
+            <div class="welcomeField">
+              <label class="welcomeLabel" for="welcomeLicense">License Number</label>
+              <input class="welcomeInput" id="welcomeLicense" type="text" placeholder="License #">
+            </div>
+
+            <div class="welcomeField">
+              <label class="welcomeLabel" for="welcomeCoverage">Service Radius</label>
+              <select class="welcomeSelect" id="welcomeCoverage">
+                <option value="">Select radius</option>
+                <option>5 miles</option>
+                <option>10 miles</option>
+                <option>25 miles</option>
+                <option>50 miles</option>
+                <option>100+ miles</option>
+              </select>
+            </div>
+
+            <div class="welcomeField full">
+              <label class="welcomeLabel" for="welcomeBio">Company Bio</label>
+              <textarea class="welcomeTextarea" id="welcomeBio" placeholder="Briefly describe your company and specialties..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="welcomeActions">
+          <button class="welcome-back-btn" type="button" onclick="backToRoleChooser()">Back</button>
+          <button class="welcome-submit-btn" type="button" onclick="submitWelcomeRegistration()">Create Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
   <script>
     const TRADE_OPTIONS = [
       'Kitchen Renovation',
@@ -1428,12 +1721,44 @@ color:var(--brand);
     const detailContent = document.getElementById('detailContent');
     const closeDetailModal = document.getElementById('closeDetailModal');
 
+    const welcomeOverlay = document.getElementById('welcomeOverlay');
+    const welcomeCard = document.getElementById('welcomeCard');
+    const welcomeRoleChooser = document.getElementById('welcomeRoleChooser');
+    const welcomeFormWrap = document.getElementById('welcomeFormWrap');
+    const welcomeRolePill = document.getElementById('welcomeRolePill');
+    const contractorTrialNote = document.getElementById('contractorTrialNote');
+    const contractorFields = document.getElementById('contractorFields');
+    const homeownerFields = document.getElementById('homeownerFields');
+    const welcomeProjectType = document.getElementById('welcomeProjectType');
+    const welcomeTrade = document.getElementById('welcomeTrade');
+
     let currentMode = new URLSearchParams(window.location.search).get('view') || 'homeowner';
     let activeSort = 'distance';
     let activeId = null;
     let filteredItems = [];
     let uiCollapsed = false;
+    let selectedWelcomeRole = null;
     const markers = new Map();
+
+    function setMapInteractivity(enabled) {
+      if (enabled) {
+        map.dragging.enable();
+        map.scrollWheelZoom.enable();
+        map.doubleClickZoom.enable();
+        map.boxZoom.enable();
+        map.keyboard.enable();
+        map.touchZoom.enable();
+        if (map.tap) map.tap.enable();
+      } else {
+        map.dragging.disable();
+        map.scrollWheelZoom.disable();
+        map.doubleClickZoom.disable();
+        map.boxZoom.disable();
+        map.keyboard.disable();
+        map.touchZoom.disable();
+        if (map.tap) map.tap.disable();
+      }
+    }
 
     function syncModeUI() {
       homeownerModeBtn.classList.toggle('active', currentMode === 'homeowner');
@@ -1446,6 +1771,12 @@ color:var(--brand);
 
     function populateTradeSelect() {
       jobTradeSelect.innerHTML = TRADE_OPTIONS.map(trade => `<option>${trade}</option>`).join('');
+      welcomeProjectType.innerHTML =
+        `<option value="">Select project type</option>` +
+        TRADE_OPTIONS.map(trade => `<option>${trade}</option>`).join('');
+      welcomeTrade.innerHTML =
+        `<option value="">Select trade</option>` +
+        TRADE_OPTIONS.map(trade => `<option>${trade}</option>`).join('');
     }
 
     function showStatus(message) {
@@ -1953,6 +2284,93 @@ color:var(--brand);
       ensureUIVisible();
     }
 
+    function startSignup(role) {
+      selectedWelcomeRole = role;
+      welcomeRoleChooser.style.display = 'none';
+      welcomeFormWrap.classList.add('show');
+
+      const isContractor = role === 'contractor';
+
+      welcomeRolePill.textContent = isContractor ? 'Pro Contractor Registration' : 'Homeowner Registration';
+      contractorTrialNote.classList.toggle('show', isContractor);
+      contractorFields.classList.toggle('show', isContractor);
+      homeownerFields.classList.toggle('show', !isContractor);
+    }
+
+    function backToRoleChooser() {
+      selectedWelcomeRole = null;
+      welcomeRoleChooser.style.display = '';
+      welcomeFormWrap.classList.remove('show');
+      contractorTrialNote.classList.remove('show');
+      contractorFields.classList.remove('show');
+      homeownerFields.classList.remove('show');
+    }
+
+    function clearWelcomeForm() {
+      [
+        'welcomeFullName',
+        'welcomeEmail',
+        'welcomePhone',
+        'welcomePassword',
+        'welcomeAddress',
+        'welcomeCompany',
+        'welcomeLicense',
+        'welcomeBio',
+        'welcomeProjectNotes'
+      ].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+
+      ['welcomeProjectType', 'welcomeTrade', 'welcomeCoverage'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.selectedIndex = 0;
+      });
+    }
+
+    function submitWelcomeRegistration() {
+      const fullName = document.getElementById('welcomeFullName').value.trim();
+      const email = document.getElementById('welcomeEmail').value.trim();
+      const phone = document.getElementById('welcomePhone').value.trim();
+      const password = document.getElementById('welcomePassword').value.trim();
+
+      if (!selectedWelcomeRole) {
+        alert('Please choose Homeowner or Pro Contractor first.');
+        return;
+      }
+
+      if (!fullName || !email || !phone || !password) {
+        alert('Please complete Full Name, Email, Phone, and Password.');
+        return;
+      }
+
+      if (selectedWelcomeRole === 'contractor') {
+        const company = document.getElementById('welcomeCompany').value.trim();
+        const trade = document.getElementById('welcomeTrade').value.trim();
+
+        if (!company || !trade) {
+          alert('Please complete Company Name and Primary Trade.');
+          return;
+        }
+
+        showStatus('Pro Contractor registration started');
+        alert('Pro Contractor registration captured. Your free 3-month trial message is included. You can connect real signup/storage next.');
+      } else {
+        showStatus('Homeowner registration started');
+        alert('Homeowner registration captured. You can connect real signup/storage next.');
+      }
+
+      clearWelcomeForm();
+      welcomeOverlay.classList.add('hidden');
+      setMapInteractivity(true);
+    }
+
+    function exploreDemo() {
+      welcomeOverlay.classList.add('hidden');
+      setMapInteractivity(true);
+      showStatus('Demo map unlocked');
+    }
+
     searchBtn.addEventListener('click', () => {
       applyFilters();
       ensureUIVisible();
@@ -2109,6 +2527,16 @@ color:var(--brand);
       }, 120);
     });
 
+    welcomeOverlay.addEventListener('click', e => {
+      if (e.target === welcomeOverlay) {
+        e.stopPropagation();
+      }
+    });
+
+    welcomeCard.addEventListener('click', e => {
+      e.stopPropagation();
+    });
+
     populateTradeSelect();
     syncModeUI();
 
@@ -2119,39 +2547,8 @@ color:var(--brand);
     const initialDataset = getCurrentDataset();
     activeId = initialDataset[0] ? initialDataset[0].id : null;
     applyFilters();
-    function exploreDemo(){
-document.getElementById("welcomeOverlay").style.display="none";
-}
 
-function startSignup(role){
-alert("Registration system coming next. Selected role: " + role);
-}
+    setMapInteractivity(false);
   </script>
-  <!-- WELCOME OVERLAY -->
-
-<div id="welcomeOverlay">
-
-<div class="welcomeCard">
-
-<img src="revamplex-logo.png" class="welcomeLogo">
-
-<h2>Welcome to Revamplex</h2>
-<p>Connect with contractors or find new projects instantly.</p>
-
-<button class="roleBtn homeowner" onclick="startSignup('homeowner')">
-🏠 I am a Homeowner
-</button>
-
-<button class="roleBtn contractor" onclick="startSignup('contractor')">
-🛠 Pro Contractor
-</button>
-
-<button class="demoBtn" onclick="exploreDemo()">
-Explore Map Demo
-</button>
-
-</div>
-
-</div>
 </body>
 </html>
