@@ -2572,18 +2572,20 @@
 
 // SHOW WELCOME SCREEN ONLY IF USER NOT REGISTERED
 
+// SHOW WELCOME SCREEN ONLY FOR NEW USERS
+
 const registered = localStorage.getItem("revamplex_registered");
 
 if(!registered){
-  welcomeOverlay.style.display = "flex";
-}
-    const registered = localStorage.getItem("revamplex_registered");
 
-if(!registered){
   welcomeOverlay.style.display = "flex";
   setMapInteractivity(false);
+
 }else{
+
+  welcomeOverlay.classList.add("hidden");
   setMapInteractivity(true);
+
 }
   </script>
 </body>
