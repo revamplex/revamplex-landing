@@ -2381,8 +2381,13 @@
     }
 
     function exploreDemo(){
+
   localStorage.setItem("revamplex_demo","true");
-  document.getElementById("welcomeOverlay").style.display="none";
+
+  welcomeOverlay.classList.add("hidden");
+
+  setMapInteractivity(true);
+
 }
 
     searchBtn.addEventListener('click', () => {
