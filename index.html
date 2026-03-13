@@ -4,5 +4,22 @@
 <meta http-equiv="refresh" content="0; url=maps.html">
 </head>
 <body>
+  <button class="demoBtn" onclick="exploreDemo()">Explore Map Demo</button>
+  .demoBtn{
+margin-top:12px;
+background:none;
+border:none;
+color:#64748b;
+font-size:14px;
+cursor:pointer;
+}
+
+.demoBtn:hover{
+text-decoration:underline;
+color:#f97316;
+}
+  function exploreDemo(){
+document.getElementById("welcomeOverlay").style.display="none";
+}
 </body>
 </html>
