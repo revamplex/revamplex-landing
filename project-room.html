@@ -1227,7 +1227,7 @@ let mode = params.get("mode");
 if(!mode){
   mode = "contractor";
 }
-
+localStorage.setItem("revampUserRole", mode);
 const jobId = params.get("job") || "demo";
 
 /* ---------- HELPERS ---------- */
@@ -1279,20 +1279,29 @@ function applyWorkspaceMode(){
 
 function setupBackButton(){
 
-  const backBtn=document.getElementById("backToFeed");
+  const backBtn = document.getElementById("backToFeed");
 
   if(!backBtn) return;
 
-  backBtn.addEventListener("click",()=>{
+  backBtn.addEventListener("click", () => {
 
-    const params=new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(window.location.search);
 
-    const role=params.get("mode") || "contractor";
+    let role = params.get("mode");
 
-    window.location.href=`map.html?view=${role}`;
+    if(!role){
+      role = localStorage.getItem("revampUserRole");
+    }
+
+    if(role !== "contractor"){
+      role = "homeowner";
+    }
+
+    window.location.href = `map.html?view=${role}`;
 
   });
 
+}
 }
 
 /* ---------- TILE CALCULATOR ---------- */
