@@ -1218,7 +1218,7 @@
   </div>
 
   <!-- WELCOME OVERLAY -->
-  <div id="welcomeOverlay">
+  <div id="welcomeOverlay" style="display:none;">
     <div class="welcomeCard" id="welcomeCard">
       <img src="revamplex-logo.png" class="welcomeLogo" alt="RevampLEX Logo">
 
@@ -2284,10 +2284,16 @@
       ensureUIVisible();
     }
 
-    function startSignup(role) {
-      selectedWelcomeRole = role;
-      welcomeRoleChooser.style.display = 'none';
-      welcomeFormWrap.classList.add('show');
+   function startSignup(role) {
+
+  // SAVE USER ROLE
+  localStorage.setItem("revamplex_registered", "true");
+  localStorage.setItem("revamplex_role", role);
+
+  selectedWelcomeRole = role;
+  welcomeRoleChooser.style.display = 'none';
+  welcomeFormWrap.classList.add('show');
+}
 
       const isContractor = role === 'contractor';
 
@@ -2547,7 +2553,20 @@
     const initialDataset = getCurrentDataset();
     activeId = initialDataset[0] ? initialDataset[0].id : null;
     applyFilters();
+    // CHECK IF USER ALREADY REGISTERED
 
+const registered = localStorage.getItem("revamplex_registered");
+
+if(!registered){
+  document.getElementById("welcomeOverlay").style.display = "flex";
+}
+// SHOW WELCOME SCREEN ONLY IF USER NOT REGISTERED
+
+const hasAccount = localStorage.getItem("revamplex_registered");
+
+if(!hasAccount){
+  document.getElementById("welcomeOverlay").style.display = "flex";
+}
     setMapInteractivity(false);
   </script>
 </body>
