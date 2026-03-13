@@ -2587,9 +2587,14 @@ if(!registered){
   setMapInteractivity(true);
 
 }
-    const role = localStorage.getItem("revamplex_role");
-if(role){
-  setMode(role === "contractor" ? "contractor" : "homeowner");
+    const urlParams = new URLSearchParams(window.location.search);
+const urlView = urlParams.get("view");
+const savedRole = localStorage.getItem("revamplex_role");
+
+if (urlView === "contractor" || urlView === "homeowner") {
+  setMode(urlView);
+} else if (savedRole === "contractor" || savedRole === "homeowner") {
+  setMode(savedRole);
 }
   </script>
 </body>
