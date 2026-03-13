@@ -797,7 +797,7 @@
         </div>
       </div>
       <div class="top-actions">
-        <button class="mini-btn secondary" onclick="window.location.href='map.html?view=contractor'">
+        <button id="backToFeed" class="btn btn-soft">
 Back to Project Feed
 </button>
         <button class="btn btn-primary">Invite Customer</button>
@@ -1217,7 +1217,7 @@ Back to Project Feed
     <p class="footer-note">Revamp Project Room prototype • Private homeowner + contractor workspace • Ready to connect to Supabase / auth / database next</p>
   </div>
 
- <script>
+<script>
 
 /* ---------- MODE DETECTION ---------- */
 
@@ -1225,20 +1225,21 @@ const params = new URLSearchParams(window.location.search);
 let mode = params.get("mode");
 
 if(!mode){
-  mode = localStorage.getItem("revampUserRole") || "contractor";
+  mode = "contractor";
 }
+
 const jobId = params.get("job") || "demo";
 
 /* ---------- HELPERS ---------- */
 
-function currency(value) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD'
-  }).format(value || 0);
+function currency(value){
+  return new Intl.NumberFormat('en-US',{
+    style:'currency',
+    currency:'USD'
+  }).format(value||0);
 }
 
-/* ---------- LOAD SELECTED JOB ---------- */
+/* ---------- LOAD JOB ---------- */
 
 const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null");
 
@@ -1254,79 +1255,43 @@ function applyWorkspaceMode(){
       el.style.display="none";
     });
 
-    const title = document.querySelector(".brand h1");
+    const title=document.querySelector(".brand h1");
+
     if(title){
-      title.textContent = "Revamp Project Room™ — Homeowner Workspace";
+      title.textContent="Revamp Project Room™ — Homeowner Workspace";
     }
 
     if(inviteBtn){
-      inviteBtn.textContent = "Invite Contractor";
+      inviteBtn.textContent="Invite Contractor";
     }
 
-  } else {
+  }else{
 
     if(inviteBtn){
-      inviteBtn.textContent = "Invite Customer";
+      inviteBtn.textContent="Invite Customer";
     }
 
   }
 
 }
 
-/* ---------- POPULATE PAGE ---------- */
+/* ---------- BACK BUTTON ---------- */
 
-function loadProjectRoom() {
-  if (!savedJob) return;
+function setupBackButton(){
 
-  const titleEl = document.querySelector(".project-title h2");
-  const subEl = document.querySelector(".project-title p");
-  const stats = document.querySelectorAll(".mini-stats .value");
-  const summaryLines = document.querySelectorAll(".side-summary .summary-line strong");
-  const notesBox = document.querySelector("textarea");
-  const customerNameInput = document.querySelector('.signature-box input[type="text"]');
+  const backBtn=document.getElementById("backToFeed");
 
-  const projectTitle = savedJob.title || "Project Workspace";
-  const projectTrade = savedJob.trade || "General Project";
-  const projectCity = savedJob.city || "Unknown City";
-  const projectCustomer = savedJob.customer || "Customer";
-  const projectBudget = savedJob.budget || "$0";
-  const projectPostedAgo = savedJob.postedAgo || "Recently";
-  const projectDescription = savedJob.description || "No description provided.";
+  if(!backBtn) return;
 
-  titleEl.textContent = projectTitle;
+  backBtn.addEventListener("click",()=>{
 
-  subEl.textContent =
-    `Project ID: ${savedJob.id} • ${projectCity} • Customer: ${projectCustomer} • Trade: ${projectTrade}`;
+    const params=new URLSearchParams(window.location.search);
 
-  if (stats[0]) stats[0].textContent = projectBudget;
-  if (stats[1]) stats[1].textContent = "Schedule TBD";
-  if (stats[2]) stats[2].textContent = "Pending Signature";
-  if (stats[3]) stats[3].textContent = "TBD";
+    const role=params.get("mode") || "contractor";
 
-  if (summaryLines[0]) summaryLines[0].textContent = projectTrade;
-  if (summaryLines[1]) summaryLines[1].textContent = "To Be Scheduled";
-  if (summaryLines[2]) summaryLines[2].textContent = "TBD";
-  if (summaryLines[3]) summaryLines[3].textContent = "v1.0";
-  if (summaryLines[4]) summaryLines[4].textContent = "Customer + Assigned Contractor Only";
+    window.location.href=`map.html?view=${role}`;
 
-  if (notesBox) {
-    notesBox.value =
-`Project Description:
-${projectDescription}
-
-Budget:
-${projectBudget}
-
-Posted:
-${projectPostedAgo}
-
-Estimate Notes:
-Includes labor, material, disposal, and standard site protection. Permit costs are included where required. Fixtures may be owner-selected or contractor-approved equivalent.`;
-  }
-
-  if (customerNameInput) {
-    customerNameInput.value = projectCustomer;
-  }
+  });
 
 }
 
@@ -1334,29 +1299,29 @@ Includes labor, material, disposal, and standard site protection. Permit costs a
 
 function calculateTile(){
 
-  const length = parseFloat(document.getElementById('length').value) || 0;
-  const width = parseFloat(document.getElementById('width').value) || 0;
-  const tileLength = parseFloat(document.getElementById('tileLength').value) || 0;
-  const tileWidth = parseFloat(document.getElementById('tileWidth').value) || 0;
-  const waste = parseFloat(document.getElementById('waste').value) || 0;
-  const perBox = parseFloat(document.getElementById('perBox').value) || 1;
+  const length=parseFloat(document.getElementById('length').value)||0;
+  const width=parseFloat(document.getElementById('width').value)||0;
+  const tileLength=parseFloat(document.getElementById('tileLength').value)||0;
+  const tileWidth=parseFloat(document.getElementById('tileWidth').value)||0;
+  const waste=parseFloat(document.getElementById('waste').value)||0;
+  const perBox=parseFloat(document.getElementById('perBox').value)||1;
 
-  const area = length * width;
-  const withWaste = area * (1 + waste/100);
-  const boxCount = Math.ceil(withWaste / perBox);
+  const area=length*width;
+  const withWaste=area*(1+waste/100);
+  const boxCount=Math.ceil(withWaste/perBox);
 
-  const tileSqFt = (tileLength * tileWidth)/144;
-  const tileCount = tileSqFt>0 ? Math.ceil(withWaste/tileSqFt) : 0;
+  const tileSqFt=(tileLength*tileWidth)/144;
+  const tileCount=tileSqFt>0 ? Math.ceil(withWaste/tileSqFt):0;
 
-  const thinsetBags = Math.max(1,Math.ceil(withWaste/50));
-  const groutBags = Math.max(1,Math.ceil(withWaste/90));
+  const thinset=Math.max(1,Math.ceil(withWaste/50));
+  const grout=Math.max(1,Math.ceil(withWaste/90));
 
-  document.getElementById('areaOut').textContent = area.toFixed(2)+" sqft";
-  document.getElementById('wasteOut').textContent = withWaste.toFixed(2)+" sqft";
-  document.getElementById('boxesOut').textContent = boxCount+" boxes";
-  document.getElementById('tileCountOut').textContent = tileCount+" tiles";
-  document.getElementById('thinsetOut').textContent = thinsetBags+" bags";
-  document.getElementById('groutOut').textContent = groutBags+" bags";
+  document.getElementById('areaOut').textContent=area.toFixed(2)+" sqft";
+  document.getElementById('wasteOut').textContent=withWaste.toFixed(2)+" sqft";
+  document.getElementById('boxesOut').textContent=boxCount+" boxes";
+  document.getElementById('tileCountOut').textContent=tileCount+" tiles";
+  document.getElementById('thinsetOut').textContent=thinset+" bags";
+  document.getElementById('groutOut').textContent=grout+" bags";
 
 }
 
@@ -1364,7 +1329,7 @@ function calculateTile(){
 
 function recalcEstimate(){
 
-  const rows = document.querySelectorAll('#estimateTable tbody tr');
+  const rows=document.querySelectorAll('#estimateTable tbody tr');
 
   let subtotal=0;
 
@@ -1374,9 +1339,9 @@ function recalcEstimate(){
     const unitCost=parseFloat(row.querySelector('.unitCost')?.value)||0;
     const laborCost=parseFloat(row.querySelector('.laborCost')?.value)||0;
 
-    const total = qty*(unitCost+laborCost);
+    const total=qty*(unitCost+laborCost);
 
-    row.querySelector('.lineTotal').textContent = currency(total);
+    row.querySelector('.lineTotal').textContent=currency(total);
 
     subtotal+=total;
 
@@ -1386,10 +1351,10 @@ function recalcEstimate(){
   const tax=(subtotal+markup)*0.06625;
   const grand=subtotal+markup+tax;
 
-  document.getElementById('subtotalOut').textContent = currency(subtotal);
-  document.getElementById('markupOut').textContent = currency(markup);
-  document.getElementById('taxOut').textContent = currency(tax);
-  document.getElementById('grandOut').textContent = currency(grand);
+  document.getElementById('subtotalOut').textContent=currency(subtotal);
+  document.getElementById('markupOut').textContent=currency(markup);
+  document.getElementById('taxOut').textContent=currency(tax);
+  document.getElementById('grandOut').textContent=currency(grand);
 
 }
 
@@ -1399,8 +1364,7 @@ function addRow(){
 
   const tr=document.createElement('tr');
 
-  tr.innerHTML=
-`
+  tr.innerHTML=`
 <td><input class="table-input" value="New Item"/></td>
 <td><input class="table-input qty" type="number" value="1"/></td>
 <td><input class="table-input" value="unit"/></td>
@@ -1437,13 +1401,13 @@ function setupChat(){
   const sendBtn=document.querySelector('.chat-compose button');
   const messages=document.querySelector('.messages');
 
-  if(!chatInput||!sendBtn||!messages)return;
+  if(!chatInput||!sendBtn||!messages) return;
 
   sendBtn.addEventListener('click',()=>{
 
     const text=chatInput.value.trim();
 
-    if(!text)return;
+    if(!text) return;
 
     const message=document.createElement('div');
 
@@ -1459,25 +1423,6 @@ function setupChat(){
 
 }
 
-/* ---------- BACK BUTTON ---------- */
-
-function setupBackButton(){
-
-  const backBtn = document.getElementById("backToFeed");
-
-  if(!backBtn) return;
-
-  backBtn.addEventListener("click", () => {
-
-    const params = new URLSearchParams(window.location.search);
-    const role = params.get("mode") || "contractor";
-
-    window.location.href = `map.html?view=${role}`;
-
-  });
-
-}
-
 /* ---------- SUBMIT BID ---------- */
 
 function submitBid(){
@@ -1485,13 +1430,11 @@ function submitBid(){
   const bidAmount=document.getElementById("grandOut").innerText;
 
   const bidData={
-
     job_id:jobId,
     contractor:"Impact Construction",
     amount:bidAmount,
     status:"submitted",
     timestamp:new Date().toISOString()
-
   };
 
   console.log("Bid Submitted:",bidData);
@@ -1504,8 +1447,6 @@ function submitBid(){
 
 applyWorkspaceMode();
 
-loadProjectRoom();
-
 calculateTile();
 
 attachEstimateListeners();
@@ -1515,18 +1456,7 @@ recalcEstimate();
 setupChat();
 
 setupBackButton();
-   
-function goBackToFeed(){
 
-  const role = localStorage.getItem("revamplex_role");
-
-  if(role === "contractor"){
-    window.location.href = "map.html?view=contractor";
-  }else{
-    window.location.href = "map.html?view=homeowner";
-  }
-
-}
 </script>
   
 </body>
