@@ -2587,6 +2587,10 @@ if(!registered){
   setMapInteractivity(true);
 
 }
+    const role = localStorage.getItem("revamplex_role");
+if(role){
+  setMode(role === "contractor" ? "contractor" : "homeowner");
+}
   </script>
 </body>
 </html>
