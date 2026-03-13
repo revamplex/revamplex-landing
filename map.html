@@ -2307,13 +2307,6 @@
   homeownerFields.classList.toggle("show",!isContractor);
 
 }
-
-      welcomeRolePill.textContent = isContractor ? 'Pro Contractor Registration' : 'Homeowner Registration';
-      contractorTrialNote.classList.toggle('show', isContractor);
-      contractorFields.classList.toggle('show', isContractor);
-      homeownerFields.classList.toggle('show', !isContractor);
-    }
-
     function backToRoleChooser() {
       selectedWelcomeRole = null;
       welcomeRoleChooser.style.display = '';
