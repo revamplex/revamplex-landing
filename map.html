@@ -2371,11 +2371,10 @@
       setMapInteractivity(true);
     }
 
-    function exploreDemo() {
-      welcomeOverlay.classList.add('hidden');
-      setMapInteractivity(true);
-      showStatus('Demo map unlocked');
-    }
+    function exploreDemo(){
+  localStorage.setItem("revamplex_demo","true");
+  document.getElementById("welcomeOverlay").style.display="none";
+}
 
     searchBtn.addEventListener('click', () => {
       applyFilters();
