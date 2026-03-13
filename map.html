@@ -2563,17 +2563,12 @@
     applyFilters();
     // CHECK IF USER ALREADY REGISTERED
 
+// SHOW WELCOME SCREEN ONLY IF USER NOT REGISTERED
+
 const registered = localStorage.getItem("revamplex_registered");
 
 if(!registered){
-  document.getElementById("welcomeOverlay").style.display = "flex";
-}
-// SHOW WELCOME SCREEN ONLY IF USER NOT REGISTERED
-
-const hasAccount = localStorage.getItem("revamplex_registered");
-
-if(!hasAccount){
-  document.getElementById("welcomeOverlay").style.display = "flex";
+  welcomeOverlay.style.display = "flex";
 }
     setMapInteractivity(false);
   </script>
