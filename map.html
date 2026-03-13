@@ -2284,25 +2284,27 @@
       ensureUIVisible();
     }
 
-   function startSignup(role) {
+   function startSignup(role){
 
-  // save user role so welcome screen doesn't appear again
-  localStorage.setItem("revamplex_registered", "true");
-  localStorage.setItem("revamplex_role", role);
+  // remember user role
+  localStorage.setItem("revamplex_registered","true");
+  localStorage.setItem("revamplex_role",role);
 
   selectedWelcomeRole = role;
-  welcomeRoleChooser.style.display = 'none';
-  welcomeFormWrap.classList.add('show');
 
-  const isContractor = role === 'contractor';
+  welcomeRoleChooser.style.display = "none";
+  welcomeFormWrap.classList.add("show");
 
-  welcomeRolePill.textContent = isContractor
-    ? 'Pro Contractor Registration'
-    : 'Homeowner Registration';
+  const isContractor = role === "contractor";
 
-  contractorTrialNote.classList.toggle('show', isContractor);
-  contractorFields.classList.toggle('show', isContractor);
-  homeownerFields.classList.toggle('show', !isContractor);
+  welcomeRolePill.textContent =
+    isContractor
+      ? "Pro Contractor Registration"
+      : "Homeowner Registration";
+
+  contractorTrialNote.classList.toggle("show",isContractor);
+  contractorFields.classList.toggle("show",isContractor);
+  homeownerFields.classList.toggle("show",!isContractor);
 
 }
 
