@@ -2561,6 +2561,11 @@
     populateTradeSelect();
     syncModeUI();
 
+    // force Leaflet to redraw map container
+setTimeout(() => {
+  map.invalidateSize();
+}, 200);
+    
     if (!new URLSearchParams(window.location.search).get('view')) {
       window.history.replaceState(null, '', 'map.html?view=homeowner');
     }
