@@ -797,7 +797,7 @@
         </div>
       </div>
       <div class="top-actions">
-        <button class="btn btn-soft" id="backToFeed">Back to Project Feed</button>
+        <button onclick="goBackToFeed()">Back to Project Feed</button>
         <button class="btn btn-primary">Invite Customer</button>
       </div>
     </div>
@@ -1513,8 +1513,20 @@ recalcEstimate();
 setupChat();
 
 setupBackButton();
+   
+function goBackToFeed(){
 
+  const role = localStorage.getItem("revamplex_role");
+
+  if(role === "contractor"){
+    window.location.href = "map.html?view=contractor";
+  }else{
+    window.location.href = "map.html?view=homeowner";
+  }
+
+}
 </script>
+  
 </body>
 </html>
 
