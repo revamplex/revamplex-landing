@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Revamp Map v4</title>
-
+ 
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""
   />
-
+ 
   <style>
     :root {
       --brand: #f97316;
@@ -25,12 +25,12 @@
       --shadow: 0 18px 42px rgba(15, 23, 42, 0.16);
       --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.1);
     }
-
+ 
     * {
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
     }
-
+ 
     html, body {
       margin: 0;
       width: 100%;
@@ -40,30 +40,30 @@
       background: var(--bg);
       color: var(--text);
     }
-
+ 
     button, input, select, textarea {
       font: inherit;
     }
-
+ 
     #app {
       position: relative;
       width: 100%;
       height: 100%;
       overflow: hidden;
     }
-
+ 
     #map {
       position: absolute;
       inset: 0;
       z-index: 1;
     }
-
+ 
     .leaflet-container {
       width: 100%;
       height: 100%;
       background: #dbeafe;
     }
-
+ 
     .topbar {
       position: absolute;
       top: 0;
@@ -74,7 +74,7 @@
       pointer-events: none;
       transition: transform 0.28s ease;
     }
-
+ 
     .topbar-inner {
       pointer-events: auto;
       max-width: 1180px;
@@ -87,7 +87,7 @@
       box-shadow: var(--shadow-soft);
       border: 1px solid rgba(255, 255, 255, 0.75);
     }
-
+ 
     .search-row,
     .mode-row,
     .filter-row {
@@ -95,35 +95,35 @@
       gap: 10px;
       align-items: center;
     }
-
+ 
     .search-row {
       margin-bottom: 10px;
     }
-
+ 
     .logo-wrap {
       display: flex;
       align-items: center;
       margin-right: 8px;
     }
-
+ 
     .logo-wrap img {
       height: 42px;
       width: auto;
     }
-
+ 
     .mode-row {
       margin-bottom: 10px;
     }
-
+ 
     .filter-row {
       overflow-x: auto;
       scrollbar-width: none;
     }
-
+ 
     .filter-row::-webkit-scrollbar {
       display: none;
     }
-
+ 
     .search-box {
       flex: 1;
       display: flex;
@@ -136,7 +136,7 @@
       border: 1px solid var(--line);
       box-shadow: 0 4px 10px rgba(15, 23, 42, 0.04);
     }
-
+ 
     .search-box input {
       width: 100%;
       border: 0;
@@ -145,7 +145,7 @@
       color: var(--text);
       font-size: 15px;
     }
-
+ 
     .search-btn,
     .mode-btn,
     .filter-pill,
@@ -164,7 +164,7 @@
       border: 0;
       cursor: pointer;
     }
-
+ 
     .search-btn {
       height: 52px;
       padding: 0 18px;
@@ -174,7 +174,7 @@
       font-weight: 800;
       box-shadow: 0 10px 22px rgba(249, 115, 22, 0.28);
     }
-
+ 
     .mode-btn {
       flex: 1;
       height: 44px;
@@ -185,13 +185,13 @@
       color: var(--text);
       box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
     }
-
+ 
     .mode-btn.active {
       background: linear-gradient(135deg, var(--brand), var(--brand-dark));
       color: white;
       box-shadow: 0 8px 18px rgba(249, 115, 22, 0.24);
     }
-
+ 
     .filter-select,
     .filter-pill {
       flex: 0 0 auto;
@@ -205,13 +205,13 @@
       white-space: nowrap;
       box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
     }
-
+ 
     .filter-pill.active {
       background: var(--brand-soft);
       color: var(--brand-dark);
       border-color: rgba(249, 115, 22, 0.28);
     }
-
+ 
     .count-pill,
     .status-pill {
       position: absolute;
@@ -229,21 +229,21 @@
       pointer-events: none;
       transition: opacity 0.25s ease, transform 0.25s ease;
     }
-
+ 
     .count-pill {
       top: 182px;
     }
-
+ 
     .status-pill {
       top: 224px;
       background: rgba(249, 115, 22, 0.9);
       display: none;
     }
-
+ 
     .status-pill.show {
       display: block;
     }
-
+ 
     .results-shell {
       position: absolute;
       left: 0;
@@ -254,12 +254,12 @@
       pointer-events: none;
       transition: transform 0.28s ease;
     }
-
+ 
     .results-shell-inner {
       max-width: 1400px;
       margin: 0 auto;
     }
-
+ 
     .results-header {
       display: flex;
       justify-content: space-between;
@@ -268,7 +268,7 @@
       padding: 0 16px 10px;
       pointer-events: none;
     }
-
+ 
     .results-title {
       pointer-events: auto;
       border-radius: 999px;
@@ -280,13 +280,13 @@
       box-shadow: var(--shadow-soft);
       backdrop-filter: blur(10px);
     }
-
+ 
     .results-actions {
       display: flex;
       gap: 8px;
       pointer-events: auto;
     }
-
+ 
     .action-btn {
       width: 42px;
       height: 42px;
@@ -297,7 +297,7 @@
       font-size: 18px;
       font-weight: 900;
     }
-
+ 
     .cards-row {
       display: flex;
       gap: 14px;
@@ -309,11 +309,11 @@
       scrollbar-width: none;
       pointer-events: auto;
     }
-
+ 
     .cards-row::-webkit-scrollbar {
       display: none;
     }
-
+ 
     .listing-card {
       flex: 0 0 340px;
       max-width: 340px;
@@ -328,37 +328,37 @@
       transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
       cursor: pointer;
     }
-
+ 
     .listing-card.active {
       transform: translateY(-6px);
       border-color: rgba(249, 115, 22, 0.3);
       box-shadow: 0 18px 44px rgba(249, 115, 22, 0.2);
     }
-
+ 
     .card-top {
       display: flex;
       justify-content: space-between;
       gap: 12px;
       padding: 16px 16px 10px;
     }
-
+ 
     .card-title-wrap {
       min-width: 0;
     }
-
+ 
     .card-title {
       margin: 0 0 6px;
       font-size: 18px;
       line-height: 1.2;
       font-weight: 900;
     }
-
+ 
     .card-sub {
       margin: 0;
       color: var(--muted);
       font-size: 13px;
     }
-
+ 
     .rating-pill {
       border-radius: 999px;
       padding: 8px 10px;
@@ -368,27 +368,27 @@
       white-space: nowrap;
       height: fit-content;
     }
-
+ 
     .card-body {
       padding: 0 16px 16px;
       display: flex;
       flex-direction: column;
     }
-
+ 
     .meta-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
       margin-bottom: 12px;
     }
-
+ 
     .meta-box {
       border-radius: 14px;
       background: #f8fafc;
       border: 1px solid var(--line);
       padding: 10px 12px;
     }
-
+ 
     .meta-label {
       margin-bottom: 4px;
       color: var(--muted);
@@ -397,23 +397,23 @@
       text-transform: uppercase;
       letter-spacing: 0.06em;
     }
-
+ 
     .meta-value {
       font-size: 14px;
       font-weight: 900;
     }
-
+ 
     .badge-row,
     .info-row {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
     }
-
+ 
     .badge-row {
       margin-bottom: 12px;
     }
-
+ 
     .badge {
       border-radius: 999px;
       padding: 7px 10px;
@@ -422,24 +422,24 @@
       font-size: 12px;
       font-weight: 800;
     }
-
+ 
     .info-row {
       margin-bottom: 12px;
       color: var(--muted);
       font-size: 13px;
     }
-
+ 
     .info-row strong {
       color: var(--text);
     }
-
+ 
     .card-actions {
       display: flex;
       gap: 10px;
       align-items: center;
       margin-top: auto;
     }
-
+ 
     .mini-btn {
       flex: 1;
       height: 42px;
@@ -447,19 +447,19 @@
       font-size: 14px;
       font-weight: 900;
     }
-
+ 
     .mini-btn.primary {
       background: linear-gradient(135deg, var(--brand), var(--brand-dark));
       color: white;
       box-shadow: 0 10px 20px rgba(249, 115, 22, 0.2);
     }
-
+ 
     .mini-btn.secondary {
       background: white;
       color: var(--text);
       border: 1px solid var(--line);
     }
-
+ 
     .favorite-btn {
       flex: 0 0 42px;
       width: 42px;
@@ -473,12 +473,12 @@
       align-items: center;
       justify-content: center;
     }
-
+ 
     .favorite-btn.active {
       background: #fff7ed;
       border-color: rgba(249, 115, 22, 0.3);
     }
-
+ 
     .fab-wrap {
       position: absolute;
       right: 18px;
@@ -488,7 +488,7 @@
       flex-direction: column;
       gap: 10px;
     }
-
+ 
     .fab {
       height: 52px;
       border-radius: 999px;
@@ -498,12 +498,12 @@
       font-weight: 900;
       box-shadow: 0 14px 28px rgba(249, 115, 22, 0.28);
     }
-
+ 
     .fab.secondary {
       background: rgba(15, 23, 42, 0.88);
       box-shadow: 0 12px 26px rgba(15, 23, 42, 0.22);
     }
-
+ 
     .restore-ui-btn {
       position: absolute;
       top: 18px;
@@ -522,11 +522,11 @@
       backdrop-filter: blur(10px);
       display: none;
     }
-
+ 
     .restore-ui-btn.show {
       display: block;
     }
-
+ 
     .modal {
       position: fixed;
       inset: 0;
@@ -538,11 +538,11 @@
       background: rgba(15, 23, 42, 0.56);
       backdrop-filter: blur(6px);
     }
-
+ 
     .modal.show {
       display: flex;
     }
-
+ 
     .modal-card {
       width: min(520px, 100%);
       max-height: min(88vh, 820px);
@@ -552,7 +552,7 @@
       box-shadow: 0 26px 60px rgba(15, 23, 42, 0.28);
       padding: 20px;
     }
-
+ 
     .modal-head {
       display: flex;
       justify-content: space-between;
@@ -560,13 +560,13 @@
       gap: 12px;
       margin-bottom: 14px;
     }
-
+ 
     .modal-title {
       margin: 0;
       font-size: 24px;
       font-weight: 900;
     }
-
+ 
     .close-btn {
       width: 38px;
       height: 38px;
@@ -576,30 +576,30 @@
       font-size: 20px;
       font-weight: 900;
     }
-
+ 
     .modal-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
-
+ 
     .field {
       display: flex;
       flex-direction: column;
       gap: 6px;
       margin-bottom: 12px;
     }
-
+ 
     .field.full {
       grid-column: 1 / -1;
     }
-
+ 
     .label {
       font-size: 13px;
       font-weight: 800;
       color: var(--text);
     }
-
+ 
     .input,
     .textarea,
     .select {
@@ -611,65 +611,65 @@
       color: var(--text);
       outline: none;
     }
-
+ 
     .textarea {
       min-height: 110px;
       resize: vertical;
     }
-
+ 
     .modal-actions {
       display: flex;
       gap: 10px;
       margin-top: 8px;
     }
-
+ 
     .modal-btn {
       flex: 1;
       height: 46px;
       border-radius: 14px;
       font-weight: 900;
     }
-
+ 
     .modal-btn.primary {
       background: linear-gradient(135deg, var(--brand), var(--brand-dark));
       color: white;
     }
-
+ 
     .modal-btn.secondary {
       background: white;
       border: 1px solid var(--line);
       color: var(--text);
     }
-
+ 
     .detail-modal .modal-card {
       width: min(680px, 100%);
     }
-
+ 
     .detail-stack {
       display: grid;
       gap: 12px;
     }
-
+ 
     .detail-panel {
       border: 1px solid var(--line);
       border-radius: 16px;
       padding: 14px;
       background: #f8fafc;
     }
-
+ 
     .detail-panel h4 {
       margin: 0 0 8px;
       font-size: 14px;
       font-weight: 900;
     }
-
+ 
     .detail-panel p {
       margin: 0;
       color: var(--muted);
       line-height: 1.5;
       font-size: 14px;
     }
-
+ 
     .map-pin {
       width: 20px;
       height: 20px;
@@ -678,63 +678,63 @@
       border: 3px solid white;
       box-shadow: 0 10px 22px rgba(249, 115, 22, 0.34);
     }
-
+ 
     .map-pin.contractor {
       background: var(--brand);
     }
-
+ 
     .map-pin.job {
       background: #0f172a;
       box-shadow: 0 10px 22px rgba(15, 23, 42, 0.34);
     }
-
+ 
     .map-pin.active {
       width: 27px;
       height: 27px;
       border-width: 4px;
     }
-
+ 
     .leaflet-popup-content-wrapper {
       border-radius: 16px;
       box-shadow: var(--shadow-soft);
     }
-
+ 
     .leaflet-popup-content {
       margin: 14px 16px;
       font-family: Inter, Arial, Helvetica, sans-serif;
     }
-
+ 
     .popup-title {
       font-size: 15px;
       font-weight: 900;
       margin-bottom: 6px;
     }
-
+ 
     .popup-sub {
       font-size: 13px;
       color: var(--muted);
       margin-bottom: 4px;
     }
-
+ 
     .ui-collapsed .topbar {
       transform: translateY(-115%);
     }
-
+ 
     .ui-collapsed .results-shell {
       transform: translateY(115%);
     }
-
+ 
     .ui-collapsed .count-pill {
       opacity: 0;
       transform: translateX(-50%) translateY(-12px);
     }
-
+ 
     .ui-collapsed .fab-wrap {
       opacity: 0.25;
     }
-
+ 
     /* WELCOME OVERLAY */
-
+ 
     #welcomeOverlay {
       position: fixed;
       top: 0;
@@ -750,13 +750,13 @@
       -webkit-backdrop-filter: blur(6px);
       transition: opacity 0.2s ease, visibility 0.2s ease;
     }
-
+ 
     #welcomeOverlay.hidden {
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
     }
-
+ 
     .welcomeCard {
       width: min(520px, calc(100vw - 24px));
       max-height: calc(100vh - 24px);
@@ -768,33 +768,33 @@
       box-shadow: 0 26px 60px rgba(15, 23, 42, 0.28);
       border: 1px solid rgba(255,255,255,0.8);
     }
-
+ 
     .welcomeLogo {
       width: 180px;
       max-width: 70%;
       margin-bottom: 14px;
     }
-
+ 
     .welcomeTitle {
       margin: 0 0 8px;
       font-size: 28px;
       font-weight: 900;
       color: var(--text);
     }
-
+ 
     .welcomeSub {
       margin: 0 0 18px;
       color: var(--muted);
       font-size: 14px;
       line-height: 1.5;
     }
-
+ 
     .welcomeRoleGrid {
       display: grid;
       gap: 12px;
       margin-bottom: 14px;
     }
-
+ 
     .welcome-role-btn {
       width: 100%;
       min-height: 58px;
@@ -804,23 +804,23 @@
       font-size: 15px;
       transition: transform 0.16s ease, box-shadow 0.16s ease;
     }
-
+ 
     .welcome-role-btn:hover {
       transform: translateY(-1px);
     }
-
+ 
     .welcome-role-btn.homeowner {
       background: linear-gradient(135deg, var(--brand), var(--brand-dark));
       color: white;
       box-shadow: 0 10px 22px rgba(249, 115, 22, 0.22);
     }
-
+ 
     .welcome-role-btn.contractor {
       background: #0f172a;
       color: white;
       box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18);
     }
-
+ 
     .demoBtn {
       margin-top: 2px;
       background: none;
@@ -828,11 +828,11 @@
       font-weight: 700;
       padding: 4px 0;
     }
-
+ 
     .demoBtn:hover {
       color: var(--brand);
     }
-
+ 
     .welcomeFormWrap {
       display: none;
       text-align: left;
@@ -840,11 +840,11 @@
       border-top: 1px solid var(--line);
       padding-top: 16px;
     }
-
+ 
     .welcomeFormWrap.show {
       display: block;
     }
-
+ 
     .welcomeRolePill {
       display: inline-flex;
       align-items: center;
@@ -857,30 +857,30 @@
       font-weight: 800;
       margin-bottom: 12px;
     }
-
+ 
     .welcomeGrid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
-
+ 
     .welcomeField {
       display: flex;
       flex-direction: column;
       gap: 6px;
       margin-bottom: 12px;
     }
-
+ 
     .welcomeField.full {
       grid-column: 1 / -1;
     }
-
+ 
     .welcomeLabel {
       font-size: 13px;
       font-weight: 800;
       color: var(--text);
     }
-
+ 
     .welcomeInput,
     .welcomeSelect,
     .welcomeTextarea {
@@ -892,12 +892,12 @@
       color: var(--text);
       outline: none;
     }
-
+ 
     .welcomeTextarea {
       min-height: 88px;
       resize: vertical;
     }
-
+ 
     .welcomeNote {
       margin: 0 0 12px;
       padding: 12px 14px;
@@ -908,27 +908,27 @@
       line-height: 1.45;
       display: none;
     }
-
+ 
     .welcomeNote.show {
       display: block;
     }
-
+ 
     .contractorFields,
     .homeownerFields {
       display: none;
     }
-
+ 
     .contractorFields.show,
     .homeownerFields.show {
       display: contents;
     }
-
+ 
     .welcomeActions {
       display: flex;
       gap: 10px;
       margin-top: 6px;
     }
-
+ 
     .welcome-submit-btn,
     .welcome-back-btn {
       flex: 1;
@@ -936,18 +936,18 @@
       border-radius: 14px;
       font-weight: 900;
     }
-
+ 
     .welcome-submit-btn {
       background: linear-gradient(135deg, var(--brand), var(--brand-dark));
       color: white;
     }
-
+ 
     .welcome-back-btn {
       background: white;
       color: var(--text);
       border: 1px solid var(--line);
     }
-
+ 
     @media (max-width: 900px) {
       .count-pill { top: 192px; }
       .status-pill { top: 234px; }
@@ -956,93 +956,93 @@
         max-width: 306px;
       }
     }
-
+ 
     @media (max-width: 640px) {
       .topbar {
         padding: 10px;
       }
-
+ 
       .topbar-inner {
         border-radius: 22px;
         padding: 10px;
       }
-
+ 
       .search-row,
       .mode-row {
         gap: 8px;
       }
-
+ 
       .search-box,
       .search-btn {
         height: 48px;
       }
-
+ 
       .mode-btn {
         height: 42px;
         font-size: 13px;
       }
-
+ 
       .count-pill {
         top: 186px;
         font-size: 12px;
       }
-
+ 
       .status-pill {
         top: 226px;
         font-size: 12px;
       }
-
+ 
       .results-header {
         padding: 0 12px 8px;
       }
-
+ 
       .cards-row {
         gap: 12px;
         padding: 0 12px 6px;
       }
-
+ 
       .listing-card {
         flex: 0 0 84vw;
         max-width: 84vw;
         min-height: 260px;
       }
-
+ 
       .fab-wrap {
         right: 12px;
         bottom: 228px;
       }
-
+ 
       .fab {
         height: 48px;
         padding: 0 15px;
         font-size: 13px;
       }
-
+ 
       .modal-card {
         padding: 16px;
         border-radius: 20px;
       }
-
+ 
       .modal-grid,
       .welcomeGrid {
         grid-template-columns: 1fr;
       }
-
+ 
       .restore-ui-btn {
         top: 12px;
         height: 40px;
         font-size: 12px;
       }
-
+ 
       .welcomeCard {
         padding: 20px;
         border-radius: 20px;
       }
-
+ 
       .welcomeTitle {
         font-size: 24px;
       }
-
+ 
       .welcomeActions {
         flex-direction: column;
       }
@@ -1057,20 +1057,20 @@
           <div class="logo-wrap">
             <img src="revamplex-logo.png" alt="RevampLEX Logo">
           </div>
-
+ 
           <div class="search-box">
             <span>🔍</span>
             <input id="searchInput" type="text" placeholder="Search contractors, jobs, trades, city..." />
           </div>
-
+ 
           <button class="search-btn" id="searchBtn">Search</button>
         </div>
-
+ 
         <div class="mode-row">
           <button class="mode-btn active" id="homeownerMode">🏠 Homeowner View</button>
           <button class="mode-btn" id="contractorMode">🛠 Contractor View</button>
         </div>
-
+ 
         <div class="filter-row">
           <select id="tradeFilter" class="filter-select">
             <option value="all">All Trades</option>
@@ -1112,7 +1112,7 @@
             <option>Water Damage Restoration</option>
             <option>Windows</option>
           </select>
-
+ 
           <select id="distanceFilter" class="filter-select">
             <option value="100">Any Distance</option>
             <option value="5">Within 5 miles</option>
@@ -1120,33 +1120,33 @@
             <option value="25">Within 25 miles</option>
             <option value="50">Within 50 miles</option>
           </select>
-
+ 
           <select id="ratingFilter" class="filter-select">
             <option value="0">Any Rating</option>
             <option value="4.5">4.5+ stars</option>
             <option value="4.0">4.0+ stars</option>
             <option value="3.5">3.5+ stars</option>
           </select>
-
+ 
           <button class="filter-pill active" id="sortDistance">Nearest</button>
           <button class="filter-pill" id="sortRating">Top Rated</button>
           <button class="filter-pill" id="resetFilters">Reset</button>
         </div>
       </div>
     </div>
-
+ 
     <div id="map"></div>
-
+ 
     <button class="restore-ui-btn" id="restoreUiBtn">▲ Show filters & results</button>
-
+ 
     <div class="count-pill" id="resultsCount">0 results</div>
     <div class="status-pill" id="statusPill"></div>
-
+ 
     <div class="fab-wrap" id="fabWrap">
       <button class="fab" id="postJobBtn">➕ Post a Job</button>
       <button class="fab secondary" id="locateBtn">📍 Center Map</button>
     </div>
-
+ 
     <div class="results-shell">
       <div class="results-shell-inner">
         <div class="results-header">
@@ -1160,53 +1160,53 @@
       </div>
     </div>
   </div>
-
+ 
   <div class="modal" id="jobModal">
     <div class="modal-card">
       <div class="modal-head">
         <h2 class="modal-title">Post a Job</h2>
         <button class="close-btn" id="closeJobModal">×</button>
       </div>
-
+ 
       <div class="modal-grid">
         <div class="field full">
           <label class="label" for="jobTitle">Project title</label>
           <input class="input" id="jobTitle" placeholder="Kitchen Renovation" />
         </div>
-
+ 
         <div class="field">
           <label class="label" for="jobTrade">Trade</label>
           <select class="select" id="jobTrade"></select>
         </div>
-
+ 
         <div class="field">
           <label class="label" for="jobBudget">Budget</label>
           <input class="input" id="jobBudget" placeholder="$12,000" />
         </div>
-
+ 
         <div class="field">
           <label class="label" for="jobCustomer">Customer name</label>
           <input class="input" id="jobCustomer" placeholder="John D." />
         </div>
-
+ 
         <div class="field">
           <label class="label" for="jobCity">City</label>
           <input class="input" id="jobCity" placeholder="Hackensack, NJ" />
         </div>
-
+ 
         <div class="field full">
           <label class="label" for="jobDescription">Project description</label>
           <textarea class="textarea" id="jobDescription" placeholder="Describe the project scope, materials, timing, and any special details..."></textarea>
         </div>
       </div>
-
+ 
       <div class="modal-actions">
         <button class="modal-btn primary" id="submitJobBtn">Post Job</button>
         <button class="modal-btn secondary" id="cancelJobBtn">Cancel</button>
       </div>
     </div>
   </div>
-
+ 
   <div class="modal detail-modal" id="detailModal">
     <div class="modal-card">
       <div class="modal-head">
@@ -1216,65 +1216,65 @@
       <div class="detail-stack" id="detailContent"></div>
     </div>
   </div>
-
+ 
   <!-- WELCOME OVERLAY -->
   <div id="welcomeOverlay">
     <div class="welcomeCard" id="welcomeCard">
       <img src="revamplex-logo.png" class="welcomeLogo" alt="RevampLEX Logo">
-
+ 
       <h2 class="welcomeTitle">Welcome to Revamplex</h2>
       <p class="welcomeSub">
         Choose your role to get started. Homeowners always use Revamplex for free.
         Pro Contractors will receive a free 3-month trial before future subscription billing begins.
       </p>
-
+ 
       <div id="welcomeRoleChooser">
         <div class="welcomeRoleGrid">
           <button class="welcome-role-btn homeowner" onclick="startSignup('homeowner')">
             🏠 I am a Homeowner
           </button>
-
+ 
           <button class="welcome-role-btn contractor" onclick="startSignup('contractor')">
             🛠 Pro Contractor
           </button>
         </div>
-
+ 
         <button class="demoBtn" onclick="exploreDemo()">Explore Map Demo</button>
       </div>
-
+ 
       <div class="welcomeFormWrap" id="welcomeFormWrap">
         <div class="welcomeRolePill" id="welcomeRolePill">Homeowner Registration</div>
-
+ 
         <p class="welcomeNote" id="contractorTrialNote">
           Pro Contractors will start with a <strong>free 3-month trial</strong>. Subscription billing can be connected later.
         </p>
-
+ 
         <div class="welcomeGrid">
           <div class="welcomeField">
             <label class="welcomeLabel" for="welcomeFullName">Full Name</label>
             <input class="welcomeInput" id="welcomeFullName" type="text" placeholder="John Smith">
           </div>
-
+ 
           <div class="welcomeField">
             <label class="welcomeLabel" for="welcomeEmail">Email</label>
             <input class="welcomeInput" id="welcomeEmail" type="email" placeholder="name@email.com">
           </div>
-
+ 
           <div class="welcomeField">
             <label class="welcomeLabel" for="welcomePhone">Phone</label>
             <input class="welcomeInput" id="welcomePhone" type="tel" placeholder="(555) 555-5555">
           </div>
-
+ 
           <div class="welcomeField">
             <label class="welcomeLabel" for="welcomePassword">Password</label>
             <input class="welcomeInput" id="welcomePassword" type="password" placeholder="Create password">
           </div>
-
+ 
           <div class="welcomeField full">
             <label class="welcomeLabel" for="welcomeAddress">Address / City / State</label>
             <input class="welcomeInput" id="welcomeAddress" type="text" placeholder="Hackensack, NJ">
           </div>
-
+ 
           <div class="homeownerFields" id="homeownerFields">
             <div class="welcomeField full">
               <label class="welcomeLabel" for="welcomeProjectType">Project Type</label>
@@ -1282,31 +1282,31 @@
                 <option value="">Select project type</option>
               </select>
             </div>
-
+ 
             <div class="welcomeField full">
               <label class="welcomeLabel" for="welcomeProjectNotes">Project Notes</label>
               <textarea class="welcomeTextarea" id="welcomeProjectNotes" placeholder="Tell us what kind of project you need help with..."></textarea>
             </div>
           </div>
-
+ 
           <div class="contractorFields" id="contractorFields">
             <div class="welcomeField">
               <label class="welcomeLabel" for="welcomeCompany">Company Name</label>
               <input class="welcomeInput" id="welcomeCompany" type="text" placeholder="ABC Contracting LLC">
             </div>
-
+ 
             <div class="welcomeField">
               <label class="welcomeLabel" for="welcomeTrade">Primary Trade</label>
               <select class="welcomeSelect" id="welcomeTrade">
                 <option value="">Select trade</option>
               </select>
             </div>
-
+ 
             <div class="welcomeField">
               <label class="welcomeLabel" for="welcomeLicense">License Number</label>
               <input class="welcomeInput" id="welcomeLicense" type="text" placeholder="License #">
             </div>
-
+ 
             <div class="welcomeField">
               <label class="welcomeLabel" for="welcomeCoverage">Service Radius</label>
               <select class="welcomeSelect" id="welcomeCoverage">
@@ -1318,14 +1318,14 @@
                 <option>100+ miles</option>
               </select>
             </div>
-
+ 
             <div class="welcomeField full">
               <label class="welcomeLabel" for="welcomeBio">Company Bio</label>
               <textarea class="welcomeTextarea" id="welcomeBio" placeholder="Briefly describe your company and specialties..."></textarea>
             </div>
           </div>
         </div>
-
+ 
         <div class="welcomeActions">
           <button class="welcome-back-btn" type="button" onclick="backToRoleChooser()">Back</button>
           <button class="welcome-submit-btn" type="button" onclick="submitWelcomeRegistration()">Create Account</button>
@@ -1333,13 +1333,13 @@
       </div>
     </div>
   </div>
-
+ 
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""
   ></script>
-
+ 
   <script>
     const TRADE_OPTIONS = [
       'Kitchen Renovation',
@@ -1380,7 +1380,7 @@
       'Water Damage Restoration',
       'Windows'
     ];
-
+ 
     const contractors = [
       {
         id: 1,
@@ -1573,7 +1573,7 @@
         tags: ['Kitchen Design', 'Cabinets', 'Millwork']
       }
     ];
-
+ 
     const jobs = [
       {
         id: 1001,
@@ -1675,14 +1675,14 @@
         ]
       }
     ];
-
+ 
     const map = L.map('map', {
       zoomControl: false,
       attributionControl: true
     }).setView([40.8859, -74.0435], 11);
-
+ 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
-
+ 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap contributors'
@@ -1696,7 +1696,7 @@ setTimeout(() => {
     const resultsTitle = document.getElementById('resultsTitle');
     const statusPill = document.getElementById('statusPill');
     const restoreUiBtn = document.getElementById('restoreUiBtn');
-
+ 
     const searchInput = document.getElementById('searchInput');
     const searchBtn = document.getElementById('searchBtn');
     const tradeFilter = document.getElementById('tradeFilter');
@@ -1710,19 +1710,19 @@ setTimeout(() => {
     const scrollLeftBtn = document.getElementById('scrollLeftBtn');
     const scrollRightBtn = document.getElementById('scrollRightBtn');
     const locateBtn = document.getElementById('locateBtn');
-
+ 
     const postJobBtn = document.getElementById('postJobBtn');
     const jobModal = document.getElementById('jobModal');
     const closeJobModal = document.getElementById('closeJobModal');
     const cancelJobBtn = document.getElementById('cancelJobBtn');
     const submitJobBtn = document.getElementById('submitJobBtn');
     const jobTradeSelect = document.getElementById('jobTrade');
-
+ 
     const detailModal = document.getElementById('detailModal');
     const detailTitle = document.getElementById('detailTitle');
     const detailContent = document.getElementById('detailContent');
     const closeDetailModal = document.getElementById('closeDetailModal');
-
+ 
     const welcomeOverlay = document.getElementById('welcomeOverlay');
     const welcomeCard = document.getElementById('welcomeCard');
     const welcomeRoleChooser = document.getElementById('welcomeRoleChooser');
@@ -1733,7 +1733,7 @@ setTimeout(() => {
     const homeownerFields = document.getElementById('homeownerFields');
     const welcomeProjectType = document.getElementById('welcomeProjectType');
     const welcomeTrade = document.getElementById('welcomeTrade');
-
+ 
     let currentMode = new URLSearchParams(window.location.search).get('view') || 'homeowner';
     let activeSort = 'distance';
     let activeId = null;
@@ -1741,7 +1741,7 @@ setTimeout(() => {
     let uiCollapsed = false;
     let selectedWelcomeRole = null;
     const markers = new Map();
-
+ 
     function setMapInteractivity(enabled) {
       if (enabled) {
         map.dragging.enable();
@@ -1761,7 +1761,7 @@ setTimeout(() => {
         if (map.tap) map.tap.disable();
       }
     }
-
+ 
     function syncModeUI() {
       homeownerModeBtn.classList.toggle('active', currentMode === 'homeowner');
       contractorModeBtn.classList.toggle('active', currentMode === 'contractor');
@@ -1770,7 +1770,7 @@ setTimeout(() => {
         : 'Swipe left ↔ right to browse customer jobs';
       postJobBtn.style.display = currentMode === 'homeowner' ? 'inline-flex' : 'none';
     }
-
+ 
     function populateTradeSelect() {
       jobTradeSelect.innerHTML = TRADE_OPTIONS.map(trade => `<option>${trade}</option>`).join('');
       welcomeProjectType.innerHTML =
@@ -1780,45 +1780,45 @@ setTimeout(() => {
         `<option value="">Select trade</option>` +
         TRADE_OPTIONS.map(trade => `<option>${trade}</option>`).join('');
     }
-
+ 
     function showStatus(message) {
       statusPill.textContent = message;
       statusPill.classList.add('show');
       clearTimeout(showStatus._timer);
       showStatus._timer = setTimeout(() => statusPill.classList.remove('show'), 2200);
     }
-
+ 
     function collapseUI() {
       uiCollapsed = true;
       app.classList.add('ui-collapsed');
       restoreUiBtn.classList.add('show');
     }
-
+ 
     function expandUI() {
       uiCollapsed = false;
       app.classList.remove('ui-collapsed');
       restoreUiBtn.classList.remove('show');
     }
-
+ 
     function ensureUIVisible() {
       if (uiCollapsed) expandUI();
     }
-
+ 
     function getCurrentDataset() {
       return currentMode === 'homeowner' ? contractors : jobs;
     }
-
+ 
     function getFavorites() {
       return JSON.parse(localStorage.getItem('revampFavorites') || '[]');
     }
-
+ 
     function isFavorite(jobId) {
       return getFavorites().includes(jobId);
     }
-
+ 
     function toggleFavorite(jobId) {
       let favorites = getFavorites();
-
+ 
       if (favorites.includes(jobId)) {
         favorites = favorites.filter(id => id !== jobId);
         showStatus('Removed from favorites');
@@ -1826,11 +1826,11 @@ setTimeout(() => {
         favorites.push(jobId);
         showStatus('Saved to favorites');
       }
-
+ 
       localStorage.setItem('revampFavorites', JSON.stringify(favorites));
       applyFilters();
     }
-
+ 
     function makeIcon(item, isActive) {
       const kind = item.type === 'job' ? 'job' : 'contractor';
       const size = isActive ? 27 : 20;
@@ -1842,12 +1842,12 @@ setTimeout(() => {
         iconAnchor: [anchor, anchor]
       });
     }
-
+ 
     function clearMarkers() {
       markers.forEach(marker => map.removeLayer(marker));
       markers.clear();
     }
-
+ 
     function getPopupHtml(item) {
       if (item.type === 'contractor') {
         return `
@@ -1858,7 +1858,7 @@ setTimeout(() => {
           </div>
         `;
       }
-
+ 
       return `
         <div>
           <div class="popup-title">${item.title}</div>
@@ -1867,32 +1867,32 @@ setTimeout(() => {
         </div>
       `;
     }
-
+ 
     function renderMarkers(items) {
       clearMarkers();
-
+ 
       items.forEach(item => {
         const marker = L.marker([item.lat, item.lng], {
           icon: makeIcon(item, item.id === activeId)
         }).addTo(map);
-
+ 
         marker.bindPopup(getPopupHtml(item));
-
+ 
         marker.on('click', () => {
           ensureUIVisible();
           setActive(item.id, true);
           scrollCardIntoView(item.id);
         });
-
+ 
         markers.set(item.id, marker);
       });
-
+ 
       fitMapToItems(items);
     }
-
+ 
     function fitMapToItems(items) {
       if (!items.length) return;
-
+ 
       const bounds = L.latLngBounds(items.map(item => [item.lat, item.lng]));
       map.fitBounds(bounds, {
         paddingTopLeft: [30, 200],
@@ -1900,7 +1900,7 @@ setTimeout(() => {
         maxZoom: 13
       });
     }
-
+ 
     function formatCount() {
       const noun = currentMode === 'homeowner' ? 'contractor' : 'job';
       const count = filteredItems.length;
@@ -1909,7 +1909,7 @@ setTimeout(() => {
         ? 'Swipe left ↔ right to browse contractors'
         : 'Swipe left ↔ right to browse customer jobs';
     }
-
+ 
     function contractorCardHtml(item) {
       return `
         <div class="card-top">
@@ -1944,10 +1944,10 @@ setTimeout(() => {
         </div>
       `;
     }
-
+ 
     function jobCardHtml(item) {
       const fav = isFavorite(item.id);
-
+ 
       return `
         <div class="card-top">
           <div class="card-title-wrap">
@@ -1986,7 +1986,7 @@ setTimeout(() => {
         </div>
       `;
     }
-
+ 
     function renderCards(items) {
       if (!items.length) {
         cardsRow.innerHTML = `
@@ -1999,14 +1999,14 @@ setTimeout(() => {
         `;
         return;
       }
-
+ 
       cardsRow.innerHTML = items.map(item => `
         <div class="listing-card ${item.id === activeId ? 'active' : ''}" data-id="${item.id}">
           ${item.type === 'contractor' ? contractorCardHtml(item) : jobCardHtml(item)}
         </div>
       `).join('');
     }
-
+ 
     function updateMarkerStates() {
       filteredItems.forEach(item => {
         const marker = markers.get(item.id);
@@ -2015,30 +2015,30 @@ setTimeout(() => {
         if (item.id === activeId) marker.openPopup();
       });
     }
-
+ 
     function setActive(id, panMap = false) {
       activeId = id;
-
+ 
       document.querySelectorAll('.listing-card[data-id]').forEach(card => {
         card.classList.toggle('active', Number(card.dataset.id) === id);
       });
-
+ 
       updateMarkerStates();
-
+ 
       const item = filteredItems.find(entry => entry.id === id);
       if (item && panMap) {
         map.flyTo([item.lat, item.lng], Math.max(map.getZoom(), 13), { duration: 0.45 });
       }
     }
-
+ 
     function scrollCardIntoView(id) {
       const target = [...document.querySelectorAll('.listing-card[data-id]')].find(card => Number(card.dataset.id) === id);
       if (!target) return;
-
+ 
       const left = target.offsetLeft - (cardsRow.clientWidth / 2) + (target.clientWidth / 2);
       cardsRow.scrollTo({ left, behavior: 'smooth' });
     }
-
+ 
     function sortItems(items) {
       if (activeSort === 'distance') {
         items.sort((a, b) => a.distance - b.distance);
@@ -2046,66 +2046,66 @@ setTimeout(() => {
         items.sort((a, b) => b.rating - a.rating);
       }
     }
-
+ 
     function applyFilters() {
       const source = getCurrentDataset();
       const query = searchInput.value.trim().toLowerCase();
       const selectedTrade = tradeFilter.value;
       const maxDistance = Number(distanceFilter.value);
       const minRating = Number(ratingFilter.value);
-
+ 
       filteredItems = source.filter(item => {
         const haystack = item.type === 'contractor'
           ? [item.name, item.trade, item.city, ...(item.tags || [])].join(' ').toLowerCase()
           : [item.title, item.trade, item.city, item.customer, item.description].join(' ').toLowerCase();
-
+ 
         const matchesQuery = !query || haystack.includes(query);
         const matchesTrade = selectedTrade === 'all' || item.trade === selectedTrade;
         const matchesDistance = item.distance <= maxDistance;
         const matchesRating = item.rating >= minRating;
-
+ 
         return matchesQuery && matchesTrade && matchesDistance && matchesRating;
       });
-
+ 
       sortItems(filteredItems);
       syncModeUI();
-
+ 
       if (!filteredItems.some(item => item.id === activeId)) {
         activeId = filteredItems[0]?.id ?? null;
       }
-
+ 
       renderCards(filteredItems);
       renderMarkers(filteredItems);
       formatCount();
-
+ 
       if (activeId) {
         setActive(activeId, false);
         setTimeout(() => scrollCardIntoView(activeId), 80);
       }
     }
-
+ 
     function setSort(type) {
       activeSort = type;
       sortDistanceBtn.classList.toggle('active', type === 'distance');
       sortRatingBtn.classList.toggle('active', type === 'rating');
       applyFilters();
     }
-
+ 
     function openJobModal() {
       ensureUIVisible();
       jobModal.classList.add('show');
     }
-
+ 
     function closeJobForm() {
       jobModal.classList.remove('show');
     }
-
+ 
     function getFormattedBudget(value) {
       const trimmed = String(value || '').trim();
       if (!trimmed) return '$0';
       return trimmed.startsWith('$') ? trimmed : `$${trimmed}`;
     }
-
+ 
     function clearJobForm() {
       document.getElementById('jobTitle').value = '';
       document.getElementById('jobBudget').value = '';
@@ -2114,7 +2114,7 @@ setTimeout(() => {
       document.getElementById('jobDescription').value = '';
       document.getElementById('jobTrade').selectedIndex = 0;
     }
-
+ 
     function createJobFromForm() {
       const title = document.getElementById('jobTitle').value.trim() || 'New Job';
       const trade = document.getElementById('jobTrade').value;
@@ -2123,7 +2123,7 @@ setTimeout(() => {
       const city = document.getElementById('jobCity').value.trim() || 'North Jersey, NJ';
       const description = document.getElementById('jobDescription').value.trim() || 'Customer posted a new project on Revamp.';
       const center = map.getCenter();
-
+ 
       jobs.unshift({
         id: Date.now(),
         type: 'job',
@@ -2142,7 +2142,7 @@ setTimeout(() => {
         description,
         bids: []
       });
-
+ 
       closeJobForm();
       clearJobForm();
       setMode('contractor');
@@ -2151,7 +2151,7 @@ setTimeout(() => {
       ensureUIVisible();
       showStatus('Job posted and now visible in Contractor View');
     }
-
+ 
     function openProjectRoom(jobId) {
       const job = jobs.find(entry => entry.id === jobId);
       if (job) {
@@ -2159,13 +2159,13 @@ setTimeout(() => {
       }
       window.location.href = `project-room.html?mode=contractor&job=${jobId}`;
     }
-
+ 
     function openDetailModal(item) {
       if (!item) return;
-
+ 
       ensureUIVisible();
       detailModal.classList.add('show');
-
+ 
       if (item.type === 'contractor') {
         detailTitle.textContent = item.name;
         detailContent.innerHTML = `
@@ -2198,14 +2198,14 @@ setTimeout(() => {
         `;
       } else {
         const fav = isFavorite(item.id);
-
+ 
         detailTitle.textContent = item.title;
         detailContent.innerHTML = `
           <div class="detail-panel">
             <h4>${item.trade} • ${item.city}</h4>
             <p>${item.description}</p>
           </div>
-
+ 
           <div class="modal-grid">
             <div class="detail-panel">
               <h4>Customer</h4>
@@ -2216,12 +2216,12 @@ setTimeout(() => {
               <p>${item.budget} • Posted ${item.postedAgo} • Approx. ${item.distance} miles away.</p>
             </div>
           </div>
-
+ 
           <div class="detail-panel">
             <h4>Bidding</h4>
             <p>Bids are submitted privately to the customer. Other contractors cannot see your bid.</p>
           </div>
-
+ 
           <div class="card-actions">
             <button class="mini-btn secondary" data-action="favorite" data-id="${item.id}">
               ${fav ? '❤️ Favorited' : '🤍 Favorite'}
@@ -2232,26 +2232,26 @@ setTimeout(() => {
           </div>
         `;
       }
-
+ 
       const closeSecondary = document.getElementById('detailCloseSecondary');
       if (closeSecondary) {
         closeSecondary.addEventListener('click', closeDetails);
       }
     }
-
+ 
     function closeDetails() {
       detailModal.classList.remove('show');
     }
-
+ 
     function handleCardAction(action, id) {
       const item = [...contractors, ...jobs].find(entry => entry.id === id);
       if (!item) return;
-
+ 
       if (action === 'view' || action === 'job-details') {
         openDetailModal(item);
         return;
       }
-
+ 
       if (action === 'message') {
         const contractor = contractors.find(c => c.id === id);
         if (contractor) {
@@ -2260,12 +2260,12 @@ setTimeout(() => {
         window.location.href = `project-room.html?mode=homeowner&contractor=${id}`;
         return;
       }
-
+ 
       if (action === 'bid') {
         openProjectRoom(id);
         return;
       }
-
+ 
       if (action === 'favorite') {
         toggleFavorite(id);
         if (detailModal.classList.contains('show') && item.type === 'job') {
@@ -2273,41 +2273,41 @@ setTimeout(() => {
         }
       }
     }
-
+ 
     function setMode(mode) {
       currentMode = mode;
       window.history.replaceState(null, '', `map.html?view=${mode}`);
       syncModeUI();
-
+ 
       const dataset = getCurrentDataset();
       activeId = dataset[0] ? dataset[0].id : null;
-
+ 
       applyFilters();
       ensureUIVisible();
     }
-
+ 
    function startSignup(role){
-
+ 
   // remember user role
   localStorage.setItem("revamplex_registered","true");
   localStorage.setItem("revamplex_role",role);
-
+ 
   selectedWelcomeRole = role;
-
+ 
   welcomeRoleChooser.style.display = "none";
   welcomeFormWrap.classList.add("show");
-
+ 
   const isContractor = role === "contractor";
-
+ 
   welcomeRolePill.textContent =
     isContractor
       ? "Pro Contractor Registration"
       : "Homeowner Registration";
-
+ 
   contractorTrialNote.classList.toggle("show",isContractor);
   contractorFields.classList.toggle("show",isContractor);
   homeownerFields.classList.toggle("show",!isContractor);
-
+ 
 }
     function backToRoleChooser() {
       selectedWelcomeRole = null;
@@ -2317,7 +2317,7 @@ setTimeout(() => {
       contractorFields.classList.remove('show');
       homeownerFields.classList.remove('show');
     }
-
+ 
     function clearWelcomeForm() {
       [
         'welcomeFullName',
@@ -2333,90 +2333,90 @@ setTimeout(() => {
         const el = document.getElementById(id);
         if (el) el.value = '';
       });
-
+ 
       ['welcomeProjectType', 'welcomeTrade', 'welcomeCoverage'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.selectedIndex = 0;
       });
     }
-
+ 
     function submitWelcomeRegistration() {
       const fullName = document.getElementById('welcomeFullName').value.trim();
       const email = document.getElementById('welcomeEmail').value.trim();
       const phone = document.getElementById('welcomePhone').value.trim();
       const password = document.getElementById('welcomePassword').value.trim();
-
+ 
       if (!selectedWelcomeRole) {
         alert('Please choose Homeowner or Pro Contractor first.');
         return;
       }
-
+ 
       if (!fullName || !email || !phone || !password) {
         alert('Please complete Full Name, Email, Phone, and Password.');
         return;
       }
-
+ 
       if (selectedWelcomeRole === 'contractor') {
         const company = document.getElementById('welcomeCompany').value.trim();
         const trade = document.getElementById('welcomeTrade').value.trim();
-
+ 
         if (!company || !trade) {
           alert('Please complete Company Name and Primary Trade.');
           return;
         }
-
+ 
         showStatus('Pro Contractor registration started');
         alert('Pro Contractor registration captured. Your free 3-month trial message is included. You can connect real signup/storage next.');
       } else {
         showStatus('Homeowner registration started');
         alert('Homeowner registration captured. You can connect real signup/storage next.');
       }
-
+ 
       clearWelcomeForm();
       welcomeOverlay.classList.add('hidden');
       setMapInteractivity(true);
     }
-
+ 
     function exploreDemo(){
-
+ 
   localStorage.setItem("revamplex_demo","true");
-
+ 
   welcomeOverlay.classList.add("hidden");
-
+ 
   setMapInteractivity(true);
-
+ 
 }
-
+ 
     searchBtn.addEventListener('click', () => {
       applyFilters();
       ensureUIVisible();
     });
-
+ 
     searchInput.addEventListener('keydown', e => {
       if (e.key === 'Enter') {
         applyFilters();
         ensureUIVisible();
       }
     });
-
+ 
     tradeFilter.addEventListener('change', () => {
       applyFilters();
       ensureUIVisible();
     });
-
+ 
     distanceFilter.addEventListener('change', () => {
       applyFilters();
       ensureUIVisible();
     });
-
+ 
     ratingFilter.addEventListener('change', () => {
       applyFilters();
       ensureUIVisible();
     });
-
+ 
     sortDistanceBtn.addEventListener('click', () => setSort('distance'));
     sortRatingBtn.addEventListener('click', () => setSort('rating'));
-
+ 
     resetFiltersBtn.addEventListener('click', () => {
       searchInput.value = '';
       tradeFilter.value = 'all';
@@ -2425,107 +2425,107 @@ setTimeout(() => {
       setSort('distance');
       ensureUIVisible();
     });
-
+ 
     homeownerModeBtn.addEventListener('click', () => setMode('homeowner'));
     contractorModeBtn.addEventListener('click', () => setMode('contractor'));
-
+ 
     scrollLeftBtn.addEventListener('click', () => {
       ensureUIVisible();
       cardsRow.scrollBy({ left: -340, behavior: 'smooth' });
     });
-
+ 
     scrollRightBtn.addEventListener('click', () => {
       ensureUIVisible();
       cardsRow.scrollBy({ left: 340, behavior: 'smooth' });
     });
-
+ 
     locateBtn.addEventListener('click', () => {
       fitMapToItems(filteredItems);
       ensureUIVisible();
       showStatus('Map recentered');
     });
-
+ 
     postJobBtn.addEventListener('click', openJobModal);
     closeJobModal.addEventListener('click', closeJobForm);
     cancelJobBtn.addEventListener('click', closeJobForm);
     submitJobBtn.addEventListener('click', createJobFromForm);
-
+ 
     restoreUiBtn.addEventListener('click', expandUI);
     closeDetailModal.addEventListener('click', closeDetails);
-
+ 
     detailModal.addEventListener('click', e => {
       if (e.target === detailModal) closeDetails();
     });
-
+ 
     jobModal.addEventListener('click', e => {
       if (e.target === jobModal) closeJobForm();
     });
-
+ 
     cardsRow.addEventListener('click', e => {
       const button = e.target.closest('[data-action]');
-
+ 
       if (button) {
         e.preventDefault();
         e.stopPropagation();
-
+ 
         const action = button.dataset.action;
         const id = Number(button.dataset.id);
         handleCardAction(action, id);
         return;
       }
-
+ 
       const card = e.target.closest('.listing-card[data-id]');
       if (card) {
         setActive(Number(card.dataset.id), true);
       }
     });
-
+ 
     detailContent.addEventListener('click', e => {
       const button = e.target.closest('[data-action]');
       if (!button) return;
-
+ 
       e.preventDefault();
       e.stopPropagation();
-
+ 
       const action = button.dataset.action;
       const id = Number(button.dataset.id);
       handleCardAction(action, id);
     });
-
+ 
     cardsRow.addEventListener('touchstart', ensureUIVisible, { passive: true });
     cardsRow.addEventListener('mousedown', ensureUIVisible);
     searchInput.addEventListener('focus', ensureUIVisible);
-
+ 
     let scrollTimer = null;
     cardsRow.addEventListener('scroll', () => {
       clearTimeout(scrollTimer);
       scrollTimer = setTimeout(() => {
         const cards = [...document.querySelectorAll('.listing-card[data-id]')];
         if (!cards.length) return;
-
+ 
         const rowRect = cardsRow.getBoundingClientRect();
         const rowCenter = rowRect.left + rowRect.width / 2;
-
+ 
         let closestId = null;
         let closestDiff = Infinity;
-
+ 
         cards.forEach(card => {
           const rect = card.getBoundingClientRect();
           const center = rect.left + rect.width / 2;
           const diff = Math.abs(center - rowCenter);
-
+ 
           if (diff < closestDiff) {
             closestDiff = diff;
             closestId = Number(card.dataset.id);
           }
         });
-
+ 
         if (closestId !== null && closestId !== activeId) {
           setActive(closestId, true);
         }
       }, 70);
     });
-
+ 
     map.on('click', () => {
       if (!uiCollapsed) {
         collapseUI();
@@ -2533,7 +2533,7 @@ setTimeout(() => {
         expandUI();
       }
     });
-
+ 
     window.addEventListener('resize', () => {
       setTimeout(() => {
         if (filteredItems.length) {
@@ -2542,55 +2542,55 @@ setTimeout(() => {
         }
       }, 120);
     });
-
+ 
     welcomeOverlay.addEventListener('click', e => {
       if (e.target === welcomeOverlay) {
         e.stopPropagation();
       }
     });
-
+ 
     welcomeCard.addEventListener('click', e => {
       e.stopPropagation();
     });
-
+ 
     populateTradeSelect();
     syncModeUI();
-
+ 
     // force Leaflet to redraw map container
 setTimeout(() => {
   map.invalidateSize();
 }, 200);
-    
+ 
     if (!new URLSearchParams(window.location.search).get('view')) {
       window.history.replaceState(null, '', 'map.html?view=homeowner');
     }
-
+ 
     const initialDataset = getCurrentDataset();
     activeId = initialDataset[0] ? initialDataset[0].id : null;
     applyFilters();
     // CHECK IF USER ALREADY REGISTERED
-
+ 
 // SHOW WELCOME SCREEN ONLY IF USER NOT REGISTERED
-
+ 
 // SHOW WELCOME SCREEN ONLY FOR NEW USERS
-
+ 
 const registered = localStorage.getItem("revamplex_registered");
-
+ 
 if(!registered){
-
+ 
   welcomeOverlay.style.display = "flex";
   setMapInteractivity(false);
-
+ 
 }else{
-
+ 
   welcomeOverlay.classList.add("hidden");
   setMapInteractivity(true);
-
+ 
 }
     const urlParams = new URLSearchParams(window.location.search);
 const urlView = urlParams.get("view");
 const savedRole = localStorage.getItem("revamplex_role");
-
+ 
 if (urlView === "contractor" || urlView === "homeowner") {
   setMode(urlView);
 } else if (savedRole === "contractor" || savedRole === "homeowner") {
