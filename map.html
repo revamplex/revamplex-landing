@@ -22,7 +22,77 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif}
 
 <div id="map"></div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+
+/* ===============================
+REVAMP NEW FEATURES
+1. Contractor monthly bid limits
+2. Homeowner max bids per job
+================================= */
+
+const BID_LIMITS = {
+  trial:5,
+  bronze:5,
+  silver:10,
+  gold:15
+};
+
+function getContractorPlan(){
+  return localStorage.getItem("revamp_plan") || "trial";
+}
+
+function getBidCount(){
+  return Number(localStorage.getItem("revamp_bid_count") || 0);
+}
+
+function incrementBidCount(){
+  let count = getBidCount();
+  count++;
+  localStorage.setItem("revamp_bid_count",count);
+}
+
+function canBid(){
+
+  const plan = getContractorPlan();
+  const limit = BID_LIMITS[plan] || 5;
+
+  if(getBidCount() >= limit){
+    alert("You reached your monthly bid limit for this plan.");
+    return false;
+  }
+
+  return true;
+}
+
+/* homeowner bid cap */
+
+function jobAcceptingBids(job){
+
+  const max = job.maxBids || 5;
+
+  if(job.bids.length >= max){
+    alert("This job is not accepting more bids right now.");
+    return false;
+  }
+
+  return true;
+}
+
+/* intercept bid button */
+
+function trySubmitBid(job){
+
+  if(!canBid()) return;
+
+  if(!jobAcceptingBids(job)) return;
+
+  incrementBidCount();
+
+  alert("Bid submitted privately to homeowner.");
+
+}
+
+</script>
 
 <script>
 
@@ -112,6 +182,76 @@ L.marker([job.lat,job.lng])
 }
 
 renderJobs();
+
+
+
+/* ===============================
+REVAMP NEW FEATURES
+1. Contractor monthly bid limits
+2. Homeowner max bids per job
+================================= */
+
+const BID_LIMITS = {
+  trial:5,
+  bronze:5,
+  silver:10,
+  gold:15
+};
+
+function getContractorPlan(){
+  return localStorage.getItem("revamp_plan") || "trial";
+}
+
+function getBidCount(){
+  return Number(localStorage.getItem("revamp_bid_count") || 0);
+}
+
+function incrementBidCount(){
+  let count = getBidCount();
+  count++;
+  localStorage.setItem("revamp_bid_count",count);
+}
+
+function canBid(){
+
+  const plan = getContractorPlan();
+  const limit = BID_LIMITS[plan] || 5;
+
+  if(getBidCount() >= limit){
+    alert("You reached your monthly bid limit for this plan.");
+    return false;
+  }
+
+  return true;
+}
+
+/* homeowner bid cap */
+
+function jobAcceptingBids(job){
+
+  const max = job.maxBids || 5;
+
+  if(job.bids.length >= max){
+    alert("This job is not accepting more bids right now.");
+    return false;
+  }
+
+  return true;
+}
+
+/* intercept bid button */
+
+function trySubmitBid(job){
+
+  if(!canBid()) return;
+
+  if(!jobAcceptingBids(job)) return;
+
+  incrementBidCount();
+
+  alert("Bid submitted privately to homeowner.");
+
+}
 
 </script>
 
