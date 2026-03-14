@@ -1677,7 +1677,7 @@ const defaultJobs = [
 ];
 
 let jobs = JSON.parse(localStorage.getItem('revampJobs') || 'null') || defaultJobs;
-
+saveJobs();
 function saveJobs() {
   localStorage.setItem('revampJobs', JSON.stringify(jobs));
 }
