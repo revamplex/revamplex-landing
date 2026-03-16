@@ -1971,11 +1971,8 @@ markerIndex.set(item.id, privacyCircle);
 
   if (!fromMap) {
     map.flyTo(latlng, 14, {
-  duration: 0.9,
-  easeLinearity: 0.18
-});
-      duration: 0.7,
-      easeLinearity: 0.25
+      duration: 0.9,
+      easeLinearity: 0.18
     });
   }
 
@@ -1990,10 +1987,9 @@ markerIndex.set(item.id, privacyCircle);
     });
   });
 
-  // open popup on selected circle
+  // open popup
   marker.openPopup();
 }
-
     function scrollCardIntoView(id) {
       const target = [...document.querySelectorAll('.listing-card[data-id]')].find(card => Number(card.dataset.id) === id);
       if (!target) return;
