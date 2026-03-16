@@ -1826,13 +1826,16 @@ markerIndex.set(item.id, privacyCircle);
     }
 
     function updateMarkerStates() {
-      filteredItems.forEach(item => {
-        const marker = markerIndex.get(item.id);
-        if (!marker) return;
-        marker.setStyle({
-  fillOpacity: item.id === activeId ? 0.35 : 0.15
-});
-    }
+  filteredItems.forEach(item => {
+    const marker = markerIndex.get(item.id);
+    if (!marker) return;
+
+    marker.setStyle({
+      fillOpacity: item.id === activeId ? 0.35 : 0.15
+    });
+
+  });
+}
 
     function fitMapToItems(items) {
       if (!items.length) return;
