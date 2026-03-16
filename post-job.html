@@ -98,32 +98,6 @@ background:#1f5fb5;
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 
-async function postJob() {
-
-  const description = document.getElementById("description").value;
-  const budget = document.getElementById("budget").value;
-  const address = document.getElementById("address").value;
-  const maxBids = Number(document.getElementById("maxBids").value);
-
-  if (!description || !budget || !address) {
-    alert("Please fill out all fields.");
-    return;
-  }
-
-  const job = {
-    title: description.substring(0, 40),
-    description: description,
-    budget: budget,
-    address: address,
-    maxBids: maxBids,
-    bids: []
-  };
-
-  console.log("Job created:", job);
-
-  alert("Job posted successfully!");
-
-}
 
 </script>
 <script>
@@ -181,10 +155,11 @@ Trade: trade,
 Description: description,
 Budget: budget,
 latitude: latitude,
-longitude: longitude
+longitude: longitude,
+maxBids: maxBids
 
 }]);
-
+const maxBids = Number(document.getElementById("maxBids").value);
 if(error){
 
 console.log(error);
