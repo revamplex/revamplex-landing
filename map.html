@@ -1927,9 +1927,14 @@ setTimeout(() => {
         <div class="card-body">
           <div class="meta-grid">
             <div class="meta-box">
-              <div class="meta-label">Distance</div>
-              <div class="meta-value">${item.distance} mi</div>
-            </div>
+  <div class="meta-label">Bids</div>
+  <div class="meta-value">${item.bids.length} / ${item.maxBids || 5}</div>
+</div>
+
+<div class="meta-box">
+  <div class="meta-label">Remaining</div>
+  <div class="meta-value">${(item.maxBids || 5) - item.bids.length}</div>
+</div>
             <div class="meta-box">
               <div class="meta-label">Reviews</div>
               <div class="meta-value">${item.reviews}</div>
