@@ -1451,19 +1451,57 @@ function setupChat(){
 
 function submitBid(){
 
-  const bidAmount=document.getElementById("grandOut").innerText;
+  const amount=document.getElementById("grandOut").innerText;
 
-  const bidData={
-    job_id:jobId,
+  let jobs=loadJobs();
+
+  const job=jobs.find(j=>String(j.id)===String(jobId));
+
+  if(!job){
+    alert("Job not found");
+    return;
+  }
+
+  if(!job.bids){
+    job.bids=[];
+  }
+
+  const plan=getPlan();
+  const limit=BID_PLANS[plan];
+
+  if(getBidCount()>=limit){
+    alert("You reached your monthly bid limit.");
+    return;
+  }
+
+  const maxBids=job.maxBids || 5;
+
+  if(job.bids.length>=maxBids){
+    alert("This job already received the maximum number of bids.");
+    return;
+  }
+
+  const bid={
     contractor:"Impact Construction",
-    amount:bidAmount,
-    status:"submitted",
-    timestamp:new Date().toISOString()
+    amount:amount,
+    message:"Estimate generated through Revamp Project Room",
+    startDate:"TBD",
+    timestamp:Date.now()
   };
 
-  console.log("Bid Submitted:",bidData);
+  job.bids.push(bid);
 
-  alert("Bid submitted to customer!");
+  incrementBid();
+
+  /* AUTO CLOSE JOB */
+
+  if(job.bids.length>=maxBids){
+    job.status="closed";
+  }
+
+  saveJobs(jobs);
+
+  alert("Bid submitted privately to homeowner.");
 
 }
 
