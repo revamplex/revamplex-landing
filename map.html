@@ -1918,9 +1918,9 @@ markerIndex.set(item.id, privacyCircle);
             </div>
           </div>
           <div class="info-row">
-            ${currentMode === "contractor" ? "" : `${currentMode === "contractor" ? "" : `<span><strong>By:</strong> ${item.customer}</span>`}
-            <span><strong>Posted:</strong> ${item.postedAgo}</span>
-          </div>
+  ${currentMode === "contractor" ? "" : `<span><strong>By:</strong> ${item.customer}</span>`}
+  <span><strong>Posted:</strong> ${item.postedAgo}</span>
+</div>
           <div class="card-actions">
             <button class="mini-btn secondary" data-action="job-details" data-id="${item.id}">View</button>
             <button class="favorite-btn ${fav ? 'active' : ''}" data-action="favorite" data-id="${item.id}" title="Save to favorites">${fav ? '❤️' : '🤍'}</button>
