@@ -1801,9 +1801,15 @@
       items.forEach(item => {
         const [maskedLat, maskedLng] = maskLocation(item.lat, item.lng, 0.25);
 
-const marker = L.marker([maskedLat, maskedLng], {
-          icon: makeIcon(item, item.id === activeId)
-        });
+const privacyCircle = L.circle([maskedLat, maskedLng], {
+  radius: 400, // ~0.25 miles
+  color: '#f97316',
+  fillColor: '#f97316',
+  fillOpacity: 0.12,
+  weight: 1
+});
+
+markerClusterGroup.addLayer(privacyCircle);
 
         marker.bindPopup(getPopupHtml(item));
 
