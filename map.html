@@ -1,6 +1,4 @@
-from textwrap import dedent
-
-html = dedent(r'''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -2438,16 +2436,4 @@ html = dedent(r'''<!DOCTYPE html>
   </script>
 </body>
 </html>
-''')
-
-path_html = "/mnt/data/map.html"
-path_txt = "/mnt/data/map_v6_full.txt"
-
-with open(path_html, "w", encoding="utf-8") as f:
-    f.write(html)
-
-with open(path_txt, "w", encoding="utf-8") as f:
-    f.write(html)
-
-print(path_html)
 print(path_txt)
