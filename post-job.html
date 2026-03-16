@@ -103,7 +103,7 @@ background:#1f5fb5;
 <script>
 
 /* SUPABASE */
-
+  
 const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
 
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
@@ -126,6 +126,7 @@ const description = document.getElementById("description").value;
 const budget = document.getElementById("budget").value;
 const address = document.getElementById("address").value;
 
+const maxBids = Number(document.getElementById("maxBids").value);
 /* ADDRESS → COORDINATES */
 
 const geoResponse = await fetch(
@@ -160,6 +161,70 @@ maxBids: maxBids
 
 }]);
 const maxBids = Number(document.getElementById("maxBids").value);
+if(error){
+
+console.log(error);
+alert("Error posting job");
+return;
+
+}
+
+alert("Job Posted Successfully!");
+
+/* CLEAR FORM */
+
+document.getElementById("title").value="";
+document.getElementById("trade").value="";
+document.getElementById("description").value="";
+document.getElementById("budget").value="";
+document.getElementById("address").value="";
+
+}
+<script>
+
+window.postJob = async function(){
+
+const title = document.getElementById("title").value;
+const trade = document.getElementById("trade").value;
+const description = document.getElementById("description").value;
+const budget = document.getElementById("budget").value;
+const address = document.getElementById("address").value;
+const maxBids = Number(document.getElementById("maxBids").value);
+
+/* ADDRESS → COORDINATES */
+
+const geoResponse = await fetch(
+`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?access_token=${MAPBOX_TOKEN}`
+);
+
+const geoData = await geoResponse.json();
+
+if(!geoData.features.length){
+
+alert("Address not found");
+return;
+
+}
+
+const longitude = geoData.features[0].center[0];
+const latitude = geoData.features[0].center[1];
+
+/* INSERT JOB */
+
+const { data, error } = await supabaseClient
+.from("Jobs")
+.insert([{
+
+Title: title,
+Trade: trade,
+Description: description,
+Budget: budget,
+latitude: latitude,
+longitude: longitude,
+maxBids: maxBids
+
+}]);
+
 if(error){
 
 console.log(error);
