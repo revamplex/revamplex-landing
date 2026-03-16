@@ -1938,22 +1938,25 @@ markerIndex.set(item.id, privacyCircle);
       `).join('');
     }
 
-    function setActive(id, panMap = false) {
-      activeId = id;
+    function setActive(id, fromMap = false) {
 
-      document.querySelectorAll('.listing-card[data-id]').forEach(card => {
-        card.classList.toggle('active', Number(card.dataset.id) === id);
-      });
+  activeId = id;
 
-      updateMarkerStates();
+  const marker = markerIndex.get(id);
 
-      const item = filteredItems.find(entry => entry.id === id);
-      if (item && panMap) {
-        map.flyTo([item.lat, item.lng], Math.max(map.getZoom(), 13), { duration: 0.38 });
-        const marker = markerIndex.get(id);
-        if (marker) marker.openPopup();
-      }
-    }
+  if (!marker) return;
+
+  if (!fromMap) {
+
+    const latlng = marker.getLatLng();
+
+    map.flyTo(latlng, 13, {
+      duration: 0.6
+    });
+
+  }
+
+}
 
     function scrollCardIntoView(id) {
       const target = [...document.querySelectorAll('.listing-card[data-id]')].find(card => Number(card.dataset.id) === id);
