@@ -1798,19 +1798,17 @@
       clearMarkers();
       markerClusterGroup = createClusterGroup();
 
-      items.forEach(item => {
-        const [maskedLat, maskedLng] = maskLocation(item.lat, item.lng, 0.25);
+items.forEach(item => {
 
-// create marker
-const [maskedLat, maskedLng] = maskLocation(item.lat, item.lng, 0.5);
+  const [maskedLat, maskedLng] = maskLocation(item.lat, item.lng, 0.5);
 
-const privacyCircle = L.circle([maskedLat, maskedLng], {
-  radius: 800, // about 0.5 mile radius
-  color: '#f97316',
-  fillColor: '#f97316',
-  fillOpacity: 0.15,
-  weight: 2
-});
+  const privacyCircle = L.circle([maskedLat, maskedLng], {
+    radius: 800,
+    color: '#f97316',
+    fillColor: '#f97316',
+    fillOpacity: 0.15,
+    weight: 2
+  });
 
 privacyCircle.bindPopup(getPopupHtml(item));
 
@@ -1820,7 +1818,7 @@ privacyCircle.on('click', () => {
   scrollCardIntoView(item.id);
 });
 
-markerClusterGroup.addLayer(privacyCircle);
+privacyCircle.addTo(map);
 markerIndex.set(item.id, privacyCircle);
 });
       map.addLayer(markerClusterGroup);
