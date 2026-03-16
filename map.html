@@ -315,9 +315,11 @@
     }
 
     .listing-card {
-      flex: 0 0 340px;
-      max-width: 340px;
-      min-height: 280px;
+      .listing-card {
+  flex: 0 0 240px;
+  max-width: 240px;
+  min-height: 150px;
+  border-radius: 18px;
       border-radius: 24px;
       background: var(--card);
       border: 1px solid rgba(255, 255, 255, 0.85);
@@ -347,8 +349,8 @@
     }
 
     .card-title {
-      margin: 0 0 6px;
-      font-size: 18px;
+  font-size: 15px;
+}
       line-height: 1.2;
       font-weight: 900;
     }
@@ -370,14 +372,14 @@
     }
 
     .card-body {
-      padding: 0 16px 16px;
+  padding: 6px 12px 12px;
       display: flex;
       flex-direction: column;
     }
 
     .meta-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
+}
       gap: 10px;
       margin-bottom: 12px;
     }
@@ -413,7 +415,9 @@
     .badge-row {
       margin-bottom: 12px;
     }
-
+.listing-card .badge-row {
+  display: none;
+}
     .badge {
       border-radius: 999px;
       padding: 7px 10px;
@@ -1943,7 +1947,10 @@ setTimeout(() => {
   </div>
 
 </div>
-
+<div class="meta-label">Bids</div>
+<div class="meta-value">
+  ${item.bids.length} / ${item.maxBids}
+</div>
 <div class="meta-box">
   <div class="meta-label">Remaining</div>
 </div>
@@ -1980,20 +1987,18 @@ setTimeout(() => {
         </div>
         <div class="card-body">
           <div class="meta-grid">
-            <div class="meta-box">
-              <div class="meta-label">Budget</div>
-              <div class="meta-value">${item.budget}</div>
-            </div>
-            <div class="meta-box">
-  <div class="meta-label">Projects</div>
-  <div class="meta-value">${item.projectsCompleted}</div>
-</div>
 
-<div class="meta-box">
-  <div class="meta-label">Distance</div>
-  <div class="meta-value">${item.distance} mi</div>
+  <div class="meta-box">
+    <div class="meta-label">Budget</div>
+    <div class="meta-value">${item.budget}</div>
+  </div>
+
+  <div class="meta-box">
+    <div class="meta-label">Bids</div>
+    <div class="meta-value">${item.bids.length} / ${item.maxBids}</div>
+  </div>
+
 </div>
-          </div>
           <div class="info-row">
             <span><strong>Posted by:</strong> ${item.customer}</span>
             <span><strong>Reviews:</strong> ${item.reviews}</span>
