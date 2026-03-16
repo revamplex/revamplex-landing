@@ -1801,13 +1801,35 @@
       items.forEach(item => {
         const [maskedLat, maskedLng] = maskLocation(item.lat, item.lng, 0.25);
 
+// create marker
+const marker = L.marker([maskedLat, maskedLng], {
+  icon: makeIcon(item, item.id === activeId)
+});
+
+// create privacy radius
 const privacyCircle = L.circle([maskedLat, maskedLng], {
   radius: 400, // ~0.25 miles
   color: '#f97316',
   fillColor: '#f97316',
-  fillOpacity: 0.12,
+  fillOpacity: 0.15,
   weight: 1
 });
+
+// add popup to marker
+marker.bindPopup(getPopupHtml(item));
+
+// click event
+marker.on('click', () => {
+  ensureUIVisible();
+  setActive(item.id, true);
+  scrollCardIntoView(item.id);
+});
+
+// add both to cluster group
+markerClusterGroup.addLayer(privacyCircle);
+markerClusterGroup.addLayer(marker);
+
+markerIndex.set(item.id, marker);
 
 markerClusterGroup.addLayer(privacyCircle);
 
