@@ -1,15 +1,25 @@
-<!DOCTYPE html>
+from textwrap import dedent
+
+html = dedent(r'''<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Revamp Map v4</title>
+  <title>RevampLEX Map v6</title>
 
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""
+  />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"
   />
 
   <style>
@@ -18,18 +28,18 @@
       --brand-dark: #ea580c;
       --brand-soft: rgba(249, 115, 22, 0.12);
       --bg: #f8fafc;
-      --card: rgba(255, 255, 255, 0.96);
+      --card: rgba(255, 255, 255, 0.97);
       --text: #0f172a;
       --muted: #64748b;
       --line: rgba(15, 23, 42, 0.08);
       --shadow: 0 18px 42px rgba(15, 23, 42, 0.16);
-      --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.1);
+      --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.10);
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
     }
 
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
     html, body {
       margin: 0;
@@ -41,9 +51,7 @@
       color: var(--text);
     }
 
-    button, input, select, textarea {
-      font: inherit;
-    }
+    button, input, select, textarea { font: inherit; }
 
     #app {
       position: relative;
@@ -77,15 +85,15 @@
 
     .topbar-inner {
       pointer-events: auto;
-      max-width: 1180px;
+      max-width: 1460px;
       margin: 0 auto;
-      border-radius: 26px;
+      border-radius: 28px;
       padding: 12px;
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
       box-shadow: var(--shadow-soft);
-      border: 1px solid rgba(255, 255, 255, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.78);
     }
 
     .search-row,
@@ -96,42 +104,47 @@
       align-items: center;
     }
 
-    .search-row {
-      margin-bottom: 10px;
-    }
+    .search-row { margin-bottom: 10px; }
+    .mode-row { margin-bottom: 10px; }
 
     .logo-wrap {
       display: flex;
       align-items: center;
-      margin-right: 8px;
+      justify-content: center;
+      min-width: 190px;
+      height: 62px;
+      padding: 0 16px;
+      border-radius: 18px;
+      background: white;
+      border: 1px solid var(--line);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+      overflow: hidden;
     }
 
     .logo-wrap img {
-      height: 42px;
+      max-height: 40px;
       width: auto;
+      display: block;
     }
 
-    .mode-row {
-      margin-bottom: 10px;
-    }
-
-    .filter-row {
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-
-    .filter-row::-webkit-scrollbar {
+    .logo-fallback {
       display: none;
+      font-weight: 900;
+      font-size: 28px;
+      letter-spacing: -0.02em;
     }
+
+    .logo-fallback .revamp { color: #0f172a; }
+    .logo-fallback .lex { color: var(--brand); }
 
     .search-box {
       flex: 1;
       display: flex;
       align-items: center;
       gap: 10px;
-      height: 52px;
-      border-radius: 18px;
-      padding: 0 15px;
+      height: 62px;
+      border-radius: 20px;
+      padding: 0 18px;
       background: #fff;
       border: 1px solid var(--line);
       box-shadow: 0 4px 10px rgba(15, 23, 42, 0.04);
@@ -143,7 +156,7 @@
       outline: 0;
       background: transparent;
       color: var(--text);
-      font-size: 15px;
+      font-size: 17px;
     }
 
     .search-btn,
@@ -159,30 +172,31 @@
     .favorite-btn,
     .welcome-role-btn,
     .welcome-submit-btn,
-    .welcome-back-btn,
-    .demoBtn {
+    .welcome-back-btn {
       border: 0;
       cursor: pointer;
     }
 
     .search-btn {
-      height: 52px;
-      padding: 0 18px;
-      border-radius: 18px;
+      height: 62px;
+      padding: 0 26px;
+      border-radius: 20px;
       background: linear-gradient(135deg, var(--brand), var(--brand-dark));
       color: white;
-      font-weight: 800;
+      font-weight: 900;
+      font-size: 17px;
       box-shadow: 0 10px 22px rgba(249, 115, 22, 0.28);
     }
 
     .mode-btn {
       flex: 1;
-      height: 44px;
-      border-radius: 14px;
+      height: 54px;
+      border-radius: 18px;
       background: #fff;
       border: 1px solid var(--line);
-      font-weight: 800;
+      font-weight: 900;
       color: var(--text);
+      font-size: 16px;
       box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
     }
 
@@ -192,18 +206,25 @@
       box-shadow: 0 8px 18px rgba(249, 115, 22, 0.24);
     }
 
+    .filter-row {
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .filter-row::-webkit-scrollbar { display: none; }
+
     .filter-select,
     .filter-pill {
       flex: 0 0 auto;
-      height: 42px;
+      height: 50px;
       border-radius: 999px;
-      padding: 0 14px;
+      padding: 0 18px;
       background: #fff;
       border: 1px solid var(--line);
       color: var(--text);
-      font-weight: 700;
+      font-weight: 800;
       white-space: nowrap;
       box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+      font-size: 15px;
     }
 
     .filter-pill.active {
@@ -230,19 +251,13 @@
       transition: opacity 0.25s ease, transform 0.25s ease;
     }
 
-    .count-pill {
-      top: 182px;
-    }
-
+    .count-pill { top: 194px; }
     .status-pill {
-      top: 224px;
-      background: rgba(249, 115, 22, 0.9);
+      top: 236px;
+      background: rgba(249, 115, 22, 0.92);
       display: none;
     }
-
-    .status-pill.show {
-      display: block;
-    }
+    .status-pill.show { display: block; }
 
     .results-shell {
       position: absolute;
@@ -250,14 +265,15 @@
       right: 0;
       bottom: 0;
       z-index: 960;
-      padding: 0 0 16px;
+      padding: 0 0 10px;
       pointer-events: none;
       transition: transform 0.28s ease;
     }
 
     .results-shell-inner {
-      max-width: 1400px;
+      max-width: 1600px;
       margin: 0 auto;
+      padding: 0 12px;
     }
 
     .results-header {
@@ -265,15 +281,15 @@
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      padding: 0 16px 10px;
+      padding: 0 0 8px;
       pointer-events: none;
     }
 
     .results-title {
       pointer-events: auto;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.92);
-      border: 1px solid rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(255, 255, 255, 0.82);
       padding: 8px 14px;
       font-size: 13px;
       font-weight: 800;
@@ -291,7 +307,7 @@
       width: 42px;
       height: 42px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(255, 255, 255, 0.96);
       box-shadow: var(--shadow-soft);
       color: var(--text);
       font-size: 18px;
@@ -300,29 +316,25 @@
 
     .cards-row {
       display: flex;
-      gap: 14px;
+      gap: 12px;
       overflow-x: auto;
       overflow-y: hidden;
-      padding: 0 16px 40px;
+      padding: 0 0 6px;
       scroll-snap-type: x mandatory;
       scroll-behavior: smooth;
       scrollbar-width: none;
       pointer-events: auto;
     }
 
-    .cards-row::-webkit-scrollbar {
-      display: none;
-    }
+    .cards-row::-webkit-scrollbar { display: none; }
 
     .listing-card {
-      .listing-card {
-  flex: 0 0 240px;
-  max-width: 240px;
-  min-height: 150px;
-  border-radius: 18px;
-      border-radius: 24px;
+      flex: 0 0 254px;
+      max-width: 254px;
+      min-height: 178px;
+      border-radius: 22px;
       background: var(--card);
-      border: 1px solid rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.88);
       box-shadow: var(--shadow);
       backdrop-filter: blur(14px);
       scroll-snap-align: center;
@@ -332,25 +344,22 @@
     }
 
     .listing-card.active {
-      transform: translateY(-6px);
+      transform: translateY(-4px);
       border-color: rgba(249, 115, 22, 0.3);
-      box-shadow: 0 18px 44px rgba(249, 115, 22, 0.2);
+      box-shadow: 0 18px 44px rgba(249, 115, 22, 0.18);
     }
 
     .card-top {
       display: flex;
       justify-content: space-between;
-      gap: 12px;
-      padding: 16px 16px 10px;
+      gap: 8px;
+      padding: 12px 12px 8px;
     }
 
-    .card-title-wrap {
-      min-width: 0;
-    }
-
+    .card-title-wrap { min-width: 0; }
     .card-title {
-  font-size: 15px;
-}
+      margin: 0 0 4px;
+      font-size: 15px;
       line-height: 1.2;
       font-weight: 900;
     }
@@ -358,43 +367,45 @@
     .card-sub {
       margin: 0;
       color: var(--muted);
-      font-size: 13px;
+      font-size: 12px;
+      line-height: 1.25;
     }
 
     .rating-pill {
       border-radius: 999px;
-      padding: 8px 10px;
+      padding: 8px 9px;
       background: rgba(15, 23, 42, 0.06);
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 900;
       white-space: nowrap;
       height: fit-content;
     }
 
     .card-body {
-  padding: 6px 12px 12px;
+      padding: 0 12px 12px;
       display: flex;
       flex-direction: column;
     }
 
     .meta-grid {
-  grid-template-columns: 1fr;
-}
-      gap: 10px;
-      margin-bottom: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
     }
 
     .meta-box {
-      border-radius: 14px;
+      border-radius: 12px;
       background: #f8fafc;
       border: 1px solid var(--line);
-      padding: 10px 12px;
+      padding: 8px 10px;
+      min-height: 58px;
     }
 
     .meta-label {
       margin-bottom: 4px;
       color: var(--muted);
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.06em;
@@ -405,57 +416,39 @@
       font-weight: 900;
     }
 
-    .badge-row,
+    .badge-row { display: none; }
+
     .info-row {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-    }
-
-    .badge-row {
-      margin-bottom: 12px;
-    }
-.listing-card .badge-row {
-  display: none;
-}
-    .badge {
-      border-radius: 999px;
-      padding: 7px 10px;
-      background: var(--brand-soft);
-      color: var(--brand-dark);
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .info-row {
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       color: var(--muted);
-      font-size: 13px;
+      font-size: 12px;
+      line-height: 1.3;
     }
 
-    .info-row strong {
-      color: var(--text);
-    }
+    .info-row strong { color: var(--text); }
 
     .card-actions {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
       margin-top: auto;
     }
 
     .mini-btn {
       flex: 1;
-      height: 42px;
-      border-radius: 14px;
-      font-size: 14px;
+      height: 38px;
+      border-radius: 12px;
+      font-size: 13px;
       font-weight: 900;
     }
 
     .mini-btn.primary {
       background: linear-gradient(135deg, var(--brand), var(--brand-dark));
       color: white;
-      box-shadow: 0 10px 20px rgba(249, 115, 22, 0.2);
+      box-shadow: 0 8px 16px rgba(249, 115, 22, 0.2);
     }
 
     .mini-btn.secondary {
@@ -465,14 +458,14 @@
     }
 
     .favorite-btn {
-      flex: 0 0 42px;
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
+      flex: 0 0 38px;
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
       background: white;
       color: var(--text);
       border: 1px solid var(--line);
-      font-size: 18px;
+      font-size: 16px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -485,8 +478,8 @@
 
     .fab-wrap {
       position: absolute;
-      right: 18px;
-      bottom: 236px;
+      right: 16px;
+      bottom: 225px;
       z-index: 980;
       display: flex;
       flex-direction: column;
@@ -494,7 +487,7 @@
     }
 
     .fab {
-      height: 52px;
+      height: 50px;
       border-radius: 999px;
       padding: 0 18px;
       background: linear-gradient(135deg, var(--brand), var(--brand-dark));
@@ -527,9 +520,7 @@
       display: none;
     }
 
-    .restore-ui-btn.show {
-      display: block;
-    }
+    .restore-ui-btn.show { display: block; }
 
     .modal {
       position: fixed;
@@ -543,12 +534,10 @@
       backdrop-filter: blur(6px);
     }
 
-    .modal.show {
-      display: flex;
-    }
+    .modal.show { display: flex; }
 
     .modal-card {
-      width: min(520px, 100%);
+      width: min(560px, 100%);
       max-height: min(88vh, 820px);
       overflow: auto;
       border-radius: 24px;
@@ -594,9 +583,7 @@
       margin-bottom: 12px;
     }
 
-    .field.full {
-      grid-column: 1 / -1;
-    }
+    .field.full { grid-column: 1 / -1; }
 
     .label {
       font-size: 13px;
@@ -604,9 +591,7 @@
       color: var(--text);
     }
 
-    .input,
-    .textarea,
-    .select {
+    .input, .textarea, .select {
       width: 100%;
       border: 1px solid var(--line);
       border-radius: 14px;
@@ -645,10 +630,6 @@
       color: var(--text);
     }
 
-    .detail-modal .modal-card {
-      width: min(680px, 100%);
-    }
-
     .detail-stack {
       display: grid;
       gap: 12px;
@@ -674,28 +655,51 @@
       font-size: 14px;
     }
 
+    .detail-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .tag {
+      border-radius: 999px;
+      padding: 7px 10px;
+      background: var(--brand-soft);
+      color: var(--brand-dark);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
     .map-pin {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
-      background: var(--brand);
       border: 3px solid white;
-      box-shadow: 0 10px 22px rgba(249, 115, 22, 0.34);
-    }
-
-    .map-pin.contractor {
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
       background: var(--brand);
     }
 
-    .map-pin.job {
-      background: #0f172a;
-      box-shadow: 0 10px 22px rgba(15, 23, 42, 0.34);
+    .map-pin.job { background: #0f172a; }
+    .map-pin.contractor { background: var(--brand); }
+    .map-pin.active {
+      width: 24px;
+      height: 24px;
+      border-width: 4px;
     }
 
-    .map-pin.active {
-      width: 27px;
-      height: 27px;
-      border-width: 4px;
+    .custom-cluster {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(249, 115, 22, 0.92);
+      color: white;
+      border: 4px solid rgba(255,255,255,0.95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      box-shadow: 0 10px 20px rgba(249,115,22,.28);
     }
 
     .leaflet-popup-content-wrapper {
@@ -720,31 +724,17 @@
       margin-bottom: 4px;
     }
 
-    .ui-collapsed .topbar {
-      transform: translateY(-115%);
-    }
-
-    .ui-collapsed .results-shell {
-      transform: translateY(115%);
-    }
-
+    .ui-collapsed .topbar { transform: translateY(-115%); }
+    .ui-collapsed .results-shell { transform: translateY(115%); }
     .ui-collapsed .count-pill {
       opacity: 0;
       transform: translateX(-50%) translateY(-12px);
     }
-
-    .ui-collapsed .fab-wrap {
-      opacity: 0.25;
-    }
-
-    /* WELCOME OVERLAY */
+    .ui-collapsed .fab-wrap { opacity: 0.25; }
 
     #welcomeOverlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      inset: 0;
       background: rgba(15, 23, 42, 0.65);
       display: flex;
       align-items: center;
@@ -809,10 +799,6 @@
       transition: transform 0.16s ease, box-shadow 0.16s ease;
     }
 
-    .welcome-role-btn:hover {
-      transform: translateY(-1px);
-    }
-
     .welcome-role-btn.homeowner {
       background: linear-gradient(135deg, var(--brand), var(--brand-dark));
       color: white;
@@ -825,17 +811,19 @@
       box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18);
     }
 
+    .welcome-role-btn:hover { transform: translateY(-1px); }
+
     .demoBtn {
       margin-top: 2px;
       background: none;
       color: var(--muted);
       font-weight: 700;
       padding: 4px 0;
+      border: 0;
+      cursor: pointer;
     }
 
-    .demoBtn:hover {
-      color: var(--brand);
-    }
+    .demoBtn:hover { color: var(--brand); }
 
     .welcomeFormWrap {
       display: none;
@@ -845,9 +833,7 @@
       padding-top: 16px;
     }
 
-    .welcomeFormWrap.show {
-      display: block;
-    }
+    .welcomeFormWrap.show { display: block; }
 
     .welcomeRolePill {
       display: inline-flex;
@@ -875,9 +861,7 @@
       margin-bottom: 12px;
     }
 
-    .welcomeField.full {
-      grid-column: 1 / -1;
-    }
+    .welcomeField.full { grid-column: 1 / -1; }
 
     .welcomeLabel {
       font-size: 13px;
@@ -885,9 +869,7 @@
       color: var(--text);
     }
 
-    .welcomeInput,
-    .welcomeSelect,
-    .welcomeTextarea {
+    .welcomeInput, .welcomeSelect, .welcomeTextarea {
       width: 100%;
       border: 1px solid var(--line);
       border-radius: 14px;
@@ -913,19 +895,9 @@
       display: none;
     }
 
-    .welcomeNote.show {
-      display: block;
-    }
-
-    .contractorFields,
-    .homeownerFields {
-      display: none;
-    }
-
-    .contractorFields.show,
-    .homeownerFields.show {
-      display: contents;
-    }
+    .welcomeNote.show { display: block; }
+    .contractorFields, .homeownerFields { display: none; }
+    .contractorFields.show, .homeownerFields.show { display: contents; }
 
     .welcomeActions {
       display: flex;
@@ -933,8 +905,7 @@
       margin-top: 6px;
     }
 
-    .welcome-submit-btn,
-    .welcome-back-btn {
+    .welcome-submit-btn, .welcome-back-btn {
       flex: 1;
       height: 46px;
       border-radius: 14px;
@@ -953,103 +924,39 @@
     }
 
     @media (max-width: 900px) {
-      .count-pill { top: 192px; }
-      .status-pill { top: 234px; }
-      .listing-card {
-        flex-basis: 306px;
-        max-width: 306px;
-      }
+      .count-pill { top: 202px; }
+      .status-pill { top: 244px; }
+      .listing-card { flex-basis: 238px; max-width: 238px; }
+      .logo-wrap { min-width: 140px; }
     }
 
     @media (max-width: 640px) {
-      .topbar {
-        padding: 10px;
-      }
-
-      .topbar-inner {
-        border-radius: 22px;
-        padding: 10px;
-      }
-
-      .search-row,
-      .mode-row {
-        gap: 8px;
-      }
-
-      .search-box,
-      .search-btn {
-        height: 48px;
-      }
-
-      .mode-btn {
-        height: 42px;
-        font-size: 13px;
-      }
-
-      .count-pill {
-        top: 186px;
-        font-size: 12px;
-      }
-
-      .status-pill {
-        top: 226px;
-        font-size: 12px;
-      }
-
-      .results-header {
-        padding: 0 12px 8px;
-      }
-
-      .cards-row {
-        gap: 12px;
-        padding: 0 12px 6px;
-      }
-
+      .topbar { padding: 10px; }
+      .topbar-inner { border-radius: 22px; padding: 10px; }
+      .search-row { gap: 8px; }
+      .search-box, .search-btn { height: 50px; }
+      .logo-wrap { min-width: 102px; height: 50px; padding: 0 10px; }
+      .logo-wrap img { max-height: 28px; }
+      .logo-fallback { font-size: 20px; }
+      .mode-btn { height: 44px; font-size: 14px; }
+      .filter-select, .filter-pill { height: 44px; font-size: 14px; padding: 0 14px; }
+      .count-pill { top: 198px; font-size: 12px; }
+      .status-pill { top: 238px; font-size: 12px; }
+      .results-header { padding: 0 0 8px; }
+      .cards-row { gap: 10px; }
       .listing-card {
-        flex: 0 0 84vw;
-        max-width: 84vw;
-        min-height: 260px;
+        flex: 0 0 74vw;
+        max-width: 74vw;
+        min-height: 172px;
       }
-
-      .fab-wrap {
-        right: 12px;
-        bottom: 228px;
-      }
-
-      .fab {
-        height: 48px;
-        padding: 0 15px;
-        font-size: 13px;
-      }
-
-      .modal-card {
-        padding: 16px;
-        border-radius: 20px;
-      }
-
-      .modal-grid,
-      .welcomeGrid {
-        grid-template-columns: 1fr;
-      }
-
-      .restore-ui-btn {
-        top: 12px;
-        height: 40px;
-        font-size: 12px;
-      }
-
-      .welcomeCard {
-        padding: 20px;
-        border-radius: 20px;
-      }
-
-      .welcomeTitle {
-        font-size: 24px;
-      }
-
-      .welcomeActions {
-        flex-direction: column;
-      }
+      .fab-wrap { right: 12px; bottom: 205px; }
+      .fab { height: 46px; padding: 0 15px; font-size: 13px; }
+      .modal-card { padding: 16px; border-radius: 20px; }
+      .modal-grid, .welcomeGrid { grid-template-columns: 1fr; }
+      .restore-ui-btn { top: 12px; height: 40px; font-size: 12px; }
+      .welcomeCard { padding: 20px; border-radius: 20px; }
+      .welcomeTitle { font-size: 24px; }
+      .welcomeActions { flex-direction: column; }
     }
   </style>
 </head>
@@ -1059,7 +966,8 @@
       <div class="topbar-inner">
         <div class="search-row">
           <div class="logo-wrap">
-            <img src="revamplex-logo.png" alt="RevampLEX Logo">
+            <img src="revamplex-logo.png" alt="RevampLEX Logo" id="logoImg">
+            <div class="logo-fallback" id="logoFallback"><span class="revamp">Revamp</span><span class="lex">LEX</span></div>
           </div>
 
           <div class="search-box">
@@ -1078,43 +986,6 @@
         <div class="filter-row">
           <select id="tradeFilter" class="filter-select">
             <option value="all">All Trades</option>
-            <option>Kitchen Renovation</option>
-            <option>Bathroom Renovation</option>
-            <option>Additions & Remodeling</option>
-            <option>General Contractors</option>
-            <option>Carpentry</option>
-            <option>Concrete & Masonry</option>
-            <option>Decks & Porches</option>
-            <option>Doors</option>
-            <option>Drywall & Insulation</option>
-            <option>Electrical</option>
-            <option>Fencing</option>
-            <option>Flooring</option>
-            <option>Garage Doors</option>
-            <option>Glass & Mirrors</option>
-            <option>Gutters</option>
-            <option>Handyman Services</option>
-            <option>HVAC</option>
-            <option>Junk Removal</option>
-            <option>Land Surveying</option>
-            <option>Landscaping</option>
-            <option>Lawn Care</option>
-            <option>Locksmith</option>
-            <option>Painting</option>
-            <option>Patios</option>
-            <option>Pest Control</option>
-            <option>Plumbing</option>
-            <option>Pools & Spas</option>
-            <option>Pressure Washing</option>
-            <option>Roofing</option>
-            <option>Septic Systems</option>
-            <option>Siding</option>
-            <option>Solar</option>
-            <option>Sunrooms</option>
-            <option>Tile & Stone</option>
-            <option>Tree Services</option>
-            <option>Water Damage Restoration</option>
-            <option>Windows</option>
           </select>
 
           <select id="distanceFilter" class="filter-select">
@@ -1211,7 +1082,7 @@
     </div>
   </div>
 
-  <div class="modal detail-modal" id="detailModal">
+  <div class="modal" id="detailModal">
     <div class="modal-card">
       <div class="modal-head">
         <h2 class="modal-title" id="detailTitle">Details</h2>
@@ -1221,29 +1092,26 @@
     </div>
   </div>
 
-  <!-- WELCOME OVERLAY -->
   <div id="welcomeOverlay">
     <div class="welcomeCard" id="welcomeCard">
-      <img src="revamplex-logo.png" class="welcomeLogo" alt="RevampLEX Logo">
+      <img src="revamplex-logo.png" class="welcomeLogo" alt="RevampLEX Logo" id="welcomeLogoImg">
+      <div class="logo-fallback" id="welcomeLogoFallback" style="display:none; justify-content:center; margin-bottom:12px;">
+        <span class="revamp">Revamp</span><span class="lex">LEX</span>
+      </div>
 
       <h2 class="welcomeTitle">Welcome to Revamplex</h2>
       <p class="welcomeSub">
         Choose your role to get started. Homeowners always use Revamplex for free.
-        Pro Contractors will receive a free 3-month trial before future subscription billing begins.
+        Pro Contractors receive a free 3-month trial before future billing is connected.
       </p>
 
       <div id="welcomeRoleChooser">
         <div class="welcomeRoleGrid">
-          <button class="welcome-role-btn homeowner" onclick="startSignup('homeowner')">
-            🏠 I am a Homeowner
-          </button>
-
-          <button class="welcome-role-btn contractor" onclick="startSignup('contractor')">
-            🛠 Pro Contractor
-          </button>
+          <button class="welcome-role-btn homeowner" id="welcomeHomeownerBtn">🏠 I am a Homeowner</button>
+          <button class="welcome-role-btn contractor" id="welcomeContractorBtn">🛠 Pro Contractor</button>
         </div>
 
-        <button class="demoBtn" onclick="exploreDemo()">Explore Map Demo</button>
+        <button class="demoBtn" id="exploreDemoBtn">Explore Map Demo</button>
       </div>
 
       <div class="welcomeFormWrap" id="welcomeFormWrap">
@@ -1331,8 +1199,8 @@
         </div>
 
         <div class="welcomeActions">
-          <button class="welcome-back-btn" type="button" onclick="backToRoleChooser()">Back</button>
-          <button class="welcome-submit-btn" type="button" onclick="submitWelcomeRegistration()">Create Account</button>
+          <button class="welcome-back-btn" type="button" id="welcomeBackBtn">Back</button>
+          <button class="welcome-submit-btn" type="button" id="welcomeSubmitBtn">Create Account</button>
         </div>
       </div>
     </div>
@@ -1343,6 +1211,7 @@
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""
   ></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
   <script>
     const TRADE_OPTIONS = [
@@ -1685,26 +1554,16 @@
       }
     ];
 
-    const map = L.map('map', {
-      zoomControl: false,
-      attributionControl: true
-    }).setView([40.8859, -74.0435], 11);
-
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-setTimeout(() => {
-  map.invalidateSize();
-},300);
     const app = document.getElementById('app');
     const cardsRow = document.getElementById('cardsRow');
     const resultsCount = document.getElementById('resultsCount');
     const resultsTitle = document.getElementById('resultsTitle');
     const statusPill = document.getElementById('statusPill');
     const restoreUiBtn = document.getElementById('restoreUiBtn');
+    const logoImg = document.getElementById('logoImg');
+    const logoFallback = document.getElementById('logoFallback');
+    const welcomeLogoImg = document.getElementById('welcomeLogoImg');
+    const welcomeLogoFallback = document.getElementById('welcomeLogoFallback');
 
     const searchInput = document.getElementById('searchInput');
     const searchBtn = document.getElementById('searchBtn');
@@ -1742,14 +1601,47 @@ setTimeout(() => {
     const homeownerFields = document.getElementById('homeownerFields');
     const welcomeProjectType = document.getElementById('welcomeProjectType');
     const welcomeTrade = document.getElementById('welcomeTrade');
+    const welcomeHomeownerBtn = document.getElementById('welcomeHomeownerBtn');
+    const welcomeContractorBtn = document.getElementById('welcomeContractorBtn');
+    const exploreDemoBtn = document.getElementById('exploreDemoBtn');
+    const welcomeBackBtn = document.getElementById('welcomeBackBtn');
+    const welcomeSubmitBtn = document.getElementById('welcomeSubmitBtn');
 
-    let currentMode = new URLSearchParams(window.location.search).get('view') || 'homeowner';
+    const initialViewParam = new URLSearchParams(window.location.search).get('view');
+    const savedRole = localStorage.getItem('revamplex_role');
+    let currentMode = (initialViewParam === 'contractor' || initialViewParam === 'homeowner')
+      ? initialViewParam
+      : ((savedRole === 'contractor' || savedRole === 'homeowner') ? savedRole : 'homeowner');
+
     let activeSort = 'distance';
     let activeId = null;
     let filteredItems = [];
     let uiCollapsed = false;
     let selectedWelcomeRole = null;
-    const markers = new Map();
+    let markerIndex = new Map();
+    let markerClusterGroup = null;
+
+    const map = L.map('map', {
+      zoomControl: false,
+      attributionControl: true
+    }).setView([40.8859, -74.0435], 11);
+
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    function showLogoFallback() {
+      if (logoImg) logoImg.style.display = 'none';
+      if (logoFallback) logoFallback.style.display = 'block';
+      if (welcomeLogoImg) welcomeLogoImg.style.display = 'none';
+      if (welcomeLogoFallback) welcomeLogoFallback.style.display = 'flex';
+    }
+
+    if (logoImg) logoImg.addEventListener('error', showLogoFallback);
+    if (welcomeLogoImg) welcomeLogoImg.addEventListener('error', showLogoFallback);
 
     function setMapInteractivity(enabled) {
       if (enabled) {
@@ -1781,13 +1673,36 @@ setTimeout(() => {
     }
 
     function populateTradeSelect() {
-      jobTradeSelect.innerHTML = TRADE_OPTIONS.map(trade => `<option>${trade}</option>`).join('');
-      welcomeProjectType.innerHTML =
-        `<option value="">Select project type</option>` +
-        TRADE_OPTIONS.map(trade => `<option>${trade}</option>`).join('');
-      welcomeTrade.innerHTML =
-        `<option value="">Select trade</option>` +
-        TRADE_OPTIONS.map(trade => `<option>${trade}</option>`).join('');
+      const options = TRADE_OPTIONS.map(trade => `<option>${trade}</option>`).join('');
+      tradeFilter.innerHTML = `<option value="all">All Trades</option>` + options;
+      jobTradeSelect.innerHTML = options;
+      welcomeProjectType.innerHTML = `<option value="">Select project type</option>` + options;
+      welcomeTrade.innerHTML = `<option value="">Select trade</option>` + options;
+    }
+
+    function getCurrentDataset() {
+      return currentMode === 'homeowner' ? contractors : jobs;
+    }
+
+    function getFavorites() {
+      return JSON.parse(localStorage.getItem('revampFavorites') || '[]');
+    }
+
+    function isFavorite(jobId) {
+      return getFavorites().includes(jobId);
+    }
+
+    function toggleFavorite(jobId) {
+      let favorites = getFavorites();
+      if (favorites.includes(jobId)) {
+        favorites = favorites.filter(id => id !== jobId);
+        showStatus('Removed from favorites');
+      } else {
+        favorites.push(jobId);
+        showStatus('Saved to favorites');
+      }
+      localStorage.setItem('revampFavorites', JSON.stringify(favorites));
+      renderCards(filteredItems);
     }
 
     function showStatus(message) {
@@ -1813,48 +1728,16 @@ setTimeout(() => {
       if (uiCollapsed) expandUI();
     }
 
-    function getCurrentDataset() {
-      return currentMode === 'homeowner' ? contractors : jobs;
-    }
-
-    function getFavorites() {
-      return JSON.parse(localStorage.getItem('revampFavorites') || '[]');
-    }
-
-    function isFavorite(jobId) {
-      return getFavorites().includes(jobId);
-    }
-
-    function toggleFavorite(jobId) {
-      let favorites = getFavorites();
-
-      if (favorites.includes(jobId)) {
-        favorites = favorites.filter(id => id !== jobId);
-        showStatus('Removed from favorites');
-      } else {
-        favorites.push(jobId);
-        showStatus('Saved to favorites');
-      }
-
-      localStorage.setItem('revampFavorites', JSON.stringify(favorites));
-      applyFilters();
-    }
-
     function makeIcon(item, isActive) {
       const kind = item.type === 'job' ? 'job' : 'contractor';
-      const size = isActive ? 27 : 20;
-      const anchor = isActive ? 13.5 : 10;
+      const size = isActive ? 24 : 18;
+      const anchor = isActive ? 12 : 9;
       return L.divIcon({
         className: '',
         html: `<div class="map-pin ${kind} ${isActive ? 'active' : ''}"></div>`,
         iconSize: [size, size],
         iconAnchor: [anchor, anchor]
       });
-    }
-
-    function clearMarkers() {
-      markers.forEach(marker => map.removeLayer(marker));
-      markers.clear();
     }
 
     function getPopupHtml(item) {
@@ -1867,23 +1750,46 @@ setTimeout(() => {
           </div>
         `;
       }
-
       return `
         <div>
           <div class="popup-title">${item.title}</div>
           <div class="popup-sub">${item.city} • ${item.trade}</div>
-          <div class="popup-sub">Posted by ${item.customer} • ⭐ ${item.rating} (${item.reviews} reviews)</div>
+          <div class="popup-sub">Posted by ${item.customer} • Bids ${item.bids.length}/${item.maxBids}</div>
         </div>
       `;
     }
 
+    function clearMarkers() {
+      markerIndex.clear();
+      if (markerClusterGroup) {
+        map.removeLayer(markerClusterGroup);
+      }
+    }
+
+    function createClusterGroup() {
+      return L.markerClusterGroup({
+        maxClusterRadius: 45,
+        showCoverageOnHover: false,
+        spiderfyOnMaxZoom: true,
+        disableClusteringAtZoom: 13,
+        iconCreateFunction(cluster) {
+          return L.divIcon({
+            html: `<div class="custom-cluster">${cluster.getChildCount()}</div>`,
+            className: '',
+            iconSize: [42, 42]
+          });
+        }
+      });
+    }
+
     function renderMarkers(items) {
       clearMarkers();
+      markerClusterGroup = createClusterGroup();
 
       items.forEach(item => {
         const marker = L.marker([item.lat, item.lng], {
           icon: makeIcon(item, item.id === activeId)
-        }).addTo(map);
+        });
 
         marker.bindPopup(getPopupHtml(item));
 
@@ -1893,20 +1799,29 @@ setTimeout(() => {
           scrollCardIntoView(item.id);
         });
 
-        markers.set(item.id, marker);
+        markerClusterGroup.addLayer(marker);
+        markerIndex.set(item.id, marker);
       });
 
+      map.addLayer(markerClusterGroup);
       fitMapToItems(items);
+    }
+
+    function updateMarkerStates() {
+      filteredItems.forEach(item => {
+        const marker = markerIndex.get(item.id);
+        if (!marker) return;
+        marker.setIcon(makeIcon(item, item.id === activeId));
+      });
     }
 
     function fitMapToItems(items) {
       if (!items.length) return;
-
       const bounds = L.latLngBounds(items.map(item => [item.lat, item.lng]));
       map.fitBounds(bounds, {
-        paddingTopLeft: [30, 200],
-        paddingBottomRight: [30, 260],
-        maxZoom: 13
+        paddingTopLeft: [30, 210],
+        paddingBottomRight: [30, 220],
+        maxZoom: 12
       });
     }
 
@@ -1930,44 +1845,21 @@ setTimeout(() => {
         </div>
         <div class="card-body">
           <div class="meta-grid">
-
-  <div class="meta-box">
-    <div class="meta-label">Projects</div>
-    <div class="meta-value">${item.projectsCompleted}</div>
-  </div>
-
-  <div class="meta-box">
-    <div class="meta-label">Distance</div>
-    <div class="meta-value">${item.distance} mi</div>
-  </div>
-
-  <div class="meta-box">
-    <div class="meta-label">Reviews</div>
-    <div class="meta-value">${item.reviews}</div>
-  </div>
-
-</div>
-<div class="meta-label">Bids</div>
-<div class="meta-value">
-  ${item.bids.length} / ${item.maxBids}
-</div>
-<div class="meta-box">
-  <div class="meta-label">Remaining</div>
-</div>
             <div class="meta-box">
-              <div class="meta-label">Reviews</div>
-              <div class="meta-value">${item.reviews}</div>
+              <div class="meta-label">Projects</div>
+              <div class="meta-value">${item.projectsCompleted}</div>
             </div>
-          </div>
-          <div class="badge-row">
-            ${item.tags.map(tag => `<span class="badge">${tag}</span>`).join('')}
+            <div class="meta-box">
+              <div class="meta-label">Distance</div>
+              <div class="meta-value">${item.distance} mi</div>
+            </div>
           </div>
           <div class="info-row">
             <span><strong>Response:</strong> ${item.responseTime}</span>
-            <span><strong>Projects:</strong> ${item.projectsCompleted}</span>
+            <span><strong>Reviews:</strong> ${item.reviews}</span>
           </div>
           <div class="card-actions">
-            <button class="mini-btn secondary" data-action="view" data-id="${item.id}">View Profile</button>
+            <button class="mini-btn secondary" data-action="view" data-id="${item.id}">View</button>
             <button class="mini-btn primary" data-action="message" data-id="${item.id}">Message</button>
           </div>
         </div>
@@ -1976,7 +1868,6 @@ setTimeout(() => {
 
     function jobCardHtml(item) {
       const fav = isFavorite(item.id);
-
       return `
         <div class="card-top">
           <div class="card-title-wrap">
@@ -1987,33 +1878,23 @@ setTimeout(() => {
         </div>
         <div class="card-body">
           <div class="meta-grid">
-
-  <div class="meta-box">
-    <div class="meta-label">Budget</div>
-    <div class="meta-value">${item.budget}</div>
-  </div>
-
-  <div class="meta-box">
-    <div class="meta-label">Bids</div>
-    <div class="meta-value">${item.bids.length} / ${item.maxBids}</div>
-  </div>
-
-</div>
+            <div class="meta-box">
+              <div class="meta-label">Budget</div>
+              <div class="meta-value">${item.budget}</div>
+            </div>
+            <div class="meta-box">
+              <div class="meta-label">Bids</div>
+              <div class="meta-value">${item.bids.length} / ${item.maxBids}</div>
+            </div>
+          </div>
           <div class="info-row">
-            <span><strong>Posted by:</strong> ${item.customer}</span>
-            <span><strong>Reviews:</strong> ${item.reviews}</span>
+            <span><strong>By:</strong> ${item.customer}</span>
             <span><strong>Posted:</strong> ${item.postedAgo}</span>
           </div>
-          <div class="badge-row">
-            ${item.verified ? '<span class="badge">Verified Customer</span>' : ''}
-            <span class="badge">${item.distance} mi away</span>
-          </div>
           <div class="card-actions">
-            <button class="mini-btn secondary" data-action="job-details" data-id="${item.id}">View Job</button>
-            <button class="favorite-btn ${fav ? 'active' : ''}" data-action="favorite" data-id="${item.id}" title="Save to favorites">
-              ${fav ? '❤️' : '🤍'}
-            </button>
-            <button class="mini-btn primary" data-action="bid" data-id="${item.id}">Submit Bid</button>
+            <button class="mini-btn secondary" data-action="job-details" data-id="${item.id}">View</button>
+            <button class="favorite-btn ${fav ? 'active' : ''}" data-action="favorite" data-id="${item.id}" title="Save to favorites">${fav ? '❤️' : '🤍'}</button>
+            <button class="mini-btn primary" data-action="bid" data-id="${item.id}">Bid</button>
           </div>
         </div>
       `;
@@ -2023,9 +1904,9 @@ setTimeout(() => {
       if (!items.length) {
         cardsRow.innerHTML = `
           <div class="listing-card" style="display:flex;align-items:center;justify-content:center;">
-            <div style="padding:24px;text-align:center;">
-              <div style="font-size:18px;font-weight:900;margin-bottom:8px;">No results found</div>
-              <div style="font-size:14px;color:#64748b;">Try changing the search or filter settings.</div>
+            <div style="padding:22px;text-align:center;">
+              <div style="font-size:17px;font-weight:900;margin-bottom:8px;">No results found</div>
+              <div style="font-size:13px;color:#64748b;">Try changing the search or filter settings.</div>
             </div>
           </div>
         `;
@@ -2039,15 +1920,6 @@ setTimeout(() => {
       `).join('');
     }
 
-    function updateMarkerStates() {
-      filteredItems.forEach(item => {
-        const marker = markers.get(item.id);
-        if (!marker) return;
-        marker.setIcon(makeIcon(item, item.id === activeId));
-        if (item.id === activeId) marker.openPopup();
-      });
-    }
-
     function setActive(id, panMap = false) {
       activeId = id;
 
@@ -2059,14 +1931,15 @@ setTimeout(() => {
 
       const item = filteredItems.find(entry => entry.id === id);
       if (item && panMap) {
-        map.flyTo([item.lat, item.lng], Math.max(map.getZoom(), 13), { duration: 0.45 });
+        map.flyTo([item.lat, item.lng], Math.max(map.getZoom(), 13), { duration: 0.38 });
+        const marker = markerIndex.get(id);
+        if (marker) marker.openPopup();
       }
     }
 
     function scrollCardIntoView(id) {
       const target = [...document.querySelectorAll('.listing-card[data-id]')].find(card => Number(card.dataset.id) === id);
       if (!target) return;
-
       const left = target.offsetLeft - (cardsRow.clientWidth / 2) + (target.clientWidth / 2);
       cardsRow.scrollTo({ left, behavior: 'smooth' });
     }
@@ -2080,64 +1953,60 @@ setTimeout(() => {
     }
 
     function applyFilters() {
+      const source = getCurrentDataset();
+      const query = searchInput.value.trim().toLowerCase();
+      const selectedTrade = tradeFilter.value;
+      const maxDistance = Number(distanceFilter.value);
+      const minRating = Number(ratingFilter.value);
 
-  const source = getCurrentDataset();
-  const query = searchInput.value.trim().toLowerCase();
-  const selectedTrade = tradeFilter.value;
-  const maxDistance = Number(distanceFilter.value);
-  const minRating = Number(ratingFilter.value);
+      filteredItems = source.filter(item => {
+        if (currentMode === 'homeowner' && item.type !== 'contractor') return false;
+        if (currentMode === 'contractor' && item.type !== 'job') return false;
 
-  filteredItems = source.filter(item => {
+        if (currentMode === 'contractor' && item.type === 'job') {
+          if (item.maxBids && item.bids && item.bids.length >= item.maxBids) return false;
+        }
 
-  /* HARD LOCK MODE */
+        const haystack = item.type === 'contractor'
+          ? [item.name, item.trade, item.city, ...(item.tags || [])].join(' ').toLowerCase()
+          : [item.title, item.trade, item.city, item.customer, item.description].join(' ').toLowerCase();
 
-  if(currentMode === "homeowner" && item.type !== "contractor") return false;
+        const matchesQuery = !query || haystack.includes(query);
+        const matchesTrade = selectedTrade === 'all' || item.trade === selectedTrade;
+        const matchesDistance = item.distance <= maxDistance;
+        const matchesRating = item.rating >= minRating;
 
-  if(currentMode === "contractor" && item.type !== "job") return false;
+        return matchesQuery && matchesTrade && matchesDistance && matchesRating;
+      });
 
-  /* AUTO HIDE JOBS THAT REACHED MAX BIDS */
+      sortItems(filteredItems);
+      syncModeUI();
 
-  if(currentMode === "contractor" && item.type === "job"){
-    if(item.maxBids && item.bids && item.bids.length >= item.maxBids){
-      return false;
+      if (!filteredItems.some(item => item.id === activeId)) {
+        activeId = filteredItems[0]?.id ?? null;
+      }
+
+      renderCards(filteredItems);
+      renderMarkers(filteredItems);
+      formatCount();
+
+      if (activeId) {
+        setActive(activeId, false);
+        setTimeout(() => scrollCardIntoView(activeId), 80);
+      }
     }
-  }
-
-    const haystack = item.type === 'contractor'
-      ? [item.name, item.trade, item.city, ...(item.tags || [])].join(' ').toLowerCase()
-      : [item.title, item.trade, item.city, item.customer, item.description].join(' ').toLowerCase();
-
-    const matchesQuery = !query || haystack.includes(query);
-    const matchesTrade = selectedTrade === 'all' || item.trade === selectedTrade;
-    const matchesDistance = item.distance <= maxDistance;
-    const matchesRating = item.rating >= minRating;
-
-    return matchesQuery && matchesTrade && matchesDistance && matchesRating;
-
-  });
-
-  sortItems(filteredItems);
-  syncModeUI();
-
-  if (!filteredItems.some(item => item.id === activeId)) {
-    activeId = filteredItems[0]?.id ?? null;
-  }
-
-  renderCards(filteredItems);
-  renderMarkers(filteredItems);
-  formatCount();
-
-  if (activeId) {
-    setActive(activeId, false);
-    setTimeout(() => scrollCardIntoView(activeId), 80);
-  }
-}
 
     function setSort(type) {
       activeSort = type;
       sortDistanceBtn.classList.toggle('active', type === 'distance');
       sortRatingBtn.classList.toggle('active', type === 'rating');
       applyFilters();
+    }
+
+    function getFormattedBudget(value) {
+      const trimmed = String(value || '').trim();
+      if (!trimmed) return '$0';
+      return trimmed.startsWith('$') ? trimmed : `$${trimmed}`;
     }
 
     function openJobModal() {
@@ -2147,12 +2016,6 @@ setTimeout(() => {
 
     function closeJobForm() {
       jobModal.classList.remove('show');
-    }
-
-    function getFormattedBudget(value) {
-      const trimmed = String(value || '').trim();
-      if (!trimmed) return '$0';
-      return trimmed.startsWith('$') ? trimmed : `$${trimmed}`;
     }
 
     function clearJobForm() {
@@ -2166,7 +2029,7 @@ setTimeout(() => {
 
     function createJobFromForm() {
       const title = document.getElementById('jobTitle').value.trim() || 'New Job';
-      const trade = document.getElementById('jobTrade').value;
+      const trade = document.getElementById('jobTrade').value || 'General Contractors';
       const budget = getFormattedBudget(document.getElementById('jobBudget').value);
       const customer = document.getElementById('jobCustomer').value.trim() || 'New Customer';
       const city = document.getElementById('jobCity').value.trim() || 'North Jersey, NJ';
@@ -2174,24 +2037,24 @@ setTimeout(() => {
       const center = map.getCenter();
 
       jobs.unshift({
-  id: Date.now(),
-  type: 'job',
-  title,
-  trade,
-  city,
-  lat: Number(center.lat.toFixed(6)),
-  lng: Number(center.lng.toFixed(6)),
-  budget,
-  rating: 5.0,
-  reviews: 1,
-  distance: 1.0,
-  customer,
-  verified: true,
-  postedAgo: 'Just now',
-  description,
-  maxBids: 5,
-  bids: []
-});
+        id: Date.now(),
+        type: 'job',
+        title,
+        trade,
+        city,
+        lat: Number(center.lat.toFixed(6)),
+        lng: Number(center.lng.toFixed(6)),
+        budget,
+        rating: 5.0,
+        reviews: 1,
+        distance: 1.0,
+        customer,
+        verified: true,
+        postedAgo: 'Just now',
+        description,
+        maxBids: 5,
+        bids: []
+      });
 
       closeJobForm();
       clearJobForm();
@@ -2203,24 +2066,18 @@ setTimeout(() => {
     }
 
     function openProjectRoom(jobId) {
+      const job = jobs.find(entry => entry.id === jobId);
+      if (!job) return;
 
-  const job = jobs.find(entry => entry.id === jobId);
+      if (job.maxBids && job.bids.length >= job.maxBids) {
+        alert('This job has already reached the maximum number of bids.');
+        return;
+      }
 
-  if (!job) return;
+      sessionStorage.setItem('revampSelectedJob', JSON.stringify(job));
+      window.location.href = `project-room.html?mode=contractor&job=${jobId}`;
+    }
 
-  if (job.maxBids && job.bids.length >= job.maxBids) {
-
-    alert("This job has already reached the maximum number of bids.");
-
-    return;
-
-  }
-
-  sessionStorage.setItem('revampSelectedJob', JSON.stringify(job));
-
-  window.location.href = `project-room.html?mode=contractor&job=${jobId}`;
-
-}
     function openDetailModal(item) {
       if (!item) return;
 
@@ -2250,7 +2107,7 @@ setTimeout(() => {
           </div>
           <div class="detail-panel">
             <h4>Specialties</h4>
-            <div class="badge-row">${item.tags.map(tag => `<span class="badge">${tag}</span>`).join('')}</div>
+            <div class="detail-tags">${(item.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
           </div>
           <div class="card-actions">
             <button class="mini-btn primary" data-action="message" data-id="${item.id}">Message</button>
@@ -2259,45 +2116,35 @@ setTimeout(() => {
         `;
       } else {
         const fav = isFavorite(item.id);
-
         detailTitle.textContent = item.title;
         detailContent.innerHTML = `
           <div class="detail-panel">
             <h4>${item.trade} • ${item.city}</h4>
             <p>${item.description}</p>
           </div>
-
           <div class="modal-grid">
             <div class="detail-panel">
               <h4>Customer</h4>
               <p>${item.customer} • ⭐ ${item.rating} (${item.reviews} reviews) • ${item.verified ? 'Verified customer' : 'Unverified customer'}</p>
             </div>
             <div class="detail-panel">
-              <h4>Budget</h4>
-              <p>${item.budget} • Posted ${item.postedAgo} • Approx. ${item.distance} miles away.</p>
+              <h4>Budget & Bids</h4>
+              <p>${item.budget} • Posted ${item.postedAgo} • Bids ${item.bids.length}/${item.maxBids}</p>
             </div>
           </div>
-
           <div class="detail-panel">
             <h4>Bidding</h4>
             <p>Bids are submitted privately to the customer. Other contractors cannot see your bid.</p>
           </div>
-
           <div class="card-actions">
-            <button class="mini-btn secondary" data-action="favorite" data-id="${item.id}">
-              ${fav ? '❤️ Favorited' : '🤍 Favorite'}
-            </button>
-            <button class="mini-btn primary" data-action="bid" data-id="${item.id}">
-              Submit Bid
-            </button>
+            <button class="mini-btn secondary" data-action="favorite" data-id="${item.id}">${fav ? '❤️ Favorited' : '🤍 Favorite'}</button>
+            <button class="mini-btn primary" data-action="bid" data-id="${item.id}">Submit Bid</button>
           </div>
         `;
       }
 
       const closeSecondary = document.getElementById('detailCloseSecondary');
-      if (closeSecondary) {
-        closeSecondary.addEventListener('click', closeDetails);
-      }
+      if (closeSecondary) closeSecondary.addEventListener('click', closeDetails);
     }
 
     function closeDetails() {
@@ -2315,9 +2162,7 @@ setTimeout(() => {
 
       if (action === 'message') {
         const contractor = contractors.find(c => c.id === id);
-        if (contractor) {
-          sessionStorage.setItem('revampSelectedContractor', JSON.stringify(contractor));
-        }
+        if (contractor) sessionStorage.setItem('revampSelectedContractor', JSON.stringify(contractor));
         window.location.href = `project-room.html?mode=homeowner&contractor=${id}`;
         return;
       }
@@ -2329,15 +2174,13 @@ setTimeout(() => {
 
       if (action === 'favorite') {
         toggleFavorite(id);
-        if (detailModal.classList.contains('show') && item.type === 'job') {
-          openDetailModal(item);
-        }
+        if (detailModal.classList.contains('show') && item.type === 'job') openDetailModal(item);
       }
     }
 
     function setMode(mode) {
       currentMode = mode;
-      window.history.replaceState(null, '', `map.html?view=${mode}`);
+      localStorage.setItem('revamplex_role', mode);
       syncModeUI();
 
       const dataset = getCurrentDataset();
@@ -2345,37 +2188,6 @@ setTimeout(() => {
 
       applyFilters();
       ensureUIVisible();
-    }
-
-   function startSignup(role){
-
-  // remember user role
-  localStorage.setItem("revamplex_role",role);
-
-  selectedWelcomeRole = role;
-
-  welcomeRoleChooser.style.display = "none";
-  welcomeFormWrap.classList.add("show");
-
-  const isContractor = role === "contractor";
-
-  welcomeRolePill.textContent =
-    isContractor
-      ? "Pro Contractor Registration"
-      : "Homeowner Registration";
-
-  contractorTrialNote.classList.toggle("show",isContractor);
-  contractorFields.classList.toggle("show",isContractor);
-  homeownerFields.classList.toggle("show",!isContractor);
-
-}
-    function backToRoleChooser() {
-      selectedWelcomeRole = null;
-      welcomeRoleChooser.style.display = '';
-      welcomeFormWrap.classList.remove('show');
-      contractorTrialNote.classList.remove('show');
-      contractorFields.classList.remove('show');
-      homeownerFields.classList.remove('show');
     }
 
     function clearWelcomeForm() {
@@ -2400,6 +2212,30 @@ setTimeout(() => {
       });
     }
 
+    function startSignup(role) {
+      localStorage.setItem('revamplex_role', role);
+      selectedWelcomeRole = role;
+
+      welcomeRoleChooser.style.display = 'none';
+      welcomeFormWrap.classList.add('show');
+
+      const isContractor = role === 'contractor';
+
+      welcomeRolePill.textContent = isContractor ? 'Pro Contractor Registration' : 'Homeowner Registration';
+      contractorTrialNote.classList.toggle('show', isContractor);
+      contractorFields.classList.toggle('show', isContractor);
+      homeownerFields.classList.toggle('show', !isContractor);
+    }
+
+    function backToRoleChooser() {
+      selectedWelcomeRole = null;
+      welcomeRoleChooser.style.display = '';
+      welcomeFormWrap.classList.remove('show');
+      contractorTrialNote.classList.remove('show');
+      contractorFields.classList.remove('show');
+      homeownerFields.classList.remove('show');
+    }
+
     function submitWelcomeRegistration() {
       const fullName = document.getElementById('welcomeFullName').value.trim();
       const email = document.getElementById('welcomeEmail').value.trim();
@@ -2419,39 +2255,35 @@ setTimeout(() => {
       if (selectedWelcomeRole === 'contractor') {
         const company = document.getElementById('welcomeCompany').value.trim();
         const trade = document.getElementById('welcomeTrade').value.trim();
-
         if (!company || !trade) {
           alert('Please complete Company Name and Primary Trade.');
           return;
         }
-
         showStatus('Pro Contractor registration started');
-        alert('Pro Contractor registration captured. Your free 3-month trial message is included. You can connect real signup/storage next.');
       } else {
         showStatus('Homeowner registration started');
-        alert('Homeowner registration captured. You can connect real signup/storage next.');
       }
 
+      localStorage.setItem('revamplex_registered', 'true');
       clearWelcomeForm();
+      welcomeOverlay.classList.add('hidden');
+      setMapInteractivity(true);
+      setMode(selectedWelcomeRole);
+    }
+
+    function exploreDemo() {
+      localStorage.setItem('revamplex_demo', 'true');
       welcomeOverlay.classList.add('hidden');
       setMapInteractivity(true);
     }
 
-    function exploreDemo(){
+    welcomeHomeownerBtn.addEventListener('click', () => startSignup('homeowner'));
+    welcomeContractorBtn.addEventListener('click', () => startSignup('contractor'));
+    exploreDemoBtn.addEventListener('click', exploreDemo);
+    welcomeBackBtn.addEventListener('click', backToRoleChooser);
+    welcomeSubmitBtn.addEventListener('click', submitWelcomeRegistration);
 
-  localStorage.setItem("revamplex_demo","true");
-
-  welcomeOverlay.classList.add("hidden");
-
-  setMapInteractivity(true);
-
-}
-
-    searchBtn.addEventListener('click', () => {
-      applyFilters();
-      ensureUIVisible();
-    });
-
+    searchBtn.addEventListener('click', () => { applyFilters(); ensureUIVisible(); });
     searchInput.addEventListener('keydown', e => {
       if (e.key === 'Enter') {
         applyFilters();
@@ -2459,20 +2291,9 @@ setTimeout(() => {
       }
     });
 
-    tradeFilter.addEventListener('change', () => {
-      applyFilters();
-      ensureUIVisible();
-    });
-
-    distanceFilter.addEventListener('change', () => {
-      applyFilters();
-      ensureUIVisible();
-    });
-
-    ratingFilter.addEventListener('change', () => {
-      applyFilters();
-      ensureUIVisible();
-    });
+    tradeFilter.addEventListener('change', () => { applyFilters(); ensureUIVisible(); });
+    distanceFilter.addEventListener('change', () => { applyFilters(); ensureUIVisible(); });
+    ratingFilter.addEventListener('change', () => { applyFilters(); ensureUIVisible(); });
 
     sortDistanceBtn.addEventListener('click', () => setSort('distance'));
     sortRatingBtn.addEventListener('click', () => setSort('rating'));
@@ -2491,12 +2312,12 @@ setTimeout(() => {
 
     scrollLeftBtn.addEventListener('click', () => {
       ensureUIVisible();
-      cardsRow.scrollBy({ left: -340, behavior: 'smooth' });
+      cardsRow.scrollBy({ left: -280, behavior: 'smooth' });
     });
 
     scrollRightBtn.addEventListener('click', () => {
       ensureUIVisible();
-      cardsRow.scrollBy({ left: 340, behavior: 'smooth' });
+      cardsRow.scrollBy({ left: 280, behavior: 'smooth' });
     });
 
     locateBtn.addEventListener('click', () => {
@@ -2523,33 +2344,23 @@ setTimeout(() => {
 
     cardsRow.addEventListener('click', e => {
       const button = e.target.closest('[data-action]');
-
       if (button) {
         e.preventDefault();
         e.stopPropagation();
-
-        const action = button.dataset.action;
-        const id = Number(button.dataset.id);
-        handleCardAction(action, id);
+        handleCardAction(button.dataset.action, Number(button.dataset.id));
         return;
       }
 
       const card = e.target.closest('.listing-card[data-id]');
-      if (card) {
-        setActive(Number(card.dataset.id), true);
-      }
+      if (card) setActive(Number(card.dataset.id), true);
     });
 
     detailContent.addEventListener('click', e => {
       const button = e.target.closest('[data-action]');
       if (!button) return;
-
       e.preventDefault();
       e.stopPropagation();
-
-      const action = button.dataset.action;
-      const id = Number(button.dataset.id);
-      handleCardAction(action, id);
+      handleCardAction(button.dataset.action, Number(button.dataset.id));
     });
 
     cardsRow.addEventListener('touchstart', ensureUIVisible, { passive: true });
@@ -2587,15 +2398,13 @@ setTimeout(() => {
     });
 
     map.on('click', () => {
-      if (!uiCollapsed) {
-        collapseUI();
-      } else {
-        expandUI();
-      }
+      if (!uiCollapsed) collapseUI();
+      else expandUI();
     });
 
     window.addEventListener('resize', () => {
       setTimeout(() => {
+        map.invalidateSize();
         if (filteredItems.length) {
           fitMapToItems(filteredItems);
           if (activeId) scrollCardIntoView(activeId);
@@ -2604,55 +2413,41 @@ setTimeout(() => {
     });
 
     welcomeOverlay.addEventListener('click', e => {
-      if (e.target === welcomeOverlay) {
-        e.stopPropagation();
-      }
+      if (e.target === welcomeOverlay) e.stopPropagation();
     });
 
-    welcomeCard.addEventListener('click', e => {
-      e.stopPropagation();
-    });
+    welcomeCard.addEventListener('click', e => e.stopPropagation());
 
     populateTradeSelect();
     syncModeUI();
 
-    // force Leaflet to redraw map container
-setTimeout(() => {
-  map.invalidateSize();
-}, 200);
-    
+    setTimeout(() => map.invalidateSize(), 250);
+
+    const registered = localStorage.getItem('revamplex_registered');
+    if (!registered) {
+      welcomeOverlay.style.display = 'flex';
+      setMapInteractivity(false);
+    } else {
+      welcomeOverlay.classList.add('hidden');
+      setMapInteractivity(true);
+    }
 
     const initialDataset = getCurrentDataset();
     activeId = initialDataset[0] ? initialDataset[0].id : null;
     applyFilters();
-    // CHECK IF USER ALREADY REGISTERED
-
-// SHOW WELCOME SCREEN ONLY IF USER NOT REGISTERED
-
-// SHOW WELCOME SCREEN ONLY FOR NEW USERS
-
-const registered = localStorage.getItem("revamplex_registered");
-
-if(!registered){
-
-  welcomeOverlay.style.display = "flex";
-  setMapInteractivity(false);
-
-}else{
-localStorage.setItem("revamplex_registered","true");
-  welcomeOverlay.classList.add("hidden");
-  setMapInteractivity(true);
-
-}
-    const urlParams = new URLSearchParams(window.location.search);
-const urlView = urlParams.get("view");
-const savedRole = localStorage.getItem("revamplex_role");
-
-if (urlView === "contractor" || urlView === "homeowner") {
-  setMode(urlView);
-} else if (savedRole === "contractor" || savedRole === "homeowner") {
-  setMode(savedRole);
-}
   </script>
 </body>
 </html>
+''')
+
+path_html = "/mnt/data/map.html"
+path_txt = "/mnt/data/map_v6_full.txt"
+
+with open(path_html, "w", encoding="utf-8") as f:
+    f.write(html)
+
+with open(path_txt, "w", encoding="utf-8") as f:
+    f.write(html)
+
+print(path_html)
+print(path_txt)
