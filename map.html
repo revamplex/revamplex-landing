@@ -1926,6 +1926,7 @@ setTimeout(() => {
         </div>
         <div class="card-body">
           <div class="meta-grid">
+
   <div class="meta-box">
     <div class="meta-label">Projects</div>
     <div class="meta-value">${item.projectsCompleted}</div>
@@ -1940,11 +1941,11 @@ setTimeout(() => {
     <div class="meta-label">Reviews</div>
     <div class="meta-value">${item.reviews}</div>
   </div>
+
 </div>
 
 <div class="meta-box">
   <div class="meta-label">Remaining</div>
-  <div class="meta-value">${(item.maxBids || 5) - item.bids.length}</div>
 </div>
             <div class="meta-box">
               <div class="meta-label">Reviews</div>
@@ -2078,17 +2079,15 @@ setTimeout(() => {
 
   filteredItems = source.filter(item => {
 
-    /* FORCE CORRECT DATASET TYPE */
+  /* HARD LOCK DATA TYPE BY MODE */
 
-    if(currentMode === "homeowner" && item.type !== "contractor") return false;
-    if(currentMode === "contractor" && item.type !== "job") return false;
+  if (currentMode === "homeowner") {
+    if (item.type !== "contractor") return false;
+  }
 
-    /* AUTO HIDE JOBS THAT REACHED MAX BIDS */
-
-    if(currentMode === "contractor" && item.type === "job"){
-      if(item.maxBids && item.bids && item.bids.length >= item.maxBids){
-        return false;
-      }
+  if (currentMode === "contractor") {
+    if (item.type !== "job") return false;
+  }
     }
 
     const haystack = item.type === 'contractor'
