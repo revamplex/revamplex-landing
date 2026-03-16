@@ -1212,6 +1212,20 @@
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
   <script>
+    function maskLocation(lat, lng, radiusMiles = 0.25) {
+  const radiusInDegrees = radiusMiles / 69; // miles → degrees approx
+
+  const u = Math.random();
+  const v = Math.random();
+
+  const w = radiusInDegrees * Math.sqrt(u);
+  const t = 2 * Math.PI * v;
+
+  const newLat = lat + w * Math.cos(t);
+  const newLng = lng + w * Math.sin(t);
+
+  return [newLat, newLng];
+}
     const TRADE_OPTIONS = [
       'Kitchen Renovation',
       'Bathroom Renovation',
@@ -1785,7 +1799,9 @@
       markerClusterGroup = createClusterGroup();
 
       items.forEach(item => {
-        const marker = L.marker([item.lat, item.lng], {
+        const [maskedLat, maskedLng] = maskLocation(item.lat, item.lng, 0.25);
+
+const marker = L.marker([maskedLat, maskedLng], {
           icon: makeIcon(item, item.id === activeId)
         });
 
