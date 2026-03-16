@@ -810,7 +810,7 @@ Back to Project Feed
           <div class="project-title">
             <div>
               <h2>Kitchen + Dining Renovation</h2>
-              <p>Project ID: RMP-20481 • 18 Oak Terrace, Paramus, NJ • Customer: John Smith • Contractor: Impact Construction</p>
+              <p>Project ID: RMP-20481 • Paramus NJ Area • Homeowner: Anonymous • Contractor: Verified Contractor</p>
             </div>
             <div class="status-pill">● In Estimate Review</div>
           </div>
@@ -885,7 +885,7 @@ Back to Project Feed
                   <p>Customer and contractor video feed appears here. Later we can wire this to WebRTC / Daily / Agora.</p>
                 </div>
               </div>
-              <div class="video-thumb">Contractor Preview<br />Impact Construction</div>
+              <div class="video-thumb">Contractor Preview<br />Verified Contractor</div>
             </div>
 
             <div class="chat-box">
@@ -897,11 +897,11 @@ Back to Project Feed
               </div>
               <div class="messages">
                 <div class="message contractor">
-                  <strong>Impact Construction</strong>
+                  <strong>Verified Contractor</strong>
                   I uploaded the revised tile layout and added the material quantities to the estimate.
                 </div>
                 <div class="message customer">
-                  <strong>John Smith</strong>
+                  <strong>Homeowner</strong>
                   Looks good. Can we move the walkthrough to Saturday morning?
                 </div>
                 <div class="message contractor">
@@ -1153,7 +1153,7 @@ Back to Project Feed
           <div class="signature-layout">
             <div class="signature-box">
               <label>Customer Full Name</label>
-              <input type="text" value="John Smith" />
+              <input type="text" value="Approved Homeowner" />
 
               <div class="approval-checklist">
                 <label class="check-row"><input type="checkbox" checked /> <span>I approve the estimate amount and scope of work shown in this Project Room.</span></label>
@@ -1626,7 +1626,7 @@ function loadBidDashboard(){
     const tr=document.createElement("tr");
 
     tr.innerHTML=`
-<td>${bid.contractor}</td>
+<td>Verified Contractor</td>
 <td>${bid.amount}</td>
 <td>${bid.startDate}</td>
 <td>${bid.message}</td>
