@@ -1829,8 +1829,9 @@ markerIndex.set(item.id, privacyCircle);
       filteredItems.forEach(item => {
         const marker = markerIndex.get(item.id);
         if (!marker) return;
-        marker.setIcon(makeIcon(item, item.id === activeId));
-      });
+        marker.setStyle({
+  fillOpacity: item.id === activeId ? 0.35 : 0.15
+});
     }
 
     function fitMapToItems(items) {
@@ -1943,20 +1944,22 @@ markerIndex.set(item.id, privacyCircle);
   activeId = id;
 
   const marker = markerIndex.get(id);
-
   if (!marker) return;
 
   if (!fromMap) {
-
     const latlng = marker.getLatLng();
 
     map.flyTo(latlng, 13, {
       duration: 0.6
-      marker.setStyle({
-  fillOpacity: 0.35
-});
-
+    });
   }
+
+  // highlight selected circle
+  marker.setStyle({
+    fillOpacity: 0.35
+  });
+
+}
 
 }
 
