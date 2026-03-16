@@ -84,11 +84,50 @@ background:#1f5fb5;
 <input id="budget" placeholder="Budget ($)">
 
 <input id="address" placeholder="Job Address (Street, City)">
+  <div class="form-group">
+  <label for="maxBids">Maximum contractor bids</label>
+  <select id="maxBids">
+
+    <option value="3">3 bids</option>
+    <option value="5" selected>5 bids</option>
+    <option value="7">7 bids</option>
+
+  </select>
+</div>
 
 <button onclick="postJob()">Submit Job</button>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
 
+async function postJob() {
+
+  const description = document.getElementById("description").value;
+  const budget = document.getElementById("budget").value;
+  const address = document.getElementById("address").value;
+  const maxBids = Number(document.getElementById("maxBids").value);
+
+  if (!description || !budget || !address) {
+    alert("Please fill out all fields.");
+    return;
+  }
+
+  const job = {
+    title: description.substring(0, 40),
+    description: description,
+    budget: budget,
+    address: address,
+    maxBids: maxBids,
+    bids: []
+  };
+
+  console.log("Job created:", job);
+
+  alert("Job posted successfully!");
+
+}
+
+</script>
 <script>
 
 /* SUPABASE */
