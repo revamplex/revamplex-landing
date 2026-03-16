@@ -1868,7 +1868,7 @@ markerIndex.set(item.id, privacyCircle);
       return `
         <div class="card-top">
           <div class="card-title-wrap">
-            <h3 class="card-title">${item.trade} Specialist</h3>
+            ${currentMode === "homeowner" ? "" : `<div class="card-title">${item.trade}</div>`}
             <p class="card-sub">${item.trade} • ${item.city}</p>
           </div>
           <div class="rating-pill">⭐ ${item.rating}</div>
@@ -1918,7 +1918,7 @@ markerIndex.set(item.id, privacyCircle);
             </div>
           </div>
           <div class="info-row">
-            ${currentMode === "contractor" ? "" : `<span><strong>By:</strong> ${item.customer}</span>`}
+            ${currentMode === "contractor" ? "" : `${currentMode === "contractor" ? "" : `<span><strong>By:</strong> ${item.customer}</span>`}
             <span><strong>Posted:</strong> ${item.postedAgo}</span>
           </div>
           <div class="card-actions">
