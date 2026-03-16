@@ -1,317 +1,1616 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Revamp Project Room</title>
+  <style>
+    :root {
+      --brand: #f97316;
+      --brand-dark: #ea580c;
+      --brand-soft: rgba(249, 115, 22, 0.12);
+      --bg: #f8fafc;
+      --card: rgba(255, 255, 255, 0.98);
+      --text: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+      --radius: 20px;
+    }
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Revamp Project Room</title>
+    * {
+      box-sizing: border-box;
+    }
 
-<style>
+    body {
+      margin: 0;
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px);
+      color: var(--text);
+    }
 
-body{
-font-family:Arial, Helvetica, sans-serif;
-margin:0;
-background:#f5f7fb;
-}
+    .app-shell {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
 
-.topbar{
-background:white;
-border-bottom:1px solid #ddd;
-padding:14px 20px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
 
-.logo{
-font-weight:700;
-font-size:20px;
-color:#f97316;
-}
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
 
-.container{
-max-width:900px;
-margin:auto;
-padding:30px;
-}
+    .brand-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      box-shadow: 0 10px 30px rgba(249, 115, 22, 0.25);
+    }
 
-.card{
-background:white;
-padding:25px;
-border-radius:10px;
-box-shadow:0 4px 10px rgba(0,0,0,0.06);
-margin-bottom:25px;
-}
+    .brand h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      line-height: 1.15;
+    }
 
-.card h2{
-margin-top:0;
-}
+    .brand p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
 
-input, textarea{
-width:100%;
-padding:10px;
-margin-top:6px;
-margin-bottom:16px;
-border-radius:6px;
-border:1px solid #ccc;
-}
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
 
-button{
-background:#f97316;
-border:none;
-color:white;
-padding:12px 18px;
-border-radius:6px;
-cursor:pointer;
-font-weight:600;
-}
+    .btn {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
 
-button:hover{
-background:#ea580c;
-}
+    .btn:hover {
+      transform: translateY(-1px);
+    }
 
-.back{
-background:#ddd;
-color:black;
-margin-right:10px;
-}
+    .btn-primary {
+      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+      color: #fff;
+      box-shadow: 0 12px 24px rgba(249, 115, 22, 0.25);
+    }
 
-.tools{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:15px;
-}
+    .btn-soft {
+      background: var(--brand-soft);
+      color: var(--brand-dark);
+    }
 
-.tool{
-background:#fafafa;
-border:1px solid #eee;
-padding:15px;
-border-radius:8px;
-}
+    .btn-dark {
+      background: #0f172a;
+      color: #fff;
+    }
 
-</style>
+    .hero {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.8);
+      box-shadow: var(--shadow);
+      border-radius: 28px;
+      padding: 22px;
+      margin-bottom: 18px;
+    }
 
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 18px;
+    }
+
+    .project-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .project-title h2 {
+      margin: 0;
+      font-size: 1.6rem;
+    }
+
+    .project-title p {
+      margin: 6px 0 0;
+      color: var(--muted);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #ecfdf5;
+      color: #15803d;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      align-self: start;
+      border: 1px solid #bbf7d0;
+    }
+
+    .mini-stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .stat .label {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .stat .value {
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .side-summary {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: linear-gradient(180deg, #fff, #fff7ed);
+      padding: 18px;
+    }
+
+    .side-summary h3 {
+      margin-top: 0;
+      margin-bottom: 14px;
+      font-size: 1rem;
+    }
+
+    .summary-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--line);
+      font-size: 0.95rem;
+    }
+
+    .summary-line:last-child {
+      border-bottom: none;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .sidebar,
+    .panel {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.85);
+      box-shadow: var(--shadow);
+      border-radius: 24px;
+    }
+
+    .sidebar {
+      padding: 16px;
+      position: sticky;
+      top: 20px;
+    }
+
+    .nav-title {
+      margin: 0 0 12px;
+      font-size: 0.88rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .nav-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px 14px;
+      background: #fff;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, var(--brand-soft), rgba(255,255,255,1));
+      border-color: rgba(249, 115, 22, 0.3);
+      color: var(--brand-dark);
+    }
+
+    .nav-item span:last-child {
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .workspace {
+      display: grid;
+      gap: 18px;
+    }
+
+    .panel {
+      padding: 20px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .panel-header h3 {
+      margin: 0;
+      font-size: 1.15rem;
+    }
+
+    .panel-header p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1.25fr 0.95fr;
+      gap: 18px;
+    }
+
+    .video-stage {
+      background: linear-gradient(160deg, #111827, #1e293b);
+      border-radius: 22px;
+      min-height: 340px;
+      padding: 18px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .video-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      backdrop-filter: blur(8px);
+    }
+
+    .video-main {
+      position: absolute;
+      inset: 60px 18px 72px 18px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at top right, rgba(249,115,22,0.18), transparent 35%), rgba(255,255,255,0.03);
+      text-align: center;
+      padding: 18px;
+    }
+
+    .video-main h4 {
+      margin: 0 0 8px;
+      font-size: 1.15rem;
+    }
+
+    .video-thumb {
+      position: absolute;
+      right: 18px;
+      bottom: 18px;
+      width: 170px;
+      height: 96px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.1);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .video-controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .video-controls .btn {
+      padding: 11px 14px;
+      border-radius: 12px;
+    }
+
+    .chat-box {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 14px;
+      background: #fff;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 340px;
+    }
+
+    .messages {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+      padding: 8px 0 16px;
+    }
+
+    .message {
+      max-width: 88%;
+      padding: 12px 14px;
+      border-radius: 16px;
+      line-height: 1.45;
+      font-size: 0.95rem;
+    }
+
+    .message.contractor {
+      background: var(--brand-soft);
+      justify-self: start;
+    }
+
+    .message.customer {
+      background: #eff6ff;
+      justify-self: end;
+    }
+
+    .message strong {
+      display: block;
+      font-size: 0.82rem;
+      margin-bottom: 4px;
+    }
+
+    .chat-compose {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font: inherit;
+      color: var(--text);
+      background: #fff;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 88px;
+    }
+
+    .chat-compose input {
+      flex: 1;
+    }
+
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .tool-card {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 18px;
+      padding: 14px;
+      cursor: pointer;
+      transition: border-color 0.18s ease, transform 0.18s ease;
+    }
+
+    .tool-card:hover,
+    .tool-card.active {
+      border-color: rgba(249, 115, 22, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .tool-card.active {
+      background: linear-gradient(135deg, var(--brand-soft), #fff);
+    }
+
+    .tool-card h4 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }
+
+    .tool-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .calc-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 0.85fr;
+      gap: 18px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    .result-card {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: linear-gradient(180deg, #fff, #fff7ed);
+      padding: 16px;
+    }
+
+    .result-metric {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--line);
+      font-size: 0.95rem;
+    }
+
+    .result-metric:last-child {
+      border-bottom: none;
+    }
+
+    .estimate-toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .estimate-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 780px;
+    }
+
+    th, td {
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      font-size: 0.95rem;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #fff7ed;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #9a3412;
+    }
+
+    .table-input {
+      min-width: 86px;
+      padding: 10px 12px;
+      border-radius: 12px;
+    }
+
+    .estimate-summary {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 18px;
+    }
+
+    .summary-box {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 16px;
+      background: #fff;
+    }
+
+    .summary-box h4 {
+      margin-top: 0;
+      margin-bottom: 14px;
+    }
+
+    .money-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--line);
+      font-size: 0.95rem;
+    }
+
+    .money-line:last-child {
+      border-bottom: none;
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .schedule-layout {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 18px;
+    }
+
+    .calendar-box,
+    .schedule-list,
+    .signature-box {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: #fff;
+      padding: 16px;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .cal-day,
+    .cal-date {
+      text-align: center;
+      padding: 10px 8px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+    }
+
+    .cal-day {
+      font-weight: 800;
+      color: var(--muted);
+      background: #f8fafc;
+    }
+
+    .cal-date {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .cal-date.active {
+      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .task-item {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    .task-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .task-item strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .task-item span {
+      color: var(--muted);
+      font-size: 0.92rem;
+      display: block;
+    }
+
+    .signature-layout {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 18px;
+    }
+
+    .signature-pad {
+      height: 180px;
+      border: 2px dashed #fdba74;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #fff, #fff7ed);
+      display: grid;
+      place-items: center;
+      color: #9a3412;
+      font-weight: 700;
+      margin: 12px 0;
+      text-align: center;
+      padding: 18px;
+    }
+
+    .approval-checklist {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .check-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    .check-row input {
+      width: auto;
+      margin-top: 3px;
+    }
+
+    .photo-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .photo-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: linear-gradient(135deg, #fff7ed, #ffffff);
+      padding: 14px;
+      min-height: 120px;
+    }
+
+    .photo-card strong {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .photo-placeholder {
+      min-height: 70px;
+      border-radius: 14px;
+      background: rgba(249, 115, 22, 0.10);
+      display: grid;
+      place-items: center;
+      color: var(--brand-dark);
+      font-weight: 700;
+      text-align: center;
+      padding: 12px;
+    }
+
+    .footer-note {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin: 18px 0 8px;
+    }
+
+    @media (max-width: 1220px) {
+      .hero-grid,
+      .dashboard,
+      .two-col,
+      .calc-layout,
+      .estimate-summary,
+      .schedule-layout,
+      .signature-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .mini-stats,
+      .tool-grid,
+      .photo-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .sidebar {
+        position: static;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app-shell {
+        padding: 14px;
+      }
+
+      .mini-stats,
+      .tool-grid,
+      .form-grid,
+      .photo-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .project-title h2 {
+        font-size: 1.28rem;
+      }
+
+      .video-thumb {
+        position: static;
+        width: 100%;
+        margin-top: 14px;
+        height: 90px;
+      }
+
+      .video-main {
+        position: static;
+        margin-top: 16px;
+        min-height: 190px;
+      }
+    }
+  </style>
 </head>
-
 <body>
+  <div class="app-shell">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-badge">R</div>
+        <div>
+          <h1>Revamp Project Room™</h1>
+          <p>Private contractor workspace for real jobs, real estimates, and real customer approvals.</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button id="backToFeed" class="btn btn-soft">
+Back to Project Feed
+</button>
+        <button class="btn btn-primary">Invite Customer</button>
+      </div>
+    </div>
 
-<div class="topbar">
+    <section class="hero">
+      <div class="hero-grid">
+        <div>
+          <div class="project-title">
+            <div>
+              <h2>Kitchen + Dining Renovation</h2>
+              <p>Project ID: RMP-20481 • 18 Oak Terrace, Paramus, NJ • Customer: John Smith • Contractor: Impact Construction</p>
+            </div>
+            <div class="status-pill">● In Estimate Review</div>
+          </div>
 
-<div class="logo">REVAMP</div>
+          <div class="mini-stats">
+            <div class="stat">
+              <div class="label">Estimate Total</div>
+              <div class="value">$18,460</div>
+            </div>
+            <div class="stat">
+              <div class="label">Next Appointment</div>
+              <div class="value">Mar 14 • 10:00 AM</div>
+            </div>
+            <div class="stat">
+              <div class="label">Approval Status</div>
+              <div class="value">Pending Signature</div>
+            </div>
+            <div class="stat">
+              <div class="label">Room Size</div>
+              <div class="value">12' × 10'</div>
+            </div>
+          </div>
+        </div>
 
-<div>
+        <aside class="side-summary">
+          <h3>Quick Project Summary</h3>
+          <div class="summary-line"><span>Trade Type</span><strong>Kitchen / Tile / Drywall</strong></div>
+          <div class="summary-line"><span>Start Goal</span><strong>March 22, 2026</strong></div>
+          <div class="summary-line"><span>Deposit Requested</span><strong>$5,500</strong></div>
+          <div class="summary-line"><span>Proposal Version</span><strong>v3.2</strong></div>
+          <div class="summary-line"><span>Private Bid Visibility</span><strong>Customer + Assigned Contractor Only</strong></div>
+        </aside>
+      </div>
+    </section>
 
-<button class="back" onclick="goBack()">Back to Project Feed</button>
+    <div class="dashboard">
+      <aside class="sidebar">
+        <h3 class="nav-title">Workspace Sections</h3>
+        <div class="nav-list">
+          <div class="nav-item active"><span>Project Overview</span><span>Live</span></div>
+          <div class="nav-item"><span>Video + Chat</span><span>2 alerts</span></div>
+          <div class="nav-item"><span>Material Calculator</span><span>Tile</span></div>
+          <div class="nav-item"><span>Estimate Spreadsheet</span><span>v3.2</span></div>
+          <div class="nav-item"><span>Schedule Calendar</span><span>4 items</span></div>
+          <div class="nav-item"><span>Customer Signature</span><span>Pending</span></div>
+          <div class="nav-item"><span>Photos + Docs</span><span>12 files</span></div>
+          <div class="nav-item"><span>Payments</span><span>$5,500 due</span></div>
+        </div>
+      </aside>
 
-</div>
+      <main class="workspace">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Video Call + Job Chat</h3>
+              <p>Use this area for live walkthroughs, screen-sharing plans, field notes, and private project communication.</p>
+            </div>
+            <div class="video-controls">
+              <button class="btn btn-primary">Start Video Call</button>
+              <button class="btn btn-soft">Share Screen</button>
+              <button class="btn btn-soft">Capture Photo</button>
+              <button class="btn btn-dark">Record Session</button>
+            </div>
+          </div>
 
-</div>
+          <div class="two-col">
+            <div class="video-stage">
+              <div class="video-badge">● Waiting Room Active</div>
+              <div class="video-main">
+                <div>
+                  <h4>Live Walkthrough Window</h4>
+                  <p>Customer and contractor video feed appears here. Later we can wire this to WebRTC / Daily / Agora.</p>
+                </div>
+              </div>
+              <div class="video-thumb">Contractor Preview<br />Impact Construction</div>
+            </div>
 
-<div class="container">
+            <div class="chat-box">
+              <div class="panel-header" style="margin-bottom:0;">
+                <div>
+                  <h3 style="font-size:1rem;">Project Chat</h3>
+                  <p>Private thread</p>
+                </div>
+              </div>
+              <div class="messages">
+                <div class="message contractor">
+                  <strong>Impact Construction</strong>
+                  I uploaded the revised tile layout and added the material quantities to the estimate.
+                </div>
+                <div class="message customer">
+                  <strong>John Smith</strong>
+                  Looks good. Can we move the walkthrough to Saturday morning?
+                </div>
+                <div class="message contractor">
+                  <strong>Impact Construction</strong>
+                  Yes. I added 10:00 AM on the calendar below and the estimate is ready for signature.
+                </div>
+              </div>
+              <div class="chat-compose">
+                <input type="text" placeholder="Type a project message..." />
+                <button class="btn btn-primary">Send</button>
+              </div>
+            </div>
+          </div>
+        </section>
+<div class="contractor-tools">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Smart Material Calculator</h3>
+              <p>Switch between trades and turn measurements into material counts that feed the estimate sheet.</p>
+            </div>
+            <button class="btn btn-soft">Push Results to Estimate</button>
+          </div>
 
-<div class="card">
+          <div class="tool-grid">
+            <div class="tool-card active">
+              <h4>Tile Calculator</h4>
+              <p>Square footage, waste factor, grout, thinset, and box count.</p>
+            </div>
+            <div class="tool-card">
+              <h4>Drywall Calculator</h4>
+              <p>Sheet count, tape, screws, and compound based on room dimensions.</p>
+            </div>
+            <div class="tool-card">
+              <h4>Framing Calculator</h4>
+              <p>Stud count, top plates, bottom plates, headers, and spacing logic.</p>
+            </div>
+          </div>
 
-<h2>Project Details</h2>
+          <div class="calc-layout">
+            <div>
+              <div class="form-grid">
+                <div>
+                  <label>Room Length (ft)</label>
+                  <input id="length" type="number" value="12" step="0.1" />
+                </div>
+                <div>
+                  <label>Room Width (ft)</label>
+                  <input id="width" type="number" value="10" step="0.1" />
+                </div>
+                <div>
+                  <label>Tile Length (in)</label>
+                  <input id="tileLength" type="number" value="24" step="1" />
+                </div>
+                <div>
+                  <label>Tile Width (in)</label>
+                  <input id="tileWidth" type="number" value="12" step="1" />
+                </div>
+                <div>
+                  <label>Waste Percentage</label>
+                  <input id="waste" type="number" value="10" step="1" />
+                </div>
+                <div>
+                  <label>Sq Ft per Box</label>
+                  <input id="perBox" type="number" value="12" step="0.1" />
+                </div>
+                <div class="full">
+                  <button class="btn btn-primary" onclick="calculateTile()">Calculate Tile Materials</button>
+                </div>
+              </div>
+            </div>
 
-<div id="jobInfo"></div>
+            <div class="result-card">
+              <h4 style="margin-top:0;">Calculated Results</h4>
+              <div class="result-metric"><span>Floor Area</span><strong id="areaOut">120 sqft</strong></div>
+              <div class="result-metric"><span>With Waste</span><strong id="wasteOut">132 sqft</strong></div>
+              <div class="result-metric"><span>Boxes Needed</span><strong id="boxesOut">11 boxes</strong></div>
+              <div class="result-metric"><span>Estimated Tile Count</span><strong id="tileCountOut">60 tiles</strong></div>
+              <div class="result-metric"><span>Suggested Thinset</span><strong id="thinsetOut">3 bags</strong></div>
+              <div class="result-metric"><span>Suggested Grout</span><strong id="groutOut">2 bags</strong></div>
+            </div>
+          </div>
+        </section>
 
-</div>
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Real Estimate Spreadsheet</h3>
+              <p>Editable line items, live math, markup control, and customer-ready totals.</p>
+            </div>
+            <div class="estimate-toolbar">
+              <button class="btn btn-soft" onclick="addRow()">Add Line Item</button>
+              <button class="btn btn-soft">Save Version</button>
+              <button class="btn btn-primary">Generate Proposal PDF</button>
+              <button class="btn btn-primary" onclick="submitBid()">Submit Bid to Customer</button>
+            </div>
+          </div>
 
+          <div class="estimate-table-wrap">
+            <table id="estimateTable">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Qty</th>
+                  <th>Unit</th>
+                  <th>Unit Cost</th>
+                  <th>Labor</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><input class="table-input" value="Demo" /></td>
+                  <td><input class="table-input qty" type="number" value="1" step="0.01" /></td>
+                  <td><input class="table-input" value="lot" /></td>
+                  <td><input class="table-input unitCost" type="number" value="800" step="0.01" /></td>
+                  <td><input class="table-input laborCost" type="number" value="0" step="0.01" /></td>
+                  <td class="lineTotal">$800.00</td>
+                </tr>
+                <tr>
+                  <td><input class="table-input" value="Framing" /></td>
+                  <td><input class="table-input qty" type="number" value="1" step="0.01" /></td>
+                  <td><input class="table-input" value="lot" /></td>
+                  <td><input class="table-input unitCost" type="number" value="750" step="0.01" /></td>
+                  <td><input class="table-input laborCost" type="number" value="450" step="0.01" /></td>
+                  <td class="lineTotal">$1200.00</td>
+                </tr>
+                <tr>
+                  <td><input class="table-input" value="Drywall" /></td>
+                  <td><input class="table-input qty" type="number" value="1" step="0.01" /></td>
+                  <td><input class="table-input" value="lot" /></td>
+                  <td><input class="table-input unitCost" type="number" value="550" step="0.01" /></td>
+                  <td><input class="table-input laborCost" type="number" value="400" step="0.01" /></td>
+                  <td class="lineTotal">$950.00</td>
+                </tr>
+                <tr>
+                  <td><input class="table-input" value="Tile Install" /></td>
+                  <td><input class="table-input qty" type="number" value="132" step="0.01" /></td>
+                  <td><input class="table-input" value="sqft" /></td>
+                  <td><input class="table-input unitCost" type="number" value="3.25" step="0.01" /></td>
+                  <td><input class="table-input laborCost" type="number" value="4.75" step="0.01" /></td>
+                  <td class="lineTotal">$1056.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-<div class="card">
+          <div class="estimate-summary">
+            <div class="summary-box">
+              <h4>Estimate Notes</h4>
+              <textarea placeholder="Add scope notes, exclusions, allowances, permit language, or fixture substitutions here...">Includes labor, material, disposal, and standard site protection. Permit costs are included in the contract price where required. Fixtures and finish materials may be specified by owner selection or contractor-approved equivalent of similar quality and cost.</textarea>
+            </div>
 
-<h2>Contractor Tools</h2>
+            <div class="summary-box">
+              <h4>Totals</h4>
+              <div class="money-line"><span>Subtotal</span><strong id="subtotalOut">$4,006.00</strong></div>
+              <div class="money-line"><span>Markup (15%)</span><strong id="markupOut">$600.90</strong></div>
+              <div class="money-line"><span>Tax (6.625%)</span><strong id="taxOut">$305.16</strong></div>
+              <div class="money-line"><span>Grand Total</span><strong id="grandOut">$4,912.06</strong></div>
+            </div>
+          </div>
+        </section>
 
-<div class="tools">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Appointment Scheduling Calendar</h3>
+              <p>Set walkthroughs, install dates, inspections, and customer appointments without endless texting.</p>
+            </div>
+            <button class="btn btn-primary">Send Appointment Invite</button>
+          </div>
 
-<div class="tool">
+          <div class="schedule-layout">
+            <div class="calendar-box">
+              <h4 style="margin-top:0;">March 2026</h4>
+              <div class="calendar-grid">
+                <div class="cal-day">Sun</div>
+                <div class="cal-day">Mon</div>
+                <div class="cal-day">Tue</div>
+                <div class="cal-day">Wed</div>
+                <div class="cal-day">Thu</div>
+                <div class="cal-day">Fri</div>
+                <div class="cal-day">Sat</div>
 
-<b>Material Calculator</b>
+                <div class="cal-date">1</div>
+                <div class="cal-date">2</div>
+                <div class="cal-date">3</div>
+                <div class="cal-date">4</div>
+                <div class="cal-date">5</div>
+                <div class="cal-date">6</div>
+                <div class="cal-date">7</div>
+                <div class="cal-date">8</div>
+                <div class="cal-date">9</div>
+                <div class="cal-date">10</div>
+                <div class="cal-date">11</div>
+                <div class="cal-date">12</div>
+                <div class="cal-date">13</div>
+                <div class="cal-date active">14</div>
+                <div class="cal-date">15</div>
+                <div class="cal-date">16</div>
+                <div class="cal-date">17</div>
+                <div class="cal-date">18</div>
+                <div class="cal-date">19</div>
+                <div class="cal-date">20</div>
+                <div class="cal-date">21</div>
+                <div class="cal-date">22</div>
+                <div class="cal-date">23</div>
+                <div class="cal-date">24</div>
+                <div class="cal-date">25</div>
+                <div class="cal-date">26</div>
+                <div class="cal-date">27</div>
+                <div class="cal-date">28</div>
+                <div class="cal-date">29</div>
+                <div class="cal-date">30</div>
+                <div class="cal-date">31</div>
+              </div>
+            </div>
 
-<p>Coming soon</p>
+            <div class="schedule-list">
+              <h4 style="margin-top:0;">Upcoming Appointments</h4>
+              <div class="task-item">
+                <strong>Site Walkthrough</strong>
+                <span>Saturday, March 14, 2026 • 10:00 AM</span>
+                <span>At property • Customer + Contractor</span>
+              </div>
+              <div class="task-item">
+                <strong>Estimate Review Call</strong>
+                <span>Monday, March 16, 2026 • 7:00 PM</span>
+                <span>Video meeting</span>
+              </div>
+              <div class="task-item">
+                <strong>Projected Start Date</strong>
+                <span>Sunday, March 22, 2026 • 8:00 AM</span>
+                <span>Pending signed approval + deposit</span>
+              </div>
+            </div>
+          </div>
+        </section>
 
-</div>
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Customer Approval Signature</h3>
+              <p>Customer reviews the estimate, checks the approval boxes, signs, and the system can generate the contract PDF.</p>
+            </div>
+            <button class="btn btn-primary">Finalize for Signature</button>
+          </div>
 
-<div class="tool">
+          <div class="signature-layout">
+            <div class="signature-box">
+              <label>Customer Full Name</label>
+              <input type="text" value="John Smith" />
 
-<b>Labor Calculator</b>
+              <div class="approval-checklist">
+                <label class="check-row"><input type="checkbox" checked /> <span>I approve the estimate amount and scope of work shown in this Project Room.</span></label>
+                <label class="check-row"><input type="checkbox" checked /> <span>I understand any change orders will be documented separately.</span></label>
+                <label class="check-row"><input type="checkbox" /> <span>I authorize the contractor to begin on the scheduled start date once deposit is received.</span></label>
+              </div>
 
-<p>Coming soon</p>
+              <div class="signature-pad">Customer Signature Area<br />Tap / sign here on mobile or desktop signature pad</div>
 
-</div>
+              <div class="form-grid">
+                <div>
+                  <label>Date</label>
+                  <input type="text" value="March 11, 2026" />
+                </div>
+                <div>
+                  <label>Deposit Amount</label>
+                  <input type="text" value="$5,500" />
+                </div>
+              </div>
+            </div>
 
-<div class="tool">
+            <div class="signature-box">
+              <h4 style="margin-top:0;">After Approval</h4>
+              <div class="result-metric"><span>Signed Contract PDF</span><strong>Generate</strong></div>
+              <div class="result-metric"><span>Deposit Invoice</span><strong>Generate</strong></div>
+              <div class="result-metric"><span>Payment Schedule</span><strong>Create</strong></div>
+              <div class="result-metric"><span>Customer Copy Email</span><strong>Send</strong></div>
+              <div class="result-metric"><span>Internal Job Folder</span><strong>Open</strong></div>
+            </div>
+          </div>
+        </section>
+<section class="panel">
+  <div class="panel-header">
+    <div>
+      <h3>Contractor Bids</h3>
+      <p>Homeowner can review all submitted contractor bids and select one.</p>
+    </div>
+  </div>
 
-<b>Profit Margin Slider</b>
+  <div class="estimate-table-wrap">
+    <table id="bidTable">
+      <thead>
+        <tr>
+          <th>Contractor</th>
+          <th>Bid Amount</th>
+          <th>Start Date</th>
+          <th>Message</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="bidTableBody">
+      </tbody>
+    </table>
+  </div>
 
-<p>Coming soon</p>
+</section>
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Photos + Documentation</h3>
+              </div>
+              <p>Organize before, during, and after images plus plans, permits, and marked-up screenshots from calls.</p>
+            </div>
+            <button class="btn btn-soft">Upload Files</button>
+          </div>
 
-</div>
+          <div class="photo-strip">
+            <div class="photo-card">
+              <strong>Before Photos</strong>
+              <div class="photo-placeholder">Kitchen existing condition photos</div>
+            </div>
+            <div class="photo-card">
+              <strong>Work in Progress</strong>
+              <div class="photo-placeholder">Demo / framing / rough-in uploads</div>
+            </div>
+            <div class="photo-card">
+              <strong>Plans + Approvals</strong>
+              <div class="photo-placeholder">Estimate PDF, permit, signed contract</div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
 
-<div class="tool">
-
-<b>Estimate Builder</b>
-
-<p>Coming soon</p>
-
-</div>
-
-</div>
-
-</div>
-
-
-<div class="card">
-
-<h2>Submit Bid</h2>
-
-<label>Contractor Name</label>
-<input id="contractorName">
-
-<label>Bid Amount ($)</label>
-<input id="bidAmount">
-
-<label>Estimated Start Date</label>
-<input id="startDate" type="date">
-
-<label>Message</label>
-<textarea id="bidMessage"></textarea>
-
-<button onclick="submitBid()">Submit Bid</button>
-
-</div>
-
-</div>
+    <p class="footer-note">Revamp Project Room prototype • Private homeowner + contractor workspace • Ready to connect to Supabase / auth / database next</p>
+  </div>
 
 <script>
 
-const params = new URLSearchParams(window.location.search)
+/* ---------- MODE DETECTION ---------- */
 
-const jobId = Number(params.get("job"))
+const params = new URLSearchParams(window.location.search);
+let mode = params.get("mode");
 
-let jobs = JSON.parse(localStorage.getItem("revampJobs")) || []
+if(!mode){
+  mode = "contractor";
+}
 
-const job = jobs.find(j => j.id === jobId)
+const jobId = params.get("job") || "demo";
 
-if(job){
+/* ---------- HELPERS ---------- */
 
-document.getElementById("jobInfo").innerHTML = `
+function currency(value){
+  return new Intl.NumberFormat('en-US',{
+    style:'currency',
+    currency:'USD'
+  }).format(value||0);
+}
 
-<b>${job.title}</b><br>
-${job.city}<br><br>
-${job.description}<br><br>
-Budget: ${job.budget}
+/* ---------- LOAD JOB ---------- */
 
-`
+const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null");
+
+/* ---------- MODE SWITCH ---------- */
+
+function applyWorkspaceMode(){
+
+  const inviteBtn = document.querySelector('.top-actions .btn-primary');
+
+  if(mode === "homeowner"){
+
+    document.querySelectorAll(".contractor-tools").forEach(el=>{
+      el.style.display="none";
+    });
+
+    const title=document.querySelector(".brand h1");
+
+    if(title){
+      title.textContent="Revamp Project Room™ — Homeowner Workspace";
+    }
+
+    if(inviteBtn){
+      inviteBtn.textContent="Invite Contractor";
+    }
+
+  }else{
+
+    if(inviteBtn){
+      inviteBtn.textContent="Invite Customer";
+    }
+
+  }
 
 }
 
+/* ---------- BACK BUTTON ---------- */
 
-const BID_PLANS = {
+function setupBackButton(){
 
-trial:5,
-bronze:5,
-silver:10,
-gold:15
+  const backBtn=document.getElementById("backToFeed");
 
-}
+  if(!backBtn) return;
 
+  backBtn.addEventListener("click",()=>{
 
-function getPlan(){
+    const params=new URLSearchParams(window.location.search);
 
-return localStorage.getItem("revamp_plan") || "trial"
+    const role=params.get("mode") || "contractor";
 
-}
+    window.location.href=`map.html?view=${role}`;
 
-function getBidCount(){
-
-return Number(localStorage.getItem("revamp_bid_count") || 0)
+  });
 
 }
 
-function incrementBid(){
+/* ---------- TILE CALCULATOR ---------- */
 
-let count = getBidCount() + 1
+function calculateTile(){
 
-localStorage.setItem("revamp_bid_count",count)
+  const length=parseFloat(document.getElementById('length').value)||0;
+  const width=parseFloat(document.getElementById('width').value)||0;
+  const tileLength=parseFloat(document.getElementById('tileLength').value)||0;
+  const tileWidth=parseFloat(document.getElementById('tileWidth').value)||0;
+  const waste=parseFloat(document.getElementById('waste').value)||0;
+  const perBox=parseFloat(document.getElementById('perBox').value)||1;
+
+  const area=length*width;
+  const withWaste=area*(1+waste/100);
+  const boxCount=Math.ceil(withWaste/perBox);
+
+  const tileSqFt=(tileLength*tileWidth)/144;
+  const tileCount=tileSqFt>0 ? Math.ceil(withWaste/tileSqFt):0;
+
+  const thinset=Math.max(1,Math.ceil(withWaste/50));
+  const grout=Math.max(1,Math.ceil(withWaste/90));
+
+  document.getElementById('areaOut').textContent=area.toFixed(2)+" sqft";
+  document.getElementById('wasteOut').textContent=withWaste.toFixed(2)+" sqft";
+  document.getElementById('boxesOut').textContent=boxCount+" boxes";
+  document.getElementById('tileCountOut').textContent=tileCount+" tiles";
+  document.getElementById('thinsetOut').textContent=thinset+" bags";
+  document.getElementById('groutOut').textContent=grout+" bags";
 
 }
 
+/* ---------- ESTIMATE ---------- */
+
+function recalcEstimate(){
+
+  const rows=document.querySelectorAll('#estimateTable tbody tr');
+
+  let subtotal=0;
+
+  rows.forEach(row=>{
+
+    const qty=parseFloat(row.querySelector('.qty')?.value)||0;
+    const unitCost=parseFloat(row.querySelector('.unitCost')?.value)||0;
+    const laborCost=parseFloat(row.querySelector('.laborCost')?.value)||0;
+
+    const total=qty*(unitCost+laborCost);
+
+    row.querySelector('.lineTotal').textContent=currency(total);
+
+    subtotal+=total;
+
+  });
+
+  const markup=subtotal*0.15;
+  const tax=(subtotal+markup)*0.06625;
+  const grand=subtotal+markup+tax;
+
+  document.getElementById('subtotalOut').textContent=currency(subtotal);
+  document.getElementById('markupOut').textContent=currency(markup);
+  document.getElementById('taxOut').textContent=currency(tax);
+  document.getElementById('grandOut').textContent=currency(grand);
+
+}
+
+function addRow(){
+
+  const tbody=document.querySelector('#estimateTable tbody');
+
+  const tr=document.createElement('tr');
+
+  tr.innerHTML=`
+<td><input class="table-input" value="New Item"/></td>
+<td><input class="table-input qty" type="number" value="1"/></td>
+<td><input class="table-input" value="unit"/></td>
+<td><input class="table-input unitCost" type="number" value="0"/></td>
+<td><input class="table-input laborCost" type="number" value="0"/></td>
+<td class="lineTotal">$0.00</td>
+`;
+
+  tbody.appendChild(tr);
+
+  attachEstimateListeners();
+
+  recalcEstimate();
+
+}
+
+function attachEstimateListeners(){
+
+  document.querySelectorAll('.qty,.unitCost,.laborCost').forEach(input=>{
+
+    input.removeEventListener('input',recalcEstimate);
+
+    input.addEventListener('input',recalcEstimate);
+
+  });
+
+}
+
+/* ---------- CHAT ---------- */
+
+function setupChat(){
+
+  const chatInput=document.querySelector('.chat-compose input');
+  const sendBtn=document.querySelector('.chat-compose button');
+  const messages=document.querySelector('.messages');
+
+  if(!chatInput||!sendBtn||!messages) return;
+
+  sendBtn.addEventListener('click',()=>{
+
+    const text=chatInput.value.trim();
+
+    if(!text) return;
+
+    const message=document.createElement('div');
+
+    message.className='message contractor';
+
+    message.innerHTML=`<strong>Impact Construction</strong>${text}`;
+
+    messages.appendChild(message);
+
+    chatInput.value='';
+
+  });
+
+}
+
+/* ---------- SUBMIT BID ---------- */
 
 function submitBid(){
 
-const contractor = document.getElementById("contractorName").value
+  const bidAmount=document.getElementById("grandOut").innerText;
 
-const amount = document.getElementById("bidAmount").value
+  const bidData={
+    job_id:jobId,
+    contractor:"Impact Construction",
+    amount:bidAmount,
+    status:"submitted",
+    timestamp:new Date().toISOString()
+  };
 
-const message = document.getElementById("bidMessage").value
+  console.log("Bid Submitted:",bidData);
 
-const startDate = document.getElementById("startDate").value
-
-
-if(!contractor || !amount){
-
-alert("Please complete the form")
-
-return
-
-}
-
-
-const plan = getPlan()
-
-const limit = BID_PLANS[plan]
-
-if(getBidCount() >= limit){
-
-alert("You reached your monthly bid limit.")
-
-return
+  alert("Bid submitted to customer!");
 
 }
 
+/* ---------- INIT ---------- */
 
-const maxBids = job.maxBids || 5
+applyWorkspaceMode();
 
-if(job.bids.length >= maxBids){
+calculateTile();
 
-alert("This job already received the maximum bids.")
+attachEstimateListeners();
 
-return
+recalcEstimate();
+
+setupChat();
+
+setupBackButton();
+  
+loadBidDashboard();
+/* ---------- BID SYSTEM ---------- */
+
+const BID_PLANS = {
+  trial:5,
+  bronze:5,
+  silver:10,
+  gold:15
+};
+
+function getPlan(){
+  return localStorage.getItem("revamp_plan") || "trial";
+}
+
+function getBidCount(){
+  return Number(localStorage.getItem("revamp_bid_count") || 0);
+}
+
+function incrementBid(){
+  const count=getBidCount()+1;
+  localStorage.setItem("revamp_bid_count",count);
+}
+
+/* ---------- LOAD JOB DATABASE ---------- */
+
+function loadJobs(){
+  return JSON.parse(localStorage.getItem("revampJobs") || "[]");
+}
+
+function saveJobs(jobs){
+  localStorage.setItem("revampJobs",JSON.stringify(jobs));
+}
+
+/* ---------- SUBMIT BID ---------- */
+
+function submitBid(){
+
+  const amount=document.getElementById("grandOut").innerText;
+
+  let jobs=loadJobs();
+
+  const job=jobs.find(j=>String(j.id)===String(jobId));
+
+  if(!job){
+    alert("Job not found");
+    return;
+  }
+
+  if(!job.bids){
+    job.bids=[];
+  }
+
+  const plan=getPlan();
+  const limit=BID_PLANS[plan];
+
+  if(getBidCount()>=limit){
+    alert("You reached your monthly bid limit.");
+    return;
+  }
+
+  const maxBids=job.maxBids || 5;
+
+  if(job.bids.length>=maxBids){
+    alert("This job already received the maximum number of bids.");
+    return;
+  }
+
+  const bid={
+    contractor:"Impact Construction",
+    amount:amount,
+    message:"Estimate generated through Revamp Project Room",
+    startDate:"TBD",
+    timestamp:Date.now()
+  };
+
+  job.bids.push(bid);
+
+  incrementBid();
+
+  saveJobs(jobs);
+
+  alert("Bid submitted privately to homeowner.");
+
+}
+  /* ---------- LOAD BIDS ---------- */
+
+function loadBidDashboard(){
+
+  if(mode!=="homeowner") return;
+
+  const jobs=loadJobs();
+
+  const job=jobs.find(j=>String(j.id)===String(jobId));
+
+  if(!job || !job.bids) return;
+
+  const tbody=document.getElementById("bidTableBody");
+
+  if(!tbody) return;
+
+  tbody.innerHTML="";
+
+  job.bids.forEach((bid,i)=>{
+
+    const tr=document.createElement("tr");
+
+    tr.innerHTML=`
+<td>${bid.contractor}</td>
+<td>${bid.amount}</td>
+<td>${bid.startDate}</td>
+<td>${bid.message}</td>
+<td>
+<button class="btn btn-primary" onclick="acceptBid(${i})">
+Accept
+</button>
+</td>
+`;
+
+    tbody.appendChild(tr);
+
+  });
 
 }
 
+function acceptBid(index){
 
-const bid = {
-
-contractor,
-amount,
-message,
-startDate,
-timestamp:Date.now()
+  alert("Contractor accepted. Contract generation coming next.");
 
 }
-
-job.bids.push(bid)
-
-incrementBid()
-
-localStorage.setItem("revampJobs",JSON.stringify(jobs))
-
-alert("Bid submitted successfully")
-
-window.location.href = "map.html"
-
-}
-
-
-function goBack(){
-
-window.location.href = "map.html"
-
-}
-
 </script>
-
+  
 </body>
 </html>
