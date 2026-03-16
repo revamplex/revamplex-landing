@@ -2147,9 +2147,34 @@ const marker = L.marker([maskedLat, maskedLng], {
             </div>
           </div>
           <div class="detail-panel">
-            <h4>Bidding</h4>
-            <p>Bids are submitted privately to the customer. Other contractors cannot see your bid.</p>
-          </div>
+  <h4>Bids (${item.bids.length}/${item.maxBids})</h4>
+
+  ${item.bids.length === 0 ? `
+    <p>No bids yet.</p>
+  ` : item.bids.map((bid, index) => {
+
+    const contractor = contractors.find(c => c.name === bid.contractor);
+
+    return `
+      <div style="border-top:1px solid #e2e8f0;padding-top:10px;margin-top:10px;">
+        <strong>Verified Contractor</strong><br>
+        ⭐ ${contractor.rating} (${contractor.reviews} reviews)<br>
+        Trade: ${contractor.trade}<br>
+        Bid: ${bid.amount}<br>
+        Start: ${bid.eta}
+
+        <div style="margin-top:8px;">
+          <button class="mini-btn primary"
+            data-action="accept-bid"
+            data-job="${item.id}"
+            data-bid="${index}">
+            Accept Bid
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('')}
+</div>
           <div class="card-actions">
             <button class="mini-btn secondary" data-action="favorite" data-id="${item.id}">${fav ? '❤️ Favorited' : '🤍 Favorite'}</button>
             <button class="mini-btn primary" data-action="bid" data-id="${item.id}">Submit Bid</button>
