@@ -2177,16 +2177,24 @@
     }
 
     function setMode(mode) {
-      currentMode = mode;
-      localStorage.setItem('revamplex_role', mode);
-      syncModeUI();
+  currentMode = mode;
 
-      const dataset = getCurrentDataset();
-      activeId = dataset[0] ? dataset[0].id : null;
+  // Save preference
+  localStorage.setItem('revamplex_role', mode);
 
-      applyFilters();
-      ensureUIVisible();
-    }
+  // ✅ Update URL so it always reflects the current view
+  const url = new URL(window.location);
+  url.searchParams.set('view', mode);
+  window.history.replaceState({}, '', url);
+
+  syncModeUI();
+
+  const dataset = getCurrentDataset();
+  activeId = dataset[0] ? dataset[0].id : null;
+
+  applyFilters();
+  ensureUIVisible();
+}
 
     function clearWelcomeForm() {
       [
