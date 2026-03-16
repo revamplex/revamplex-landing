@@ -1868,8 +1868,8 @@ markerIndex.set(item.id, privacyCircle);
       return `
         <div class="card-top">
           <div class="card-title-wrap">
-            ${currentMode === "homeowner" ? "" : `<div class="card-title">${item.trade}</div>`}
-            <p class="card-sub">${item.trade} • ${item.city}</p>
+            ${currentMode === "homeowner" ? `<div class="card-title">${item.trade}</div>` : ""}
+<p class="card-sub">${item.city}</p>
           </div>
           <div class="rating-pill">⭐ ${item.rating}</div>
         </div>
