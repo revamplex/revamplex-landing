@@ -1802,49 +1802,27 @@
         const [maskedLat, maskedLng] = maskLocation(item.lat, item.lng, 0.25);
 
 // create marker
-const marker = L.marker([maskedLat, maskedLng], {
-  icon: makeIcon(item, item.id === activeId)
-});
+const [maskedLat, maskedLng] = maskLocation(item.lat, item.lng, 0.5);
 
-// create privacy radius
 const privacyCircle = L.circle([maskedLat, maskedLng], {
-  radius: 400, // ~0.25 miles
+  radius: 800, // about 0.5 mile radius
   color: '#f97316',
   fillColor: '#f97316',
   fillOpacity: 0.15,
-  weight: 1
+  weight: 2
 });
 
-// add popup to marker
-marker.bindPopup(getPopupHtml(item));
+privacyCircle.bindPopup(getPopupHtml(item));
 
-// click event
-marker.on('click', () => {
+privacyCircle.on('click', () => {
   ensureUIVisible();
   setActive(item.id, true);
   scrollCardIntoView(item.id);
 });
 
-// add both to cluster group
 markerClusterGroup.addLayer(privacyCircle);
-markerClusterGroup.addLayer(marker);
-
-markerIndex.set(item.id, marker);
-
-markerClusterGroup.addLayer(privacyCircle);
-
-        marker.bindPopup(getPopupHtml(item));
-
-        marker.on('click', () => {
-          ensureUIVisible();
-          setActive(item.id, true);
-          scrollCardIntoView(item.id);
-        });
-
-        markerClusterGroup.addLayer(marker);
-        markerIndex.set(item.id, marker);
-      });
-
+markerIndex.set(item.id, privacyCircle);
+});
       map.addLayer(markerClusterGroup);
       fitMapToItems(items);
     }
