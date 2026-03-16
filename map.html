@@ -1952,7 +1952,9 @@ markerIndex.set(item.id, privacyCircle);
 
     map.flyTo(latlng, 13, {
       duration: 0.6
-    });
+      marker.setStyle({
+  fillOpacity: 0.35
+});
 
   }
 
