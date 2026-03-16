@@ -1918,7 +1918,7 @@ markerIndex.set(item.id, privacyCircle);
             </div>
           </div>
           <div class="info-row">
-            <span><strong>By:</strong> ${currentMode === "contractor" ? "Homeowner" : item.customer}</span>
+            ${currentMode === "contractor" ? "" : `<span><strong>By:</strong> ${item.customer}</span>`}
             <span><strong>Posted:</strong> ${item.postedAgo}</span>
           </div>
           <div class="card-actions">
