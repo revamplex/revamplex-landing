@@ -2147,23 +2147,24 @@ setTimeout(() => {
       const center = map.getCenter();
 
       jobs.unshift({
-        id: Date.now(),
-        type: 'job',
-        title,
-        trade,
-        city,
-        lat: Number(center.lat.toFixed(6)),
-        lng: Number(center.lng.toFixed(6)),
-        budget,
-        rating: 5.0,
-        reviews: 1,
-        distance: 1.0,
-        customer,
-        verified: true,
-        postedAgo: 'Just now',
-        description,
-        bids: []
-      });
+  id: Date.now(),
+  type: 'job',
+  title,
+  trade,
+  city,
+  lat: Number(center.lat.toFixed(6)),
+  lng: Number(center.lng.toFixed(6)),
+  budget,
+  rating: 5.0,
+  reviews: 1,
+  distance: 1.0,
+  customer,
+  verified: true,
+  postedAgo: 'Just now',
+  description,
+  maxBids: 5,
+  bids: []
+});
 
       closeJobForm();
       clearJobForm();
