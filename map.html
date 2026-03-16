@@ -2611,8 +2611,8 @@ setTimeout(() => {
 }, 200);
     
     if (!new URLSearchParams(window.location.search).get('view')) {
-      window.history.replaceState(null, '', 'map.html?view=homeowner');
-    }
+  currentMode = 'homeowner';
+}
 
     const initialDataset = getCurrentDataset();
     activeId = initialDataset[0] ? initialDataset[0].id : null;
