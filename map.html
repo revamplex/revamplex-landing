@@ -1811,12 +1811,13 @@ items.forEach(item => {
   const [maskedLat, maskedLng] = maskLocation(item.lat, item.lng, 0.5);
 
   const privacyCircle = L.circle([maskedLat, maskedLng], {
-    radius: 800,
-    color: '#f97316',
-    fillColor: '#f97316',
-    fillOpacity: 0.15,
-    weight: 2
-  });
+  radius: 800,
+  color: '#f97316',
+  fillColor: '#f97316',
+  fillOpacity: 0.15,
+  weight: 2,
+  className: "job-radius"
+});
 
 privacyCircle.bindPopup(getPopupHtml(item));
 
