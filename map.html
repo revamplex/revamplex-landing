@@ -1478,7 +1478,9 @@
         description: 'Remove existing cabinets, install new shaker cabinets, quartz counters, backsplash, lighting, and paint.',
         maxBids: 5,
         bids: [
-          { contractor: 'Prime Cabinet Studio', amount: '$17,500', eta: 'Start in 3 weeks', rating: 4.7 },
+          bids: [
+  { contractorId: 10, amount: '$17,500', eta: 'Start in 3 weeks', rating: 4.7 }
+]
           { contractor: 'Garden State Carpentry', amount: '$18,900', eta: 'Start in 2 weeks', rating: 4.9 }
         ]
       },
@@ -2003,7 +2005,7 @@ markerIndex.set(item.id, privacyCircle);
         }
 
         const haystack = item.type === 'contractor'
-          ? [item.name, item.trade, item.city, ...(item.tags || [])].join(' ').toLowerCase()
+          ? [item.trade, item.city, ...(item.tags || [])].join(' ').toLowerCase()
           : [item.title, item.trade, item.city, item.customer, item.description].join(' ').toLowerCase();
 
         const matchesQuery = !query || haystack.includes(query);
@@ -2120,7 +2122,7 @@ markerIndex.set(item.id, privacyCircle);
       detailModal.classList.add('show');
 
       if (item.type === 'contractor') {
-        detailTitle.textContent = item.name;
+        detailTitle.textContent = item.trade;
         detailContent.innerHTML = `
           <div class="detail-panel">
             <h4>${item.trade} • ${item.city}</h4>
@@ -2174,7 +2176,7 @@ markerIndex.set(item.id, privacyCircle);
     <p>No bids yet.</p>
   ` : item.bids.map((bid, index) => {
 
-    const contractor = contractors.find(c => c.name === bid.contractor);
+    const contractor = contractors.find(c => c.trade === item.trade) || {};
 
     return `
       <div style="border-top:1px solid #e2e8f0;padding-top:10px;margin-top:10px;">
