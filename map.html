@@ -1693,8 +1693,16 @@
     }
 
     function getCurrentDataset() {
-      return currentMode === 'homeowner' ? contractors : jobs;
-    }
+  if (currentMode === "homeowner") {
+    return contractors;   // homeowners see contractors
+  }
+
+  if (currentMode === "contractor") {
+    return jobs;          // contractors see jobs
+  }
+
+  return [];
+}
 
     function getFavorites() {
       return JSON.parse(localStorage.getItem('revampFavorites') || '[]');
