@@ -1808,10 +1808,21 @@ setTimeout(() => {
       return currentMode === 'homeowner' ? contractors : jobs;
     }
  
-    function getFavorites() {
-      return JSON.parse(localStorage.getItem('revampFavorites') || '[]');
-    }
- 
+    function getJobs() {
+
+  let jobs = JSON.parse(localStorage.getItem('revampJobs') || '[]');
+
+  /* hide closed jobs from contractors */
+
+  if(currentView === "contractor"){
+    jobs = jobs.filter(job => job.status !== "closed");
+  }
+
+  return jobs;
+
+}
+ /* hide closed jobs from contractors */
+
     function isFavorite(jobId) {
       return getFavorites().includes(jobId);
     }
