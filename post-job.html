@@ -21,18 +21,15 @@ margin-bottom:25px;
 }
 
 input, textarea, select{
-
 width:100%;
 padding:12px;
 margin-bottom:15px;
 border-radius:8px;
 border:1px solid #ccc;
 font-size:16px;
-
 }
 
 button{
-
 padding:14px;
 font-size:18px;
 background:#2a7ae2;
@@ -41,7 +38,6 @@ border:none;
 border-radius:8px;
 cursor:pointer;
 width:100%;
-
 }
 
 button:hover{
@@ -84,7 +80,8 @@ background:#1f5fb5;
 <input id="budget" placeholder="Budget ($)">
 
 <input id="address" placeholder="Job Address (Street, City)">
-<label for="maxBids">Maximum contractor bids</label>
+
+<label>Maximum contractor bids</label>
 <select id="maxBids">
 
 <option value="3">3 bids</option>
@@ -96,93 +93,28 @@ background:#1f5fb5;
 <button onclick="postJob()">Submit Job</button>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
 
-
-</script>
 <script>
 
 /* SUPABASE */
-  
+
 const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
 
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
+const SUPABASE_KEY = "YOUR_SUPABASE_KEY";
 
 const { createClient } = supabase;
 
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+
 /* MAPBOX */
 
-const MAPBOX_TOKEN = "pk.eyJ1IjoicmV2YW1wbGV4IiwiYSI6ImNtbWp0YjZyejE2c2gyd3Bucml6YTMzYzMifQ.qIuzgtSyYxQhR97_SvmNJw";
+const MAPBOX_TOKEN = "YOUR_MAPBOX_TOKEN";
+
 
 /* POST JOB */
 
-window.postJob = async function(){
-
-const title = document.getElementById("title").value;
-const trade = document.getElementById("trade").value;
-const description = document.getElementById("description").value;
-const budget = document.getElementById("budget").value;
-const address = document.getElementById("address").value;
-
-const maxBids = Number(document.getElementById("maxBids").value);
-/* ADDRESS → COORDINATES */
-
-const geoResponse = await fetch(
-`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?access_token=${MAPBOX_TOKEN}`
-);
-
-const geoData = await geoResponse.json();
-
-if(!geoData.features.length){
-
-alert("Address not found");
-return;
-
-}
-
-const longitude = geoData.features[0].center[0];
-const latitude = geoData.features[0].center[1];
-
-/* INSERT JOB */
-
-const { data, error } = await supabaseClient
-.from("Jobs")
-.insert([{
-
-Title: title,
-Trade: trade,
-Description: description,
-Budget: budget,
-latitude: latitude,
-longitude: longitude,
-maxBids: maxBids
-
-}]);
-const maxBids = Number(document.getElementById("maxBids").value);
-if(error){
-
-console.log(error);
-alert("Error posting job");
-return;
-
-}
-
-alert("Job Posted Successfully!");
-
-/* CLEAR FORM */
-
-document.getElementById("title").value="";
-document.getElementById("trade").value="";
-document.getElementById("description").value="";
-document.getElementById("budget").value="";
-document.getElementById("address").value="";
-
-}
-<script>
-
-window.postJob = async function(){
+async function postJob(){
 
 const title = document.getElementById("title").value;
 const trade = document.getElementById("trade").value;
@@ -190,6 +122,13 @@ const description = document.getElementById("description").value;
 const budget = document.getElementById("budget").value;
 const address = document.getElementById("address").value;
 const maxBids = Number(document.getElementById("maxBids").value);
+
+if(!title || !trade || !description || !budget || !address){
+
+alert("Please fill out all fields");
+return;
+
+}
 
 /* ADDRESS → COORDINATES */
 
@@ -209,7 +148,8 @@ return;
 const longitude = geoData.features[0].center[0];
 const latitude = geoData.features[0].center[1];
 
-/* INSERT JOB */
+
+/* INSERT JOB INTO SUPABASE */
 
 const { data, error } = await supabaseClient
 .from("Jobs")
@@ -225,6 +165,7 @@ maxBids: maxBids
 
 }]);
 
+
 if(error){
 
 console.log(error);
@@ -233,7 +174,9 @@ return;
 
 }
 
+
 alert("Job Posted Successfully!");
+
 
 /* CLEAR FORM */
 
