@@ -1478,11 +1478,9 @@
         description: 'Remove existing cabinets, install new shaker cabinets, quartz counters, backsplash, lighting, and paint.',
         maxBids: 5,
         bids: [
-          bids: [
-  { contractorId: 10, amount: '$17,500', eta: 'Start in 3 weeks', rating: 4.7 }
+  { contractorId: 10, amount: '$17,500', eta: 'Start in 3 weeks', rating: 4.7 },
+  { contractorId: 5, amount: '$18,900', eta: 'Start in 2 weeks', rating: 4.9 }
 ]
-          { contractor: 'Garden State Carpentry', amount: '$18,900', eta: 'Start in 2 weeks', rating: 4.9 }
-        ]
       },
       {
         id: 1002,
@@ -1920,7 +1918,7 @@ markerIndex.set(item.id, privacyCircle);
             </div>
           </div>
           <div class="info-row">
-  ${currentMode === "contractor" ? "" : `<span><strong>Customer:</strong> Verified Homeowner</span>
+  ${currentMode === "contractor" ? "" : `<span><strong>Customer:</strong> Verified Homeowner</span>`}
   <span><strong>Posted:</strong> ${item.postedAgo}</span>
 </div>
           <div class="card-actions">
