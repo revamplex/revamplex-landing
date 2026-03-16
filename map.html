@@ -1926,9 +1926,20 @@ setTimeout(() => {
         </div>
         <div class="card-body">
           <div class="meta-grid">
-            <div class="meta-box">
-  <div class="meta-label">Bids</div>
-  <div class="meta-value">${item.bids.length} / ${item.maxBids || 5}</div>
+  <div class="meta-box">
+    <div class="meta-label">Projects</div>
+    <div class="meta-value">${item.projectsCompleted}</div>
+  </div>
+
+  <div class="meta-box">
+    <div class="meta-label">Distance</div>
+    <div class="meta-value">${item.distance} mi</div>
+  </div>
+
+  <div class="meta-box">
+    <div class="meta-label">Reviews</div>
+    <div class="meta-value">${item.reviews}</div>
+  </div>
 </div>
 
 <div class="meta-box">
@@ -2069,13 +2080,13 @@ setTimeout(() => {
 
     /* FORCE CORRECT DATASET TYPE */
 
-    if (currentMode === "homeowner" && item.type !== "contractor") return false;
-    if (currentMode === "contractor" && item.type !== "job") return false;
+    if(currentMode === "homeowner" && item.type !== "contractor") return false;
+    if(currentMode === "contractor" && item.type !== "job") return false;
 
     /* AUTO HIDE JOBS THAT REACHED MAX BIDS */
 
-    if (currentMode === "contractor" && item.type === "job") {
-      if (item.maxBids && item.bids && item.bids.length >= item.maxBids) {
+    if(currentMode === "contractor" && item.type === "job"){
+      if(item.maxBids && item.bids && item.bids.length >= item.maxBids){
         return false;
       }
     }
