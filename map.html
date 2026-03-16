@@ -2345,7 +2345,6 @@ setTimeout(() => {
    function startSignup(role){
 
   // remember user role
-  localStorage.setItem("revamplex_registered","true");
   localStorage.setItem("revamplex_role",role);
 
   selectedWelcomeRole = role;
@@ -2617,9 +2616,6 @@ setTimeout(() => {
   map.invalidateSize();
 }, 200);
     
-    if (!new URLSearchParams(window.location.search).get('view')) {
-  currentMode = 'homeowner';
-}
 
     const initialDataset = getCurrentDataset();
     activeId = initialDataset[0] ? initialDataset[0].id : null;
@@ -2638,7 +2634,7 @@ if(!registered){
   setMapInteractivity(false);
 
 }else{
-
+localStorage.setItem("revamplex_registered","true");
   welcomeOverlay.classList.add("hidden");
   setMapInteractivity(true);
 
