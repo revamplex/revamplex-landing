@@ -2067,10 +2067,15 @@ setTimeout(() => {
 
   filteredItems = source.filter(item => {
 
-    /* AUTO HIDE JOBS THAT REACHED MAX BIDS (CONTRACTOR VIEW ONLY) */
+    /* FORCE CORRECT DATASET TYPE */
 
-    if(currentMode === "contractor" && item.type === "job"){
-      if(item.maxBids && item.bids && item.bids.length >= item.maxBids){
+    if (currentMode === "homeowner" && item.type !== "contractor") return false;
+    if (currentMode === "contractor" && item.type !== "job") return false;
+
+    /* AUTO HIDE JOBS THAT REACHED MAX BIDS */
+
+    if (currentMode === "contractor" && item.type === "job") {
+      if (item.maxBids && item.bids && item.bids.length >= item.maxBids) {
         return false;
       }
     }
@@ -2103,7 +2108,6 @@ setTimeout(() => {
     setActive(activeId, false);
     setTimeout(() => scrollCardIntoView(activeId), 80);
   }
-
 }
 
     function setSort(type) {
