@@ -1957,19 +1957,28 @@ markerIndex.set(item.id, privacyCircle);
   const marker = markerIndex.get(id);
   if (!marker) return;
 
-  if (!fromMap) {
-    const latlng = marker.getLatLng();
+  const latlng = marker.getLatLng();
 
-    map.flyTo(latlng, 13, {
-      duration: 0.6,
+  if (!fromMap) {
+    map.flyTo(latlng, 14, {
+      duration: 0.7,
+      easeLinearity: 0.25
     });
   }
 
-  // highlight selected circle
-  marker.setStyle({
-    fillOpacity: 0.35
+  // reset all circles
+  filteredItems.forEach(item => {
+    const m = markerIndex.get(item.id);
+    if (!m) return;
+
+    m.setStyle({
+      fillOpacity: item.id === id ? 0.35 : 0.15,
+      radius: item.id === id ? 1000 : 800
+    });
   });
 
+  // open popup on selected circle
+  marker.openPopup();
 }
 
     function scrollCardIntoView(id) {
