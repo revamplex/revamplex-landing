@@ -2021,8 +2021,7 @@ map.addLayer(markerClusterGroup);
       const minRating = Number(ratingFilter.value);
 
       filteredItems = source.filter(item => {
-        if (currentMode === 'homeowner' && item.type !== 'contractor') return false;
-        if (currentMode === 'contractor' && item.type !== 'job') return false;
+       
 
         if (currentMode === 'contractor' && item.type === 'job') {
           if (item.maxBids && item.bids && item.bids.length >= item.maxBids) return false;
