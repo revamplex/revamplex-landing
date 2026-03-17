@@ -2366,14 +2366,14 @@ async function submitBid(jobId) {
 
       localStorage.setItem('revamplex_registered', 'true');
       clearWelcomeForm();
-      welcomeOverlay.classList.add('hidden');
+      welcomeOverlay.style.display = 'none';
       setMapInteractivity(true);
       setMode(selectedWelcomeRole);
     }
 
     function exploreDemo() {
       localStorage.setItem('revamplex_demo', 'true');
-      welcomeOverlay.classList.add('hidden');
+      welcomeOverlay.style.display = 'none';
       setMapInteractivity(true);
     }
 
@@ -2528,7 +2528,7 @@ async function submitBid(jobId) {
       welcomeOverlay.style.display = 'flex';
       setMapInteractivity(false);
     } else {
-      welcomeOverlay.classList.add('hidden');
+      welcomeOverlay.style.display = 'none';
       setMapInteractivity(true);
     }
 
