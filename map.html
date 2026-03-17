@@ -1653,7 +1653,9 @@
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
-
+const markerClusterGroup = L.markerClusterGroup();
+map.addLayer(markerClusterGroup);
+    
     function showLogoFallback() {
       if (logoImg) logoImg.style.display = 'none';
       if (logoFallback) logoFallback.style.display = 'block';
@@ -1789,11 +1791,12 @@
     }
 
     function clearMarkers() {
-      markerIndex.clear();
-      if (markerClusterGroup) {
-        map.removeLayer(markerClusterGroup);
-      }
-    }
+  markerIndex.clear();
+
+  if (markerClusterGroup) {
+    markerClusterGroup.clearLayers(); // ✅ clears markers properly
+  }
+}
 
     function createClusterGroup() {
       return L.markerClusterGroup({
