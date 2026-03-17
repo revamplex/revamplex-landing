@@ -2099,18 +2099,6 @@ const marker = L.marker([maskedLat, maskedLng], {
       sessionStorage.setItem('revampSelectedJob', JSON.stringify(job));
       window.location.href = `project-room.html?mode=contractor&job=${jobId}`;
     }
-function openProjectRoom(jobId) {
-  const job = jobs.find(entry => entry.id === jobId);
-  if (!job) return;
-
-  if (job.maxBids && job.bids.length >= job.maxBids) {
-    alert('This job has already reached the maximum number of bids.');
-    return;
-  }
-
-  sessionStorage.setItem('revampSelectedJob', JSON.stringify(job));
-  window.location.href = `project-room.html?mode=contractor&job=${jobId}`;
-}
 
 
 // ✅ ADD THIS DIRECTLY UNDER IT
