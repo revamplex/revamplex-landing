@@ -2162,24 +2162,6 @@ items = items.filter(item =>
           </div>
         `;
       } else {
-        const fav = isFavorite(item.id);
-        detailTitle.textContent = item.title;
-        detailContent.innerHTML = `
-          <div class="detail-panel">
-            <h4>${item.trade} • ${item.city}</h4>
-            <p>${item.description}</p>
-          </div>
-          <div class="modal-grid">
-            <div class="detail-panel">
-              <h4>Customer</h4>
-              <p>Verified Homeowner • ⭐ ${item.rating} (${item.reviews} reviews)</p>
-            </div>
-            <div class="detail-panel">
-              <h4>Budget & Bids</h4>
-              <p>${item.budget} • Posted ${item.postedAgo}</p>
-            </div>
-          </div>
-          } else {
   const fav = isFavorite(item.id);
 
   detailTitle.textContent = item.title;
@@ -2210,6 +2192,17 @@ items = items.filter(item =>
           : `<div>Private bids will appear here</div>`
       }
     </div>
+
+    <div class="card-actions">
+      <button class="mini-btn secondary" data-action="favorite" data-id="${item.id}">
+        ${fav ? '❤️ Favorited' : '🤍 Favorite'}
+      </button>
+      <button class="mini-btn primary" data-action="bid" data-id="${item.id}">
+        Submit Bid
+      </button>
+    </div>
+  `;
+      }
 
     <div class="card-actions">
       <button class="mini-btn secondary" data-action="favorite" data-id="${item.id}">
