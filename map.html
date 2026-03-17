@@ -1221,6 +1221,10 @@
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
   <script>
+    let markerClusterGroup;
+    markerClusterGroup = L.markerClusterGroup();
+map.addLayer(markerClusterGroup);
+    
     function maskLocation(lat, lng, radiusMiles = 0.25) {
   const radiusInDegrees = radiusMiles / 69; // miles → degrees approx
 
