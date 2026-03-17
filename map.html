@@ -1786,7 +1786,7 @@ map.addLayer(markerClusterGroup);
         <div>
           <div class="popup-title">${item.title}</div>
           <div class="popup-sub">${item.city} • ${item.trade}</div>
-         <div class="popup-sub">Verified Homeowner • Bids ${item.bids.length}/${item.maxBids}</div>
+         <div class="popup-sub">Verified Homeowner</div>
         </div>
       `;
     }
@@ -1935,7 +1935,6 @@ items = items.filter(item =>
             </div>
             <div class="meta-box">
               <div class="meta-label">Bids</div>
-              <div class="meta-value">${item.bids.length} / ${item.maxBids}</div>
             </div>
           </div>
           <div class="info-row">
@@ -2029,10 +2028,6 @@ items = items.filter(item =>
 
       filteredItems = source.filter(item => {
        
-
-        if (currentMode === 'contractor') {
-  if (item.maxBids && item.bids.length >= item.maxBids) return false;
-}
 
         const haystack = item.type === 'contractor'
           ? [item.trade, item.city, ...(item.tags || [])].join(' ').toLowerCase()
