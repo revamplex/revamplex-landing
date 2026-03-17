@@ -2194,18 +2194,48 @@ items = items.filter(item =>
               <p>${item.budget} • Posted ${item.postedAgo}</p>
             </div>
           </div>
-          <div class="detail-panel">
-  <h4>Private Bids</h4>
+          } else {
+  const fav = isFavorite(item.id);
 
-  ${
-    currentMode === "contractor"
-      ? `<button onclick="openBidModal('${item.id}')">Place Private Bid</button>`
-      : `<div>Private bids will appear here</div>`
-  }
+  detailTitle.textContent = item.title;
 
-</div>
+  detailContent.innerHTML = `
+    <div class="detail-panel">
+      <h4>${item.trade} • ${item.city}</h4>
+      <p>${item.description}</p>
+    </div>
 
-    const contractor = contractors.find(c => c.trade === item.trade) || {};
+    <div class="modal-grid">
+      <div class="detail-panel">
+        <h4>Customer</h4>
+        <p>Verified Homeowner • ⭐ ${item.rating} (${item.reviews} reviews)</p>
+      </div>
+
+      <div class="detail-panel">
+        <h4>Budget</h4>
+        <p>${item.budget} • Posted ${item.postedAgo}</p>
+      </div>
+    </div>
+
+    <div class="detail-panel">
+      <h4>Private Bids</h4>
+      ${
+        currentMode === "contractor"
+          ? `<button class="mini-btn primary" data-action="bid" data-id="${item.id}">Place Private Bid</button>`
+          : `<div>Private bids will appear here</div>`
+      }
+    </div>
+
+    <div class="card-actions">
+      <button class="mini-btn secondary" data-action="favorite" data-id="${item.id}">
+        ${fav ? '❤️ Favorited' : '🤍 Favorite'}
+      </button>
+      <button class="mini-btn primary" data-action="bid" data-id="${item.id}">
+        Submit Bid
+      </button>
+    </div>
+  `;
+}
 
     return `
       <div style="border-top:1px solid #e2e8f0;padding-top:10px;margin-top:10px;">
