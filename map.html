@@ -2196,15 +2196,19 @@ items = items.filter(item =>
             </div>
             <div class="detail-panel">
               <h4>Budget & Bids</h4>
-              <p>${item.budget} • Posted ${item.postedAgo} • Bids ${item.bids.length}/${item.maxBids}</p>
+              <p>${item.budget} • Posted ${item.postedAgo}</p>
             </div>
           </div>
           <div class="detail-panel">
-  <h4>Bids (${item.bids.length}/${item.maxBids})</h4>
+  <h4>Private Bids</h4>
 
-  ${item.bids.length === 0 ? `
-    <p>No bids yet.</p>
-  ` : item.bids.map((bid, index) => {
+  ${
+    currentMode === "contractor"
+      ? `<button onclick="openBidModal('${item.id}')">Place Private Bid</button>`
+      : `<div>Private bids will appear here</div>`
+  }
+
+</div>
 
     const contractor = contractors.find(c => c.trade === item.trade) || {};
 
