@@ -2566,6 +2566,24 @@ items = items.filter(item =>
     alert("Something went wrong");
   }
 }
+    function enterApp(mode) {
+  // Save mode
+  localStorage.setItem("revamp_mode", mode);
+
+  // Reload page
+  location.reload();
+}
+
+// On page load
+const currentMode = localStorage.getItem("revamp_mode");
+
+if (currentMode) {
+  document.getElementById("welcomeOverlay").style.display = "none";
+
+
+} else {
+  document.getElementById("welcomeOverlay").style.display = "flex";
+}
   </script>
 </body>
 </html>
