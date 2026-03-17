@@ -1817,7 +1817,10 @@ map.addLayer(markerClusterGroup);
 
     function renderMarkers(items) {
   clearMarkers();
-
+items = items.filter(item => 
+  (currentMode === 'homeowner' && item.type === 'contractor') ||
+  (currentMode === 'contractor' && item.type === 'job')
+);
   items.forEach(item => {
 
     const [maskedLat, maskedLng] = maskLocation(item.lat, item.lng, 0.5);
@@ -1949,6 +1952,10 @@ map.addLayer(markerClusterGroup);
     }
 
     function renderCards(items) {
+      items = items.filter(item => 
+  (currentMode === 'homeowner' && item.type === 'contractor') ||
+  (currentMode === 'contractor' && item.type === 'job')
+);
       if (!items.length) {
         cardsRow.innerHTML = `
           <div class="listing-card" style="display:flex;align-items:center;justify-content:center;">
@@ -2023,9 +2030,9 @@ map.addLayer(markerClusterGroup);
       filteredItems = source.filter(item => {
        
 
-        if (currentMode === 'contractor' && item.type === 'job') {
-          if (item.maxBids && item.bids && item.bids.length >= item.maxBids) return false;
-        }
+        if (currentMode === 'contractor') {
+  if (item.maxBids && item.bids.length >= item.maxBids) return false;
+}
 
         const haystack = item.type === 'contractor'
           ? [item.trade, item.city, ...(item.tags || [])].join(' ').toLowerCase()
@@ -2266,18 +2273,17 @@ map.addLayer(markerClusterGroup);
     function setMode(mode) {
   currentMode = mode;
 
-  // Save preference
   localStorage.setItem('revamplex_role', mode);
 
-  // ✅ Update URL so it always reflects the current view
   const url = new URL(window.location);
   url.searchParams.set('view', mode);
   window.history.replaceState({}, '', url);
 
   syncModeUI();
 
-  const dataset = getCurrentDataset();
-  activeId = dataset[0] ? dataset[0].id : null;
+  // 🔥 RESET EVERYTHING CLEANLY
+  activeId = null;
+  markerIndex.clear();
 
   applyFilters();
   ensureUIVisible();
