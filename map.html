@@ -2215,25 +2215,6 @@ items = items.filter(item =>
   `;
 }
 
-    return `
-        <strong>Verified Contractor</strong><br>
-        ⭐ ${contractor.rating} (${contractor.reviews} reviews)<br>
-        Trade: ${contractor.trade}<br>
-        Bid: ${bid.amount}<br>
-        Start: ${bid.eta}
-
-        <div style="margin-top:8px;">
-          <button class="mini-btn primary"
-            data-action="accept-bid"
-            data-job="${item.id}"
-            data-bid="${index}">
-            Accept Bid
-          </button>
-        </div>
-      </div>
-    `;
-  }).join('')}
-</div>
           <div class="card-actions">
             <button class="mini-btn secondary" data-action="favorite" data-id="${item.id}">${fav ? '❤️ Favorited' : '🤍 Favorite'}</button>
             <button class="mini-btn primary" data-action="bid" data-id="${item.id}">Submit Bid</button>
