@@ -1221,9 +1221,6 @@
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
   <script>
-    let markerClusterGroup;
-    markerClusterGroup = L.markerClusterGroup();
-map.addLayer(markerClusterGroup);
     
     function maskLocation(lat, lng, radiusMiles = 0.25) {
   const radiusInDegrees = radiusMiles / 69; // miles → degrees approx
@@ -1657,7 +1654,7 @@ map.addLayer(markerClusterGroup);
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
-const markerClusterGroup = L.markerClusterGroup();
+markerClusterGroup = L.markerClusterGroup();
 map.addLayer(markerClusterGroup);
     
     function showLogoFallback() {
@@ -1820,7 +1817,6 @@ map.addLayer(markerClusterGroup);
 
     function renderMarkers(items) {
       clearMarkers();
-      markerClusterGroup = createClusterGroup();
 
 items.forEach(item => {
 
@@ -1843,9 +1839,7 @@ privacyCircle.on('click', () => {
   scrollCardIntoView(item.id);
 });
 
-privacyCircle.addTo(map);
-markerIndex.set(item.id, privacyCircle);
-});
+markerClusterGroup.addLayer(privacyCircle);
     
       fitMapToItems(items);
     }
