@@ -1816,33 +1816,40 @@ map.addLayer(markerClusterGroup);
     }
 
     function renderMarkers(items) {
-      clearMarkers();
+  clearMarkers();
 
-items.forEach(item => {
+  items.forEach(item => {
 
-  const [maskedLat, maskedLng] = maskLocation(item.lat, item.lng, 0.5);
+    const [maskedLat, maskedLng] = maskLocation(item.lat, item.lng, 0.5);
 
-  const privacyCircle = L.circle([maskedLat, maskedLng], {
-  radius: 800,
-  color: '#f97316',
-  fillColor: '#f97316',
-  fillOpacity: 0.15,
-  weight: 2,
-  className: "job-radius"
-});
+    const privacyCircle = L.circle([maskedLat, maskedLng], {
+      radius: 800,
+      color: '#f97316',
+      fillColor: '#f97316',
+      fillOpacity: 0.15,
+      weight: 2,
+      className: "job-radius"
+    });
 
-privacyCircle.bindPopup(getPopupHtml(item));
+    privacyCircle.bindPopup(getPopupHtml(item));
 
-privacyCircle.on('click', () => {
-  ensureUIVisible();
-  setActive(item.id, true);
-  scrollCardIntoView(item.id);
-});
+    privacyCircle.on('click', () => {
+      ensureUIVisible();
+      setActive(item.id, true);
+      scrollCardIntoView(item.id);
+    });
 
-markerClusterGroup.addLayer(privacyCircle);
-    
-      fitMapToItems(items);
-    }
+    // ✅ ADD TO CLUSTER
+    markerClusterGroup.addLayer(privacyCircle);
+
+    // ✅ STORE REFERENCE
+    markerIndex.set(item.id, privacyCircle);
+
+  }); // ✅ THIS WAS THE IMPORTANT MISSING PART
+
+  // ✅ ONLY RUN ONCE
+  fitMapToItems(items);
+}
 
     function updateMarkerStates() {
   filteredItems.forEach(item => {
