@@ -2126,105 +2126,95 @@ items = items.filter(item =>
     }
 
     function openDetailModal(item) {
-      if (!item) return;
+  if (!item) return;
 
-      ensureUIVisible();
-      detailModal.classList.add('show');
+  ensureUIVisible();
+  detailModal.classList.add('show');
 
-      if (item.type === 'contractor') {
-        detailTitle.textContent = item.trade;
-        detailContent.innerHTML = `
-          <div class="detail-panel">
-            <h4>${item.city}</h4>
-            <p>${item.bio}</p>
-          </div>
-          <div class="modal-grid">
-            <div class="detail-panel">
-              <h4>Reputation</h4>
-              <p>⭐ ${item.rating} rating with ${item.reviews} reviews.</p>
-            </div>
-            <div class="detail-panel">
-              <h4>Performance</h4>
-              <p>${item.projectsCompleted} completed projects and average response time of ${item.responseTime}.</p>
-            </div>
-          </div>
-          <div class="detail-panel">
-            <h4>Qualifications</h4>
-            <p>${item.licensed ? 'Licensed' : 'Unlicensed'} • ${item.insured ? 'Insured' : 'Not insured'} • Budget tier ${item.price}</p>
-          </div>
-          <div class="detail-panel">
-            <h4>Specialties</h4>
-            <div class="detail-tags">${(item.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
-          </div>
-          <div class="card-actions">
-            <button class="mini-btn primary" data-action="message" data-id="${item.id}">Message</button>
-            <button class="mini-btn secondary" id="detailCloseSecondary">Close</button>
-          </div>
-        `;
-      } else {
-  const fav = isFavorite(item.id);
+  if (item.type === 'contractor') {
+    detailTitle.textContent = item.trade;
 
-  detailTitle.textContent = item.title;
-
-  detailContent.innerHTML = `
-    <div class="detail-panel">
-      <h4>${item.trade} • ${item.city}</h4>
-      <p>${item.description}</p>
-    </div>
-
-    <div class="modal-grid">
+    detailContent.innerHTML = `
       <div class="detail-panel">
-        <h4>Customer</h4>
-        <p>Verified Homeowner • ⭐ ${item.rating} (${item.reviews} reviews)</p>
+        <h4>${item.city}</h4>
+        <p>${item.bio}</p>
+      </div>
+
+      <div class="modal-grid">
+        <div class="detail-panel">
+          <h4>Reputation</h4>
+          <p>⭐ ${item.rating} (${item.reviews} reviews)</p>
+        </div>
+
+        <div class="detail-panel">
+          <h4>Performance</h4>
+          <p>${item.projectsCompleted} projects • ${item.responseTime} response</p>
+        </div>
       </div>
 
       <div class="detail-panel">
-        <h4>Budget</h4>
-        <p>${item.budget} • Posted ${item.postedAgo}</p>
+        <h4>Qualifications</h4>
+        <p>${item.licensed ? 'Licensed' : 'Unlicensed'} • ${item.insured ? 'Insured' : 'Not insured'}</p>
       </div>
-    </div>
 
-    <div class="detail-panel">
-      <h4>Private Bids</h4>
-      ${
-        currentMode === "contractor"
-          ? `<button class="mini-btn primary" data-action="bid" data-id="${item.id}">Place Private Bid</button>`
-          : `<div>Private bids will appear here</div>`
-      }
-    </div>
+      <div class="detail-panel">
+        <h4>Specialties</h4>
+        <div class="detail-tags">
+          ${(item.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}
+        </div>
+      </div>
 
-    <div class="card-actions">
-      <button class="mini-btn secondary" data-action="favorite" data-id="${item.id}">
-        ${fav ? '❤️ Favorited' : '🤍 Favorite'}
-      </button>
-      <button class="mini-btn primary" data-action="bid" data-id="${item.id}">
-        Submit Bid
-      </button>
-    </div>
-  `;
-      }
+      <div class="card-actions">
+        <button class="mini-btn primary" data-action="message" data-id="${item.id}">Message</button>
+        <button class="mini-btn secondary" id="detailCloseSecondary">Close</button>
+      </div>
+    `;
+  } else {
+    const fav = isFavorite(item.id);
 
-    <div class="card-actions">
-      <button class="mini-btn secondary" data-action="favorite" data-id="${item.id}">
-        ${fav ? '❤️ Favorited' : '🤍 Favorite'}
-      </button>
-      <button class="mini-btn primary" data-action="bid" data-id="${item.id}">
-        Submit Bid
-      </button>
-    </div>
-  `;
+    detailTitle.textContent = item.title;
+
+    detailContent.innerHTML = `
+      <div class="detail-panel">
+        <h4>${item.trade} • ${item.city}</h4>
+        <p>${item.description}</p>
+      </div>
+
+      <div class="modal-grid">
+        <div class="detail-panel">
+          <h4>Customer</h4>
+          <p>Verified Homeowner • ⭐ ${item.rating} (${item.reviews} reviews)</p>
+        </div>
+
+        <div class="detail-panel">
+          <h4>Budget</h4>
+          <p>${item.budget} • Posted ${item.postedAgo}</p>
+        </div>
+      </div>
+
+      <div class="detail-panel">
+        <h4>Private Bids</h4>
+        ${
+          currentMode === "contractor"
+            ? `<button class="mini-btn primary" data-action="bid" data-id="${item.id}">Place Private Bid</button>`
+            : `<div>Private bids will appear here</div>`
+        }
+      </div>
+
+      <div class="card-actions">
+        <button class="mini-btn secondary" data-action="favorite" data-id="${item.id}">
+          ${fav ? '❤️ Favorited' : '🤍 Favorite'}
+        </button>
+        <button class="mini-btn primary" data-action="bid" data-id="${item.id}">
+          Submit Bid
+        </button>
+      </div>
+    `;
+  }
+
+  const closeSecondary = document.getElementById('detailCloseSecondary');
+  if (closeSecondary) closeSecondary.addEventListener('click', closeDetails);
 }
-
-          <div class="card-actions">
-            <button class="mini-btn secondary" data-action="favorite" data-id="${item.id}">${fav ? '❤️ Favorited' : '🤍 Favorite'}</button>
-            <button class="mini-btn primary" data-action="bid" data-id="${item.id}">Submit Bid</button>
-          </div>
-        `;
-      }
-
-      const closeSecondary = document.getElementById('detailCloseSecondary');
-      if (closeSecondary) closeSecondary.addEventListener('click', closeDetails);
-    }
 
     function closeDetails() {
       detailModal.classList.remove('show');
