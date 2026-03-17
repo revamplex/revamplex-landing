@@ -2517,22 +2517,14 @@ items = items.filter(item =>
     applyFilters();
     async function submitBid(jobId) {
   try {
-    const { data: userData } = await supabase.auth.getUser();
-    const user = userData.user;
-
-    if (!user) {
-      alert("You must be logged in to place a bid.");
-      return;
-    }
-
     const { error } = await supabase
       .from("bids")
       .insert([
         {
           job_id: jobId,
-          contractor_id: user.id,
-          amount: 1000, // 🔥 temp value (we'll make input later)
-          message: "Interested in this project"
+          contractor_id: "test-user-123", // 🔥 TEMP
+          amount: 1000,
+          message: "Test bid"
         }
       ]);
 
