@@ -2518,6 +2518,40 @@ items = items.filter(item =>
     const initialDataset = getCurrentDataset();
     activeId = initialDataset[0] ? initialDataset[0].id : null;
     applyFilters();
+    async function submitBid(jobId) {
+  try {
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData.user;
+
+    if (!user) {
+      alert("You must be logged in to place a bid.");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("bids")
+      .insert([
+        {
+          job_id: jobId,
+          contractor_id: user.id,
+          amount: 1000, // 🔥 temp value (we'll make input later)
+          message: "Interested in this project"
+        }
+      ]);
+
+    if (error) {
+      console.error(error);
+      alert("Error submitting bid");
+      return;
+    }
+
+    showStatus("Bid submitted successfully 🔥");
+
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong");
+  }
+}
   </script>
 </body>
 </html>
