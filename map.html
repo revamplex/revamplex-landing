@@ -1100,12 +1100,19 @@
     </div>
   </div>
 
-  <div id="welcomeOverlay">
-    <div class="welcomeCard" id="welcomeCard">
-      <img src="revamplex-logo.png" class="welcomeLogo" alt="RevampLEX Logo" id="welcomeLogoImg">
-      <div class="logo-fallback" id="welcomeLogoFallback" style="display:none; justify-content:center; margin-bottom:12px;">
-        <span class="revamp">Revamp</span><span class="lex">LEX</span>
-      </div>
+  <div id="welcomeOverlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;">
+  
+  <h1>Welcome to Revamp</h1>
+
+  <button onclick="enterApp('homeowner')" style="margin:10px;padding:15px 25px;">
+    I'm a Homeowner
+  </button>
+
+  <button onclick="enterApp('contractor')" style="margin:10px;padding:15px 25px;">
+    I'm a Contractor
+  </button>
+
+</div>
 
       <h2 class="welcomeTitle">Welcome to Revamplex</h2>
       <p class="welcomeSub">
@@ -1222,11 +1229,29 @@
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
   <script>
+    const urlParams = new URLSearchParams(window.location.search);
+let currentMode = urlParams.get('view');
+
+// Handle welcome screen
+if (!currentMode) {
+  document.getElementById("welcomeOverlay").style.display = "flex";
+} else {
+  document.getElementById("welcomeOverlay").style.display = "none";
+  initMap(); // this MUST exist in your code
+}
     const supabaseUrl = "https://dezvwoedboikshqttdqu.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
 
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-    
+    const urlParams = new URLSearchParams(window.location.search);
+let currentMode = urlParams.get('view');
+
+if (!currentMode) {
+  document.getElementById("welcomeOverlay").style.display = "flex";
+} else {
+  document.getElementById("welcomeOverlay").style.display = "none";
+  initMap();
+}
     function maskLocation(lat, lng, radiusMiles = 0.25) {
   const radiusInDegrees = radiusMiles / 69; // miles → degrees approx
 
