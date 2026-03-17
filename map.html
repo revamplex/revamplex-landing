@@ -2123,10 +2123,7 @@ items = items.filter(item =>
 
       if (job.maxBids) {
   // we'll enforce limits later with Supabase
-} {
-        alert('This job has already reached the maximum number of bids.');
-        return;
-      }
+}
 
       sessionStorage.setItem('revampSelectedJob', JSON.stringify(job));
       window.location.href = `project-room.html?mode=contractor&job=${jobId}`;
