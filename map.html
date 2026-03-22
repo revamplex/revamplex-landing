@@ -1484,16 +1484,12 @@ formatCount();
 
 if (filteredItems.length > 0) {
   activeId = filteredItems[0].id;
-  setTimeout(function() {
-    setActive(activeId, false);
-  }, 50);
-}
 
-      if (activeId) {
-        setActive(activeId, false);
-        setTimeout(() => scrollCardIntoView(activeId), 80);
-      }
-    }
+  setTimeout(() => {
+    setActive(activeId, false);
+    scrollCardIntoView(activeId);
+  }, 60);
+}
 
     function setSort(type) {
       activeSort = type;
