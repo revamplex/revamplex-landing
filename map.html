@@ -1,174 +1,1968 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>RevampLEX v7 Stable</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>RevampLEX Map v8</title>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 
-<style>
-html,body,#map{height:100%;margin:0;font-family:Arial}
-.topbar{
-position:absolute;top:10px;left:50%;transform:translateX(-50%);
-z-index:1000;background:white;padding:10px 15px;border-radius:10px;
-box-shadow:0 4px 12px rgba(0,0,0,.15);
-}
-.logo{font-weight:bold;font-size:18px}
-.logo span{color:#f97316}
-.btn{
-margin-top:5px;
-padding:6px 10px;
-background:#f97316;
-color:white;
-border:none;
-border-radius:6px;
-cursor:pointer;
-font-weight:bold;
-}
-</style>
+  <style>
+    :root {
+      --brand: #f97316;
+      --brand-dark: #ea580c;
+      --brand-soft: rgba(249, 115, 22, 0.12);
+      --bg: #f8fafc;
+      --card: rgba(255, 255, 255, 0.97);
+      --text: #0f172a;
+      --muted: #64748b;
+      --line: rgba(15, 23, 42, 0.08);
+      --shadow: 0 18px 42px rgba(15, 23, 42, 0.16);
+      --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.10);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    button, input, select, textarea { font: inherit; }
+
+    #app {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    #map {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    .leaflet-container {
+      width: 100%;
+      height: 100%;
+      background: #dbeafe;
+    }
+
+    .topbar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 12px;
+      pointer-events: none;
+      transition: transform .25s ease;
+    }
+
+    .topbar-inner {
+      pointer-events: auto;
+      max-width: 1460px;
+      margin: 0 auto;
+      border-radius: 28px;
+      padding: 12px;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(255,255,255,.78);
+    }
+
+    .search-row,.mode-row,.filter-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .search-row { margin-bottom: 10px; }
+    .mode-row { margin-bottom: 10px; }
+
+    .logo-wrap {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-width:190px;
+      height:62px;
+      padding:0 16px;
+      border-radius:18px;
+      background:white;
+      border:1px solid var(--line);
+      box-shadow: 0 2px 6px rgba(15,23,42,.04);
+      overflow:hidden;
+    }
+    .logo-wrap img {
+      max-height: 40px;
+      width: auto;
+      display: block;
+    }
+    .logo-fallback {
+      display:none;
+      font-weight:900;
+      font-size:28px;
+      letter-spacing:-.02em;
+    }
+    .logo-fallback .revamp { color:#0f172a; }
+    .logo-fallback .lex { color:var(--brand); }
+
+    .search-box {
+      flex:1;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      height:62px;
+      border-radius:20px;
+      padding:0 18px;
+      background:#fff;
+      border:1px solid var(--line);
+      box-shadow: 0 4px 10px rgba(15,23,42,.04);
+    }
+    .search-box input {
+      width:100%;
+      border:0;
+      outline:0;
+      background:transparent;
+      color:var(--text);
+      font-size:17px;
+    }
+
+    .search-btn,.mode-btn,.filter-pill,.filter-select,.action-btn,.mini-btn,.fab,.modal-btn,.close-btn,.favorite-btn,.restore-ui-btn,.welcome-role-btn,.welcome-submit-btn,.welcome-back-btn {
+      border:0;
+      cursor:pointer;
+    }
+
+    .search-btn {
+      height:62px;
+      padding:0 26px;
+      border-radius:20px;
+      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+      color:white;
+      font-weight:900;
+      font-size:17px;
+      box-shadow:0 10px 22px rgba(249,115,22,.28);
+    }
+
+    .mode-btn {
+      flex:1;
+      height:54px;
+      border-radius:18px;
+      background:#fff;
+      border:1px solid var(--line);
+      color:var(--text);
+      font-weight:900;
+      font-size:16px;
+      box-shadow:0 2px 6px rgba(15,23,42,.04);
+    }
+    .mode-btn.active {
+      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+      color:white;
+      box-shadow:0 8px 18px rgba(249,115,22,.24);
+    }
+
+    .filter-row { overflow-x:auto; scrollbar-width:none; }
+    .filter-row::-webkit-scrollbar { display:none; }
+
+    .filter-select,.filter-pill {
+      flex:0 0 auto;
+      height:50px;
+      border-radius:999px;
+      padding:0 18px;
+      background:#fff;
+      border:1px solid var(--line);
+      color:var(--text);
+      font-weight:800;
+      font-size:15px;
+      white-space:nowrap;
+      box-shadow:0 2px 6px rgba(15,23,42,.04);
+    }
+
+    .filter-pill.active {
+      background:var(--brand-soft);
+      color:var(--brand-dark);
+      border-color:rgba(249,115,22,.28);
+    }
+
+    .count-pill,.status-pill {
+      position:absolute;
+      z-index:950;
+      left:50%;
+      transform:translateX(-50%);
+      border-radius:999px;
+      padding:10px 15px;
+      background:rgba(15,23,42,.82);
+      color:white;
+      font-size:13px;
+      font-weight:800;
+      backdrop-filter:blur(10px);
+      box-shadow:var(--shadow-soft);
+      pointer-events:none;
+      transition:opacity .25s ease, transform .25s ease;
+    }
+    .count-pill { top:194px; }
+    .status-pill {
+      top:236px;
+      background: rgba(249,115,22,.92);
+      display:none;
+    }
+    .status-pill.show { display:block; }
+
+    .results-shell {
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:0;
+      z-index:960;
+      padding:0 0 10px;
+      pointer-events:none;
+      transition:transform .25s ease;
+    }
+    .results-shell-inner {
+      max-width:1600px;
+      margin:0 auto;
+      padding:0 12px;
+    }
+    .results-header {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      padding:0 0 8px;
+      pointer-events:none;
+    }
+    .results-title {
+      pointer-events:auto;
+      border-radius:999px;
+      background:rgba(255,255,255,.94);
+      border:1px solid rgba(255,255,255,.82);
+      padding:8px 14px;
+      font-size:13px;
+      font-weight:800;
+      box-shadow:var(--shadow-soft);
+      backdrop-filter:blur(10px);
+    }
+    .results-actions {
+      display:flex;
+      gap:8px;
+      pointer-events:auto;
+    }
+    .action-btn {
+      width:42px;
+      height:42px;
+      border-radius:999px;
+      background:rgba(255,255,255,.96);
+      box-shadow:var(--shadow-soft);
+      color:var(--text);
+      font-size:18px;
+      font-weight:900;
+    }
+
+    .cards-row {
+      display:flex;
+      gap:12px;
+      overflow-x:auto;
+      overflow-y:hidden;
+      padding:0 0 6px;
+      scroll-snap-type:x mandatory;
+      scroll-behavior:smooth;
+      scrollbar-width:none;
+      pointer-events:auto;
+    }
+    .cards-row::-webkit-scrollbar { display:none; }
+
+    .listing-card {
+      flex:0 0 254px;
+      max-width:254px;
+      min-height:178px;
+      border-radius:22px;
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.88);
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(14px);
+      scroll-snap-align:center;
+      overflow:hidden;
+      transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+      cursor:pointer;
+    }
+    .listing-card.active {
+      transform:translateY(-4px);
+      border-color:rgba(249,115,22,.30);
+      box-shadow:0 18px 44px rgba(249,115,22,.18);
+    }
+
+    .card-top {
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      padding:12px 12px 8px;
+    }
+    .card-title-wrap { min-width:0; }
+    .card-title {
+      margin:0 0 4px;
+      font-size:15px;
+      line-height:1.2;
+      font-weight:900;
+    }
+    .card-sub {
+      margin:0;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.25;
+    }
+    .rating-pill {
+      border-radius:999px;
+      padding:8px 9px;
+      background:rgba(15,23,42,.06);
+      font-size:12px;
+      font-weight:900;
+      white-space:nowrap;
+      height:fit-content;
+    }
+
+    .card-body {
+      padding:0 12px 12px;
+      display:flex;
+      flex-direction:column;
+    }
+    .meta-grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      margin-bottom:8px;
+    }
+    .meta-box {
+      border-radius:12px;
+      background:#f8fafc;
+      border:1px solid var(--line);
+      padding:8px 10px;
+      min-height:58px;
+    }
+    .meta-label {
+      margin-bottom:4px;
+      color:var(--muted);
+      font-size:10px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+    .meta-value {
+      font-size:14px;
+      font-weight:900;
+    }
+    .info-row {
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:10px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.3;
+    }
+    .info-row strong { color:var(--text); }
+
+    .card-actions {
+      display:flex;
+      gap:8px;
+      align-items:center;
+      margin-top:auto;
+    }
+
+    .mini-btn {
+      flex:1;
+      height:38px;
+      border-radius:12px;
+      font-size:13px;
+      font-weight:900;
+    }
+    .mini-btn.primary {
+      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+      color:white;
+      box-shadow:0 8px 16px rgba(249,115,22,.2);
+    }
+    .mini-btn.secondary {
+      background:white;
+      color:var(--text);
+      border:1px solid var(--line);
+    }
+
+    .favorite-btn {
+      flex:0 0 38px;
+      width:38px;
+      height:38px;
+      border-radius:12px;
+      background:white;
+      color:var(--text);
+      border:1px solid var(--line);
+      font-size:16px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .fab-wrap {
+      position:absolute;
+      right:16px;
+      bottom:225px;
+      z-index:980;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .fab {
+      height:50px;
+      border-radius:999px;
+      padding:0 18px;
+      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+      color:white;
+      font-weight:900;
+      box-shadow:0 14px 28px rgba(249,115,22,.28);
+    }
+    .fab.secondary {
+      background:rgba(15,23,42,.88);
+      box-shadow:0 12px 26px rgba(15,23,42,.22);
+    }
+
+    .restore-ui-btn {
+      position:absolute;
+      top:18px;
+      left:50%;
+      transform:translateX(-50%);
+      z-index:1100;
+      height:42px;
+      padding:0 16px;
+      border-radius:999px;
+      background:rgba(255,255,255,.96);
+      color:var(--text);
+      font-size:13px;
+      font-weight:900;
+      box-shadow:var(--shadow-soft);
+      border:1px solid rgba(255,255,255,.85);
+      backdrop-filter:blur(10px);
+      display:none;
+    }
+    .restore-ui-btn.show { display:block; }
+
+    .modal {
+      position:fixed;
+      inset:0;
+      z-index:2000;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      background:rgba(15,23,42,.56);
+      backdrop-filter:blur(6px);
+    }
+    .modal.show { display:flex; }
+
+    .modal-card {
+      width:min(560px,100%);
+      max-height:min(88vh,820px);
+      overflow:auto;
+      border-radius:24px;
+      background:white;
+      box-shadow:0 26px 60px rgba(15,23,42,.28);
+      padding:20px;
+    }
+    .modal-head {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:14px;
+    }
+    .modal-title {
+      margin:0;
+      font-size:24px;
+      font-weight:900;
+    }
+    .close-btn {
+      width:38px;
+      height:38px;
+      border-radius:999px;
+      background:#f1f5f9;
+      color:var(--text);
+      font-size:20px;
+      font-weight:900;
+    }
+
+    .modal-grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .field {
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin-bottom:12px;
+    }
+    .field.full { grid-column:1 / -1; }
+
+    .label {
+      font-size:13px;
+      font-weight:800;
+      color:var(--text);
+    }
+    .input,.textarea,.select {
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px 13px;
+      background:white;
+      color:var(--text);
+      outline:none;
+    }
+    .textarea {
+      min-height:110px;
+      resize:vertical;
+    }
+
+    .modal-actions {
+      display:flex;
+      gap:10px;
+      margin-top:8px;
+    }
+    .modal-btn {
+      flex:1;
+      height:46px;
+      border-radius:14px;
+      font-weight:900;
+    }
+    .modal-btn.primary {
+      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+      color:white;
+    }
+    .modal-btn.secondary {
+      background:white;
+      border:1px solid var(--line);
+      color:var(--text);
+    }
+
+    .detail-stack { display:grid; gap:12px; }
+    .detail-panel {
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+      background:#f8fafc;
+    }
+    .detail-panel h4 {
+      margin:0 0 8px;
+      font-size:14px;
+      font-weight:900;
+    }
+    .detail-panel p {
+      margin:0;
+      color:var(--muted);
+      line-height:1.5;
+      font-size:14px;
+    }
+    .detail-tags {
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:6px;
+    }
+    .tag {
+      border-radius:999px;
+      padding:7px 10px;
+      background:var(--brand-soft);
+      color:var(--brand-dark);
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .map-pin {
+      width:18px;
+      height:18px;
+      border-radius:50%;
+      border:3px solid white;
+      box-shadow:0 8px 18px rgba(15,23,42,.18);
+      background:var(--brand);
+    }
+    .map-pin.job { background:#0f172a; }
+    .map-pin.contractor { background:var(--brand); }
+    .map-pin.active {
+      width:24px;
+      height:24px;
+      border-width:4px;
+    }
+
+    .job-radius {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: rgba(249,115,22,.16);
+      border: 2px solid rgba(249,115,22,.28);
+      box-shadow: 0 0 0 12px rgba(249,115,22,.07);
+      animation: radiusPulse 2.4s infinite ease-in-out;
+    }
+    @keyframes radiusPulse {
+      0%,100% { transform: scale(.96); opacity:.68; }
+      50% { transform: scale(1.05); opacity:.95; }
+    }
+
+    .custom-cluster {
+      width:42px;
+      height:42px;
+      border-radius:50%;
+      background:rgba(249,115,22,.92);
+      color:white;
+      border:4px solid rgba(255,255,255,.95);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      box-shadow:0 10px 20px rgba(249,115,22,.28);
+    }
+
+    .leaflet-popup-content-wrapper {
+      border-radius:16px;
+      box-shadow:var(--shadow-soft);
+    }
+    .leaflet-popup-content {
+      margin:14px 16px;
+      font-family:Inter, Arial, Helvetica, sans-serif;
+    }
+
+    .ui-collapsed .topbar { transform: translateY(-115%); }
+    .ui-collapsed .results-shell { transform: translateY(115%); }
+    .ui-collapsed .count-pill {
+      opacity:0;
+      transform:translateX(-50%) translateY(-12px);
+    }
+
+    #welcomeOverlay {
+      position:fixed;
+      inset:0;
+      background:rgba(15,23,42,.65);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:5000;
+      backdrop-filter:blur(6px);
+      -webkit-backdrop-filter:blur(6px);
+      transition:opacity .2s ease, visibility .2s ease;
+    }
+    #welcomeOverlay.hidden {
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+    }
+    .welcomeCard {
+      width:min(520px, calc(100vw - 24px));
+      max-height:calc(100vh - 24px);
+      overflow:auto;
+      background:white;
+      border-radius:22px;
+      padding:28px;
+      text-align:center;
+      box-shadow:0 26px 60px rgba(15,23,42,.28);
+      border:1px solid rgba(255,255,255,.8);
+    }
+    .welcomeLogo {
+      width:180px;
+      max-width:70%;
+      margin-bottom:14px;
+    }
+    .welcomeTitle {
+      margin:0 0 8px;
+      font-size:28px;
+      font-weight:900;
+      color:var(--text);
+    }
+    .welcomeSub {
+      margin:0 0 18px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.5;
+    }
+    .welcomeRoleGrid {
+      display:grid;
+      gap:12px;
+      margin-bottom:14px;
+    }
+    .welcome-role-btn {
+      width:100%;
+      min-height:58px;
+      padding:14px 16px;
+      border-radius:16px;
+      font-weight:900;
+      font-size:15px;
+    }
+    .welcome-role-btn.homeowner {
+      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+      color:white;
+      box-shadow:0 10px 22px rgba(249,115,22,.22);
+    }
+    .welcome-role-btn.contractor {
+      background:#0f172a;
+      color:white;
+      box-shadow:0 10px 22px rgba(15,23,42,.18);
+    }
+    .demoBtn {
+      margin-top:2px;
+      background:none;
+      color:var(--muted);
+      font-weight:700;
+      padding:4px 0;
+      border:0;
+      cursor:pointer;
+    }
+    .welcomeFormWrap {
+      display:none;
+      text-align:left;
+      margin-top:14px;
+      border-top:1px solid var(--line);
+      padding-top:16px;
+    }
+    .welcomeFormWrap.show { display:block; }
+    .welcomeRolePill {
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:999px;
+      padding:8px 12px;
+      background:var(--brand-soft);
+      color:var(--brand-dark);
+      font-size:12px;
+      font-weight:800;
+      margin-bottom:12px;
+    }
+    .welcomeGrid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .welcomeField {
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin-bottom:12px;
+    }
+    .welcomeField.full { grid-column:1 / -1; }
+    .welcomeLabel {
+      font-size:13px;
+      font-weight:800;
+      color:var(--text);
+    }
+    .welcomeInput,.welcomeSelect,.welcomeTextarea {
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px 13px;
+      background:white;
+      color:var(--text);
+      outline:none;
+    }
+    .welcomeTextarea {
+      min-height:88px;
+      resize:vertical;
+    }
+    .welcomeNote {
+      margin:0 0 12px;
+      padding:12px 14px;
+      border-radius:14px;
+      background:#fff7ed;
+      color:#9a3412;
+      font-size:13px;
+      line-height:1.45;
+      display:none;
+    }
+    .welcomeNote.show { display:block; }
+    .contractorFields,.homeownerFields { display:none; }
+    .contractorFields.show,.homeownerFields.show { display:contents; }
+    .welcomeActions {
+      display:flex;
+      gap:10px;
+      margin-top:6px;
+    }
+    .welcome-submit-btn,.welcome-back-btn {
+      flex:1;
+      height:46px;
+      border-radius:14px;
+      font-weight:900;
+    }
+    .welcome-submit-btn {
+      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+      color:white;
+    }
+    .welcome-back-btn {
+      background:white;
+      color:var(--text);
+      border:1px solid var(--line);
+    }
+
+    @media (max-width: 640px) {
+      .topbar { padding:10px; }
+      .topbar-inner { border-radius:22px; padding:10px; }
+      .search-box, .search-btn { height:50px; }
+      .logo-wrap { min-width:102px; height:50px; padding:0 10px; }
+      .logo-wrap img { max-height:28px; }
+      .logo-fallback { font-size:20px; }
+      .mode-btn { height:44px; font-size:14px; }
+      .filter-select,.filter-pill { height:44px; font-size:14px; padding:0 14px; }
+      .count-pill { top:198px; font-size:12px; }
+      .status-pill { top:238px; font-size:12px; }
+      .listing-card { flex:0 0 74vw; max-width:74vw; min-height:172px; }
+      .fab-wrap { right:12px; bottom:205px; }
+      .fab { height:46px; padding:0 15px; font-size:13px; }
+      .modal-card { padding:16px; border-radius:20px; }
+      .modal-grid,.welcomeGrid { grid-template-columns:1fr; }
+      .welcomeCard { padding:20px; border-radius:20px; }
+      .welcomeTitle { font-size:24px; }
+      .welcomeActions { flex-direction:column; }
+    }
+  </style>
 </head>
-
 <body>
+  <div id="app">
+    <div class="topbar">
+      <div class="topbar-inner">
+        <div class="search-row">
+          <div class="logo-wrap">
+            <img src="revamplex-logo.png" alt="RevampLEX Logo" id="logoImg">
+            <div class="logo-fallback" id="logoFallback"><span class="revamp">Revamp</span><span class="lex">LEX</span></div>
+          </div>
+          <div class="search-box">
+            <span>🔍</span>
+            <input id="searchInput" type="text" placeholder="Search contractors, jobs, trades, city..." />
+          </div>
+          <button class="search-btn" id="searchBtn">Search</button>
+        </div>
 
-<div class="topbar">
-<div class="logo">Revamp<span>LEX</span></div>
-<button class="btn" onclick="openPostModal()">Post Job</button>
-</div>
+        <div class="mode-row">
+          <button class="mode-btn active" id="homeownerMode">🏠 Homeowner View</button>
+          <button class="mode-btn" id="contractorMode">🛠 Contractor View</button>
+        </div>
 
-<div id="map"></div>
+        <div class="filter-row">
+          <select id="tradeFilter" class="filter-select">
+            <option value="all">All Trades</option>
+          </select>
+          <select id="distanceFilter" class="filter-select">
+            <option value="100">Any Distance</option>
+            <option value="5">Within 5 miles</option>
+            <option value="10">Within 10 miles</option>
+            <option value="25">Within 25 miles</option>
+            <option value="50">Within 50 miles</option>
+          </select>
+          <select id="ratingFilter" class="filter-select">
+            <option value="0">Any Rating</option>
+            <option value="4.5">4.5+ stars</option>
+            <option value="4.0">4.0+ stars</option>
+            <option value="3.5">3.5+ stars</option>
+          </select>
+          <button class="filter-pill active" id="sortDistance">Nearest</button>
+          <button class="filter-pill" id="sortRating">Top Rated</button>
+          <button class="filter-pill" id="resetFilters">Reset</button>
+        </div>
+      </div>
+    </div>
 
-<script>
+    <div id="map"></div>
 
-/* =========================
-   SUPABASE
-========================= */
-const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E"; // keep yours
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    <button class="restore-ui-btn" id="restoreUiBtn">▲ Show filters & results</button>
 
-/* =========================
-   MAP
-========================= */
-const map = L.map('map').setView([40.8859,-74.0435],11);
+    <div class="count-pill" id="resultsCount">0 results</div>
+    <div class="status-pill" id="statusPill"></div>
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-maxZoom:19
-}).addTo(map);
+    <div class="fab-wrap" id="fabWrap">
+      <button class="fab" id="postJobBtn">➕ Post a Job</button>
+      <button class="fab secondary" id="locateBtn">📍 Center Map</button>
+    </div>
 
-let markers = [];
+    <div class="results-shell">
+      <div class="results-shell-inner">
+        <div class="results-header">
+          <div class="results-title" id="resultsTitle">Swipe left ↔ right to browse contractors</div>
+          <div class="results-actions">
+            <button class="action-btn" id="scrollLeftBtn">‹</button>
+            <button class="action-btn" id="scrollRightBtn">›</button>
+          </div>
+        </div>
+        <div class="cards-row" id="cardsRow"></div>
+      </div>
+    </div>
+  </div>
 
-/* =========================
-   LOAD LIVE DATA
-========================= */
-async function loadData(){
-clearMarkers();
+  <div class="modal" id="jobModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 class="modal-title">Post a Job</h2>
+        <button class="close-btn" id="closeJobModal">×</button>
+      </div>
+      <div class="modal-grid">
+        <div class="field full">
+          <label class="label" for="jobTitle">Project title</label>
+          <input class="input" id="jobTitle" placeholder="Kitchen Renovation" />
+        </div>
 
-const {data:jobs} = await supabaseClient.from("jobs").select("*");
+        <div class="field">
+          <label class="label" for="jobTrade">Trade</label>
+          <select class="select" id="jobTrade"></select>
+        </div>
 
-if(!jobs) return;
+        <div class="field">
+          <label class="label" for="jobBudget">Budget</label>
+          <input class="input" id="jobBudget" placeholder="$12,000" />
+        </div>
 
-jobs.forEach(job=>{
-const marker = L.marker([job.lat,job.lng]).addTo(map);
+        <div class="field">
+          <label class="label" for="jobCustomer">Customer name</label>
+          <input class="input" id="jobCustomer" placeholder="John D." />
+        </div>
 
-marker.bindPopup(`
-<b>${job.title}</b><br>
-${job.city}<br><br>
+        <div class="field">
+          <label class="label" for="jobCity">City</label>
+          <input class="input" id="jobCity" placeholder="Hackensack, NJ" />
+        </div>
 
-<button class="btn" onclick="openProjectRoom(${job.id})">
-Project Room
-</button><br><br>
+        <div class="field full">
+          <label class="label" for="jobDescription">Project description</label>
+          <textarea class="textarea" id="jobDescription" placeholder="Describe the project scope, materials, timing, and any special details..."></textarea>
+        </div>
+      </div>
 
-<button class="btn" onclick="submitBid(${job.id})">
-Submit Bid
-</button>
-`);
+      <div class="modal-actions">
+        <button class="modal-btn primary" id="submitJobBtn">Post Job</button>
+        <button class="modal-btn secondary" id="cancelJobBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
 
-markers.push(marker);
-});
-}
+  <div class="modal" id="detailModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 class="modal-title" id="detailTitle">Details</h2>
+        <button class="close-btn" id="closeDetailModal">×</button>
+      </div>
+      <div class="detail-stack" id="detailContent"></div>
+    </div>
+  </div>
 
-/* =========================
-   CLEAR MARKERS
-========================= */
-function clearMarkers(){
-markers.forEach(m=>map.removeLayer(m));
-markers=[];
-}
+  <div id="welcomeOverlay">
+    <div class="welcomeCard" id="welcomeCard">
+      <img src="revamplex-logo.png" class="welcomeLogo" alt="RevampLEX Logo" id="welcomeLogoImg">
+      <div class="logo-fallback" id="welcomeLogoFallback" style="display:none; justify-content:center; margin-bottom:12px;">
+        <span class="revamp">Revamp</span><span class="lex">LEX</span>
+      </div>
 
-/* =========================
-   POST JOB
-========================= */
-function openPostModal(){
-const title = prompt("Job Title");
-if(!title) return;
+      <h2 class="welcomeTitle">Welcome to RevampLEX</h2>
+      <p class="welcomeSub">
+        Choose your role to get started. Homeowners use RevampLEX for free.
+        Contractors can explore, bid, and manage jobs from one map.
+      </p>
 
-const city = prompt("City");
-const trade = prompt("Trade");
+      <div id="welcomeRoleChooser">
+        <div class="welcomeRoleGrid">
+          <button class="welcome-role-btn homeowner" id="welcomeHomeownerBtn">🏠 I am a Homeowner</button>
+          <button class="welcome-role-btn contractor" id="welcomeContractorBtn">🛠 Pro Contractor</button>
+        </div>
+        <button class="demoBtn" id="exploreDemoBtn">Explore Map Demo</button>
+      </div>
 
-createJob(title, city, trade);
-}
+      <div class="welcomeFormWrap" id="welcomeFormWrap">
+        <div class="welcomeRolePill" id="welcomeRolePill">Homeowner Registration</div>
 
-async function createJob(title, city, trade){
-const center = map.getCenter();
+        <p class="welcomeNote" id="contractorTrialNote">
+          Pro Contractors can browse and bid after signup. Billing and locking can be connected later.
+        </p>
 
-const {error} = await supabaseClient.from("jobs").insert([{
-title,
-city,
-trade,
-lat:center.lat,
-lng:center.lng,
-budget:"$0",
-customer_name:"Demo User",
-max_bids:5
-}]);
+        <div class="welcomeGrid">
+          <div class="welcomeField">
+            <label class="welcomeLabel" for="welcomeFullName">Full Name</label>
+            <input class="welcomeInput" id="welcomeFullName" type="text" placeholder="John Smith">
+          </div>
+          <div class="welcomeField">
+            <label class="welcomeLabel" for="welcomeEmail">Email</label>
+            <input class="welcomeInput" id="welcomeEmail" type="email" placeholder="name@email.com">
+          </div>
+          <div class="welcomeField">
+            <label class="welcomeLabel" for="welcomePhone">Phone</label>
+            <input class="welcomeInput" id="welcomePhone" type="tel" placeholder="(555) 555-5555">
+          </div>
+          <div class="welcomeField">
+            <label class="welcomeLabel" for="welcomePassword">Password</label>
+            <input class="welcomeInput" id="welcomePassword" type="password" placeholder="Create password">
+          </div>
+          <div class="welcomeField full">
+            <label class="welcomeLabel" for="welcomeAddress">Address / City / State</label>
+            <input class="welcomeInput" id="welcomeAddress" type="text" placeholder="Hackensack, NJ">
+          </div>
 
-if(error){
-alert("Error posting job");
-return;
-}
+          <div class="homeownerFields" id="homeownerFields">
+            <div class="welcomeField full">
+              <label class="welcomeLabel" for="welcomeProjectType">Project Type</label>
+              <select class="welcomeSelect" id="welcomeProjectType">
+                <option value="">Select project type</option>
+              </select>
+            </div>
 
-alert("Job Posted");
-loadData();
-}
+            <div class="welcomeField full">
+              <label class="welcomeLabel" for="welcomeProjectNotes">Project Notes</label>
+              <textarea class="welcomeTextarea" id="welcomeProjectNotes" placeholder="Tell us what kind of project you need help with..."></textarea>
+            </div>
+          </div>
 
-/* =========================
-   BID
-========================= */
-async function submitBid(jobId){
-const amount = prompt("Enter bid amount");
-if(!amount) return;
+          <div class="contractorFields" id="contractorFields">
+            <div class="welcomeField">
+              <label class="welcomeLabel" for="welcomeCompany">Company Name</label>
+              <input class="welcomeInput" id="welcomeCompany" type="text" placeholder="ABC Contracting LLC">
+            </div>
 
-const {error} = await supabaseClient.from("bids").insert([{
-job_id:jobId,
-contractor_id:"demo",
-contractor_name:"Verified Contractor",
-amount:amount
-}]);
+            <div class="welcomeField">
+              <label class="welcomeLabel" for="welcomeTrade">Primary Trade</label>
+              <select class="welcomeSelect" id="welcomeTrade">
+                <option value="">Select trade</option>
+              </select>
+            </div>
 
-if(error){
-alert("Error");
-return;
-}
+            <div class="welcomeField">
+              <label class="welcomeLabel" for="welcomeLicense">License Number</label>
+              <input class="welcomeInput" id="welcomeLicense" type="text" placeholder="License #">
+            </div>
 
-alert("Bid submitted");
-}
+            <div class="welcomeField">
+              <label class="welcomeLabel" for="welcomeCoverage">Service Radius</label>
+              <select class="welcomeSelect" id="welcomeCoverage">
+                <option value="">Select radius</option>
+                <option>5 miles</option>
+                <option>10 miles</option>
+                <option>25 miles</option>
+                <option>50 miles</option>
+                <option>100+ miles</option>
+              </select>
+            </div>
 
-/* =========================
-   PROJECT ROOM
-========================= */
-function openProjectRoom(id){
-window.location.href = "project-room.html?job=" + id;
-}
+            <div class="welcomeField full">
+              <label class="welcomeLabel" for="welcomeBio">Company Bio</label>
+              <textarea class="welcomeTextarea" id="welcomeBio" placeholder="Briefly describe your company and specialties..."></textarea>
+            </div>
+          </div>
+        </div>
 
-/* =========================
-   INIT
-========================= */
-loadData();
+        <div class="welcomeActions">
+          <button class="welcome-back-btn" type="button" id="welcomeBackBtn">Back</button>
+          <button class="welcome-submit-btn" type="button" id="welcomeSubmitBtn">Create Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-</script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
+  <script>
+    const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const TRADE_OPTIONS = [
+      'Kitchen Renovation','Bathroom Renovation','Additions & Remodeling','General Contractors','Carpentry',
+      'Concrete & Masonry','Decks & Porches','Doors','Drywall & Insulation','Electrical','Fencing','Flooring',
+      'Garage Doors','Glass & Mirrors','Gutters','Handyman Services','HVAC','Junk Removal','Land Surveying',
+      'Landscaping','Lawn Care','Locksmith','Painting','Patios','Pest Control','Plumbing','Pools & Spas',
+      'Pressure Washing','Roofing','Septic Systems','Siding','Solar','Sunrooms','Tile & Stone','Tree Services',
+      'Water Damage Restoration','Windows'
+    ];
+
+    let contractors = [];
+    let jobs = [];
+    let activeSort = 'distance';
+    let activeId = null;
+    let filteredItems = [];
+    let markerIndex = new Map();
+    let markerClusterGroup = null;
+    let activeCircles = [];
+    let uiCollapsed = false;
+    let selectedWelcomeRole = null;
+    let currentMode = new URLSearchParams(window.location.search).get('view') === 'contractor' ? 'contractor' : 'homeowner';
+
+    const app = document.getElementById('app');
+    const cardsRow = document.getElementById('cardsRow');
+    const resultsCount = document.getElementById('resultsCount');
+    const resultsTitle = document.getElementById('resultsTitle');
+    const statusPill = document.getElementById('statusPill');
+    const restoreUiBtn = document.getElementById('restoreUiBtn');
+
+    const logoImg = document.getElementById('logoImg');
+    const logoFallback = document.getElementById('logoFallback');
+    const welcomeLogoImg = document.getElementById('welcomeLogoImg');
+    const welcomeLogoFallback = document.getElementById('welcomeLogoFallback');
+
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const tradeFilter = document.getElementById('tradeFilter');
+    const distanceFilter = document.getElementById('distanceFilter');
+    const ratingFilter = document.getElementById('ratingFilter');
+    const sortDistanceBtn = document.getElementById('sortDistance');
+    const sortRatingBtn = document.getElementById('sortRating');
+    const resetFiltersBtn = document.getElementById('resetFilters');
+    const homeownerModeBtn = document.getElementById('homeownerMode');
+    const contractorModeBtn = document.getElementById('contractorMode');
+    const scrollLeftBtn = document.getElementById('scrollLeftBtn');
+    const scrollRightBtn = document.getElementById('scrollRightBtn');
+    const locateBtn = document.getElementById('locateBtn');
+
+    const postJobBtn = document.getElementById('postJobBtn');
+    const jobModal = document.getElementById('jobModal');
+    const closeJobModal = document.getElementById('closeJobModal');
+    const cancelJobBtn = document.getElementById('cancelJobBtn');
+    const submitJobBtn = document.getElementById('submitJobBtn');
+    const jobTradeSelect = document.getElementById('jobTrade');
+
+    const detailModal = document.getElementById('detailModal');
+    const detailTitle = document.getElementById('detailTitle');
+    const detailContent = document.getElementById('detailContent');
+    const closeDetailModal = document.getElementById('closeDetailModal');
+
+    const welcomeOverlay = document.getElementById('welcomeOverlay');
+    const welcomeCard = document.getElementById('welcomeCard');
+    const welcomeRoleChooser = document.getElementById('welcomeRoleChooser');
+    const welcomeFormWrap = document.getElementById('welcomeFormWrap');
+    const welcomeRolePill = document.getElementById('welcomeRolePill');
+    const contractorTrialNote = document.getElementById('contractorTrialNote');
+    const contractorFields = document.getElementById('contractorFields');
+    const homeownerFields = document.getElementById('homeownerFields');
+    const welcomeProjectType = document.getElementById('welcomeProjectType');
+    const welcomeTrade = document.getElementById('welcomeTrade');
+    const welcomeHomeownerBtn = document.getElementById('welcomeHomeownerBtn');
+    const welcomeContractorBtn = document.getElementById('welcomeContractorBtn');
+    const exploreDemoBtn = document.getElementById('exploreDemoBtn');
+    const welcomeBackBtn = document.getElementById('welcomeBackBtn');
+    const welcomeSubmitBtn = document.getElementById('welcomeSubmitBtn');
+
+    const map = L.map('map', { zoomControl: false, attributionControl: true }).setView([40.8859, -74.0435], 11);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    function showLogoFallback() {
+      if (logoImg) logoImg.style.display = 'none';
+      if (logoFallback) logoFallback.style.display = 'block';
+      if (welcomeLogoImg) welcomeLogoImg.style.display = 'none';
+      if (welcomeLogoFallback) welcomeLogoFallback.style.display = 'flex';
+    }
+
+    if (logoImg) logoImg.addEventListener('error', showLogoFallback);
+    if (welcomeLogoImg) welcomeLogoImg.addEventListener('error', showLogoFallback);
+
+    function populateTradeSelect() {
+      const options = TRADE_OPTIONS.map(trade => `<option>${trade}</option>`).join('');
+      tradeFilter.innerHTML = `<option value="all">All Trades</option>` + options;
+      jobTradeSelect.innerHTML = options;
+      welcomeProjectType.innerHTML = `<option value="">Select project type</option>` + options;
+      welcomeTrade.innerHTML = `<option value="">Select trade</option>` + options;
+    }
+
+    function showStatus(message) {
+      statusPill.textContent = message;
+      statusPill.classList.add('show');
+      clearTimeout(showStatus._timer);
+      showStatus._timer = setTimeout(() => statusPill.classList.remove('show'), 2200);
+    }
+
+    function getCurrentDataset() {
+      return currentMode === 'homeowner' ? contractors : jobs;
+    }
+
+    function syncModeUI() {
+      homeownerModeBtn.classList.toggle('active', currentMode === 'homeowner');
+      contractorModeBtn.classList.toggle('active', currentMode === 'contractor');
+      resultsTitle.textContent = currentMode === 'homeowner'
+        ? 'Swipe left ↔ right to browse contractors'
+        : 'Swipe left ↔ right to browse customer jobs';
+      postJobBtn.style.display = currentMode === 'homeowner' ? 'inline-flex' : 'none';
+    }
+
+    function collapseUI() {
+      uiCollapsed = true;
+      app.classList.add('ui-collapsed');
+      restoreUiBtn.classList.add('show');
+    }
+
+    function expandUI() {
+      uiCollapsed = false;
+      app.classList.remove('ui-collapsed');
+      restoreUiBtn.classList.remove('show');
+    }
+
+    function maskLocation(lat, lng, radiusMiles = 0.25) {
+      const radiusInDegrees = radiusMiles / 69;
+      const u = Math.random();
+      const v = Math.random();
+      const w = radiusInDegrees * Math.sqrt(u);
+      const t = 2 * Math.PI * v;
+      return [lat + w * Math.cos(t), lng + w * Math.sin(t)];
+    }
+
+    function makeIcon(item, isActive) {
+      const kind = item.type === 'job' ? 'job' : 'contractor';
+      const size = isActive ? 24 : 18;
+      const anchor = isActive ? 12 : 9;
+      return L.divIcon({
+        className: '',
+        html: `<div class="map-pin ${kind} ${isActive ? 'active' : ''}"></div>`,
+        iconSize: [size, size],
+        iconAnchor: [anchor, anchor]
+      });
+    }
+
+    function createClusterGroup() {
+      return L.markerClusterGroup({
+        maxClusterRadius: 45,
+        showCoverageOnHover: false,
+        spiderfyOnMaxZoom: true,
+        disableClusteringAtZoom: 13,
+        iconCreateFunction(cluster) {
+          return L.divIcon({
+            html: `<div class="custom-cluster">${cluster.getChildCount()}</div>`,
+            className: '',
+            iconSize: [42, 42]
+          });
+        }
+      });
+    }
+
+    function clearMarkers() {
+      activeCircles.forEach(layer => map.removeLayer(layer));
+      activeCircles = [];
+      markerIndex.clear();
+      if (markerClusterGroup) map.removeLayer(markerClusterGroup);
+    }
+
+    function getPopupHtml(item) {
+      if (item.type === 'contractor') {
+        return `
+          <div>
+            <div style="font-size:15px;font-weight:900;margin-bottom:6px;">${item.name || 'Verified Contractor'}</div>
+            <div style="font-size:13px;color:#64748b;margin-bottom:4px;">${item.trade} • ${item.city || ''}</div>
+            <div style="font-size:13px;color:#64748b;">⭐ ${Number(item.rating || 0).toFixed(1)} • ${Number(item.distance || 0).toFixed(1)} mi</div>
+          </div>
+        `;
+      }
+      return `
+        <div>
+          <div style="font-size:15px;font-weight:900;margin-bottom:6px;">${item.title}</div>
+          <div style="font-size:13px;color:#64748b;margin-bottom:4px;">${item.city || ''} • ${item.trade}</div>
+          <div style="font-size:13px;color:#64748b;">Posted by ${item.customer_name || 'Customer'} • Bids ${(item.bids || []).length}/${item.max_bids || 5}</div>
+        </div>
+      `;
+    }
+
+    function renderMarkers(items) {
+      clearMarkers();
+      markerClusterGroup = createClusterGroup();
+
+      items.forEach(item => {
+        let markerCoords = [Number(item.lat), Number(item.lng)];
+
+        if (item.type === 'job') {
+          const [maskedLat, maskedLng] = maskLocation(Number(item.lat), Number(item.lng), 0.25);
+          markerCoords = [maskedLat, maskedLng];
+
+          const privacyCircle = L.circle([item.lat, item.lng], {
+            radius: 420,
+            color: '#f97316',
+            weight: 1,
+            fillColor: '#f97316',
+            fillOpacity: 0.14
+          });
+          activeCircles.push(privacyCircle);
+          privacyCircle.addTo(map);
+        }
+
+        const marker = L.marker(markerCoords, {
+          icon: makeIcon(item, item.id === activeId)
+        });
+
+        marker.bindPopup(getPopupHtml(item));
+        marker.on('click', () => {
+          expandUI();
+          setActive(item.id, true);
+          scrollCardIntoView(item.id);
+        });
+
+        markerClusterGroup.addLayer(marker);
+        markerIndex.set(item.id, marker);
+      });
+
+      map.addLayer(markerClusterGroup);
+      fitMapToItems(items);
+    }
+
+    function fitMapToItems(items) {
+      if (!items.length) return;
+      const bounds = L.latLngBounds(items.map(item => [Number(item.lat), Number(item.lng)]));
+      map.fitBounds(bounds, {
+        paddingTopLeft: [30, 210],
+        paddingBottomRight: [30, 220],
+        maxZoom: 12
+      });
+    }
+
+    function updateMarkerStates() {
+      filteredItems.forEach(item => {
+        const marker = markerIndex.get(item.id);
+        if (marker) marker.setIcon(makeIcon(item, item.id === activeId));
+      });
+    }
+
+    function formatCount() {
+      const noun = currentMode === 'homeowner' ? 'contractor' : 'job';
+      const count = filteredItems.length;
+      resultsCount.textContent = `${count} ${noun}${count === 1 ? '' : 's'} found`;
+    }
+
+    function contractorCardHtml(item) {
+      return `
+        <div class="card-top">
+          <div class="card-title-wrap">
+            <h3 class="card-title">${item.name || (item.trade + ' Specialist')}</h3>
+            <p class="card-sub">${item.trade} • ${item.city || ''}</p>
+          </div>
+          <div class="rating-pill">⭐ ${Number(item.rating || 0).toFixed(1)}</div>
+        </div>
+        <div class="card-body">
+          <div class="meta-grid">
+            <div class="meta-box">
+              <div class="meta-label">Projects</div>
+              <div class="meta-value">${item.projects_completed || 0}</div>
+            </div>
+            <div class="meta-box">
+              <div class="meta-label">Distance</div>
+              <div class="meta-value">${Number(item.distance || 0).toFixed(1)} mi</div>
+            </div>
+          </div>
+          <div class="info-row">
+            <span><strong>Response:</strong> ${item.response_time || '—'}</span>
+            <span><strong>Reviews:</strong> ${item.reviews || 0}</span>
+          </div>
+          <div class="card-actions">
+            <button class="mini-btn secondary" data-action="view" data-id="${item.id}">View</button>
+            <button class="mini-btn primary" data-action="message" data-id="${item.id}">Message</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function jobCardHtml(item) {
+      return `
+        <div class="card-top">
+          <div class="card-title-wrap">
+            <h3 class="card-title">${item.title}</h3>
+            <p class="card-sub">${item.trade} • ${item.city || ''}</p>
+          </div>
+          <div class="rating-pill">⭐ ${Number(item.rating || 0).toFixed(1)}</div>
+        </div>
+        <div class="card-body">
+          <div class="meta-grid">
+            <div class="meta-box">
+              <div class="meta-label">Budget</div>
+              <div class="meta-value">${item.budget || '$0'}</div>
+            </div>
+            <div class="meta-box">
+              <div class="meta-label">Bids</div>
+              <div class="meta-value">${(item.bids || []).length} / ${item.max_bids || 5}</div>
+            </div>
+          </div>
+          <div class="info-row">
+            <span><strong>By:</strong> ${item.customer_name || 'Customer'}</span>
+            <span><strong>Posted:</strong> ${item.posted_ago || 'Live'}</span>
+          </div>
+          <div class="card-actions">
+            <button class="mini-btn secondary" data-action="job-details" data-id="${item.id}">View</button>
+            <button class="mini-btn primary" data-action="project-room" data-id="${item.id}">Project Room</button>
+            <button class="mini-btn primary" data-action="bid" data-id="${item.id}">Bid</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCards(items) {
+      if (!items.length) {
+        cardsRow.innerHTML = `
+          <div class="listing-card" style="display:flex;align-items:center;justify-content:center;">
+            <div style="padding:22px;text-align:center;">
+              <div style="font-size:17px;font-weight:900;margin-bottom:8px;">No results found</div>
+              <div style="font-size:13px;color:#64748b;">Try changing the search or filter settings.</div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      cardsRow.innerHTML = items.map(item => `
+        <div class="listing-card ${item.id === activeId ? 'active' : ''}" data-id="${item.id}">
+          ${item.type === 'contractor' ? contractorCardHtml(item) : jobCardHtml(item)}
+        </div>
+      `).join('');
+    }
+
+    function setActive(id, panMap = false) {
+      activeId = id;
+
+      document.querySelectorAll('.listing-card[data-id]').forEach(card => {
+        card.classList.toggle('active', Number(card.dataset.id) === id);
+      });
+
+      updateMarkerStates();
+
+      const item = filteredItems.find(entry => entry.id === id);
+      if (item && panMap) {
+        map.flyTo([Number(item.lat), Number(item.lng)], Math.max(map.getZoom(), 13), { duration: .38 });
+        const marker = markerIndex.get(id);
+        if (marker) marker.openPopup();
+      }
+    }
+
+    function scrollCardIntoView(id) {
+      const target = [...document.querySelectorAll('.listing-card[data-id]')].find(card => Number(card.dataset.id) === id);
+      if (!target) return;
+      const left = target.offsetLeft - (cardsRow.clientWidth / 2) + (target.clientWidth / 2);
+      cardsRow.scrollTo({ left, behavior: 'smooth' });
+    }
+
+    function sortItems(items) {
+      if (activeSort === 'distance') items.sort((a, b) => Number(a.distance || 999) - Number(b.distance || 999));
+      else items.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
+    }
+
+    function applyFilters() {
+      const source = getCurrentDataset();
+      const query = searchInput.value.trim().toLowerCase();
+      const selectedTrade = tradeFilter.value;
+      const maxDistance = Number(distanceFilter.value);
+      const minRating = Number(ratingFilter.value);
+
+      filteredItems = source.filter(item => {
+        if (currentMode === 'homeowner' && item.type !== 'contractor') return false;
+        if (currentMode === 'contractor' && item.type !== 'job') return false;
+
+        if (currentMode === 'contractor' && item.type === 'job') {
+          if ((item.max_bids || 5) <= ((item.bids || []).length)) return false;
+        }
+
+        const haystack = item.type === 'contractor'
+          ? [item.name, item.trade, item.city, item.bio].join(' ').toLowerCase()
+          : [item.title, item.trade, item.city, item.customer_name, item.description].join(' ').toLowerCase();
+
+        const matchesQuery = !query || haystack.includes(query);
+        const matchesTrade = selectedTrade === 'all' || item.trade === selectedTrade;
+        const matchesDistance = Number(item.distance || 999) <= maxDistance;
+        const matchesRating = Number(item.rating || 0) >= minRating;
+
+        return matchesQuery && matchesTrade && matchesDistance && matchesRating;
+      });
+
+      sortItems(filteredItems);
+      syncModeUI();
+
+      if (!filteredItems.some(item => item.id === activeId)) {
+        activeId = filteredItems[0]?.id ?? null;
+      }
+
+      renderCards(filteredItems);
+      renderMarkers(filteredItems);
+      formatCount();
+
+      if (activeId) {
+        setActive(activeId, false);
+        setTimeout(() => scrollCardIntoView(activeId), 80);
+      }
+    }
+
+    function setSort(type) {
+      activeSort = type;
+      sortDistanceBtn.classList.toggle('active', type === 'distance');
+      sortRatingBtn.classList.toggle('active', type === 'rating');
+      applyFilters();
+    }
+
+    function getFormattedBudget(value) {
+      const trimmed = String(value || '').trim();
+      if (!trimmed) return '$0';
+      return trimmed.startsWith('$') ? trimmed : `$${trimmed}`;
+    }
+
+    function openJobModal() { expandUI(); jobModal.classList.add('show'); }
+    function closeJobForm() { jobModal.classList.remove('show'); }
+    function clearJobForm() {
+      document.getElementById('jobTitle').value = '';
+      document.getElementById('jobBudget').value = '';
+      document.getElementById('jobCustomer').value = '';
+      document.getElementById('jobCity').value = '';
+      document.getElementById('jobDescription').value = '';
+      document.getElementById('jobTrade').selectedIndex = 0;
+    }
+
+    async function createJobFromForm() {
+      const title = document.getElementById('jobTitle').value.trim() || 'New Job';
+      const trade = document.getElementById('jobTrade').value || 'General Contractors';
+      const budget = getFormattedBudget(document.getElementById('jobBudget').value);
+      const customer_name = document.getElementById('jobCustomer').value.trim() || 'New Customer';
+      const city = document.getElementById('jobCity').value.trim() || 'North Jersey, NJ';
+      const description = document.getElementById('jobDescription').value.trim() || 'Customer posted a new project on Revamp.';
+      const center = map.getCenter();
+
+      const payload = {
+        title, trade, budget, customer_name, city, description,
+        lat: Number(center.lat.toFixed(6)),
+        lng: Number(center.lng.toFixed(6)),
+        rating: 5.0,
+        reviews: 1,
+        distance: 1.0,
+        verified: true,
+        posted_ago: 'Just now',
+        max_bids: 5,
+        type: 'job'
+      };
+
+      const { error } = await supabaseClient.from('jobs').insert([payload]);
+      if (error) {
+        console.error(error);
+        alert('Error posting job');
+        return;
+      }
+
+      closeJobForm();
+      clearJobForm();
+      showStatus('Job posted');
+      await loadLiveData();
+      setMode('contractor');
+    }
+
+    function openProjectRoom(jobId) {
+      const job = jobs.find(entry => entry.id === jobId);
+      if (!job) return;
+      sessionStorage.setItem('revampSelectedJob', JSON.stringify(job));
+      window.location.href = `project-room.html?mode=contractor&job=${jobId}`;
+    }
+
+    async function submitBid(jobId) {
+      try {
+        const amount = prompt("Enter your bid amount:");
+        if (!amount) return;
+        const message = prompt("Add a message (optional):") || "";
+
+        const { error } = await supabaseClient.from("bids").insert([{
+          job_id: jobId,
+          contractor_id: "demo-contractor",
+          contractor_name: "Verified Contractor",
+          amount: amount,
+          message: message,
+          eta: "TBD"
+        }]);
+
+        if (error) {
+          console.error(error);
+          alert("Error submitting bid");
+          return;
+        }
+
+        showStatus("Bid submitted");
+        await loadLiveData();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function openDetailModal(item) {
+      if (!item) return;
+      expandUI();
+      detailModal.classList.add('show');
+
+      if (item.type === 'contractor') {
+        detailTitle.textContent = item.name || 'Contractor Details';
+        detailContent.innerHTML = `
+          <div class="detail-panel">
+            <h4>${item.trade} • ${item.city || ''}</h4>
+            <p>${item.bio || ''}</p>
+          </div>
+          <div class="modal-grid">
+            <div class="detail-panel">
+              <h4>Reputation</h4>
+              <p>⭐ ${Number(item.rating || 0).toFixed(1)} rating with ${item.reviews || 0} reviews.</p>
+            </div>
+            <div class="detail-panel">
+              <h4>Performance</h4>
+              <p>${item.projects_completed || 0} completed projects and average response time of ${item.response_time || '—'}.</p>
+            </div>
+          </div>
+          <div class="detail-panel">
+            <h4>Qualifications</h4>
+            <p>${item.licensed ? 'Licensed' : 'Unlicensed'} • ${item.insured ? 'Insured' : 'Not insured'} • Budget tier ${item.price || '$$'}</p>
+          </div>
+          <div class="detail-panel">
+            <h4>Specialties</h4>
+            <div class="detail-tags">${(item.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
+          </div>
+          <div class="card-actions">
+            <button class="mini-btn primary" data-action="message" data-id="${item.id}">Message</button>
+          </div>
+        `;
+      } else {
+        const bidsHtml = (item.bids || []).length
+          ? item.bids.map((bid, index) => `
+              <div style="border-top:1px solid #e2e8f0;padding-top:10px;margin-top:10px;">
+                <strong>${bid.contractor_name || 'Verified Contractor'}</strong><br>
+                Bid: ${bid.amount}<br>
+                Start: ${bid.eta || 'TBD'}<br>
+                ${bid.message ? `Message: ${bid.message}<br>` : ''}
+                <button class="mini-btn primary" style="margin-top:8px;" data-action="accept-bid" data-job="${item.id}" data-bid="${index}">Accept Bid</button>
+              </div>
+            `).join('')
+          : '<p>No bids yet.</p>';
+
+        detailTitle.textContent = item.title;
+        detailContent.innerHTML = `
+          <div class="detail-panel">
+            <h4>${item.trade} • ${item.city || ''}</h4>
+            <p>${item.description || ''}</p>
+          </div>
+          <div class="modal-grid">
+            <div class="detail-panel">
+              <h4>Customer</h4>
+              <p>${item.customer_name || 'Customer'} • ⭐ ${Number(item.rating || 0).toFixed(1)} (${item.reviews || 0} reviews) • ${item.verified ? 'Verified customer' : 'Unverified customer'}</p>
+            </div>
+            <div class="detail-panel">
+              <h4>Budget & Bids</h4>
+              <p>${item.budget || '$0'} • Posted ${item.posted_ago || 'Live'} • Bids ${(item.bids || []).length}/${item.max_bids || 5}</p>
+            </div>
+          </div>
+          <div class="detail-panel">
+            <h4>Bids (${(item.bids || []).length}/${item.max_bids || 5})</h4>
+            ${bidsHtml}
+          </div>
+          <div class="card-actions">
+            <button class="mini-btn secondary" data-action="project-room" data-id="${item.id}">Open Project Room</button>
+            <button class="mini-btn primary" data-action="bid" data-id="${item.id}">Submit Bid</button>
+          </div>
+        `;
+      }
+    }
+
+    function closeDetails() {
+      detailModal.classList.remove('show');
+    }
+
+    function handleCardAction(action, id) {
+      const item = [...contractors, ...jobs].find(entry => entry.id === id);
+      if (!item) return;
+
+      if (action === 'view' || action === 'job-details') {
+        openDetailModal(item);
+        return;
+      }
+
+      if (action === 'message') {
+        const contractor = contractors.find(c => c.id === id);
+        if (contractor) sessionStorage.setItem('revampSelectedContractor', JSON.stringify(contractor));
+        window.location.href = `project-room.html?mode=homeowner&contractor=${id}`;
+        return;
+      }
+
+      if (action === 'project-room') {
+        openProjectRoom(id);
+        return;
+      }
+
+      if (action === 'bid') {
+        submitBid(id);
+        return;
+      }
+
+      if (action === 'accept-bid') {
+        showStatus('Bid accepted');
+        return;
+      }
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      localStorage.setItem('revamplex_role', mode);
+
+      const url = new URL(window.location);
+      url.searchParams.set('view', mode);
+      window.history.replaceState({}, '', url);
+
+      syncModeUI();
+      const dataset = getCurrentDataset();
+      activeId = dataset[0] ? dataset[0].id : null;
+      applyFilters();
+      expandUI();
+    }
+
+    function clearWelcomeForm() {
+      [
+        'welcomeFullName','welcomeEmail','welcomePhone','welcomePassword','welcomeAddress',
+        'welcomeCompany','welcomeLicense','welcomeBio','welcomeProjectNotes'
+      ].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+
+      ['welcomeProjectType','welcomeTrade','welcomeCoverage'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.selectedIndex = 0;
+      });
+    }
+
+    function startSignup(role) {
+      localStorage.setItem('revamplex_role', role);
+      selectedWelcomeRole = role;
+
+      welcomeRoleChooser.style.display = 'none';
+      welcomeFormWrap.classList.add('show');
+
+      const isContractor = role === 'contractor';
+      welcomeRolePill.textContent = isContractor ? 'Pro Contractor Registration' : 'Homeowner Registration';
+      contractorTrialNote.classList.toggle('show', isContractor);
+      contractorFields.classList.toggle('show', isContractor);
+      homeownerFields.classList.toggle('show', !isContractor);
+    }
+
+    function backToRoleChooser() {
+      selectedWelcomeRole = null;
+      welcomeRoleChooser.style.display = '';
+      welcomeFormWrap.classList.remove('show');
+      contractorTrialNote.classList.remove('show');
+      contractorFields.classList.remove('show');
+      homeownerFields.classList.remove('show');
+    }
+
+    function submitWelcomeRegistration() {
+      const fullName = document.getElementById('welcomeFullName').value.trim();
+      const email = document.getElementById('welcomeEmail').value.trim();
+      const phone = document.getElementById('welcomePhone').value.trim();
+      const password = document.getElementById('welcomePassword').value.trim();
+
+      if (!selectedWelcomeRole) {
+        alert('Please choose Homeowner or Pro Contractor first.');
+        return;
+      }
+
+      if (!fullName || !email || !phone || !password) {
+        alert('Please complete Full Name, Email, Phone, and Password.');
+        return;
+      }
+
+      localStorage.setItem('revamplex_registered', 'true');
+      clearWelcomeForm();
+      welcomeOverlay.style.display = 'none';
+      setMode(selectedWelcomeRole);
+      showStatus(selectedWelcomeRole === 'contractor' ? 'Pro Contractor registration started' : 'Homeowner registration started');
+    }
+
+    function exploreDemo() {
+      localStorage.setItem('revamplex_demo', 'true');
+      welcomeOverlay.style.display = 'none';
+    }
+
+    async function loadContractors() {
+      const { data, error } = await supabaseClient
+        .from('contractors')
+        .select('*')
+        .order('rating', { ascending: false });
+
+      if (error) {
+        console.error('contractors load error', error);
+        return [];
+      }
+
+      return (data || []).map(item => ({
+        ...item,
+        type: 'contractor',
+        tags: item.tags || []
+      }));
+    }
+
+    async function loadJobs() {
+      const { data, error } = await supabaseClient
+        .from('jobs')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('jobs load error', error);
+        return [];
+      }
+
+      const rows = data || [];
+      const ids = rows.map(r => r.id);
+      let bidsByJob = {};
+
+      if (ids.length) {
+        const { data: bidRows, error: bidError } = await supabaseClient
+          .from('bids')
+          .select('*')
+          .in('job_id', ids)
+          .order('created_at', { ascending: true });
+
+        if (!bidError && bidRows) {
+          bidsByJob = bidRows.reduce((acc, bid) => {
+            if (!acc[bid.job_id]) acc[bid.job_id] = [];
+            acc[bid.job_id].push(bid);
+            return acc;
+          }, {});
+        }
+      }
+
+      return rows.map(item => ({
+        ...item,
+        bids: bidsByJob[item.id] || [],
+        type: 'job'
+      }));
+    }
+
+    async function loadLiveData() {
+      contractors = await loadContractors();
+      jobs = await loadJobs();
+      const dataset = getCurrentDataset();
+      activeId = dataset[0] ? dataset[0].id : null;
+      applyFilters();
+    }
+
+    function subscribeLive() {
+      supabaseClient
+        .channel('revamplex-live')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, loadLiveData)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'bids' }, loadLiveData)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'contractors' }, loadLiveData)
+        .subscribe();
+    }
+
+    welcomeHomeownerBtn.addEventListener('click', () => startSignup('homeowner'));
+    welcomeContractorBtn.addEventListener('click', () => startSignup('contractor'));
+    exploreDemoBtn.addEventListener('click', exploreDemo);
+    welcomeBackBtn.addEventListener('click', backToRoleChooser);
+    welcomeSubmitBtn.addEventListener('click', submitWelcomeRegistration);
+
+    searchBtn.addEventListener('click', applyFilters);
+    searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') applyFilters(); });
+    tradeFilter.addEventListener('change', applyFilters);
+    distanceFilter.addEventListener('change', applyFilters);
+    ratingFilter.addEventListener('change', applyFilters);
+    sortDistanceBtn.addEventListener('click', () => setSort('distance'));
+    sortRatingBtn.addEventListener('click', () => setSort('rating'));
+
+    resetFiltersBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      tradeFilter.value = 'all';
+      distanceFilter.value = '100';
+      ratingFilter.value = '0';
+      setSort('distance');
+    });
+
+    homeownerModeBtn.addEventListener('click', () => setMode('homeowner'));
+    contractorModeBtn.addEventListener('click', () => setMode('contractor'));
+
+    scrollLeftBtn.addEventListener('click', () => cardsRow.scrollBy({ left: -280, behavior: 'smooth' }));
+    scrollRightBtn.addEventListener('click', () => cardsRow.scrollBy({ left: 280, behavior: 'smooth' }));
+
+    locateBtn.addEventListener('click', () => {
+      fitMapToItems(filteredItems);
+      expandUI();
+      showStatus('Map recentered');
+    });
+
+    postJobBtn.addEventListener('click', openJobModal);
+    closeJobModal.addEventListener('click', closeJobForm);
+    cancelJobBtn.addEventListener('click', closeJobForm);
+    submitJobBtn.addEventListener('click', createJobFromForm);
+    restoreUiBtn.addEventListener('click', expandUI);
+    closeDetailModal.addEventListener('click', closeDetails);
+
+    detailModal.addEventListener('click', e => { if (e.target === detailModal) closeDetails(); });
+    jobModal.addEventListener('click', e => { if (e.target === jobModal) closeJobForm(); });
+
+    cardsRow.addEventListener('click', e => {
+      const button = e.target.closest('[data-action]');
+      if (button) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleCardAction(button.dataset.action, Number(button.dataset.id));
+        return;
+      }
+
+      const card = e.target.closest('.listing-card[data-id]');
+      if (card) setActive(Number(card.dataset.id), true);
+    });
+
+    detailContent.addEventListener('click', e => {
+      const button = e.target.closest('[data-action]');
+      if (!button) return;
+      e.preventDefault();
+      e.stopPropagation();
+      handleCardAction(button.dataset.action, Number(button.dataset.id));
+    });
+
+    let scrollTimer = null;
+    cardsRow.addEventListener('scroll', () => {
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => {
+        const cards = [...document.querySelectorAll('.listing-card[data-id]')];
+        if (!cards.length) return;
+
+        const rowRect = cardsRow.getBoundingClientRect();
+        const rowCenter = rowRect.left + rowRect.width / 2;
+
+        let closestId = null;
+        let closestDiff = Infinity;
+
+        cards.forEach(card => {
+          const rect = card.getBoundingClientRect();
+          const center = rect.left + rect.width / 2;
+          const diff = Math.abs(center - rowCenter);
+          if (diff < closestDiff) {
+            closestDiff = diff;
+            closestId = Number(card.dataset.id);
+          }
+        });
+
+        if (closestId !== null && closestId !== activeId) setActive(closestId, true);
+      }, 70);
+    });
+
+    map.on('click', () => {
+      if (!uiCollapsed) collapseUI();
+      else expandUI();
+    });
+
+    window.addEventListener('resize', () => {
+      setTimeout(() => {
+        map.invalidateSize();
+        if (filteredItems.length) {
+          fitMapToItems(filteredItems);
+          if (activeId) scrollCardIntoView(activeId);
+        }
+      }, 120);
+    });
+
+    const registered = localStorage.getItem('revamplex_registered');
+    if (!registered) {
+      welcomeOverlay.style.display = 'flex';
+    } else {
+      welcomeOverlay.style.display = 'none';
+    }
+
+    populateTradeSelect();
+    syncModeUI();
+    loadLiveData();
+    subscribeLive();
+  </script>
 </body>
 </html>
