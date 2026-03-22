@@ -1,208 +1,174 @@
-<!-- REVAMPLEX v8 FULL MERGED BUILD -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RevampLEX v7 Stable</title>
 
-<!-- ONLY SHOWING CRITICAL MERGE SECTION (your UI stays SAME above this line) -->
-
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
+<style>
+html,body,#map{height:100%;margin:0;font-family:Arial}
+.topbar{
+position:absolute;top:10px;left:50%;transform:translateX(-50%);
+z-index:1000;background:white;padding:10px 15px;border-radius:10px;
+box-shadow:0 4px 12px rgba(0,0,0,.15);
+}
+.logo{font-weight:bold;font-size:18px}
+.logo span{color:#f97316}
+.btn{
+margin-top:5px;
+padding:6px 10px;
+background:#f97316;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+<div class="logo">Revamp<span>LEX</span></div>
+<button class="btn" onclick="openPostModal()">Post Job</button>
+</div>
+
+<div id="map"></div>
+
 <script>
+
 /* =========================
-   SUPABASE (FIXED + LIVE)
+   SUPABASE
 ========================= */
 const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
-
+const SUPABASE_KEY = "YOUR_KEY"; // keep yours
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* =========================
-   LIVE DATA LOAD
+   MAP
 ========================= */
-async function loadLiveData() {
-  try {
-    const { data: contractorData } = await supabaseClient
-      .from("contractors")
-      .select("*");
+const map = L.map('map').setView([40.8859,-74.0435],11);
 
-    const { data: jobData } = await supabaseClient
-      .from("jobs_with_bid_counts")
-      .select("*")
-      .order("created_at", { ascending: false });
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+maxZoom:19
+}).addTo(map);
 
-    const { data: bidData } = await supabaseClient
-      .from("bids")
-      .select("*");
+let markers = [];
 
-    // attach bids to jobs
-    const bidsByJob = {};
-    (bidData || []).forEach(b => {
-      if (!bidsByJob[b.job_id]) bidsByJob[b.job_id] = [];
-      bidsByJob[b.job_id].push(b);
-    });
+/* =========================
+   LOAD LIVE DATA
+========================= */
+async function loadData(){
+clearMarkers();
 
-    contractors = (contractorData || []).map(c => ({
-      ...c,
-      type: "contractor"
-    }));
+const {data:jobs} = await supabaseClient.from("jobs").select("*");
 
-    jobs = (jobData || []).map(j => ({
-      ...j,
-      bids: bidsByJob[j.id] || [],
-      type: "job"
-    }));
+if(!jobs) return;
 
-    applyFilters();
+jobs.forEach(job=>{
+const marker = L.marker([job.lat,job.lng]).addTo(map);
 
-  } catch (err) {
-    console.error("LIVE LOAD ERROR", err);
-  }
+marker.bindPopup(`
+<b>${job.title}</b><br>
+${job.city}<br><br>
+
+<button class="btn" onclick="openProjectRoom(${job.id})">
+Project Room
+</button><br><br>
+
+<button class="btn" onclick="submitBid(${job.id})">
+Submit Bid
+</button>
+`);
+
+markers.push(marker);
+});
 }
 
 /* =========================
-   REALTIME
+   CLEAR MARKERS
 ========================= */
-function subscribeLive() {
-  supabaseClient
-    .channel("revamp-live")
-    .on("postgres_changes", { event: "*", schema: "public", table: "jobs" }, loadLiveData)
-    .on("postgres_changes", { event: "*", schema: "public", table: "bids" }, loadLiveData)
-    .subscribe();
+function clearMarkers(){
+markers.forEach(m=>map.removeLayer(m));
+markers=[];
 }
 
 /* =========================
-   POST JOB (CONNECTED)
+   POST JOB
 ========================= */
-async function createJobFromForm() {
-  const title = document.getElementById("jobTitle").value;
-  const trade = document.getElementById("jobTrade").value;
-  const budget = document.getElementById("jobBudget").value;
-  const customer = document.getElementById("jobCustomer").value;
-  const city = document.getElementById("jobCity").value;
-  const description = document.getElementById("jobDescription").value;
+function openPostModal(){
+const title = prompt("Job Title");
+if(!title) return;
 
-  const center = map.getCenter();
+const city = prompt("City");
+const trade = prompt("Trade");
 
-  const { error } = await supabaseClient.from("jobs").insert([{
-    title,
-    trade,
-    budget,
-    customer_name: customer,
-    city,
-    description,
-    lat: center.lat,
-    lng: center.lng,
-    max_bids: 5
-  }]);
+createJob(title, city, trade);
+}
 
-  if (error) {
-    alert("Error posting job");
-    console.error(error);
-    return;
-  }
+async function createJob(title, city, trade){
+const center = map.getCenter();
 
-  closeJobForm();
-  showStatus("Job posted live 🚀");
-  loadLiveData();
+const {error} = await supabaseClient.from("jobs").insert([{
+title,
+city,
+trade,
+lat:center.lat,
+lng:center.lng,
+budget:"$0",
+customer_name:"Demo User",
+max_bids:5
+}]);
+
+if(error){
+alert("Error posting job");
+return;
+}
+
+alert("Job Posted");
+loadData();
 }
 
 /* =========================
-   BID SYSTEM (CONNECTED)
+   BID
 ========================= */
-async function submitBid(jobId) {
-  const amount = prompt("Enter your bid:");
-  if (!amount) return;
+async function submitBid(jobId){
+const amount = prompt("Enter bid amount");
+if(!amount) return;
 
-  const { error } = await supabaseClient
-    .from("bids")
-    .insert([{
-      job_id: jobId,
-      contractor_id: "demo",
-      contractor_name: "Verified Contractor",
-      amount: amount
-    }]);
+const {error} = await supabaseClient.from("bids").insert([{
+job_id:jobId,
+contractor_id:"demo",
+contractor_name:"Verified Contractor",
+amount:amount
+}]);
 
-  if (error) {
-    alert("Error submitting bid");
-    console.error(error);
-    return;
-  }
+if(error){
+alert("Error");
+return;
+}
 
-  showStatus("Bid submitted ✅");
-  loadLiveData();
+alert("Bid submitted");
 }
 
 /* =========================
-   PROJECT ROOM (RESTORED)
+   PROJECT ROOM
 ========================= */
-function openProjectRoom(jobId) {
-  const job = jobs.find(j => j.id === jobId);
-  if (!job) return;
-
-  sessionStorage.setItem("revampSelectedJob", JSON.stringify(job));
-  window.location.href = "project-room.html?job=" + jobId;
-}
-
-/* =========================
-   FIX BUTTON HANDLERS
-========================= */
-function handleCardAction(action, id) {
-  const item = [...contractors, ...jobs].find(x => x.id === id);
-
-  if (!item) return;
-
-  if (action === "bid") {
-    submitBid(id);
-    return;
-  }
-
-  if (action === "job-details") {
-    openDetailModal(item);
-    return;
-  }
-
-  if (action === "project-room") {
-    openProjectRoom(id);
-    return;
-  }
-}
-
-/* =========================
-   DETAIL MODAL FIX
-========================= */
-function openDetailModal(item) {
-  detailModal.classList.add("show");
-
-  if (item.type === "job") {
-    detailTitle.textContent = item.title;
-
-    detailContent.innerHTML = `
-      <div class="detail-panel">
-        <h4>${item.trade}</h4>
-        <p>${item.description}</p>
-      </div>
-
-      <div class="detail-panel">
-        <h4>Bids (${item.bids.length})</h4>
-        ${item.bids.map(b => `
-          <div style="margin-top:10px;">
-            <strong>${b.contractor_name}</strong><br>
-            ${b.amount}
-          </div>
-        `).join("")}
-      </div>
-
-      <div class="card-actions">
-        <button class="mini-btn primary" onclick="submitBid(${item.id})">Submit Bid</button>
-        <button class="mini-btn secondary" onclick="openProjectRoom(${item.id})">Open Project Room</button>
-      </div>
-    `;
-  }
+function openProjectRoom(id){
+window.location.href = "project-room.html?job=" + id;
 }
 
 /* =========================
    INIT
 ========================= */
-populateTradeSelect();
-syncModeUI();
-loadLiveData();
-subscribeLive();
+loadData();
 
 </script>
+
+</body>
+</html>
