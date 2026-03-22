@@ -1950,7 +1950,13 @@ cardsRow.addEventListener('scroll', () => {
     const scale = Math.max(0.92, 1 - diff / 600);
     const opacity = Math.max(0.6, 1 - diff / 500);
 
-    card.style.transform = `scale(${scale})`;
+    const isActive = Number(card.dataset.id) === activeId;
+
+if (isActive) {
+  card.style.transform = `translateY(-8px) scale(${Math.max(scale, 1.05)})`;
+} else {
+  card.style.transform = `scale(${scale})`;
+}
     card.style.opacity = opacity;
 
     if (diff < closestDiff) {
