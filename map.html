@@ -1511,7 +1511,7 @@ renderMarkers(filteredItems);
 formatCount();
 
 if (filteredItems.length > 0) {
-  activeId = filteredItems[0].id;
+  activeId = null;
 
   requestAnimationFrame(() => {
   setActive(activeId, false);
