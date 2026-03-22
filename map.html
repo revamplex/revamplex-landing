@@ -1959,27 +1959,28 @@ cardsRow.addEventListener('scroll', () => {
   let closestDiff = Infinity;
 
   cards.forEach(card => {
-    const rect = card.getBoundingClientRect();
-    const center = rect.left + rect.width / 2;
-    const diff = Math.abs(center - rowCenter);
+  const rect = card.getBoundingClientRect();
+  const center = rect.left + rect.width / 2;
+  const diff = Math.abs(center - rowCenter);
 
-    // 🔥 dynamic scale based on distance from center
-    const scale = Math.max(0.92, 1 - diff / 600);
-    const opacity = Math.max(0.6, 1 - diff / 500);
+  const id = Number(card.dataset.id);
 
-    const isActive = Number(card.dataset.id) === activeId;
+  // 🔥 CLEAR previous states
+  card.classList.remove('near', 'far');
 
-if (isActive) {
-} else {
-  card.style.transform = `scale(${scale})`;
-}
-    
+  if (id === activeId) return; // active handled separately
 
-    if (diff < closestDiff) {
-      closestDiff = diff;
-      closestId = Number(card.dataset.id);
-    }
-  });
+  if (diff < 120) {
+    card.classList.add('near');
+  } else {
+    card.classList.add('far');
+  }
+
+  if (diff < closestDiff) {
+    closestDiff = diff;
+    closestId = id;
+  }
+});
 
   scrollTimer = setTimeout(() => {
     if (closestId !== null) {
