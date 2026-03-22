@@ -1928,32 +1928,37 @@ function setSort(type) {
 cardsRow.addEventListener('scroll', () => {
   clearTimeout(scrollTimer);
 
+  const cards = [...document.querySelectorAll('.listing-card[data-id]')];
+  if (!cards.length) return;
+
+  const rowRect = cardsRow.getBoundingClientRect();
+  const rowCenter = rowRect.left + rowRect.width / 2;
+
+  let closestId = null;
+  let closestDiff = Infinity;
+
+  cards.forEach(card => {
+    const rect = card.getBoundingClientRect();
+    const center = rect.left + rect.width / 2;
+    const diff = Math.abs(center - rowCenter);
+
+    // 🔥 dynamic scale based on distance from center
+    const scale = Math.max(0.92, 1 - diff / 600);
+    const opacity = Math.max(0.6, 1 - diff / 500);
+
+    card.style.transform = `scale(${scale})`;
+    card.style.opacity = opacity;
+
+    if (diff < closestDiff) {
+      closestDiff = diff;
+      closestId = Number(card.dataset.id);
+    }
+  });
+
   scrollTimer = setTimeout(() => {
-
-    const cards = [...document.querySelectorAll('.listing-card[data-id]')];
-    if (!cards.length) return;
-
-    const rowRect = cardsRow.getBoundingClientRect();
-    const rowCenter = rowRect.left + rowRect.width / 2;
-
-    let closestId = null;
-    let closestDiff = Infinity;
-
-    cards.forEach(card => {
-      const rect = card.getBoundingClientRect();
-      const center = rect.left + rect.width / 2;
-      const diff = Math.abs(center - rowCenter);
-
-      if (diff < closestDiff) {
-        closestDiff = diff;
-        closestId = Number(card.dataset.id);
-      }
-    });
-
     if (closestId !== null) {
       setActive(closestId, false);
     }
-
   }, 70);
 });
     map.on('click', () => {
