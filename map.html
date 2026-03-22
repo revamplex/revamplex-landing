@@ -1495,9 +1495,12 @@ if (filteredItems.length > 0) {
   activeId = filteredItems[0].id;
 
   requestAnimationFrame(() => {
-    setActive(activeId, false);
-    scrollCardIntoView(activeId);
-  });
+  setActive(activeId, false);
+  scrollCardIntoView(activeId);
+
+  // 🔥 FORCE animation pass
+  cardsRow.dispatchEvent(new Event('scroll'));
+});
 }
 
 } 
