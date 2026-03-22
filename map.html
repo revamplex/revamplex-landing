@@ -277,7 +277,7 @@
     }
     .cards-row::-webkit-scrollbar { display:none; }
 
-    .listing-card {
+   .listing-card {
   flex: 0 0 254px;
   max-width: 254px;
   min-height: 178px;
@@ -290,16 +290,21 @@
   overflow: hidden;
   cursor: pointer;
 
-  /* ✅ ADD THIS (animation fix) */
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  /* 🔥 upgraded animation */
+  transform: scale(0.94);
+  opacity: 0.75;
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease,
+    opacity 0.25s ease;
 }
 
 .listing-card.active {
-  transform: translateY(-6px) scale(1.02);
-  border-color: rgba(249, 115, 22, 0.3);
-  box-shadow: 0 18px 40px rgba(249, 115, 22, 0.18);
+  transform: translateY(-8px) scale(1.05);
+  opacity: 1;
+  border-color: rgba(249, 115, 22, 0.35);
+  box-shadow: 0 22px 50px rgba(249, 115, 22, 0.22);
 }
-
     .card-top {
       display:flex;
       justify-content:space-between;
