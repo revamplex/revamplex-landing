@@ -293,7 +293,21 @@
   scroll-snap-align: center;
   overflow: hidden;
   cursor: pointer;
+/* depth states */
+.listing-card.near {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
 
+.listing-card.far {
+  transform: scale(0.92);
+  opacity: 0.65;
+}
+
+.listing-card.active {
+  transform: translateY(-8px) scale(1.05);
+  opacity: 1;
+}
   /* 🔥 upgraded animation */
   transform: scale(0.94);
   opacity: 0.75;
