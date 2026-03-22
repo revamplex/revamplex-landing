@@ -276,7 +276,11 @@
       pointer-events:auto;
     }
     .cards-row::-webkit-scrollbar { display:none; }
-
+.cards-row {
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; /* 🔥 iOS smoothness */
+}
    .listing-card {
   flex: 0 0 254px;
   max-width: 254px;
