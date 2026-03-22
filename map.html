@@ -1479,8 +1479,15 @@
       }
 
       renderCards(filteredItems);
-      renderMarkers(filteredItems);
-      formatCount();
+renderMarkers(filteredItems);
+formatCount();
+
+if (filteredItems.length > 0) {
+  activeId = filteredItems[0].id;
+  setTimeout(function() {
+    setActive(activeId, false);
+  }, 50);
+}
 
       if (activeId) {
         setActive(activeId, false);
