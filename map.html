@@ -1477,17 +1477,17 @@
         activeId = filteredItems[0]?.id ?? null;
       }
 
-      renderCards(filteredItems);
+     renderCards(filteredItems);
 renderMarkers(filteredItems);
 formatCount();
 
 if (filteredItems.length > 0) {
   activeId = filteredItems[0].id;
 
-  setTimeout(() => {
+  requestAnimationFrame(() => {
     setActive(activeId, false);
     scrollCardIntoView(activeId);
-  }, 60);
+  });
 }
 
 } 
