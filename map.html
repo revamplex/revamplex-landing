@@ -1917,33 +1917,38 @@ if (filteredItems.length > 0) {
     });
 
     let scrollTimer = null;
-    cardsRow.addEventListener('scroll', () => {
-      clearTimeout(scrollTimer);
-      scrollTimer = setTimeout(() => {
-        const cards = [...document.querySelectorAll('.listing-card[data-id]')];
-        if (!cards.length) return;
 
-        const rowRect = cardsRow.getBoundingClientRect();
-        const rowCenter = rowRect.left + rowRect.width / 2;
+cardsRow.addEventListener('scroll', () => {
+  clearTimeout(scrollTimer);
 
-        let closestId = null;
-        let closestDiff = Infinity;
+  scrollTimer = setTimeout(() => {
 
-        cards.forEach(card => {
-          const rect = card.getBoundingClientRect();
-          const center = rect.left + rect.width / 2;
-          const diff = Math.abs(center - rowCenter);
-          if (diff < closestDiff) {
-            closestDiff = diff;
-            closestId = Number(card.dataset.id);
-          }
-        });
+    const cards = [...document.querySelectorAll('.listing-card[data-id]')];
+    if (!cards.length) return;
 
-        if (closestId !== null) {
-  setActive(closestId, false);
-}, 70);
+    const rowRect = cardsRow.getBoundingClientRect();
+    const rowCenter = rowRect.left + rowRect.width / 2;
+
+    let closestId = null;
+    let closestDiff = Infinity;
+
+    cards.forEach(card => {
+      const rect = card.getBoundingClientRect();
+      const center = rect.left + rect.width / 2;
+      const diff = Math.abs(center - rowCenter);
+
+      if (diff < closestDiff) {
+        closestDiff = diff;
+        closestId = Number(card.dataset.id);
+      }
     });
 
+    if (closestId !== null) {
+      setActive(closestId, false);
+    }
+
+  }, 70); // ✅ THIS is correct
+});
     map.on('click', () => {
       if (!uiCollapsed) collapseUI();
       else expandUI();
