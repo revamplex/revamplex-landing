@@ -1936,8 +1936,9 @@
           }
         });
 
-        if (closestId !== null && closestId !== activeId) setActive(closestId, false);
-      }, 70);
+        if (closestId !== null) {
+  setActive(closestId, false);
+}, 70);
     });
 
     map.on('click', () => {
