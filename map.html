@@ -1415,6 +1415,7 @@
     }
 
     function setActive(id, panMap = false) {
+      if (activeId === id) return;
       activeId = id;
 
       document.querySelectorAll('.listing-card[data-id]').forEach(card => {
@@ -1948,7 +1949,7 @@ cardsRow.addEventListener('scroll', () => {
       setActive(closestId, false);
     }
 
-  }, 70); // ✅ THIS is correct
+  }, 70);
 });
     map.on('click', () => {
       if (!uiCollapsed) collapseUI();
