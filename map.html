@@ -284,12 +284,9 @@
   -webkit-overflow-scrolling: touch; /* 🔥 iOS smoothness */
 }
 .listing-card {
-  flex: 0 0 254px;
-  max-width: 254px;
-  min-height: 178px;
-  border-radius: 22px;
-  background: var(--card);
-  border: 1px solid rgba(255, 255, 255, 0.88);
+  ...
+  background: transparent; /* ⬅️ IMPORTANT */
+  border: none;            /* ⬅️ IMPORTANT */
   box-shadow: var(--shadow);
   backdrop-filter: blur(14px);
   scroll-snap-align: center;
@@ -308,6 +305,8 @@
   border-radius: 22px;
   overflow: hidden;
   background: var(--card);
+  border: 1px solid rgba(255, 255, 255, 0.88);
+  box-shadow: var(--shadow);
 }
 .listing-card.near {
   transform: scale(0.98);
@@ -322,6 +321,9 @@
 .listing-card.active {
   transform: translateY(-8px) scale(1.05);
   opacity: 1;
+}
+
+.listing-card.active .card-inner {
   border-color: rgba(249, 115, 22, 0.35);
   box-shadow: 0 22px 50px rgba(249, 115, 22, 0.22);
 }
