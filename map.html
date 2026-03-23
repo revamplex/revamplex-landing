@@ -1543,10 +1543,13 @@ fitMapToItems(items);
 
   updateMarkerStates();
 
-  const item = filteredItems.find(entry => entry.id === id);
+  const item = filteredItems.find(entry => String(entry.id) === String(id));
   if (item && panMap) {
     const [displayLat, displayLng] = getDisplayCoords(item);
-    map.flyTo([displayLat, displayLng], Math.max(map.getZoom(), 13), { duration: .38 });
+    map.flyTo([displayLat, displayLng], 14, {
+  duration: 0.6,
+  easeLinearity: 0.25
+});
     const marker = markerIndex.get(id);
     if (marker) marker.openPopup();
   }
