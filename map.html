@@ -1359,7 +1359,7 @@ const core = L.circle(coords, {
   radius: 120,
   color: item.type === 'job' ? '#0f172a' : '#f97316',
   fillColor: item.type === 'job' ? '#0f172a' : '#f97316',
-  fillOpacity: 0.35,
+  fillOpacity: 0.25 + Math.min(0.25, items.length * 0.01)
   weight: 0
 }).addTo(map);
 
