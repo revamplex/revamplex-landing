@@ -1348,6 +1348,10 @@
       markerClusterGroup = null;
 
       items.forEach(item => {
+
+  // 🔥 HARD FILTER (prevents cross-rendering)
+  if (currentMode === 'homeowner' && item.type !== 'contractor') return;
+  if (currentMode === 'contractor' && item.type !== 'job') return;
 const coords = getDisplayCoords(item);
         
 // 🔥 GLOW CORE
