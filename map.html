@@ -1375,22 +1375,41 @@ const glow = L.circle(coords, {
 activeCircles.push(core, glow);
 
 // 🔥 PULSE ANIMATION
-let radius = 250;
-let opacity = 0.15;
+// 🔥 MULTI RING RIPPLE
+const rings = [];
+
+for (let i = 0; i < 3; i++) {
+  const ring = L.circle(coords, {
+    radius: 200 + (i * 120),
+    color: item.type === 'job' ? '#0f172a' : '#f97316',
+    fillColor: item.type === 'job' ? '#0f172a' : '#f97316',
+    fillOpacity: 0.12 - (i * 0.03),
+    weight: 0
+  }).addTo(map);
+
+  rings.push({
+    ring,
+    radius: 200 + (i * 120),
+    opacity: 0.12 - (i * 0.03)
+  });
+}
 
 const pulse = setInterval(() => {
-  radius += 10;
-  opacity -= 0.015;
+  rings.forEach(r => {
+    r.radius += 8;
+    r.opacity -= 0.01;
 
-  if (radius > 600) {
-    radius = 250;
-    opacity = 0.15;
-  }
+    if (r.radius > 700) {
+      r.radius = 200;
+      r.opacity = 0.12;
+    }
 
-  glow.setRadius(radius);
-  glow.setStyle({ fillOpacity: opacity });
-
+    r.ring.setRadius(r.radius);
+    r.ring.setStyle({ fillOpacity: r.opacity });
+  });
 }, 60);
+
+activePulseAnimations.push({ rings, timer: pulse });
 
 activePulseAnimations.push({ ring: glow, timer: pulse });
 
