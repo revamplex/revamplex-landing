@@ -267,10 +267,10 @@
     }
 
     .cards-row {
-      display:flex;
-      gap:12px;
-      overflow-x:auto;
-      overflow-y:hidden;
+  display:flex;
+  gap:12px;
+  overflow-x:auto;
+  overflow-y:visible; /* ⬅️ allow upward growth */
       padding:0 0 6px;
       scroll-snap-type:x mandatory;
       scroll-behavior:smooth;
