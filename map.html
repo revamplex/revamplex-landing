@@ -1419,10 +1419,10 @@ for (let i = 0; i < 3; i++) {
 
 const pulse = setInterval(() => {
   rings.forEach(r => {
-    r.radius += 20; // ⬅️ faster + smoother expansion
+    r.radius += 20;
     r.opacity -= 0.015;
 
-    if (r.radius > 2200) { // ⬅️ much larger max
+    if (r.radius > 2200) {
       r.radius = 600;
       r.opacity = 0.18;
     }
