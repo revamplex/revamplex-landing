@@ -4,7 +4,7 @@
   <link rel="icon" href="data:,">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>RevampLEX Map v8</title>
+  <title>RevampLEX Map v9</title>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
@@ -634,29 +634,14 @@
       border-width:4px;
     }
 
-   .job-radius {
-  stroke-dasharray: 4;
-  animation: radiusPulse 2s ease-out infinite;
-}
+        .job-pulse-core {
+      pointer-events: none;
+    }
 
-.leaflet-interactive.job-radius {
-  animation: radiusPulse 2s ease-out infinite;
-}
-
-@keyframes radiusPulse {
-  0% {
-    transform: scale(0.5);
-    opacity: 0.6;
-  }
-  70% {
-    transform: scale(1.6);
-    opacity: 0.1;
-  }
-  100% {
-    transform: scale(1.6);
-    opacity: 0;
-  }
-}
+    .job-pulse-halo {
+      pointer-events: none;
+      filter: blur(2px);
+    }
 
     .custom-cluster {
       width:42px;
@@ -1132,6 +1117,7 @@
     let markerIndex = new Map();
     let markerClusterGroup = null;
     let activeCircles = [];
+    let activePulseAnimations = [];
     let uiCollapsed = false;
     let selectedWelcomeRole = null;
     let currentMode = new URLSearchParams(window.location.search).get('view') === 'contractor' ? 'contractor' : 'homeowner';
@@ -1257,6 +1243,116 @@
       return [lat + w * Math.cos(t), lng + w * Math.sin(t)];
     }
 
+    function anonymizeContractorName(item) {
+      return 'Verified Contractor';
+    }
+
+    function anonymizeCustomerName(item) {
+      return 'Customer';
+    }
+
+    function getDisplayCoords(item) {
+      if (item.type === 'job') {
+        if (typeof item._maskedLat !== 'number' || typeof item._maskedLng !== 'number') {
+          const [maskedLat, maskedLng] = maskLocation(Number(item.lat), Number(item.lng), 0.25);
+          item._maskedLat = maskedLat;
+          item._maskedLng = maskedLng;
+        }
+        return [item._maskedLat, item._maskedLng];
+      }
+      return [Number(item.lat), Number(item.lng)];
+    }
+
+    function createPulseRing(latlng, options = {}) {
+      const ring = L.circleMarker(latlng, {
+        radius: options.startRadius ?? 18,
+        color: options.color ?? '#f97316',
+        weight: options.weight ?? 2,
+        opacity: options.opacity ?? 0.55,
+        fillColor: options.fillColor ?? '#f97316',
+        fillOpacity: options.fillOpacity ?? 0.10,
+        interactive: false,
+        className: options.className ?? ''
+      }).addTo(map);
+
+      const anim = {
+        ring,
+        startRadius: options.startRadius ?? 18,
+        endRadius: options.endRadius ?? 70,
+        startOpacity: options.opacity ?? 0.55,
+        endOpacity: options.endOpacity ?? 0.02,
+        stepRadius: options.stepRadius ?? 0.9,
+        stepOpacity: options.stepOpacity ?? 0.010
+      };
+
+      anim.timer = setInterval(() => {
+        const currentRadius = ring.getRadius();
+        let nextRadius = currentRadius + anim.stepRadius;
+        let nextOpacity = Math.max(anim.endOpacity, (ring.options.opacity ?? anim.startOpacity) - anim.stepOpacity);
+        let nextFillOpacity = Math.max(0, (ring.options.fillOpacity ?? 0.10) - (anim.stepOpacity * 0.35));
+
+        if (nextRadius >= anim.endRadius) {
+          nextRadius = anim.startRadius;
+          nextOpacity = anim.startOpacity;
+          nextFillOpacity = options.fillOpacity ?? 0.10;
+        }
+
+        ring.setRadius(nextRadius);
+        ring.setStyle({
+          opacity: nextOpacity,
+          fillOpacity: nextFillOpacity
+        });
+      }, options.interval ?? 32);
+
+      activePulseAnimations.push(anim);
+      return ring;
+    }
+
+    function createJobPulse(item) {
+      const latlng = getDisplayCoords(item);
+      const outer = createPulseRing(latlng, {
+        startRadius: 14,
+        endRadius: 72,
+        opacity: 0.50,
+        fillOpacity: 0.10,
+        stepRadius: 0.95,
+        stepOpacity: 0.008,
+        interval: 34,
+        className: 'job-pulse-halo'
+      });
+
+      const inner = createPulseRing(latlng, {
+        startRadius: 24,
+        endRadius: 88,
+        opacity: 0.26,
+        fillOpacity: 0.05,
+        stepRadius: 0.82,
+        stepOpacity: 0.005,
+        interval: 40,
+        className: 'job-pulse-core'
+      });
+
+      activeCircles.push(outer, inner);
+    }
+
+    function getSafeContractorSessionItem(item) {
+      return {
+        ...item,
+        name: anonymizeContractorName(item)
+      };
+    }
+
+    function getSafeJobSessionItem(item) {
+      return {
+        ...item,
+        customer_name: anonymizeCustomerName(item),
+        bids: (item.bids || []).map(bid => ({
+          ...bid,
+          contractor_name: 'Verified Contractor'
+        }))
+      };
+    }
+
     function makeIcon(item, isActive) {
       const kind = item.type === 'job' ? 'job' : 'contractor';
       const size = isActive ? 24 : 18;
@@ -1286,7 +1382,11 @@
     }
 
     function clearMarkers() {
-      activeCircles.forEach(layer => map.removeLayer(layer));
+      activePulseAnimations.forEach(anim => {
+        if (anim.timer) clearInterval(anim.timer);
+        if (anim.ring && map.hasLayer(anim.ring)) map.removeLayer(anim.ring);
+      });
+      activePulseAnimations = [];
       activeCircles = [];
       markerIndex.clear();
       if (markerClusterGroup) map.removeLayer(markerClusterGroup);
@@ -1296,7 +1396,7 @@
       if (item.type === 'contractor') {
         return `
           <div>
-            <div style="font-size:15px;font-weight:900;margin-bottom:6px;">${item.name || 'Verified Contractor'}</div>
+            <div style="font-size:15px;font-weight:900;margin-bottom:6px;">${anonymizeContractorName(item)}</div>
             <div style="font-size:13px;color:#64748b;margin-bottom:4px;">${item.trade} • ${item.city || ''}</div>
             <div style="font-size:13px;color:#64748b;">⭐ ${Number(item.rating || 0).toFixed(1)} • ${Number(item.distance || 0).toFixed(1)} mi</div>
           </div>
@@ -1306,7 +1406,7 @@
         <div>
           <div style="font-size:15px;font-weight:900;margin-bottom:6px;">${item.title}</div>
           <div style="font-size:13px;color:#64748b;margin-bottom:4px;">${item.city || ''} • ${item.trade}</div>
-          <div style="font-size:13px;color:#64748b;">Posted by ${item.customer_name || 'Customer'} • Bids ${(item.bids || []).length}/${item.max_bids || 5}</div>
+          <div style="font-size:13px;color:#64748b;">Posted by ${anonymizeCustomerName(item)} • Bids ${(item.bids || []).length}/${item.max_bids || 5}</div>
         </div>
       `;
     }
@@ -1316,22 +1416,10 @@
       markerClusterGroup = createClusterGroup();
 
       items.forEach(item => {
-        let markerCoords = [Number(item.lat), Number(item.lng)];
+        const markerCoords = getDisplayCoords(item);
 
         if (item.type === 'job') {
-          const [maskedLat, maskedLng] = maskLocation(Number(item.lat), Number(item.lng), 0.25);
-          markerCoords = [maskedLat, maskedLng];
-
-          const privacyCircle = L.circle([maskedLat, maskedLng], {
-  radius: 250, // size of pulse
-  color: "#f97316",
-  fillColor: "#f97316",
-  fillOpacity: 0.15,
-  weight: 1,
-  className: "job-radius"
-}).addTo(map);
-          activeCircles.push(privacyCircle);
-          privacyCircle.addTo(map);
+          createJobPulse(item);
         }
 
         const marker = L.marker(markerCoords, {
@@ -1355,7 +1443,7 @@
 
     function fitMapToItems(items) {
       if (!items.length) return;
-      const bounds = L.latLngBounds(items.map(item => [Number(item.lat), Number(item.lng)]));
+      const bounds = L.latLngBounds(items.map(item => getDisplayCoords(item)));
       map.fitBounds(bounds, {
         paddingTopLeft: [30, 210],
         paddingBottomRight: [30, 220],
@@ -1380,7 +1468,7 @@
       return `
         <div class="card-top">
           <div class="card-title-wrap">
-            <h3 class="card-title">${item.name || (item.trade + ' Specialist')}</h3>
+            <h3 class="card-title">${anonymizeContractorName(item)}</h3>
             <p class="card-sub">${item.trade} • ${item.city || ''}</p>
           </div>
           <div class="rating-pill">⭐ ${Number(item.rating || 0).toFixed(1)}</div>
@@ -1429,7 +1517,7 @@
             </div>
           </div>
           <div class="info-row">
-            <span><strong>By:</strong> ${item.customer_name || 'Customer'}</span>
+            <span><strong>By:</strong> ${anonymizeCustomerName(item)}</span>
             <span><strong>Posted:</strong> ${item.posted_ago || 'Live'}</span>
           </div>
           <div class="card-actions">
@@ -1477,7 +1565,8 @@
 
   const item = filteredItems.find(entry => entry.id === id);
   if (item && panMap) {
-    map.flyTo([Number(item.lat), Number(item.lng)], Math.max(map.getZoom(), 13), { duration: .38 });
+    const [displayLat, displayLng] = getDisplayCoords(item);
+    map.flyTo([displayLat, displayLng], Math.max(map.getZoom(), 13), { duration: .38 });
     const marker = markerIndex.get(id);
     if (marker) marker.openPopup();
   }
@@ -1575,7 +1664,7 @@ function setSort(type) {
       const title = document.getElementById('jobTitle').value.trim() || 'New Job';
       const trade = document.getElementById('jobTrade').value || 'General Contractors';
       const budget = getFormattedBudget(document.getElementById('jobBudget').value);
-      const customer_name = document.getElementById('jobCustomer').value.trim() || 'New Customer';
+      const customer_name = 'Customer';
       const city = document.getElementById('jobCity').value.trim() || 'North Jersey, NJ';
       const description = document.getElementById('jobDescription').value.trim() || 'Customer posted a new project on Revamp.';
       const center = map.getCenter();
@@ -1610,7 +1699,7 @@ function setSort(type) {
     function openProjectRoom(jobId) {
       const job = jobs.find(entry => entry.id === jobId);
       if (!job) return;
-      sessionStorage.setItem('revampSelectedJob', JSON.stringify(job));
+      sessionStorage.setItem('revampSelectedJob', JSON.stringify(getSafeJobSessionItem(job)));
       window.location.href = `project-room.html?mode=contractor&job=${jobId}`;
     }
 
@@ -1620,22 +1709,22 @@ function setSort(type) {
         if (!amount) return;
         const message = prompt("Add a message (optional):") || "";
 
-        const { error } = await supabaseClient.from("bids").insert([{
+        const { error } = await supabaseClient.from('bids').insert([{
           job_id: jobId,
-          contractor_id: "demo-contractor",
-          contractor_name: "Verified Contractor",
+          contractor_id: 'demo-contractor',
+          contractor_name: 'Verified Contractor',
           amount: amount,
           message: message,
-          eta: "TBD"
+          eta: 'TBD'
         }]);
 
         if (error) {
           console.error(error);
-          alert("Error submitting bid");
+          alert('Error submitting bid');
           return;
         }
 
-        showStatus("Bid submitted");
+        showStatus('Bid submitted');
         await loadLiveData();
       } catch (err) {
         console.error(err);
@@ -1648,7 +1737,7 @@ function setSort(type) {
       detailModal.classList.add('show');
 
       if (item.type === 'contractor') {
-        detailTitle.textContent = item.name || 'Contractor Details';
+        detailTitle.textContent = anonymizeContractorName(item);
         detailContent.innerHTML = `
           <div class="detail-panel">
             <h4>${item.trade} • ${item.city || ''}</h4>
@@ -1680,7 +1769,7 @@ function setSort(type) {
         const bidsHtml = (item.bids || []).length
           ? item.bids.map((bid, index) => `
               <div style="border-top:1px solid #e2e8f0;padding-top:10px;margin-top:10px;">
-                <strong>${bid.contractor_name || 'Verified Contractor'}</strong><br>
+                <strong>${'Verified Contractor'}</strong><br>
                 Bid: ${bid.amount}<br>
                 Start: ${bid.eta || 'TBD'}<br>
                 ${bid.message ? `Message: ${bid.message}<br>` : ''}
@@ -1698,7 +1787,7 @@ function setSort(type) {
           <div class="modal-grid">
             <div class="detail-panel">
               <h4>Customer</h4>
-              <p>${item.customer_name || 'Customer'} • ⭐ ${Number(item.rating || 0).toFixed(1)} (${item.reviews || 0} reviews) • ${item.verified ? 'Verified customer' : 'Unverified customer'}</p>
+              <p>${anonymizeCustomerName(item)} • ⭐ ${Number(item.rating || 0).toFixed(1)} (${item.reviews || 0} reviews) • ${item.verified ? 'Verified customer' : 'Unverified customer'}</p>
             </div>
             <div class="detail-panel">
               <h4>Budget & Bids</h4>
@@ -1732,7 +1821,7 @@ function setSort(type) {
 
       if (action === 'message') {
         const contractor = contractors.find(c => c.id === id);
-        if (contractor) sessionStorage.setItem('revampSelectedContractor', JSON.stringify(contractor));
+        if (contractor) sessionStorage.setItem('revampSelectedContractor', JSON.stringify(getSafeContractorSessionItem(contractor)));
         window.location.href = `project-room.html?mode=homeowner&contractor=${id}`;
         return;
       }
@@ -1969,6 +2058,12 @@ function setSort(type) {
       if (!button) return;
       e.preventDefault();
       e.stopPropagation();
+
+      if (button.dataset.action === 'accept-bid') {
+        showStatus('Bid accepted');
+        return;
+      }
+
       handleCardAction(button.dataset.action, Number(button.dataset.id));
     });
 
