@@ -1252,39 +1252,88 @@
     }
 
     function getDisplayCoords(item) {
-      // 🔥 APPLY TO BOTH JOBS + CONTRACTORS
-const [maskedLat, maskedLng] = maskLocation(Number(item.lat), Number(item.lng), 0.25);
-markerCoords = [maskedLat, maskedLng];
+      if (item.type === 'job' || currentMode === 'homeowner') {
+        if (typeof item._maskedLat !== 'number' || typeof item._maskedLng !== 'number') {
+          const [maskedLat, maskedLng] = maskLocation(Number(item.lat), Number(item.lng), 0.25);
+          item._maskedLat = maskedLat;
+          item._maskedLng = maskedLng;
+        }
+        return [item._maskedLat, item._maskedLng];
+      }
+      return [Number(item.lat), Number(item.lng)];
+    }
 
-// base circle
-const pulseCircle = L.circleMarker([maskedLat, maskedLng], {
-  radius: 20,
-  color: "#f97316",
-  fillColor: "#f97316",
-  fillOpacity: 0.3,
-  weight: 1
-}).addTo(map);
+    function createPulseRing(latlng, options = {}) {
+      const ring = L.circleMarker(latlng, {
+        radius: options.startRadius ?? 18,
+        color: options.color ?? '#f97316',
+        weight: options.weight ?? 2,
+        opacity: options.opacity ?? 0.55,
+        fillColor: options.fillColor ?? '#f97316',
+        fillOpacity: options.fillOpacity ?? 0.10,
+        interactive: false,
+        className: options.className ?? ''
+      }).addTo(map);
 
-activeCircles.push(pulseCircle);
+      const anim = {
+        ring,
+        startRadius: options.startRadius ?? 18,
+        endRadius: options.endRadius ?? 70,
+        startOpacity: options.opacity ?? 0.55,
+        endOpacity: options.endOpacity ?? 0.02,
+        stepRadius: options.stepRadius ?? 0.9,
+        stepOpacity: options.stepOpacity ?? 0.010
+      };
 
-// 🔥 REAL PULSE ANIMATION (JS — WORKS 100%)
-let radius = 20;
-let opacity = 0.4;
+      anim.timer = setInterval(() => {
+        const currentRadius = ring.getRadius();
+        let nextRadius = currentRadius + anim.stepRadius;
+        let nextOpacity = Math.max(anim.endOpacity, (ring.options.opacity ?? anim.startOpacity) - anim.stepOpacity);
+        let nextFillOpacity = Math.max(0, (ring.options.fillOpacity ?? 0.10) - (anim.stepOpacity * 0.35));
 
-setInterval(() => {
-  radius += 2;
-  opacity -= 0.02;
+        if (nextRadius >= anim.endRadius) {
+          nextRadius = anim.startRadius;
+          nextOpacity = anim.startOpacity;
+          nextFillOpacity = options.fillOpacity ?? 0.10;
+        }
 
-  if (radius > 80) {
-    radius = 20;
-    opacity = 0.4;
-  }
+        ring.setRadius(nextRadius);
+        ring.setStyle({
+          opacity: nextOpacity,
+          fillOpacity: nextFillOpacity
+        });
+      }, options.interval ?? 32);
 
-  pulseCircle.setRadius(radius);
-  pulseCircle.setStyle({ fillOpacity: opacity });
+      activePulseAnimations.push(anim);
+      return ring;
+    }
 
-}, 60);
-      
+    function createJobPulse(item) {
+      const latlng = getDisplayCoords(item);
+      const outer = createPulseRing(latlng, {
+        startRadius: 14,
+        endRadius: 72,
+        opacity: 0.50,
+        fillOpacity: 0.10,
+        stepRadius: 0.95,
+        stepOpacity: 0.008,
+        interval: 34,
+        className: 'job-pulse-halo'
+      });
+
+      const inner = createPulseRing(latlng, {
+        startRadius: 24,
+        endRadius: 88,
+        opacity: 0.26,
+        fillOpacity: 0.05,
+        stepRadius: 0.82,
+        stepOpacity: 0.005,
+        interval: 40,
+        className: 'job-pulse-core'
+      });
+
+      activeCircles.push(outer, inner);
+    }
 
     function getSafeContractorSessionItem(item) {
       return {
