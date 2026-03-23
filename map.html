@@ -1558,8 +1558,8 @@
   activeId = id;
 
   document.querySelectorAll('.listing-card[data-id]').forEach(card => {
-    card.classList.toggle('active', Number(card.dataset.id) === id);
-  });
+  card.classList.toggle('active', String(card.dataset.id) === String(id));
+});
 
   updateMarkerStates();
 
@@ -1811,7 +1811,7 @@ function setSort(type) {
     }
 
     function handleCardAction(action, id) {
-      const item = [...contractors, ...jobs].find(entry => entry.id === id);
+      const item = [...contractors, ...jobs].find(entry => String(entry.id) === String(id));
       if (!item) return;
 
       if (action === 'view' || action === 'job-details') {
@@ -2040,27 +2040,25 @@ function setSort(type) {
     detailModal.addEventListener('click', e => { if (e.target === detailModal) closeDetails(); });
     jobModal.addEventListener('click', e => { if (e.target === jobModal) closeJobForm(); });
 
-    cardsRow.addEventListener('click', e => {
-
+cardsRow.addEventListener('click', e => {
   const button = e.target.closest('[data-action]');
   if (button) {
     e.preventDefault();
     e.stopPropagation();
-
-    const id = Number(button.dataset.id);
-
-    // 🔥 DEBUG (optional)
-    console.log("CLICK ACTION:", button.dataset.action, id);
-
-    handleCardAction(button.dataset.action, id);
+    handleCardAction(button.dataset.action, button.dataset.id);
     return;
   }
 
   const card = e.target.closest('.listing-card[data-id]');
-  if (card) {
-    setActive(Number(card.dataset.id), true);
-  }
+  if (card) setActive(card.dataset.id, true);
+});
 
+detailContent.addEventListener('click', e => {
+  const button = e.target.closest('[data-action]');
+  if (!button) return;
+  e.preventDefault();
+  e.stopPropagation();
+  handleCardAction(button.dataset.action, button.dataset.id);
 });
 
     detailContent.addEventListener('click', e => {
