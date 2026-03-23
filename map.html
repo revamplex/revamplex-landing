@@ -2032,7 +2032,7 @@ cardsRow.addEventListener('click', e => {
   const card = e.target.closest('.listing-card[data-id]');
   if (card) setActive(card.dataset.id, true);
 });
-}
+    
 detailContent.addEventListener('click', e => {
   const button = e.target.closest('[data-action]');
   if (!button) return;
