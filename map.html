@@ -1210,8 +1210,8 @@
     }
 
     function getCurrentDataset() {
-      return currentMode === 'homeowner' ? contractors : jobs;
-    }
+  return currentMode === 'homeowner' ? contractors.filter(c => c.type === 'contractor') : jobs;
+}
 
     function syncModeUI() {
       homeownerModeBtn.classList.toggle('active', currentMode === 'homeowner');
