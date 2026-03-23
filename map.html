@@ -1345,31 +1345,54 @@
     function renderMarkers(items) {
       console.log("RENDERING ITEMS:", items);
       clearMarkers();
-      markerClusterGroup = createClusterGroup();
+      markerClusterGroup = null;
 
       items.forEach(item => {
         let markerCoords = getDisplayCoords(item);
 const coords = getDisplayCoords(item);
         
-       // 🔥 ALWAYS create pulse (both homeowner + contractor view)
+// 🔥 GLOW CORE
+const core = L.circle(coords, {
+  radius: 120,
+  color: item.type === 'job' ? '#0f172a' : '#f97316',
+  fillColor: item.type === 'job' ? '#0f172a' : '#f97316',
+  fillOpacity: 0.35,
+  weight: 0
+}).addTo(map);
+
+// 🔥 OUTER GLOW
+const glow = L.circle(coords, {
+  radius: 250,
+  color: item.type === 'job' ? '#0f172a' : '#f97316',
+  fillColor: item.type === 'job' ? '#0f172a' : '#f97316',
+  fillOpacity: 0.15,
+  weight: 0
+}).addTo(map);
+
+activeCircles.push(core, glow);
+
+// 🔥 PULSE ANIMATION
+let radius = 250;
+let opacity = 0.15;
+
+const pulse = setInterval(() => {
+  radius += 10;
+  opacity -= 0.015;
+
+  if (radius > 600) {
+    radius = 250;
+    opacity = 0.15;
+  }
+
+  glow.setRadius(radius);
+  glow.setStyle({ fillOpacity: opacity });
+
+}, 60);
+
+activePulseAnimations.push({ ring: glow, timer: pulse });
 
 
-        const marker = L.marker(markerCoords, {
-          icon: makeIcon(item, item.id === activeId)
-        });
 
-        marker.bindPopup(getPopupHtml(item));
-        marker.on('click', () => {
-          expandUI();
-          setActive(item.id, true);
-          scrollCardIntoView(item.id);
-        });
-
-        markerClusterGroup.addLayer(marker);
-        markerIndex.set(item.id, marker);
-      });
-
-      map.addLayer(markerClusterGroup);
       fitMapToItems(items);
     }
 
