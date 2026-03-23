@@ -1318,13 +1318,13 @@
           const [maskedLat, maskedLng] = maskLocation(Number(item.lat), Number(item.lng), 0.25);
           markerCoords = [maskedLat, maskedLng];
 
-          const privacyCircle = L.circle([item.lat, item.lng], {
-            radius: 420,
-            color: '#f97316',
-            weight: 1,
-            fillColor: '#f97316',
-            fillOpacity: 0.14
-          });
+          const privacyCircle = L.circle([lat, lng], {
+  radius: someRadius,
+  color: "#f97316",
+  fillColor: "#f97316",
+  fillOpacity: 0.2,
+  className: "job-radius"
+});
           activeCircles.push(privacyCircle);
           privacyCircle.addTo(map);
         }
