@@ -214,16 +214,18 @@
     }
     .status-pill.show { display:block; }
 
-   .results-shell {
+  .results-shell {
   position:absolute;
   left:0;
   right:0;
   bottom:0;
   z-index:900;
-  padding:20px 0 16px; 
+
+  padding:40px 0 16px; /* ⬅️ THIS IS THE FIX */
+
   pointer-events:auto;
   transition:transform .25s ease;
-  overflow: visible; /* ⬅️ KEY FIX */
+  overflow: visible;
 }
     .results-shell-inner {
       max-width:1600px;
@@ -319,7 +321,7 @@
 }
 
 .listing-card.active {
-  transform: translateY(-20px);
+  transform: translateY(-12px);
   opacity: 1;
 }
 
@@ -327,7 +329,9 @@
   transform: scale(1.04);
   box-shadow: 0 30px 60px rgba(249,115,22,0.35);
 }
-
+.card-inner {
+  transform-origin: center center;
+}
     .card-top {
       display:flex;
       justify-content:space-between;
