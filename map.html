@@ -285,19 +285,21 @@
   -webkit-overflow-scrolling: touch; /* 🔥 iOS smoothness */
 }
 .listing-card {
-  ...
-  background: transparent; /* ⬅️ IMPORTANT */
-  border: none;            /* ⬅️ IMPORTANT */
-  box-shadow: var(--shadow);
+  flex: 0 0 240px;
+  max-width: 240px;
+
+  background: transparent;
+  border: none;
   backdrop-filter: blur(14px);
+
   scroll-snap-align: center;
   overflow: visible;
   cursor: pointer;
 
-  transform: scale(0.94);
-  .listing-card {
   opacity: 0.5;
-  transition: all 0.25s ease;
+
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 0.35s ease,
     opacity 0.25s ease;
 }
