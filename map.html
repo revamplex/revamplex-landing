@@ -996,16 +996,15 @@
       </p>
 
       <div id="welcomeRoleChooser">
-        <div class="welcomeRoleGrid">
-          welcomeHomeownerBtn.addEventListener('click', () => {
-  console.log("HOMEOWNER CLICKED");
-  startSignup('homeowner');
-});
-          welcomeContractorBtn.addEventListener('click', () => {
-  console.log("CONTRACTOR CLICKED");
-  startSignup('contractor');
-});
-        </div>
+       <div class="welcomeRoleGrid">
+  <button class="welcome-role-btn homeowner" id="welcomeHomeownerBtn">
+    I’m a Homeowner
+  </button>
+
+  <button class="welcome-role-btn contractor" id="welcomeContractorBtn">
+    I’m a Contractor
+  </button>
+</div>
         <button class="demoBtn" id="exploreDemoBtn">Explore Map Demo</button>
       </div>
 
