@@ -635,18 +635,24 @@
     }
 
     .job-radius {
-      width: 160px;
-      height: 160px;
-      border-radius: 50%;
-      background: rgba(249,115,22,.16);
-      border: 2px solid rgba(249,115,22,.28);
-      box-shadow: 0 0 0 12px rgba(249,115,22,.07);
-      animation: radiusPulse 2.4s infinite ease-in-out;
-    }
-    @keyframes radiusPulse {
-      0%,100% { transform: scale(.96); opacity:.68; }
-      50% { transform: scale(1.05); opacity:.95; }
-    }
+  animation: radiusPulse 2.4s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes radiusPulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(0.6);
+    opacity: 0.6;
+  }
+}
 
     .custom-cluster {
       width:42px;
