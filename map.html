@@ -56,15 +56,10 @@
     }
 
     .topbar {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      padding: 12px;
-      pointer-events: none;
-      transition: transform .25s ease;
-    }
+  position: absolute;
+  top: 0;
+  z-index: 2000; /* ⬅️ higher than cards */
+}
 
     .topbar-inner {
       pointer-events: auto;
@@ -220,7 +215,7 @@
   left:0;
   right:0;
   bottom:0;
-  z-index:960;
+  z-index:900;
   padding:20px 0 20px; /* ⬅️ more breathing room */
   pointer-events:auto;
   transition:transform .25s ease;
