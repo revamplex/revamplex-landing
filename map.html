@@ -1380,52 +1380,51 @@
         
 // 🔥 GLOW CORE
 const core = L.circle(coords, {
-  radius: 120,
-  color: item.type === 'job' ? '#0f172a' : '#f97316',
-  fillColor: item.type === 'job' ? '#0f172a' : '#f97316',
-  fillOpacity: 0.25 + Math.min(0.25, items.length * 0.01),
+  radius: 400, // ⬅️ bigger
+  color: '#ff0000',
+  fillColor: '#ff0000',
+  fillOpacity: 0.35,
   weight: 0
 }).addTo(map);
 
 // 🔥 OUTER GLOW
 const glow = L.circle(coords, {
-  radius: 250,
-  color: item.type === 'job' ? '#0f172a' : '#f97316',
-  fillColor: item.type === 'job' ? '#0f172a' : '#f97316',
-  fillOpacity: 0.15,
+  radius: 900, // ⬅️ much bigger
+  color: '#ff0000',
+  fillColor: '#ff0000',
+  fillOpacity: 0.2,
   weight: 0
 }).addTo(map);
 
 activeCircles.push(core, glow);
 
-// 🔥 PULSE ANIMATION
 // 🔥 MULTI RING RIPPLE
 const rings = [];
 
 for (let i = 0; i < 3; i++) {
   const ring = L.circle(coords, {
-    radius: 200 + (i * 120),
-    color: item.type === 'job' ? '#0f172a' : '#f97316',
-    fillColor: item.type === 'job' ? '#0f172a' : '#f97316',
-    fillOpacity: 0.12 - (i * 0.03),
+    radius: 600 + (i * 400), // ⬅️ bigger spread
+    color: '#ff0000',
+    fillColor: '#ff0000',
+    fillOpacity: 0.18 - (i * 0.05),
     weight: 0
   }).addTo(map);
 
   rings.push({
     ring,
-    radius: 200 + (i * 120),
-    opacity: 0.12 - (i * 0.03)
+    radius: 600 + (i * 400),
+    opacity: 0.18 - (i * 0.05)
   });
 }
 
 const pulse = setInterval(() => {
   rings.forEach(r => {
-    r.radius += 8;
-    r.opacity -= 0.01;
+    r.radius += 20; // ⬅️ faster + smoother expansion
+    r.opacity -= 0.015;
 
-    if (r.radius > 700) {
-      r.radius = 200;
-      r.opacity = 0.12;
+    if (r.radius > 2200) { // ⬅️ much larger max
+      r.radius = 600;
+      r.opacity = 0.18;
     }
 
     r.ring.setRadius(r.radius);
@@ -1434,9 +1433,6 @@ const pulse = setInterval(() => {
 }, 60);
 
 activePulseAnimations.push({ rings, timer: pulse });
-
-}); // close forEach
-
 fitMapToItems(items);
 }
 
