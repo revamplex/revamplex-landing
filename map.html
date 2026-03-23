@@ -997,8 +997,14 @@
 
       <div id="welcomeRoleChooser">
         <div class="welcomeRoleGrid">
-          <button class="welcome-role-btn homeowner" id="welcomeHomeownerBtn">🏠 I am a Homeowner</button>
-          <button class="welcome-role-btn contractor" id="welcomeContractorBtn">🛠 Pro Contractor</button>
+          welcomeHomeownerBtn.addEventListener('click', () => {
+  console.log("HOMEOWNER CLICKED");
+  startSignup('homeowner');
+});
+          welcomeContractorBtn.addEventListener('click', () => {
+  console.log("CONTRACTOR CLICKED");
+  startSignup('contractor');
+});
         </div>
         <button class="demoBtn" id="exploreDemoBtn">Explore Map Demo</button>
       </div>
