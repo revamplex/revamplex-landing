@@ -1252,7 +1252,7 @@
     }
 
     function getDisplayCoords(item) {
-      if (item.type === 'job') {
+      if (item.type === 'job' || currentMode === 'homeowner') {
         if (typeof item._maskedLat !== 'number' || typeof item._maskedLng !== 'number') {
           const [maskedLat, maskedLng] = maskLocation(Number(item.lat), Number(item.lng), 0.25);
           item._maskedLat = maskedLat;
