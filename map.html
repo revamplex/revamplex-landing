@@ -285,12 +285,13 @@
 
   background: transparent;
   border: none;
-}
+
   scroll-snap-align: center;
   overflow: visible;
   cursor: pointer;
 
   opacity: 0.5;
+  transform: scale(0.94);
 
   transition:
     transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
@@ -322,16 +323,6 @@
   transform: scale(1.05);
   box-shadow: 0 30px 60px rgba(249, 115, 22, 0.35);
   border: 1px solid rgba(249, 115, 22, 0.4);
-}
- .listing-card {
-  ...
-  opacity: 0.5;
-  transform: scale(0.94);
-
-  transition:
-    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.35s ease,
-    opacity 0.25s ease;
 }
 
     .card-top {
