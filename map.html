@@ -634,26 +634,27 @@
       border-width:4px;
     }
 
-    .job-radius {
-  animation: radiusPulse 2.4s ease-in-out infinite;
-  transform-origin: center;
+   .job-radius {
+  stroke-dasharray: 4;
+  animation: radiusPulse 2s ease-out infinite;
 }
+
 .leaflet-interactive.job-radius {
-  animation: radiusPulse 2.4s ease-in-out infinite;
-  transform-origin: center;
+  animation: radiusPulse 2s ease-out infinite;
 }
+
 @keyframes radiusPulse {
   0% {
-    transform: scale(0.6);
+    transform: scale(0.5);
     opacity: 0.6;
   }
-  50% {
-    transform: scale(1.4);
-    opacity: 0.2;
+  70% {
+    transform: scale(1.6);
+    opacity: 0.1;
   }
   100% {
-    transform: scale(0.6);
-    opacity: 0.6;
+    transform: scale(1.6);
+    opacity: 0;
   }
 }
 
@@ -1321,13 +1322,14 @@
           const [maskedLat, maskedLng] = maskLocation(Number(item.lat), Number(item.lng), 0.25);
           markerCoords = [maskedLat, maskedLng];
 
-          const privacyCircle = L.circle([lat, lng], {
-  radius: someRadius,
+          const privacyCircle = L.circle([maskedLat, maskedLng], {
+  radius: 250, // size of pulse
   color: "#f97316",
   fillColor: "#f97316",
-  fillOpacity: 0.2,
+  fillOpacity: 0.15,
+  weight: 1,
   className: "job-radius"
-});
+}).addTo(map);
           activeCircles.push(privacyCircle);
           privacyCircle.addTo(map);
         }
