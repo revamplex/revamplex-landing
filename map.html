@@ -55,10 +55,14 @@
       background: #dbeafe;
     }
 
-    .topbar {
+ .topbar {
   position: absolute;
   top: 0;
-  z-index: 1000; /* ⬅️ higher than cards */
+  left: 0;
+  right: 0;          /* ⬅️ THIS FIXES WIDTH */
+  width: 100%;       /* ⬅️ IMPORTANT */
+  padding: 12px;
+  z-index: 1000;
 }
 
     .topbar-inner {
@@ -301,8 +305,8 @@
 .card-inner {
   border-radius: 22px;
   overflow: hidden;
-  background: rgba(255,255,255,0.9);
-  backdrop-filter: blur(10px); /* ✅ SAFE HERE */
+  background: #ffffff; /* ⬅️ SOLID */
+  box-shadow: 0 12px 28px rgba(0,0,0,0.15);
 }
 .listing-card.near {
   transform: scale(0.98);
