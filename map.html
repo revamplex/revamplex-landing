@@ -215,16 +215,17 @@
     }
     .status-pill.show { display:block; }
 
-    .results-shell {
-      position:absolute;
-      left:0;
-      right:0;
-      bottom:0;
-      z-index:960;
-      padding:0 0 10px;
-      pointer-events:auto;
-      transition:transform .25s ease;
-    }
+   .results-shell {
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:960;
+  padding:20px 0 20px; /* ⬅️ more breathing room */
+  pointer-events:auto;
+  transition:transform .25s ease;
+  overflow: visible; /* ⬅️ KEY FIX */
+}
     .results-shell-inner {
       max-width:1600px;
       margin:0 auto;
