@@ -1338,7 +1338,7 @@
 
       items.forEach(item => {
         let markerCoords = getDisplayCoords(item);
-
+createJobPulse(item);
        // 🔥 ALWAYS create pulse (both homeowner + contractor view)
 
 const [maskedLat, maskedLng] = maskLocation(Number(item.lat), Number(item.lng), 0.25);
