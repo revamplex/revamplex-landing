@@ -1543,13 +1543,9 @@ fitMapToItems(items);
         return;
       }
 
-      cardsRow.innerHTML = items.map(item => `
-        <div class="listing-card ${item.id === activeId ? 'active' : ''}" data-id="${item.id}">
-  <div class="card-inner">
-    ${item.type === 'contractor' ? contractorCardHtml(item) : jobCardHtml(item)}
-  </div>
+      <div class="listing-card ${item.id === activeId ? 'active' : ''}" data-id="${item.id}">
+  ${item.type === 'contractor' ? contractorCardHtml(item) : jobCardHtml(item)}
 </div>
-      `).join('');
     }
 
    function setActive(id, panMap = false) {
