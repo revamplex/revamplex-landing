@@ -1419,9 +1419,39 @@
       items.forEach(item => {
         const markerCoords = getDisplayCoords(item);
 
-        if (item.type === 'job') {
-          createJobPulse(item);
-        }
+       // 🔥 ALWAYS create pulse (both homeowner + contractor view)
+
+const [maskedLat, maskedLng] = maskLocation(Number(item.lat), Number(item.lng), 0.25);
+markerCoords = [maskedLat, maskedLng];
+
+// create pulse circle
+const pulseCircle = L.circleMarker([maskedLat, maskedLng], {
+  radius: 20,
+  color: "#f97316",
+  fillColor: "#f97316",
+  fillOpacity: 0.3,
+  weight: 1
+}).addTo(map);
+
+activeCircles.push(pulseCircle);
+
+// 🔥 animation (guaranteed working)
+let radius = 20;
+let opacity = 0.4;
+
+setInterval(() => {
+  radius += 2;
+  opacity -= 0.02;
+
+  if (radius > 80) {
+    radius = 20;
+    opacity = 0.4;
+  }
+
+  pulseCircle.setRadius(radius);
+  pulseCircle.setStyle({ fillOpacity: opacity });
+
+}, 60);
 
         const marker = L.marker(markerCoords, {
           icon: makeIcon(item, item.id === activeId)
