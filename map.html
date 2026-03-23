@@ -2029,24 +2029,6 @@ cardsRow.addEventListener('click', e => {
   const card = e.target.closest('.listing-card[data-id]');
   if (card) setActive(card.dataset.id, true);
 });
-// 🔥 BOOST ACTIVE GLOW
-activeCircles.forEach(circle => {
-  circle.setStyle({ fillOpacity: 0.1 });
-});
-
-const activeItem = filteredItems.find(i => i.id === id);
-if (activeItem) {
-  const coords = getDisplayCoords(activeItem);
-
-  const highlight = L.circle(coords, {
-    radius: 300,
-    color: '#22c55e',
-    fillColor: '#22c55e',
-    fillOpacity: 0.25,
-    weight: 0
-  }).addTo(map);
-
-  setTimeout(() => map.removeLayer(highlight), 800);
 }
 detailContent.addEventListener('click', e => {
   const button = e.target.closest('[data-action]');
