@@ -1318,15 +1318,33 @@
     }
 
     function clearMarkers() {
-      activePulseAnimations.forEach(anim => {
-        if (anim.timer) clearInterval(anim.timer);
-        if (anim.ring && map.hasLayer(anim.ring)) map.removeLayer(anim.ring);
+
+  // stop animations
+  activePulseAnimations.forEach(anim => {
+    if (anim.timer) clearInterval(anim.timer);
+
+    if (anim.rings) {
+      anim.rings.forEach(r => {
+        if (map.hasLayer(r.ring)) map.removeLayer(r.ring);
       });
-      activePulseAnimations = [];
-      activeCircles = [];
-      markerIndex.clear();
-      if (markerClusterGroup) map.removeLayer(markerClusterGroup);
     }
+
+    if (anim.ring && map.hasLayer(anim.ring)) {
+      map.removeLayer(anim.ring);
+    }
+  });
+
+  activePulseAnimations = [];
+
+  // remove ALL circles (core + glow)
+  activeCircles.forEach(c => {
+    if (map.hasLayer(c)) map.removeLayer(c);
+  });
+
+  activeCircles = [];
+
+  markerIndex.clear();
+}
 
     function getPopupHtml(item) {
       if (item.type === 'contractor') {
@@ -1354,10 +1372,11 @@
 
       items.forEach(item => {
 
-  // 🔥 HARD FILTER (prevents cross-rendering)
+  // 🔥 STRICT MODE FILTER (absolute separation)
   if (currentMode === 'homeowner' && item.type !== 'contractor') return;
   if (currentMode === 'contractor' && item.type !== 'job') return;
-const coords = getDisplayCoords(item);
+
+  const coords = getDisplayCoords(item);
         
 // 🔥 GLOW CORE
 const core = L.circle(coords, {
