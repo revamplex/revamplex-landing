@@ -787,6 +787,15 @@
   </style>
 </head>
 <body>
+  <div style="padding:20px;">
+
+  <h2 id="jobTitle">Loading...</h2>
+
+  <p id="jobDescription"></p>
+
+  <div><strong>Budget:</strong> <span id="jobBudget"></span></div>
+
+</div>
   <div class="app-shell">
     <div class="topbar">
       <div class="brand">
@@ -1242,7 +1251,38 @@ Back to Project Feed
   </div>
 
 <script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
 
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const urlParams = new URLSearchParams(window.location.search);
+const jobId = urlParams.get('job');
+
+console.log("PROJECT ROOM JOB ID:", jobId);
+  async function loadJob() {
+  const { data, error } = await supabaseClient
+    .from('jobs')
+    .select('*')
+    .eq('id', jobId)
+    .single();
+
+  if (error) {
+    console.error("Error loading job:", error);
+    return;
+  }
+
+  console.log("LOADED JOB:", data);
+
+  renderJob(data);
+}
+  function renderJob(job) {
+  document.getElementById('jobTitle').innerText = job.title;
+  document.getElementById('jobDescription').innerText = job.description;
+  document.getElementById('jobBudget').innerText = job.budget;
+}
+  loadJob();
+  
 /* ---------- MODE DETECTION ---------- */
 
 const params = new URLSearchParams(window.location.search);
