@@ -1128,6 +1128,63 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
   <script>
+    async function checkAuth(){
+
+  const { data } = await supabaseClient.auth.getUser();
+
+  if(!data.user){
+    document.getElementById("overlay").style.display = "flex";
+  } else {
+    document.getElementById("overlay").style.display = "none";
+  }
+
+}
+
+checkAuth();
+    let authMode = "login";
+
+function showLogin(){
+  authMode = "login";
+  document.getElementById("authBox").style.display = "block";
+  document.getElementById("authSubmit").innerText = "Login";
+}
+
+function showSignup(){
+  authMode = "signup";
+  document.getElementById("authBox").style.display = "block";
+  document.getElementById("authSubmit").innerText = "Register";
+}
+
+document.getElementById("authSubmit").addEventListener("click", async () => {
+
+  const email = document.getElementById("authEmail").value;
+  const password = document.getElementById("authPassword").value;
+
+  let result;
+
+  if(authMode === "login"){
+    result = await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+  } else {
+    result = await supabaseClient.auth.signUp({
+      email,
+      password
+    });
+  }
+
+  if(result.error){
+    document.getElementById("authStatus").innerText = result.error.message;
+    return;
+  }
+
+  document.getElementById("authStatus").innerText = "Success!";
+
+  // 🔥 CLOSE OVERLAY + CONTINUE
+  document.getElementById("overlay").style.display = "none";
+
+});
     const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
