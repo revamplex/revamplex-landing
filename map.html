@@ -2208,6 +2208,18 @@ const bidsHtml = visibleBids.length
     welcomeContractorBtn.addEventListener('click', () => startSignup('contractor'));
     exploreDemoBtn.addEventListener('click', exploreDemo);
     welcomeBackBtn.addEventListener('click', backToRoleChooser);
+    function exploreDemo() {
+  // hide overlay
+  welcomeOverlay.classList.add('hidden');
+
+  // prevent it from showing again
+  localStorage.setItem('revamplex_registered', 'true');
+
+  // load demo view
+  setMode('homeowner');
+
+  showStatus('Demo mode');
+}
     welcomeSubmitBtn.addEventListener('click', submitWelcomeRegistration);
 
     searchBtn.addEventListener('click', applyFilters);
