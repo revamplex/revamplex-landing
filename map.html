@@ -1778,16 +1778,24 @@ function setSort(type) {
         `;
       } else {
         const bidsHtml = (item.bids || []).length
-          ? item.bids.map((bid, index) => `
-              <div style="border-top:1px solid #e2e8f0;padding-top:10px;margin-top:10px;">
-                <strong>${'Verified Contractor'}</strong><br>
-                Bid: ${bid.amount}<br>
-                Start: ${bid.eta || 'TBD'}<br>
-                ${bid.message ? `Message: ${bid.message}<br>` : ''}
-                <button class="mini-btn primary" style="margin-top:8px;" data-action="accept-bid" data-job="${item.id}" data-bid="${index}">Accept Bid</button>
-              </div>
-            `).join('')
-          : '<p>No bids yet.</p>';
+  ? item.bids
+      .filter(bid => {
+        // 🚫 Contractors only see THEIR OWN bid
+        if (currentMode === 'contractor' && bid.contractor_id !== 'demo-contractor') {
+          return false;
+        }
+        return true;
+      })
+      .map((bid, index) => `
+        <div style="border-top:1px solid #e2e8f0;padding-top:10px;margin-top:10px;">
+          <strong>Verified Contractor</strong><br>
+          Bid: ${bid.amount}<br>
+          Start: ${bid.eta || 'TBD'}<br>
+          ${bid.message ? `Message: ${bid.message}<br>` : ''}
+          <button class="mini-btn primary" style="margin-top:8px;" data-action="accept-bid" data-job="${item.id}" data-bid="${index}">Accept Bid</button>
+        </div>
+      `).join('')
+  : '<p>No bids yet.</p>';
 
         detailTitle.textContent = item.title;
         detailContent.innerHTML = `
