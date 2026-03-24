@@ -1,3 +1,5 @@
+Map.html
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -286,8 +288,6 @@
   -webkit-overflow-scrolling: touch; /* 🔥 iOS smoothness */
 }
 .listing-card {
-  position: relative;
-  z-index: 2100;
   flex: 0 0 240px;
   max-width: 240px;
 
@@ -315,13 +315,10 @@
   box-shadow: 0 25px 50px rgba(0,0,0,0.25);
 }
 .card-inner {
-  position: relative;
-  z-index: 2101;
   border-radius: 22px;
   overflow: hidden;
-  background: #ffffff;
+  background: #ffffff; /* ⬅️ SOLID */
   box-shadow: 0 12px 28px rgba(0,0,0,0.15);
-  pointer-events: auto;
 }
 .listing-card.near {
   transform: scale(0.98);
@@ -424,7 +421,6 @@
       gap:8px;
       align-items:center;
       margin-top:auto;
-      pointer-events: auto;
     }
 
     .mini-btn {
@@ -1029,25 +1025,7 @@
         <p class="welcomeNote" id="contractorTrialNote">
           Pro Contractors can browse and bid after signup. Billing and locking can be connected later.
         </p>
-<div style="margin-top:20px;">
 
-  <button class="btn btn-primary" onclick="showLogin()">Login</button>
-
-  <button class="btn btn-soft" onclick="showSignup()">Register</button>
-
-</div>
-
-<div id="authBox" style="margin-top:15px; display:none;">
-
-  <input id="authEmail" placeholder="Email" style="width:100%; padding:10px; margin-bottom:10px;" />
-
-  <input id="authPassword" type="password" placeholder="Password" style="width:100%; padding:10px; margin-bottom:10px;" />
-
-  <button id="authSubmit" class="btn btn-primary" style="width:100%;">Submit</button>
-
-  <p id="authStatus" style="margin-top:10px;"></p>
-
-</div>
         <div class="welcomeGrid">
           <div class="welcomeField">
             <label class="welcomeLabel" for="welcomeFullName">Full Name</label>
@@ -1134,65 +1112,10 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
   <script>
-    async function checkAuth(){
-
-  const { data } = await supabaseClient.auth.getUser();
-
-  if(!data.user){
-    document.getElementById("welcomeOverlay").style.display = "flex";
-  } else {
-    document.getElementById("welcomeOverlay").style.display = "none";
-  }
-
-}
-    let authMode = "login";
-
-function showLogin(){
-  authMode = "login";
-  document.getElementById("authBox").style.display = "block";
-  document.getElementById("authSubmit").innerText = "Login";
-}
-
-function showSignup(){
-  authMode = "signup";
-  document.getElementById("authBox").style.display = "block";
-  document.getElementById("authSubmit").innerText = "Register";
-}
-
-document.getElementById("authSubmit").addEventListener("click", async () => {
-
-  const email = document.getElementById("authEmail").value;
-  const password = document.getElementById("authPassword").value;
-
-  let result;
-
-  if(authMode === "login"){
-    result = await supabaseClient.auth.signInWithPassword({
-      email,
-      password
-    });
-  } else {
-    result = await supabaseClient.auth.signUp({
-      email,
-      password
-    });
-  }
-
-  if(result.error){
-    document.getElementById("authStatus").innerText = result.error.message;
-    return;
-  }
-
-  document.getElementById("authStatus").innerText = "Success!";
-
-  // 🔥 CLOSE OVERLAY + CONTINUE
-  document.getElementById("welcomeOverlay").style.display = "none";
-
-});
     const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    checkAuth();
+
     const TRADE_OPTIONS = [
       'Kitchen Renovation','Bathroom Renovation','Additions & Remodeling','General Contractors','Carpentry',
       'Concrete & Masonry','Decks & Porches','Doors','Drywall & Insulation','Electrical','Fencing','Flooring',
@@ -1459,35 +1382,29 @@ document.getElementById("authSubmit").addEventListener("click", async () => {
       markerClusterGroup = null;
 
       items.forEach(item => {
-const coords = getDisplayCoords(item);
 
-// 🔥 ADD HIDDEN MARKER FOR INTERACTION
-const marker = L.marker(coords, {
-  icon: makeIcon(item, false),
-  opacity: 0 // invisible
-}).addTo(map);
+  // 🔥 STRICT MODE FILTER (absolute separation)
+  if (currentMode === 'homeowner' && item.type !== 'contractor') return;
+  if (currentMode === 'contractor' && item.type !== 'job') return;
 
-marker.bindPopup(getPopupHtml(item));
-
-marker.on('click', () => {
-  setActive(item.id, true);
-  scrollCardIntoView(item.id);
-});
-
-markerIndex.set(item.id, marker);
-
+  const coords = getDisplayCoords(item);
+        
 // 🔥 GLOW CORE
-const inner = L.circle(coords, {
-  radius: 400,
-  color: 'red',
-  fillOpacity: 0.5
+const core = L.circle(coords, {
+  radius: 400, // ⬅️ bigger
+  color: '#ff0000',
+  fillColor: '#ff0000',
+  fillOpacity: 0.35,
+  weight: 0
 }).addTo(map);
 
 // 🔥 OUTER GLOW
-const outer = L.circle(coords, {
-  radius: 1200,
-  color: 'red',
-  fillOpacity: 0.15
+const glow = L.circle(coords, {
+  radius: 900, // ⬅️ much bigger
+  color: '#ff0000',
+  fillColor: '#ff0000',
+  fillOpacity: 0.2,
+  weight: 0
 }).addTo(map);
 
 activeCircles.push(core, glow);
@@ -1496,14 +1413,19 @@ activeCircles.push(core, glow);
 const rings = [];
 
 for (let i = 0; i < 3; i++) {
-  setTimeout(() => {
-    L.circle(coords, {
-      radius: 400 + (i * 300),
-      color: 'red',
-      fillOpacity: 0.2 - (i * 0.05),
-      interactive: false // 🔥 THIS FIXES IT
-    }).addTo(map);
-  }, i * 400);
+  const ring = L.circle(coords, {
+    radius: 600 + (i * 400), // ⬅️ bigger spread
+    color: '#ff0000',
+    fillColor: '#ff0000',
+    fillOpacity: 0.18 - (i * 0.05),
+    weight: 0
+  }).addTo(map);
+
+  rings.push({
+    ring,
+    radius: 600 + (i * 400),
+    opacity: 0.18 - (i * 0.05)
+  });
 }
 
 const pulse = setInterval(() => {
@@ -1575,8 +1497,8 @@ fitMapToItems(items);
             <span><strong>Reviews:</strong> ${item.reviews || 0}</span>
           </div>
           <div class="card-actions">
-            <button class="mini-btn secondary" data-action="view" data-id="${item.id}" onclick="event.stopPropagation()">View</button>
-            <button class="mini-btn primary" data-action="message" data-id="${item.id}" onclick="event.stopPropagation()">Message</button>
+            <button class="mini-btn secondary" data-action="view" data-id="${item.id}">View</button>
+            <button class="mini-btn primary" data-action="message" data-id="${item.id}">Message</button>
           </div>
         </div>
       `;
@@ -1607,10 +1529,8 @@ fitMapToItems(items);
             <span><strong>Posted:</strong> ${item.posted_ago || 'Live'}</span>
           </div>
           <div class="card-actions">
-            <button class="mini-btn secondary" data-action="job-details" data-id="${item.id}" onclick="event.stopPropagation()">View</button>
-            <button class="mini-btn primary" data-action="project-room" data-id="${item.id}" onclick="event.stopPropagation()">
-  Submit Bid
-</button>
+            <button class="mini-btn secondary" data-action="job-details" data-id="${item.id}">View</button>
+            <button class="mini-btn primary" onclick="openProjectRoom(${item.id})">Bid</button>
           </div>
         </div>
       `;
@@ -1630,27 +1550,12 @@ fitMapToItems(items);
   }
 
   cardsRow.innerHTML = items.map(item => `
-    <div
-      class="listing-card ${item.id === activeId ? 'active' : ''}"
-      data-id="${item.id}"
-      onclick="handleCardTap(event, ${item.id})"
-    >
+    <div class="listing-card ${item.id === activeId ? 'active' : ''}" data-id="${item.id}">
       <div class="card-inner">
         ${item.type === 'contractor' ? contractorCardHtml(item) : jobCardHtml(item)}
       </div>
     </div>
   `).join('');
-}
-
-window.handleCardTap = function(event, id) {
-  if (event) {
-    event.preventDefault();
-    event.stopPropagation();
-  }
-  const item = filteredItems.find(i => Number(i.id) === Number(id));
-  if (!item) return;
-  setActive(Number(id), true);
-  scrollCardIntoView(Number(id));
 }
 
    function setActive(id, panMap = false) {
@@ -1804,21 +1709,40 @@ function setSort(type) {
       setMode('contractor');
     }
 
-function openProjectRoom(jobId) {
-  jobId = Number(jobId);
+    function openProjectRoom(jobId) {
+      const job = jobs.find(entry => String(entry.id) === String(jobId));
+      console.log("OPENING JOB:", jobId, job);
+      if (!job) return;
+      window.location.href = `project-room.html?mode=contractor&job=${jobId}`;
+    }
 
-  const job = jobs.find(entry => entry.id === jobId);
+    async function submitBid(jobId) {
+      try {
+        const amount = prompt("Enter your bid amount:");
+        if (!amount) return;
+        const message = prompt("Add a message (optional):") || "";
 
-  console.log("OPENING JOB:", jobId, job);
+        const { error } = await supabaseClient.from('bids').insert([{
+          job_id: jobId,
+contractor_id: 'demo-contractor',
+contractor_name: 'Verified Contractor',
+          amount: amount,
+          message: message,
+          eta: 'TBD'
+        }]);
 
-  if (!job) {
-    console.warn("Job not found");
-    return;
-  }
+        if (error) {
+          console.error(error);
+          alert('Error submitting bid');
+          return;
+        }
 
-  window.location.href = `project-room.html?mode=contractor&job=${job.id}`;
-}
-
+        showStatus('Bid submitted');
+        await loadLiveData();
+      } catch (err) {
+        console.error(err);
+      }
+    }
 
     function openDetailModal(item) {
       if (!item) return;
@@ -1851,7 +1775,7 @@ function openProjectRoom(jobId) {
             <div class="detail-tags">${(item.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
           </div>
           <div class="card-actions">
-            <button class="mini-btn primary" data-action="message" data-id="${item.id}" onclick="event.stopPropagation()">Message</button>
+            <button class="mini-btn primary" data-action="message" data-id="${item.id}">Message</button>
           </div>
         `;
       } else {
@@ -1869,7 +1793,7 @@ const bidsHtml = visibleBids.length
         Bid: ${bid.amount}<br>
         Start: ${bid.eta || 'TBD'}<br>
         ${bid.message ? `Message: ${bid.message}<br>` : ''}
-        <button class="mini-btn primary" style="margin-top:8px;" data-action="accept-bid" data-job="${item.id}" data-bid="${index}" onclick="event.stopPropagation()">Accept Bid</button>
+        <button class="mini-btn primary" style="margin-top:8px;" data-action="accept-bid" data-job="${item.id}" data-bid="${index}">Accept Bid</button>
       </div>
     `).join('')
   : '<p>No bids yet.</p>';
@@ -1895,10 +1819,8 @@ const bidsHtml = visibleBids.length
             ${bidsHtml}
           </div>
           <div class="card-actions">
-            <button class="mini-btn primary" data-action="project-room" data-id="${item.id}" onclick="event.stopPropagation()">
-  Submit Bid
-</button>
-           
+            <button class="mini-btn secondary" data-action="project-room" data-id="${item.id}">Open Project Room</button>
+            <button class="mini-btn primary" data-action="bid" data-id="${item.id}">Submit Bid</button>
           </div>
         `;
       }
@@ -1925,15 +1847,9 @@ const bidsHtml = visibleBids.length
       }
 
       if (action === 'project-room') {
-  const lockedId = Number(id);
-
-  console.log("LOCKED CLICK ID:", lockedId);
-
-  // 🔥 IMMEDIATE redirect (no interference)
-  window.location.href = `project-room.html?mode=contractor&job=${lockedId}`;
-  
-  return;
-}
+        openProjectRoom(id);
+        return;
+      }
 
       if (action === 'bid') {
         submitBid(id);
@@ -2145,39 +2061,16 @@ const bidsHtml = visibleBids.length
     jobModal.addEventListener('click', e => { if (e.target === jobModal) closeJobForm(); });
 
 cardsRow.addEventListener('click', e => {
-
   const button = e.target.closest('[data-action]');
-  
   if (button) {
     e.preventDefault();
     e.stopPropagation();
-
-    const id = Number(button.dataset.id);
-
-    console.log("BUTTON CLICK:", button.dataset.action, id);
-
-    handleCardAction(button.dataset.action, id);
+    handleCardAction(button.dataset.action, button.dataset.id);
     return;
   }
 
   const card = e.target.closest('.listing-card[data-id]');
-  if (!card) return;
-
-  const id = Number(card.dataset.id);
-
-  console.log("CARD CLICK:", id);
-
-  // 🔥 FORCE correct item lookup
-  const item = filteredItems.find(i => Number(i.id) === id);
-
-  if (!item) {
-    console.warn("ITEM NOT FOUND IN FILTERED ITEMS:", id);
-    return;
-  }
-
-  setActive(id, true);
-  scrollCardIntoView(id);
-
+  if (card) setActive(card.dataset.id, true);
 });
     
 detailContent.addEventListener('click', e => {
@@ -2246,7 +2139,10 @@ cardsRow.addEventListener('scroll', () => {
     }
   }, 70);
 });
-    map.on('click', () => {});
+    map.on('click', () => {
+      if (!uiCollapsed) collapseUI();
+      else expandUI();
+    });
 
     window.addEventListener('resize', () => {
       setTimeout(() => {
@@ -2258,6 +2154,12 @@ cardsRow.addEventListener('scroll', () => {
       }, 120);
     });
 
+    const registered = localStorage.getItem('revamplex_registered');
+    if (!registered) {
+      welcomeOverlay.style.display = 'flex';
+    } else {
+      welcomeOverlay.style.display = 'none';
+    }
 
     populateTradeSelect();
     syncModeUI();
