@@ -1278,11 +1278,16 @@ console.log("PROJECT ROOM JOB ID:", jobId);
 }
   function renderJob(job){
 
+  console.log("RENDERING JOB:", job);
+
   document.getElementById("jobTitle").innerText = job.Title || "Untitled Job";
 
-document.getElementById("jobBudget").innerText = job.Budget || "$0";
+  document.getElementById("jobMeta").innerText =
+    `Project ID: ${job.id} • ${job.latitude ? "NJ Area" : "Unknown Location"} • Homeowner: Anonymous • Contractor: Verified Contractor`;
 
-document.getElementById("jobTrade").innerText = job.Trade || "General";
+  document.getElementById("jobBudget").innerText = job.Budget || "$0";
+
+  document.getElementById("jobTrade").innerText = job.Trade || "General";
 
 }
   loadJob();
