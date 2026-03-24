@@ -2244,10 +2244,17 @@ cardsRow.addEventListener('scroll', () => {
     }
   }, 70);
 });
-    map.on('click', () => {
-      if (!uiCollapsed) collapseUI();
-      else expandUI();
-    });
+    map.on('click', (e) => {
+
+  // 🔥 STOP map from hijacking card clicks
+  if (e.originalEvent && e.originalEvent.target.closest('.listing-card')) {
+    return;
+  }
+
+  if (!uiCollapsed) collapseUI();
+  else expandUI();
+
+});
 
     window.addEventListener('resize', () => {
       setTimeout(() => {
