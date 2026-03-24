@@ -1,5 +1,3 @@
-Map.html
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -982,25 +980,7 @@ Map.html
       </div>
     </div>
   </div>
-<div style="margin-top:20px;">
 
-  <button class="btn btn-primary" onclick="showLogin()">Login</button>
-
-  <button class="btn btn-soft" onclick="showSignup()">Register</button>
-
-</div>
-
-<div id="authBox" style="margin-top:15px; display:none;">
-
-  <input id="authEmail" placeholder="Email" style="width:100%; padding:10px; margin-bottom:10px;" />
-
-  <input id="authPassword" type="password" placeholder="Password" style="width:100%; padding:10px; margin-bottom:10px;" />
-
-  <button id="authSubmit" class="btn btn-primary" style="width:100%;">Submit</button>
-
-  <p id="authStatus" style="margin-top:10px;"></p>
-
-</div>
   <div class="modal" id="detailModal">
     <div class="modal-card">
       <div class="modal-head">
@@ -2157,19 +2137,6 @@ cardsRow.addEventListener('scroll', () => {
     }
   }, 70);
 });
-    async function checkAuth(){
-
-  const { data } = await supabaseClient.auth.getUser();
-
-  if(!data.user){
-    document.getElementById("overlay").style.display = "flex";
-  } else {
-    document.getElementById("overlay").style.display = "none";
-  }
-
-}
-
-checkAuth();
     map.on('click', () => {
       if (!uiCollapsed) collapseUI();
       else expandUI();
@@ -2184,50 +2151,7 @@ checkAuth();
         }
       }, 120);
     });
-let authMode = "login";
 
-function showLogin(){
-  authMode = "login";
-  document.getElementById("authBox").style.display = "block";
-  document.getElementById("authSubmit").innerText = "Login";
-}
-
-function showSignup(){
-  authMode = "signup";
-  document.getElementById("authBox").style.display = "block";
-  document.getElementById("authSubmit").innerText = "Register";
-}
-
-document.getElementById("authSubmit").addEventListener("click", async () => {
-
-  const email = document.getElementById("authEmail").value;
-  const password = document.getElementById("authPassword").value;
-
-  let result;
-
-  if(authMode === "login"){
-    result = await supabaseClient.auth.signInWithPassword({
-      email,
-      password
-    });
-  } else {
-    result = await supabaseClient.auth.signUp({
-      email,
-      password
-    });
-  }
-
-  if(result.error){
-    document.getElementById("authStatus").innerText = result.error.message;
-    return;
-  }
-
-  document.getElementById("authStatus").innerText = "Success!";
-
-  // 🔥 CLOSE OVERLAY + CONTINUE
-  document.getElementById("overlay").style.display = "none";
-
-});
     const registered = localStorage.getItem('revamplex_registered');
     if (!registered) {
       welcomeOverlay.style.display = 'flex';
