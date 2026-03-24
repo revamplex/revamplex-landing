@@ -1237,7 +1237,12 @@ async function handleAuth() {
 
       if (error) throw error;
 
-      const userId = data.user.id;
+      const userId = data.user?.id;
+
+if (!userId) {
+  alert("Signup worked, but user not returned. Try logging in.");
+  return;
+}
 
       // 🔥 insert into profiles
       await supabaseClient.from('profiles').insert([{
