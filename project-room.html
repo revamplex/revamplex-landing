@@ -818,8 +818,8 @@ Back to Project Feed
         <div>
           <div class="project-title">
             <div>
-              <h2>Kitchen + Dining Renovation</h2>
-              <p>Project ID: RMP-20481 • Paramus NJ Area • Homeowner: Anonymous • Contractor: Verified Contractor</p>
+              <h2 id="jobTitle">Loading...</h2>
+              <p id="jobMeta">Loading job details...</p>
             </div>
             <div class="status-pill">● In Estimate Review</div>
           </div>
@@ -1282,7 +1282,14 @@ console.log("PROJECT ROOM JOB ID:", jobId);
   document.getElementById('jobBudget').innerText = job.budget;
 }
   loadJob();
-  
+  function renderJob(job){
+
+  document.getElementById("jobTitle").innerText = job.title || "Untitled Job";
+
+  document.getElementById("jobMeta").innerText =
+    `Project ID: ${job.id} • ${job.location || "Unknown Location"} • Homeowner: Anonymous • Contractor: Verified Contractor`;
+
+}
 /* ---------- MODE DETECTION ---------- */
 
 const params = new URLSearchParams(window.location.search);
@@ -1592,7 +1599,14 @@ function loadJobs(){
 function saveJobs(jobs){
   localStorage.setItem("revampJobs",JSON.stringify(jobs));
 }
+const jobs = loadJobs();
+const job = jobs.find(j => String(j.id) === String(jobId));
 
+if(job){
+  renderJob(job);
+}else{
+  console.log("Job not found for ID:", jobId);
+}
 /* ---------- SUBMIT BID ---------- */
 
 function submitBid(){
