@@ -1286,12 +1286,6 @@ async function handleAuth() {
     console.error(err);
   }
 }
-      alert("Logged in successfully");
-      closeAuth();
-
-      // OPTIONAL: store session
-      localStorage.setItem('revamp_user', JSON.stringify(data.user));
-    }
 
   } catch (err) {
     alert(err.message);
