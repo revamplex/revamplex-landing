@@ -1722,8 +1722,8 @@ function setSort(type) {
 
         const { error } = await supabaseClient.from('bids').insert([{
           job_id: jobId,
-          bid.contractor_id !== 'demo-contractor'
-          contractor_name: 'Verified Contractor',
+contractor_id: 'demo-contractor',
+contractor_name: 'Verified Contractor',
           amount: amount,
           message: message,
           eta: 'TBD'
