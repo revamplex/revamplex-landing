@@ -1290,14 +1290,7 @@ console.log("PROJECT ROOM JOB ID:", jobId);
 
 }
   loadJob();
-  function renderJob(job){
-
-  document.getElementById("jobTitle").innerText = job.title || "Untitled Job";
-
-  document.getElementById("jobMeta").innerText =
-    `Project ID: ${job.id} • ${job.location || "Unknown Location"} • Homeowner: Anonymous • Contractor: Verified Contractor`;
-
-}
+  
 /* ---------- MODE DETECTION ---------- */
 
 const params = new URLSearchParams(window.location.search);
