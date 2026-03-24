@@ -1261,18 +1261,27 @@ const jobId = urlParams.get('job');
 
 console.log("PROJECT ROOM JOB ID:", jobId);
   async function loadJob() {
+
+  const params = new URLSearchParams(window.location.search);
+  const jobId = Number(params.get('job'));
+
+  console.log("LOADING JOB ID:", jobId);
+
   const { data, error } = await supabaseClient
     .from('jobs')
     .select('*')
-    .eq('id', Number(jobId))
+    .eq('id', jobId)
     .single();
 
   if (error) {
-    console.error("Error loading job:", error);
+    console.error("SUPABASE ERROR:", error);
+    alert("Error loading job. Check console.");
     return;
   }
 
   console.log("LOADED JOB:", data);
+
+  window.currentJob = data;
 
   renderJob(data);
 }
