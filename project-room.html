@@ -1568,7 +1568,6 @@ function submitBid(){
     job.status="closed";
   }
 
-  saveJobs(jobs);
 
   alert("Bid submitted privately to homeowner.");
 
@@ -1611,64 +1610,11 @@ function incrementBid(){
   localStorage.setItem("revamp_bid_count",count);
 }
 
-/* ---------- LOAD JOB DATABASE ---------- */
-
-  return JSON.parse(localStorage.getItem("revampJobs") || "[]");
-}
 
 function saveJobs(jobs){
   localStorage.setItem("revampJobs",JSON.stringify(jobs));
 }
 
-/* ---------- SUBMIT BID ---------- */
-
-function submitBid(){
-
-  const amount=document.getElementById("grandOut").innerText;
-
-  const job = window.currentJob;
-
-  if(!job){
-    alert("Job not found");
-    
-  }
-
-  if(!job.bids){
-    job.bids=[];
-  }
-
-  const plan=getPlan();
-  const limit=BID_PLANS[plan];
-
-  if(getBidCount()>=limit){
-    alert("You reached your monthly bid limit.");
-    return;
-  }
-
-  const maxBids=job.maxBids || 5;
-
-  if(job.bids.length>=maxBids){
-    alert("This job already received the maximum number of bids.");
-    return;
-  }
-
-  const bid={
-    contractor:"Verified Contractor",
-    amount:amount,
-    message:"Estimate generated through Revamp Project Room",
-    startDate:"TBD",
-    timestamp:Date.now()
-  };
-
-  job.bids.push(bid);
-
-  incrementBid();
-
-  saveJobs(jobs);
-
-  alert("Bid submitted privately to homeowner.");
-
-}
   /* ---------- LOAD BIDS ---------- */
 
 function loadBidDashboard(){
@@ -1676,7 +1622,7 @@ function loadBidDashboard(){
   if(mode!=="homeowner") return;
 
 
-  const job=jobs.find(j=>String(j.id)===String(jobId));
+  const job = window.currentJob;
 
   if(!job || !job.bids) return;
 
