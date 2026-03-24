@@ -1607,14 +1607,7 @@ function loadJobs(){
 function saveJobs(jobs){
   localStorage.setItem("revampJobs",JSON.stringify(jobs));
 }
-const jobs = loadJobs();
-const job = jobs.find(j => String(j.id) === String(jobId));
 
-if(job){
-  renderJob(job);
-}else{
-  console.log("Job not found for ID:", jobId);
-}
 /* ---------- SUBMIT BID ---------- */
 
 function submitBid(){
