@@ -1211,18 +1211,45 @@ function toggleAuth() {
 }
 
 async function handleAuth() {
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
 
   if (!email || !password) {
     alert("Enter email & password");
     return;
   }
 
-  if (authMode === 'login') {
-    alert("Login logic goes here (Supabase next)");
-  } else {
-    alert("Register logic goes here (Supabase next)");
+  try {
+    if (authMode === 'register') {
+      const { data, error } = await supabaseClient.auth.signUp({
+        email,
+        password
+      });
+
+      if (error) throw error;
+
+      alert("Account created! Check your email to confirm.");
+      closeAuth();
+    }
+
+    if (authMode === 'login') {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) throw error;
+
+      alert("Logged in successfully");
+      closeAuth();
+
+      // OPTIONAL: store session
+      localStorage.setItem('revamp_user', JSON.stringify(data.user));
+    }
+
+  } catch (err) {
+    alert(err.message);
+    console.error(err);
   }
 }
 
