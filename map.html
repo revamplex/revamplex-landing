@@ -2097,52 +2097,53 @@ const bidsHtml = visibleBids.length
       homeownerFields.classList.remove('show');
     }
 
-    function submitWelcomeRegistration() {
-      const fullName = document.getElementById('welcomeFullName').value.trim();
-      const email = document.getElementById('welcomeEmail').value.trim();
-      const phone = document.getElementById('welcomePhone').value.trim();
-      const password = document.getElementById('welcomePassword').value.trim();
+   async function submitWelcomeRegistration() {
+  const email = document.getElementById('welcomeEmail').value.trim();
+  const password = document.getElementById('welcomePassword').value.trim();
 
-      if (!selectedWelcomeRole) {
-        alert('Please choose Homeowner or Pro Contractor first.');
-        return;
-      }
+  if (!selectedWelcomeRole) {
+    alert('Choose Homeowner or Contractor');
+    return;
+  }
 
-      if (!fullName || !email || !phone || !password) {
-        alert('Please complete Full Name, Email, Phone, and Password.');
-        return;
-      }
+  if (!email || !password) {
+    alert('Enter email & password');
+    return;
+  }
 
-      localStorage.setItem('revamplex_registered', 'true');
-      clearWelcomeForm();
-      welcomeOverlay.style.display = 'none';
-      setMode(selectedWelcomeRole);
-      showStatus(selectedWelcomeRole === 'contractor' ? 'Pro Contractor registration started' : 'Homeowner registration started');
+  try {
+    // 🔥 CREATE USER
+    const { data, error } = await supabaseClient.auth.signUp({
+      email,
+      password
+    });
+
+    if (error) throw error;
+
+    const userId = data.user.id;
+
+    // 🔥 SAVE ROLE
+    await supabaseClient.from('profiles').insert([{
+      id: userId,
+      email: email,
+      role: selectedWelcomeRole
+    }]);
+
+    // 🔥 HIDE OVERLAY FOREVER
+    localStorage.setItem('revamplex_registered', 'true');
+
+    // 🔥 REDIRECT BASED ON ROLE
+    if (selectedWelcomeRole === 'contractor') {
+      window.location.href = "map.html?view=contractor";
+    } else {
+      window.location.href = "map.html?view=homeowner";
     }
 
-    function exploreDemo() {
-      localStorage.setItem('revamplex_demo', 'true');
-      welcomeOverlay.style.display = 'none';
-    }
-
-    async function loadContractors() {
-      const { data, error } = await supabaseClient
-        .from('contractors')
-        .select('*')
-        .order('rating', { ascending: false });
-
-      if (error) {
-        console.error('contractors load error', error);
-        return [];
-      }
-
-      return (data || []).map(item => ({
-        ...item,
-        type: 'contractor',
-        tags: item.tags || []
-      }));
-    }
-
+  } catch (err) {
+    alert(err.message);
+    console.error(err);
+  }
+}
     async function loadJobs() {
       const { data, error } = await supabaseClient
         .from('jobs')
