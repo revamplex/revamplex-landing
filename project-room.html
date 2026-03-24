@@ -839,7 +839,7 @@ Back to Project Feed
             </div>
             <div class="stat">
               <div class="label">Room Size</div>
-              <div class="value">12' × 10'</div>
+              <div class="value" id="jobRoomSize">Loading...</div>
             </div>
           </div>
         </div>
@@ -847,8 +847,8 @@ Back to Project Feed
         <aside class="side-summary">
           <h3>Quick Project Summary</h3>
           <div class="summary-line"><span>Trade Type</span><strong id="jobTrade">Loading...</strong></div>
-          <div class="summary-line"><span>Start Goal</span><strong>March 22, 2026</strong></div>
-          <div class="summary-line"><span>Deposit Requested</span><strong>$5,500</strong></div>
+          <div class="summary-line"><span>Start Goal</span><<strong id="jobStartGoal">Loading...</strong></div>
+          <div class="summary-line"><span>Deposit Requested</span><strong id="jobDeposit">Loading...</strong></div>
           <div class="summary-line"><span>Proposal Version</span><strong>v3.2</strong></div>
           <div class="summary-line"><span>Private Bid Visibility</span><strong>Customer + Assigned Contractor Only</strong></div>
         </aside>
@@ -1288,6 +1288,13 @@ console.log("PROJECT ROOM JOB ID:", jobId);
   document.getElementById("jobBudget").innerText = job.Budget || "$0";
 
   document.getElementById("jobTrade").innerText = job.Trade || "General";
+
+  // 🔥 NEW FIELDS
+  document.getElementById("jobRoomSize").innerText = job.room_size || "N/A";
+
+  document.getElementById("jobStartGoal").innerText = job.start_goal || "TBD";
+
+  document.getElementById("jobDeposit").innerText = job.deposit || "$0";
 
 }
   loadJob();
