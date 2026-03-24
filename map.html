@@ -1486,19 +1486,26 @@ const outer = L.circle(coords, {
   fillOpacity: 0.15
 }).addTo(map);
 
-activeCircles.push(core, glow);
+activeCircles.push(inner, outer);
 
-// 🔥 MULTI RING RIPPLE
+// 🔥 MULTI RING RIPPLE (FIXED)
 const rings = [];
 
 for (let i = 0; i < 3; i++) {
   setTimeout(() => {
-    L.circle(coords, {
+    const ring = L.circle(coords, {
       radius: 400 + (i * 300),
       color: 'red',
       fillOpacity: 0.2 - (i * 0.05),
-      interactive: false // 🔥 THIS FIXES IT
+      interactive: false // ✅ prevents blocking cards
     }).addTo(map);
+
+    rings.push({
+      ring,
+      radius: 400 + (i * 300),
+      opacity: 0.2 - (i * 0.05)
+    });
+
   }, i * 400);
 }
 
@@ -1518,7 +1525,6 @@ const pulse = setInterval(() => {
 }, 60);
 
 activePulseAnimations.push({ rings, timer: pulse });
-}); 
 
 fitMapToItems(items);
 }
