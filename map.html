@@ -1528,7 +1528,7 @@ fitMapToItems(items);
           </div>
           <div class="card-actions">
             <button class="mini-btn secondary" data-action="job-details" data-id="${item.id}">View</button>
-            <button class="mini-btn primary" data-action="project-room" data-id="${item.id}">Bid</button>
+            <button class="mini-btn primary" onclick="openProjectRoom(${item.id})">Bid</button>
           </div>
         </div>
       `;
