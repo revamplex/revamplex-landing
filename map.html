@@ -1023,7 +1023,25 @@
         <p class="welcomeNote" id="contractorTrialNote">
           Pro Contractors can browse and bid after signup. Billing and locking can be connected later.
         </p>
+<div style="margin-top:20px;">
 
+  <button class="btn btn-primary" onclick="showLogin()">Login</button>
+
+  <button class="btn btn-soft" onclick="showSignup()">Register</button>
+
+</div>
+
+<div id="authBox" style="margin-top:15px; display:none;">
+
+  <input id="authEmail" placeholder="Email" style="width:100%; padding:10px; margin-bottom:10px;" />
+
+  <input id="authPassword" type="password" placeholder="Password" style="width:100%; padding:10px; margin-bottom:10px;" />
+
+  <button id="authSubmit" class="btn btn-primary" style="width:100%;">Submit</button>
+
+  <p id="authStatus" style="margin-top:10px;"></p>
+
+</div>
         <div class="welcomeGrid">
           <div class="welcomeField">
             <label class="welcomeLabel" for="welcomeFullName">Full Name</label>
