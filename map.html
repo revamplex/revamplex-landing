@@ -2138,7 +2138,13 @@ cardsRow.addEventListener('click', e => {
   // 🔥 ONLY trigger if NOT clicking a button
   if (!e.target.closest('[data-action]')) {
     const card = e.target.closest('.listing-card[data-id]');
-    if (card) setActive(Number(card.dataset.id), true);
+    if (card) {
+  const id = Number(card.dataset.id);
+
+  console.log("CARD CLICK (FULL):", id);
+
+  window.location.href = `project-room.html?mode=${currentMode}&job=${id}`;
+}
   }
 });
     
