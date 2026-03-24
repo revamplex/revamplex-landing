@@ -1455,79 +1455,82 @@ document.getElementById("authSubmit").addEventListener("click", async () => {
       markerClusterGroup = null;
 
       items.forEach(item => {
-const coords = getDisplayCoords(item);
 
-// 🔥 ADD HIDDEN MARKER FOR INTERACTION
-const marker = L.marker(coords, {
-  icon: makeIcon(item, false),
-  opacity: 0 // invisible
-}).addTo(map);
+  const coords = getDisplayCoords(item);
 
-marker.bindPopup(getPopupHtml(item));
+  // 🔥 MARKER
+  const marker = L.marker(coords, {
+    icon: makeIcon(item, false),
+    opacity: 0
+  }).addTo(map);
 
-marker.on('click', () => {
-  setActive(item.id, true);
-  scrollCardIntoView(item.id);
-});
+  marker.bindPopup(getPopupHtml(item));
 
-markerIndex.set(item.id, marker);
-
-// 🔥 GLOW CORE
-const inner = L.circle(coords, {
-  radius: 400,
-  color: 'red',
-  fillOpacity: 0.5,
-  interactive: false
-}).addTo(map);
-
-// 🔥 OUTER GLOW
-const outer = L.circle(coords, {
-  radius: 1200,
-  color: 'red',
-  fillOpacity: 0.15,
-  interactive: false
-}).addTo(map);
-
-activeCircles.push(inner, outer);
-
-// 🔥 MULTI RING RIPPLE (CLEAN + FIXED)
-const rings = [];
-
-for (let i = 0; i < 3; i++) {
-  setTimeout(() => {
-    const ring = L.circle(coords, {
-      radius: 400 + (i * 300),
-      color: 'red',
-      fillOpacity: 0.2 - (i * 0.05),
-      interactive: false
-    }).addTo(map);
-
-    rings.push({
-      ring: ring,
-      radius: 400 + (i * 300),
-      opacity: 0.2 - (i * 0.05)
-    });
-
-  }, i * 400);
-}
-
-const pulse = setInterval(() => {
-  rings.forEach(r => {
-    r.radius += 20;
-    r.opacity -= 0.015;
-
-    if (r.radius > 2200) {
-      r.radius = 600;
-      r.opacity = 0.18;
-    }
-
-    r.ring.setRadius(r.radius);
-    r.ring.setStyle({ fillOpacity: r.opacity });
+  marker.on('click', () => {
+    setActive(item.id, true);
+    scrollCardIntoView(item.id);
   });
-}, 60);
 
-activePulseAnimations.push({ rings, timer: pulse });
+  markerIndex.set(item.id, marker);
 
+  // 🔥 INNER
+  const inner = L.circle(coords, {
+    radius: 400,
+    color: 'red',
+    fillOpacity: 0.5,
+    interactive: false
+  }).addTo(map);
+
+  // 🔥 OUTER
+  const outer = L.circle(coords, {
+    radius: 1200,
+    color: 'red',
+    fillOpacity: 0.15,
+    interactive: false
+  }).addTo(map);
+
+  activeCircles.push(inner, outer);
+
+  // 🔥 RIPPLE
+  const rings = [];
+
+  for (let i = 0; i < 3; i++) {
+    setTimeout(() => {
+
+      const ring = L.circle(coords, {
+        radius: 400 + (i * 300),
+        color: 'red',
+        fillOpacity: 0.2 - (i * 0.05),
+        interactive: false
+      }).addTo(map);
+
+      rings.push({
+        ring: ring,
+        radius: 400 + (i * 300),
+        opacity: 0.2 - (i * 0.05)
+      });
+
+    }, i * 400);
+  }
+
+  const pulse = setInterval(() => {
+    rings.forEach(r => {
+      r.radius += 20;
+      r.opacity -= 0.015;
+
+      if (r.radius > 2200) {
+        r.radius = 600;
+        r.opacity = 0.18;
+      }
+
+      r.ring.setRadius(r.radius);
+      r.ring.setStyle({ fillOpacity: r.opacity });
+    });
+  }, 60);
+
+  activePulseAnimations.push({ rings: rings, timer: pulse });
+
+});
 fitMapToItems(items);
 }
 
