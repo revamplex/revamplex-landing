@@ -44,10 +44,10 @@
 }
 
     #map {
-  position: absolute;
-  inset: 0;
-  z-index: 0; /* 👈 LOWER IT */
-}
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
 
     .leaflet-container {
       width: 100%;
@@ -215,23 +215,17 @@
     .status-pill.show { display:block; }
 
   .results-shell {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 2000; /* 🔥 FORCE ABOVE EVERYTHING */
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:900;
 
-  padding: 40px 0 16px;
+  padding:40px 0 16px; /* ⬅️ THIS IS THE FIX */
 
-  pointer-events: none; /* 🔥 IMPORTANT */
-}
-    .results-shell-inner,
-.cards-row,
-.listing-card,
-.card-inner,
-.card-actions,
-.mini-btn {
-  pointer-events: auto; /* 🔥 re-enable clicks ONLY on cards */
+  pointer-events:auto;
+  transition:transform .25s ease;
+  overflow: visible;
 }
     .results-shell-inner {
       max-width:1600px;
@@ -292,6 +286,8 @@
   -webkit-overflow-scrolling: touch; /* 🔥 iOS smoothness */
 }
 .listing-card {
+  position: relative;
+  z-index: 2100;
   flex: 0 0 240px;
   max-width: 240px;
 
@@ -319,6 +315,8 @@
   box-shadow: 0 25px 50px rgba(0,0,0,0.25);
 }
 .card-inner {
+  position: relative;
+  z-index: 2101;
   border-radius: 22px;
   overflow: hidden;
   background: #ffffff;
@@ -1461,82 +1459,71 @@ document.getElementById("authSubmit").addEventListener("click", async () => {
       markerClusterGroup = null;
 
       items.forEach(item => {
+const coords = getDisplayCoords(item);
 
-  const coords = getDisplayCoords(item);
+// 🔥 ADD HIDDEN MARKER FOR INTERACTION
+const marker = L.marker(coords, {
+  icon: makeIcon(item, false),
+  opacity: 0 // invisible
+}).addTo(map);
 
-  // 🔥 MARKER
-  const marker = L.marker(coords, {
-    icon: makeIcon(item, false),
-    opacity: 0
-  }).addTo(map);
+marker.bindPopup(getPopupHtml(item));
 
-  marker.bindPopup(getPopupHtml(item));
-
-  marker.on('click', () => {
-    setActive(item.id, true);
-    scrollCardIntoView(item.id);
-  });
-
-  markerIndex.set(item.id, marker);
-
-  // 🔥 INNER
-  const inner = L.circle(coords, {
-    radius: 400,
-    color: 'red',
-    fillOpacity: 0.5,
-    interactive: false
-  }).addTo(map);
-
-  // 🔥 OUTER
-  const outer = L.circle(coords, {
-    radius: 1200,
-    color: 'red',
-    fillOpacity: 0.15,
-    interactive: false
-  }).addTo(map);
-
-  activeCircles.push(inner, outer);
-
-  // 🔥 RIPPLE
-  const rings = [];
-
-  for (let i = 0; i < 3; i++) {
-    setTimeout(() => {
-
-      const ring = L.circle(coords, {
-        radius: 400 + (i * 300),
-        color: 'red',
-        fillOpacity: 0.2 - (i * 0.05),
-        interactive: false
-      }).addTo(map);
-
-      rings.push({
-        ring: ring,
-        radius: 400 + (i * 300),
-        opacity: 0.2 - (i * 0.05)
-      });
-
-    }, i * 400);
-  }
-
-  const pulse = setInterval(() => {
-    rings.forEach(r => {
-      r.radius += 20;
-      r.opacity -= 0.015;
-
-      if (r.radius > 2200) {
-        r.radius = 600;
-        r.opacity = 0.18;
-      }
-
-      r.ring.setRadius(r.radius);
-      r.ring.setStyle({ fillOpacity: r.opacity });
-    });
-  }, 60);
-
-  activePulseAnimations.push({ rings: rings, timer: pulse });
-
+marker.on('click', () => {
+  setActive(item.id, true);
+  scrollCardIntoView(item.id);
 });
+
+markerIndex.set(item.id, marker);
+
+// 🔥 GLOW CORE
+const inner = L.circle(coords, {
+  radius: 400,
+  color: 'red',
+  fillOpacity: 0.5
+}).addTo(map);
+
+// 🔥 OUTER GLOW
+const outer = L.circle(coords, {
+  radius: 1200,
+  color: 'red',
+  fillOpacity: 0.15
+}).addTo(map);
+
+activeCircles.push(core, glow);
+
+// 🔥 MULTI RING RIPPLE
+const rings = [];
+
+for (let i = 0; i < 3; i++) {
+  setTimeout(() => {
+    L.circle(coords, {
+      radius: 400 + (i * 300),
+      color: 'red',
+      fillOpacity: 0.2 - (i * 0.05),
+      interactive: false // 🔥 THIS FIXES IT
+    }).addTo(map);
+  }, i * 400);
+}
+
+const pulse = setInterval(() => {
+  rings.forEach(r => {
+    r.radius += 20;
+    r.opacity -= 0.015;
+
+    if (r.radius > 2200) {
+      r.radius = 600;
+      r.opacity = 0.18;
+    }
+
+    r.ring.setRadius(r.radius);
+    r.ring.setStyle({ fillOpacity: r.opacity });
+  });
+}, 60);
+
+activePulseAnimations.push({ rings, timer: pulse });
+}); 
+
 fitMapToItems(items);
 }
 
@@ -1588,8 +1575,8 @@ fitMapToItems(items);
             <span><strong>Reviews:</strong> ${item.reviews || 0}</span>
           </div>
           <div class="card-actions">
-            <button class="mini-btn secondary" data-action="view" data-id="${item.id}">View</button>
-            <button class="mini-btn primary" data-action="message" data-id="${item.id}">Message</button>
+            <button class="mini-btn secondary" data-action="view" data-id="${item.id}" onclick="event.stopPropagation()">View</button>
+            <button class="mini-btn primary" data-action="message" data-id="${item.id}" onclick="event.stopPropagation()">Message</button>
           </div>
         </div>
       `;
@@ -1620,8 +1607,8 @@ fitMapToItems(items);
             <span><strong>Posted:</strong> ${item.posted_ago || 'Live'}</span>
           </div>
           <div class="card-actions">
-            <button class="mini-btn secondary" data-action="job-details" data-id="${item.id}">View</button>
-            <button class="mini-btn primary" data-action="project-room" data-id="${item.id}">
+            <button class="mini-btn secondary" data-action="job-details" data-id="${item.id}" onclick="event.stopPropagation()">View</button>
+            <button class="mini-btn primary" data-action="project-room" data-id="${item.id}" onclick="event.stopPropagation()">
   Submit Bid
 </button>
           </div>
@@ -1643,12 +1630,27 @@ fitMapToItems(items);
   }
 
   cardsRow.innerHTML = items.map(item => `
-    <div class="listing-card ${item.id === activeId ? 'active' : ''}" data-id="${item.id}">
+    <div
+      class="listing-card ${item.id === activeId ? 'active' : ''}"
+      data-id="${item.id}"
+      onclick="handleCardTap(event, ${item.id})"
+    >
       <div class="card-inner">
         ${item.type === 'contractor' ? contractorCardHtml(item) : jobCardHtml(item)}
       </div>
     </div>
   `).join('');
+}
+
+window.handleCardTap = function(event, id) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  const item = filteredItems.find(i => Number(i.id) === Number(id));
+  if (!item) return;
+  setActive(Number(id), true);
+  scrollCardIntoView(Number(id));
 }
 
    function setActive(id, panMap = false) {
@@ -1849,7 +1851,7 @@ function openProjectRoom(jobId) {
             <div class="detail-tags">${(item.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
           </div>
           <div class="card-actions">
-            <button class="mini-btn primary" data-action="message" data-id="${item.id}">Message</button>
+            <button class="mini-btn primary" data-action="message" data-id="${item.id}" onclick="event.stopPropagation()">Message</button>
           </div>
         `;
       } else {
@@ -1867,7 +1869,7 @@ const bidsHtml = visibleBids.length
         Bid: ${bid.amount}<br>
         Start: ${bid.eta || 'TBD'}<br>
         ${bid.message ? `Message: ${bid.message}<br>` : ''}
-        <button class="mini-btn primary" style="margin-top:8px;" data-action="accept-bid" data-job="${item.id}" data-bid="${index}">Accept Bid</button>
+        <button class="mini-btn primary" style="margin-top:8px;" data-action="accept-bid" data-job="${item.id}" data-bid="${index}" onclick="event.stopPropagation()">Accept Bid</button>
       </div>
     `).join('')
   : '<p>No bids yet.</p>';
@@ -1893,7 +1895,7 @@ const bidsHtml = visibleBids.length
             ${bidsHtml}
           </div>
           <div class="card-actions">
-            <button class="mini-btn primary" data-action="project-room" data-id="${item.id}">
+            <button class="mini-btn primary" data-action="project-room" data-id="${item.id}" onclick="event.stopPropagation()">
   Submit Bid
 </button>
            
@@ -2244,17 +2246,7 @@ cardsRow.addEventListener('scroll', () => {
     }
   }, 70);
 });
-    map.on('click', (e) => {
-
-  // 🔥 STOP map from hijacking card clicks
-  if (e.originalEvent && e.originalEvent.target.closest('.listing-card')) {
-    return;
-  }
-
-  if (!uiCollapsed) collapseUI();
-  else expandUI();
-
-});
+    map.on('click', () => {});
 
     window.addEventListener('resize', () => {
       setTimeout(() => {
