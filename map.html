@@ -2045,15 +2045,22 @@ const bidsHtml = visibleBids.length
 
 cardsRow.addEventListener('click', e => {
   const button = e.target.closest('[data-action]');
+  
   if (button) {
     e.preventDefault();
     e.stopPropagation();
-    handleCardAction(button.dataset.action, Number(button.dataset.id));
-    return;
+
+    const id = Number(button.dataset.id);
+    handleCardAction(button.dataset.action, id);
+
+    return; // 🔥 stops card click below
   }
 
-  const card = e.target.closest('.listing-card[data-id]');
-  if (card) setActive(card.dataset.id, true);
+  // 🔥 ONLY trigger if NOT clicking a button
+  if (!e.target.closest('[data-action]')) {
+    const card = e.target.closest('.listing-card[data-id]');
+    if (card) setActive(Number(card.dataset.id), true);
+  }
 });
     
 detailContent.addEventListener('click', e => {
