@@ -1262,9 +1262,9 @@ const jobId = urlParams.get('job');
 console.log("PROJECT ROOM JOB ID:", jobId);
   async function loadJob() {
   const { data, error } = await supabaseClient
-    .from('jobs')
+    .from('Jobs')
     .select('*')
-    .eq('id', jobId)
+    .eq('id', Number(jobId))
     .single();
 
   if (error) {
