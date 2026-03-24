@@ -1453,13 +1453,23 @@ document.getElementById("authSubmit").addEventListener("click", async () => {
       markerClusterGroup = null;
 
       items.forEach(item => {
+const coords = getDisplayCoords(item);
 
-  // 🔥 STRICT MODE FILTER (absolute separation)
-  if (currentMode === 'homeowner' && item.type !== 'contractor') return;
-  if (currentMode === 'contractor' && item.type !== 'job') return;
+// 🔥 ADD HIDDEN MARKER FOR INTERACTION
+const marker = L.marker(coords, {
+  icon: makeIcon(item, false),
+  opacity: 0 // invisible
+}).addTo(map);
 
-  const coords = getDisplayCoords(item);
-        
+marker.bindPopup(getPopupHtml(item));
+
+marker.on('click', () => {
+  setActive(item.id, true);
+  scrollCardIntoView(item.id);
+});
+
+markerIndex.set(item.id, marker);
+
 // 🔥 GLOW CORE
 const core = L.circle(coords, {
   radius: 400, // ⬅️ bigger
