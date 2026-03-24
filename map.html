@@ -1490,7 +1490,7 @@ const outer = L.circle(coords, {
 
 activeCircles.push(inner, outer);
 
-// 🔥 MULTI RING RIPPLE (FIXED)
+// 🔥 MULTI RING RIPPLE (CLEAN + FIXED)
 const rings = [];
 
 for (let i = 0; i < 3; i++) {
@@ -1499,11 +1499,11 @@ for (let i = 0; i < 3; i++) {
       radius: 400 + (i * 300),
       color: 'red',
       fillOpacity: 0.2 - (i * 0.05),
-      interactive: false // ✅ prevents blocking cards
+      interactive: false
     }).addTo(map);
 
     rings.push({
-      ring,
+      ring: ring,
       radius: 400 + (i * 300),
       opacity: 0.2 - (i * 0.05)
     });
