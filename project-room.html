@@ -1294,13 +1294,9 @@ console.log("PROJECT ROOM JOB ID:", jobId);
 /* ---------- MODE DETECTION ---------- */
 
 const params = new URLSearchParams(window.location.search);
-let mode = params.get("mode");
 
-if(!mode){
-  mode = "contractor";
-}
+let mode = params.get("mode") || "contractor";
 
-const jobId = params.get("job") || "demo";
 console.log("ACTIVE JOB ID:", jobId);
   
 /* ---------- HELPERS ---------- */
