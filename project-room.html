@@ -1278,15 +1278,11 @@ console.log("PROJECT ROOM JOB ID:", jobId);
 }
   function renderJob(job){
 
-  document.getElementById("jobTitle").innerText = job.title || "Untitled Job";
+  document.getElementById("jobTitle").innerText = job.Title || "Untitled Job";
 
-  document.getElementById("jobMeta").innerText =
-    `Project ID: ${job.id} • ${job.location || "Unknown Location"} • Homeowner: Anonymous • Contractor: Verified Contractor`;
+document.getElementById("jobBudget").innerText = job.Budget || "$0";
 
-  // ✅ NEW
-  document.getElementById("jobBudget").innerText = job.budget || "$0";
-
-  document.getElementById("jobTrade").innerText = job.trade || "General";
+document.getElementById("jobTrade").innerText = job.Trade || "General";
 
 }
   loadJob();
