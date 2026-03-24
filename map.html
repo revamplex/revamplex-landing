@@ -1830,9 +1830,15 @@ const bidsHtml = visibleBids.length
       }
 
       if (action === 'project-room') {
-        openProjectRoom(id);
-        return;
-      }
+  const lockedId = Number(id);
+
+  console.log("LOCKED CLICK ID:", lockedId);
+
+  // 🔥 IMMEDIATE redirect (no interference)
+  window.location.href = `project-room.html?mode=contractor&job=${lockedId}`;
+  
+  return;
+}
 
       if (action === 'bid') {
         submitBid(id);
