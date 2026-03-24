@@ -2139,11 +2139,26 @@ cardsRow.addEventListener('click', e => {
   if (!e.target.closest('[data-action]')) {
     const card = e.target.closest('.listing-card[data-id]');
     if (card) {
+  if (card) {
   const id = Number(card.dataset.id);
 
-  console.log("CARD CLICK (FULL):", id);
+  const item = [...contractors, ...jobs].find(i => Number(i.id) === id);
 
-  window.location.href = `project-room.html?mode=${currentMode}&job=${id}`;
+  console.log("CARD CLICK (FULL):", id, item);
+
+  if (!item) return;
+
+  // 🔥 IF CONTRACTOR (homeowner view)
+  if (item.type === "contractor") {
+    window.location.href = `project-room.html?mode=homeowner&contractor=${id}`;
+    return;
+  }
+
+  // 🔥 IF JOB (contractor view)
+  if (item.type === "job") {
+    window.location.href = `project-room.html?mode=contractor&job=${id}`;
+    return;
+  }
 }
   }
 });
