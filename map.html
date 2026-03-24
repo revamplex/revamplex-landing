@@ -1709,7 +1709,20 @@ function setSort(type) {
       setMode('contractor');
     }
 
-    function openProjectRoom(jobId) {
+   function openProjectRoom(jobId) {
+  jobId = Number(jobId);
+
+  const job = jobs.find(entry => entry.id === jobId);
+
+  console.log("OPENING FIXED:", jobId, job);
+
+  if (!job) {
+    console.warn("Job not found");
+    return;
+  }
+
+  window.location.href = `project-room.html?mode=contractor&job=${job.id}`;
+}
   const job = filteredItems.find(entry => String(entry.id) === String(jobId));
 
   console.log("OPENING FROM FILTERED:", jobId, job);
@@ -2046,7 +2059,7 @@ cardsRow.addEventListener('click', e => {
   if (button) {
     e.preventDefault();
     e.stopPropagation();
-    handleCardAction(button.dataset.action, button.dataset.id);
+    handleCardAction(button.dataset.action, Number(button.dataset.id));
     return;
   }
 
