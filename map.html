@@ -1476,14 +1476,16 @@ markerIndex.set(item.id, marker);
 const inner = L.circle(coords, {
   radius: 400,
   color: 'red',
-  fillOpacity: 0.5
+  fillOpacity: 0.5,
+  interactive: false
 }).addTo(map);
 
 // 🔥 OUTER GLOW
 const outer = L.circle(coords, {
   radius: 1200,
   color: 'red',
-  fillOpacity: 0.15
+  fillOpacity: 0.15,
+  interactive: false
 }).addTo(map);
 
 activeCircles.push(inner, outer);
