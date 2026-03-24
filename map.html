@@ -1,3 +1,5 @@
+Map.html
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1714,6 +1716,33 @@ function setSort(type) {
       window.location.href = `project-room.html?mode=contractor&job=${jobId}`;
     }
 
+    async function submitBid(jobId) {
+      try {
+        const amount = prompt("Enter your bid amount:");
+        if (!amount) return;
+        const message = prompt("Add a message (optional):") || "";
+
+        const { error } = await supabaseClient.from('bids').insert([{
+          job_id: jobId,
+contractor_id: 'demo-contractor',
+contractor_name: 'Verified Contractor',
+          amount: amount,
+          message: message,
+          eta: 'TBD'
+        }]);
+
+        if (error) {
+          console.error(error);
+          alert('Error submitting bid');
+          return;
+        }
+
+        showStatus('Bid submitted');
+        await loadLiveData();
+      } catch (err) {
+        console.error(err);
+      }
+    }
 
     function openDetailModal(item) {
       if (!item) return;
@@ -1790,9 +1819,8 @@ const bidsHtml = visibleBids.length
             ${bidsHtml}
           </div>
           <div class="card-actions">
-            <button onclick="window.location.href='project-room.html?mode=contractor&job=${job.id}'">
-  Submit Bid
-</button>
+            <button class="mini-btn secondary" data-action="project-room" data-id="${item.id}">Open Project Room</button>
+            <button class="mini-btn primary" data-action="bid" data-id="${item.id}">Submit Bid</button>
           </div>
         `;
       }
