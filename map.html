@@ -1263,7 +1263,12 @@ if (!userId) {
 
       if (error) throw error;
 
-      const userId = data.user.id;
+      const userId = data.user?.id;
+
+if (!userId) {
+  alert("Signup worked, try logging in.");
+  return;
+}
 
       // 🔥 get role
       const { data: profile } = await supabaseClient
