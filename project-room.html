@@ -1506,9 +1506,7 @@ function submitBid(){
 
   const amount=document.getElementById("grandOut").innerText;
 
-  let jobs=loadJobs();
-
-  const job=jobs.find(j=>String(j.id)===String(jobId));
+  const job = window.currentJob;
 
   if(!job){
     alert("Job not found");
@@ -1597,7 +1595,6 @@ function incrementBid(){
 
 /* ---------- LOAD JOB DATABASE ---------- */
 
-function loadJobs(){
   return JSON.parse(localStorage.getItem("revampJobs") || "[]");
 }
 
@@ -1611,9 +1608,7 @@ function submitBid(){
 
   const amount=document.getElementById("grandOut").innerText;
 
-  let jobs=loadJobs();
-
-  const job=jobs.find(j=>String(j.id)===String(jobId));
+  const job = window.currentJob;
 
   if(!job){
     alert("Job not found");
@@ -1662,7 +1657,6 @@ function loadBidDashboard(){
 
   if(mode!=="homeowner") return;
 
-  const jobs=loadJobs();
 
   const job=jobs.find(j=>String(j.id)===String(jobId));
 
