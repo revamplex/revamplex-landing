@@ -1268,10 +1268,9 @@ console.log("PROJECT ROOM JOB ID:", jobId);
   console.log("LOADING JOB ID:", jobId);
 
   const { data, error } = await supabaseClient
-    .from('jobs')
-    .select('*')
-    .eq('id', jobId)
-    .single();
+  .from('jobs')
+  .select('*')
+  .eq('id', jobId);
 
   if (error) {
     console.error("SUPABASE ERROR:", error);
@@ -1283,7 +1282,17 @@ console.log("PROJECT ROOM JOB ID:", jobId);
 
   window.currentJob = data;
 
-  renderJob(data);
+  console.log("RAW DATA:", data);
+
+if (!data || data.length === 0) {
+  console.warn("NO JOB FOUND FOR ID:", jobId);
+  alert("No job found in database");
+  return;
+}
+
+window.currentJob = data[0];
+
+renderJob(data[0]);
 }
   function renderJob(job){
 
