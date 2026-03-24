@@ -1709,26 +1709,15 @@ function setSort(type) {
       setMode('contractor');
     }
 
-   function openProjectRoom(jobId) {
+function openProjectRoom(jobId) {
   jobId = Number(jobId);
 
   const job = jobs.find(entry => entry.id === jobId);
 
-  console.log("OPENING FIXED:", jobId, job);
+  console.log("OPENING JOB:", jobId, job);
 
   if (!job) {
     console.warn("Job not found");
-    return;
-  }
-
-  window.location.href = `project-room.html?mode=contractor&job=${job.id}`;
-}
-  const job = filteredItems.find(entry => String(entry.id) === String(jobId));
-
-  console.log("OPENING FROM FILTERED:", jobId, job);
-
-  if (!job) {
-    console.warn("Job not found in filteredItems");
     return;
   }
 
