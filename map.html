@@ -463,7 +463,23 @@
       align-items:center;
       margin-top:auto;
     }
+.card-actions .mini-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
+  height: 42px;
+  min-height: 42px;
+
+  flex: 1;
+
+  white-space: nowrap;
+}
+    .card-actions {
+  display: flex;
+  gap: 8px;
+  align-items: stretch; /* 🔥 THIS IS KEY */
+}
     .mini-btn {
       flex:1;
       height:38px;
