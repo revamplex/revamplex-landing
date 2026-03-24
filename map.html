@@ -2141,20 +2141,30 @@ cardsRow.addEventListener('click', e => {
     e.stopPropagation();
 
     const id = Number(button.dataset.id);
+
+    console.log("BUTTON CLICK:", button.dataset.action, id);
+
     handleCardAction(button.dataset.action, id);
     return;
   }
 
-  // 🔥 CARD CLICK = ONLY SET ACTIVE (NOT NAVIGATE)
   const card = e.target.closest('.listing-card[data-id]');
   if (!card) return;
 
   const id = Number(card.dataset.id);
 
-  console.log("CARD CLICK (SET ACTIVE):", id);
+  console.log("CARD CLICK:", id);
 
-  setActive(id, true);        // 🔥 THIS RESTORES ANIMATION
-  scrollCardIntoView(id);     // 🔥 THIS RESTORES SCROLL
+  // 🔥 FORCE correct item lookup
+  const item = filteredItems.find(i => Number(i.id) === id);
+
+  if (!item) {
+    console.warn("ITEM NOT FOUND IN FILTERED ITEMS:", id);
+    return;
+  }
+
+  setActive(id, true);
+  scrollCardIntoView(id);
 
 });
     
