@@ -1,5 +1,3 @@
-Map.html
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,6 +10,29 @@ Map.html
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 
+<!-- 🔥 ADD THIS INSIDE YOUR TOP NAV / HEADER AREA -->
+
+<div style="position:absolute; top:10px; right:15px; z-index:9999; display:flex; gap:10px;">
+  <button onclick="openAuth('login')" class="auth-btn">Login</button>
+  <button onclick="openAuth('register')" class="auth-btn">Register</button>
+</div>
+
+<style>
+.auth-btn {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+  transition: 0.2s;
+}
+.auth-btn:hover {
+  transform: scale(1.05);
+}
+</style>
   <style>
     :root {
       --brand: #f97316;
@@ -1116,6 +1137,43 @@ Map.html
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+let authMode = 'login';
+
+function openAuth(mode) {
+  authMode = mode;
+  document.getElementById('authTitle').innerText = mode === 'login' ? 'Login' : 'Register';
+  document.getElementById('authModal').style.display = 'flex';
+}
+
+function closeAuth() {
+  document.getElementById('authModal').style.display = 'none';
+}
+
+function toggleAuth() {
+  authMode = authMode === 'login' ? 'register' : 'login';
+  document.getElementById('authTitle').innerText = authMode === 'login' ? 'Login' : 'Register';
+}
+
+async function handleAuth() {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  if (!email || !password) {
+    alert("Enter email & password");
+    return;
+  }
+
+  if (authMode === 'login') {
+    alert("Login logic goes here (Supabase next)");
+  } else {
+    alert("Register logic goes here (Supabase next)");
+  }
+}
+
+function openProjectRoom(jobId) {
+  window.location.href = `project-room.html?mode=contractor&job=${jobId}`;
+} 
+
     const TRADE_OPTIONS = [
       'Kitchen Renovation','Bathroom Renovation','Additions & Remodeling','General Contractors','Carpentry',
       'Concrete & Masonry','Decks & Porches','Doors','Drywall & Insulation','Electrical','Fencing','Flooring',
@@ -1819,8 +1877,7 @@ const bidsHtml = visibleBids.length
             ${bidsHtml}
           </div>
           <div class="card-actions">
-            <button class="mini-btn secondary" data-action="project-room" data-id="${item.id}">Open Project Room</button>
-            <button class="mini-btn primary" data-action="bid" data-id="${item.id}">Submit Bid</button>
+            <button class="submit-bid-btn" onclick="openProjectRoom(${item.id})">
           </div>
         `;
       }
@@ -2166,5 +2223,29 @@ cardsRow.addEventListener('scroll', () => {
     loadLiveData();
     subscribeLive();
   </script>
+<div id="authModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99999; align-items:center; justify-content:center;">
+  <div style="background:white; padding:25px; border-radius:16px; width:300px; box-shadow:0 10px 40px rgba(0,0,0,0.3);">
+
+    <h2 id="authTitle" style="margin-bottom:15px;">Login</h2>
+
+    <input id="email" placeholder="Email" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc;" />
+    <input id="password" type="password" placeholder="Password" style="width:100%; padding:10px; margin-bottom:15px; border-radius:8px; border:1px solid #ccc;" />
+
+    <button onclick="handleAuth()" style="width:100%; background:#f97316; color:white; border:none; padding:12px; border-radius:10px; font-weight:600;">
+      Continue
+    </button>
+
+    <div style="margin-top:10px; text-align:center;">
+      <span onclick="toggleAuth()" style="cursor:pointer; color:#f97316; font-size:14px;">
+        Switch Mode
+      </span>
+    </div>
+
+    <div onclick="closeAuth()" style="margin-top:15px; text-align:center; cursor:pointer; color:#999;">
+      Close
+    </div>
+
+  </div>
+</div>
 </body>
 </html>
