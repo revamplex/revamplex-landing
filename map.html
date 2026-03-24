@@ -1708,7 +1708,8 @@ function setSort(type) {
     }
 
     function openProjectRoom(jobId) {
-      const job = jobs.find(entry => entry.id === jobId);
+      const job = jobs.find(entry => String(entry.id) === String(jobId));
+      console.log("OPENING JOB:", jobId, job);
       if (!job) return;
       sessionStorage.setItem('revampSelectedJob', JSON.stringify(getSafeJobSessionItem(job)));
       window.location.href = `project-room.html?mode=contractor&job=${jobId}`;
