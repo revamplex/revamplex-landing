@@ -2131,15 +2131,12 @@ cardsRow.addEventListener('click', e => {
 
     const id = Number(button.dataset.id);
     handleCardAction(button.dataset.action, id);
-
-    return; // 🔥 stops card click below
+    return;
   }
 
-  // 🔥 ONLY trigger if NOT clicking a button
-  if (!e.target.closest('[data-action]')) {
-    const card = e.target.closest('.listing-card[data-id]');
-    if (card) {
-  if (card) {
+  const card = e.target.closest('.listing-card[data-id]');
+  if (!card) return;
+
   const id = Number(card.dataset.id);
 
   const item = [...contractors, ...jobs].find(i => Number(i.id) === id);
@@ -2148,18 +2145,16 @@ cardsRow.addEventListener('click', e => {
 
   if (!item) return;
 
-  // 🔥 IF CONTRACTOR (homeowner view)
+  // 🔥 CONTRACTOR CLICK (homeowner mode)
   if (item.type === "contractor") {
     window.location.href = `project-room.html?mode=homeowner&contractor=${id}`;
     return;
   }
 
-  // 🔥 IF JOB (contractor view)
+  // 🔥 JOB CLICK (contractor mode)
   if (item.type === "job") {
     window.location.href = `project-room.html?mode=contractor&job=${id}`;
     return;
-  }
-}
   }
 });
     
