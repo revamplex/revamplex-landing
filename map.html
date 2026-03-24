@@ -2123,6 +2123,7 @@ const bidsHtml = visibleBids.length
     jobModal.addEventListener('click', e => { if (e.target === jobModal) closeJobForm(); });
 
 cardsRow.addEventListener('click', e => {
+
   const button = e.target.closest('[data-action]');
   
   if (button) {
@@ -2134,28 +2135,17 @@ cardsRow.addEventListener('click', e => {
     return;
   }
 
+  // 🔥 CARD CLICK = ONLY SET ACTIVE (NOT NAVIGATE)
   const card = e.target.closest('.listing-card[data-id]');
   if (!card) return;
 
   const id = Number(card.dataset.id);
 
-  const item = [...contractors, ...jobs].find(i => Number(i.id) === id);
+  console.log("CARD CLICK (SET ACTIVE):", id);
 
-  console.log("CARD CLICK (FULL):", id, item);
+  setActive(id, true);        // 🔥 THIS RESTORES ANIMATION
+  scrollCardIntoView(id);     // 🔥 THIS RESTORES SCROLL
 
-  if (!item) return;
-
-  // 🔥 CONTRACTOR CLICK (homeowner mode)
-  if (item.type === "contractor") {
-    window.location.href = `project-room.html?mode=homeowner&contractor=${id}`;
-    return;
-  }
-
-  // 🔥 JOB CLICK (contractor mode)
-  if (item.type === "job") {
-    window.location.href = `project-room.html?mode=contractor&job=${id}`;
-    return;
-  }
 });
     
 detailContent.addEventListener('click', e => {
