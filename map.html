@@ -1473,21 +1473,17 @@ marker.on('click', () => {
 markerIndex.set(item.id, marker);
 
 // 🔥 GLOW CORE
-const core = L.circle(coords, {
-  radius: 400, // ⬅️ bigger
-  color: '#ff0000',
-  fillColor: '#ff0000',
-  fillOpacity: 0.35,
-  weight: 0
+const inner = L.circle(coords, {
+  radius: 400,
+  color: 'red',
+  fillOpacity: 0.5
 }).addTo(map);
 
 // 🔥 OUTER GLOW
-const glow = L.circle(coords, {
-  radius: 900, // ⬅️ much bigger
-  color: '#ff0000',
-  fillColor: '#ff0000',
-  fillOpacity: 0.2,
-  weight: 0
+const outer = L.circle(coords, {
+  radius: 1200,
+  color: 'red',
+  fillOpacity: 0.15
 }).addTo(map);
 
 activeCircles.push(core, glow);
@@ -1496,19 +1492,14 @@ activeCircles.push(core, glow);
 const rings = [];
 
 for (let i = 0; i < 3; i++) {
-  const ring = L.circle(coords, {
-    radius: 600 + (i * 400), // ⬅️ bigger spread
-    color: '#ff0000',
-    fillColor: '#ff0000',
-    fillOpacity: 0.18 - (i * 0.05),
-    weight: 0
-  }).addTo(map);
-
-  rings.push({
-    ring,
-    radius: 600 + (i * 400),
-    opacity: 0.18 - (i * 0.05)
-  });
+  setTimeout(() => {
+    L.circle(coords, {
+      radius: 400 + (i * 300),
+      color: 'red',
+      fillOpacity: 0.2 - (i * 0.05),
+      interactive: false // 🔥 THIS FIXES IT
+    }).addTo(map);
+  }, i * 400);
 }
 
 const pulse = setInterval(() => {
