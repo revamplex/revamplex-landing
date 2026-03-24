@@ -2244,12 +2244,6 @@ cardsRow.addEventListener('scroll', () => {
       }, 120);
     });
 
-    const registered = localStorage.getItem('revamplex_registered');
-    if (!registered) {
-      welcomeOverlay.style.display = 'flex';
-    } else {
-      welcomeOverlay.style.display = 'none';
-    }
 
     populateTradeSelect();
     syncModeUI();
