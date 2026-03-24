@@ -32,6 +32,26 @@
 .auth-btn:hover {
   transform: scale(1.05);
 }
+.submit-bid-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 42px;
+  min-height: 42px;
+
+  font-size: 14px;
+  font-weight: 900;
+
+  border-radius: 12px;
+
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  color: white;
+
+  box-shadow: 0 10px 20px rgba(249,115,22,0.25);
+
+  padding: 0 12px;
+}
 </style>
   <style>
     :root {
@@ -1588,7 +1608,7 @@ fitMapToItems(items);
           </div>
           <div class="card-actions">
             <button class="mini-btn secondary" data-action="job-details" data-id="${item.id}">View</button>
-            <button class="mini-btn primary" onclick="openProjectRoom(${item.id})">Bid</button>
+            <button class="mini-btn primary submit-bid-btn" onclick="openProjectRoom(${item.id})">Submit Bid</button>
           </div>
         </div>
       `;
