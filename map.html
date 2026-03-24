@@ -1221,6 +1221,15 @@ async function handleAuth() {
 
   try {
     if (authMode === 'register') {
+
+      // 🔥 ask user role
+      const role = prompt("Enter role: contractor or homeowner");
+
+      if (!role || !['contractor','homeowner'].includes(role.toLowerCase())) {
+        alert("Must be 'contractor' or 'homeowner'");
+        return;
+      }
+
       const { data, error } = await supabaseClient.auth.signUp({
         email,
         password
@@ -1228,7 +1237,16 @@ async function handleAuth() {
 
       if (error) throw error;
 
-      alert("Account created! Check your email to confirm.");
+      const userId = data.user.id;
+
+      // 🔥 insert into profiles
+      await supabaseClient.from('profiles').insert([{
+        id: userId,
+        email: email,
+        role: role.toLowerCase()
+      }]);
+
+      alert("Account created!");
       closeAuth();
     }
 
@@ -1240,6 +1258,34 @@ async function handleAuth() {
 
       if (error) throw error;
 
+      const userId = data.user.id;
+
+      // 🔥 get role
+      const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .single();
+
+      if (!profile) {
+        alert("No role found");
+        return;
+      }
+
+      // 🔥 redirect based on role
+      if (profile.role === 'contractor') {
+        window.location.href = "map.html?view=contractor";
+      } else {
+        window.location.href = "map.html?view=homeowner";
+      }
+
+    }
+
+  } catch (err) {
+    alert(err.message);
+    console.error(err);
+  }
+}
       alert("Logged in successfully");
       closeAuth();
 
