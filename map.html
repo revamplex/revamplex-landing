@@ -1790,7 +1790,9 @@ const bidsHtml = visibleBids.length
             ${bidsHtml}
           </div>
           <div class="card-actions">
-            <button class="mini-btn secondary" data-action="project-room" data-id="${item.id}">Open Project Room</button>
+            <button onclick="window.location.href='project-room.html?mode=contractor&job=${job.id}'">
+  Submit Bid
+</button>
            
           </div>
         `;
