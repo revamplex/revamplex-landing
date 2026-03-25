@@ -2217,7 +2217,7 @@ const bidsHtml = visibleBids.length
   }
 
   try {
-    // 🔥 CREATE USER
+    // 🔥 SIGN UP USER
     const { data, error } = await supabaseClient.auth.signUp({
       email,
       password
@@ -2227,27 +2227,56 @@ const bidsHtml = visibleBids.length
 
     const userId = data.user?.id;
 
-if (!userId) {
-  alert("Signup worked, try logging in.");
-  return;
-}
+    if (!userId) {
+      alert("Signup issue — try again");
+      return;
+    }
 
-    // 🔥 SAVE ROLE
-    await supabaseClient.from('profiles').insert([{
+    // 🔥 SAVE FULL PROFILE (THIS WAS MISSING)
+    const profilePayload = {
       id: userId,
       email: email,
-      role: selectedWelcomeRole
-    }]);
+      role: selectedWelcomeRole,
+      full_name: document.getElementById('welcomeFullName').value.trim(),
+      phone: document.getElementById('welcomePhone').value.trim(),
+      address: document.getElementById('welcomeAddress').value.trim(),
 
-    // 🔥 HIDE OVERLAY FOREVER
-    localStorage.setItem('revamplex_registered', 'true');
+      // homeowner fields
+      project_type: document.getElementById('welcomeProjectType').value,
+      project_notes: document.getElementById('welcomeProjectNotes').value.trim(),
 
-    // 🔥 REDIRECT BASED ON ROLE
-    if (selectedWelcomeRole === 'contractor') {
-      window.location.href = "map.html?view=contractor";
-    } else {
-      window.location.href = "map.html?view=homeowner";
+      // contractor fields
+      company: document.getElementById('welcomeCompany').value.trim(),
+      trade: document.getElementById('welcomeTrade').value,
+      license: document.getElementById('welcomeLicense').value.trim(),
+      service_radius: document.getElementById('welcomeCoverage').value,
+      bio: document.getElementById('welcomeBio').value.trim()
+    };
+
+    const { error: profileError } = await supabaseClient
+      .from('profiles')
+      .insert([profilePayload]);
+
+    if (profileError) {
+      console.error(profileError);
+      alert("Profile save failed");
+      return;
     }
+
+    // 🔥 FORCE LOGIN AFTER SIGNUP
+    const { error: loginError } = await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (loginError) throw loginError;
+
+    // 🔥 SAVE STATE
+    localStorage.setItem('revamplex_registered', 'true');
+    localStorage.setItem('revamplex_role', selectedWelcomeRole);
+
+    // 🔥 HARD REDIRECT (clean state)
+    window.location.href = `map.html?view=${selectedWelcomeRole}`;
 
   } catch (err) {
     alert(err.message);
