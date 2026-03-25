@@ -1324,10 +1324,8 @@ async function handleAuth() {
 if (error) throw error;
 
 // immediately log them in after signup
-const { error: loginError } = await supabaseClient.auth.signInWithPassword({
-  email,
-  password
-});
+alert("Check your email to confirm your account before logging in.");
+return;
 
 if (loginError) throw loginError;
 
