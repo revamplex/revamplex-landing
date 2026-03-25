@@ -1094,7 +1094,9 @@
 </div>
         <button class="demoBtn" id="exploreDemoBtn">Explore Map Demo</button>
       </div>
-
+<button class="demoBtn" id="loginInsteadBtn">
+  Already have an account? Login
+</button>
       <div class="welcomeFormWrap" id="welcomeFormWrap">
         <div class="welcomeRolePill" id="welcomeRolePill">Homeowner Registration</div>
 
@@ -2358,6 +2360,24 @@ async function loadContractors() {
     welcomeContractorBtn.addEventListener('click', () => startSignup('contractor'));
     exploreDemoBtn.addEventListener('click', exploreDemo);
     welcomeBackBtn.addEventListener('click', backToRoleChooser);
+    document.getElementById('loginInsteadBtn').addEventListener('click', async () => {
+  const email = prompt("Enter your email");
+  const password = prompt("Enter your password");
+
+  if (!email || !password) return;
+
+  const { error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  location.reload();
+});
     function exploreDemo() {
   // hide overlay
   welcomeOverlay.classList.add('hidden');
