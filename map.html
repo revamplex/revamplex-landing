@@ -2546,18 +2546,21 @@ cardsRow.addEventListener('scroll', () => {
     });
 
 function openWelcomeAuth(mode = 'register') {
-  // 🔥 exiting demo mode
+  // 🔥 EXIT DEMO MODE
   localStorage.removeItem('revamplex_demo');
 
+  // 🔥 FORCE OVERLAY VISIBLE (THIS IS THE FIX)
+  welcomeOverlay.classList.remove('hidden');
   welcomeOverlay.style.display = 'flex';
+
+  // 🔥 RESET UI STATE
+  backToRoleChooser();
 
   if (mode === 'login') {
     const loginBtn = document.getElementById('loginInsteadBtn');
     if (loginBtn) {
       setTimeout(() => loginBtn.click(), 100);
     }
-  } else {
-    backToRoleChooser();
   }
 }
 
