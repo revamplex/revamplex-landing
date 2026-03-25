@@ -1225,14 +1225,28 @@ async function checkUserSession() {
     .from('profiles')
     .select('role,email')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
   if (profileError) {
     console.error('profile load error', profileError);
   }
 
   const role = profile?.role;
+if (!profile) {
+  console.warn("No profile found — creating one");
 
+  const fallbackRole = localStorage.getItem('revamplex_role') || 'homeowner';
+
+  await supabaseClient.from('profiles').insert([{
+    id: user.id,
+    email: user.email,
+    role: fallbackRole
+  }]);
+
+  lockedRole = fallbackRole;
+  setMode(fallbackRole);
+  return;
+}
   if (!role) {
     authContainer.innerHTML = `
       <div style="display:flex; align-items:center; gap:10px;">
@@ -1364,7 +1378,7 @@ if (!userId) {
         .from('profiles')
         .select('role')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       if (!profile) {
         alert("No role found");
