@@ -2132,19 +2132,24 @@ const bidsHtml = visibleBids.length
     }
 
     function setMode(mode) {
-      currentMode = mode;
-      localStorage.setItem('revamplex_role', mode);
+  if (lockedRole && mode !== lockedRole) {
+    showStatus(`Logged in as ${lockedRole} only`);
+    mode = lockedRole;
+  }
 
-      const url = new URL(window.location);
-      url.searchParams.set('view', mode);
-      window.history.replaceState({}, '', url);
+  currentMode = mode;
+  localStorage.setItem('revamplex_role', mode);
 
-      syncModeUI();
-      const dataset = getCurrentDataset();
-      activeId = dataset[0] ? dataset[0].id : null;
-      applyFilters();
-      expandUI();
-    }
+  const url = new URL(window.location);
+  url.searchParams.set('view', mode);
+  window.history.replaceState({}, '', url);
+
+  syncModeUI();
+  const dataset = getCurrentDataset();
+  activeId = dataset[0] ? dataset[0].id : null;
+  applyFilters();
+  expandUI();
+}
 
     function clearWelcomeForm() {
       [
