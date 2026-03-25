@@ -1230,31 +1230,28 @@ async function checkUserSession() {
   if (profileError) {
     console.error('profile load error', profileError);
   }
-const role = profile?.role;
-if (!profile) {
-  console.warn("No profile found — creating one");
+let role = profile?.role;
 
-  const fallbackRole = localStorage.getItem('revamplex_role') || 'homeowner';
+// 🔧 fallback if profile missing
+if (!role) {
+  console.warn("No profile found — using stored role");
 
-  await supabaseClient.from('profiles').insert([{
-    id: user.id,
-    email: user.email,
-    role: fallbackRole
-  }]);
+  role = localStorage.getItem('revamplex_role');
 
-  lockedRole = fallbackRole;
-  setMode(fallbackRole);
-  return;
-}
+  // if STILL no role → do NOT force homeowner
   if (!role) {
+    console.warn("No role anywhere — showing login state only");
+
     authContainer.innerHTML = `
       <div style="display:flex; align-items:center; gap:10px;">
         <span style="font-weight:700;">Logged In</span>
         <button onclick="logout()" class="auth-btn">Logout</button>
       </div>
     `;
+
     return;
   }
+}
 
   lockedRole = role;
 
