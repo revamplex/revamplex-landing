@@ -1344,11 +1344,7 @@ if (!userId) {
 }
 
       // 🔥 insert into profiles
-      await supabaseClient.from('profiles').insert([{
-        id: userId,
-        email: email,
-        role: role.toLowerCase()
-      }]);
+
 
       alert("Account created!");
       closeAuth();
