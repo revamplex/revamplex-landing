@@ -2529,10 +2529,11 @@ cardsRow.addEventListener('scroll', () => {
   welcomeOverlay.style.display = 'flex';
 
   if (mode === 'login') {
-    // simulate login click
-    document.getElementById('loginInsteadBtn')?.click();
+    const loginBtn = document.getElementById('loginInsteadBtn');
+    if (loginBtn) {
+      setTimeout(() => loginBtn.click(), 100);
+    }
   } else {
-    // reset to role chooser
     backToRoleChooser();
   }
 }
