@@ -1365,11 +1365,14 @@ if (!userId) {
       }
 
       // 🔥 redirect based on role
-      if (profile.role === 'contractor') {
-        window.location.href = "map.html?view=contractor";
-      } else {
-        window.location.href = "map.html?view=homeowner";
-      }
+     localStorage.setItem('revamplex_registered', 'true');
+localStorage.setItem('revamplex_role', profile.role);
+
+if (profile.role === 'contractor') {
+  window.location.href = "map.html?view=contractor";
+} else {
+  window.location.href = "map.html?view=homeowner";
+}
 
     }
 
