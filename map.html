@@ -2378,16 +2378,13 @@ async function loadContractors() {
 
   location.reload();
 });
-    function exploreDemo() {
-  // hide overlay
+function exploreDemo() {
   welcomeOverlay.classList.add('hidden');
 
-  // prevent it from showing again
-  localStorage.setItem('revamplex_registered', 'true');
+  // 🔥 mark as demo instead of registered
+  localStorage.setItem('revamplex_demo', 'true');
 
-  // load demo view
   setMode('homeowner');
-
   showStatus('Demo mode');
 }
     welcomeSubmitBtn.addEventListener('click', submitWelcomeRegistration);
