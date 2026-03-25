@@ -1504,18 +1504,12 @@ function openProjectRoom(jobId) {
     }
 
 function getCurrentDataset() {
-  if (lockedRole === 'contractor') {
-    return jobs; // contractors ONLY see jobs
-  }
-
-  if (lockedRole === 'homeowner') {
-    return contractors; // homeowners ONLY see contractors
-  }
+  // 🔒 HARD LOCK — ignore currentMode completely when logged in
+  if (lockedRole === 'contractor') return jobs;
+  if (lockedRole === 'homeowner') return contractors;
 
   // fallback (not logged in)
-  return currentMode === 'homeowner'
-    ? contractors
-    : jobs;
+  return currentMode === 'homeowner' ? contractors : jobs;
 }
 
     function syncModeUI() {
