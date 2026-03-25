@@ -1818,11 +1818,7 @@ fitMapToItems(items);
         </div>
       `;
     }
-items = items.filter(item => {
-  if (lockedRole === 'homeowner') return item.type === 'contractor';
-  if (lockedRole === 'contractor') return item.type === 'job';
-  return true;
-});
+
 function renderCards(items) {
 
   // 🔒 HARD FILTER (MUST BE INSIDE FUNCTION)
