@@ -1823,7 +1823,15 @@ items = items.filter(item => {
   if (lockedRole === 'contractor') return item.type === 'job';
   return true;
 });
-       function renderCards(items) {
+function renderCards(items) {
+
+  // 🔒 HARD FILTER (MUST BE INSIDE FUNCTION)
+  items = items.filter(item => {
+    if (lockedRole === 'homeowner') return item.type === 'contractor';
+    if (lockedRole === 'contractor') return item.type === 'job';
+    return true;
+  });
+
   if (!items.length) {
     cardsRow.innerHTML = `
       <div class="listing-card" style="display:flex;align-items:center;justify-content:center;">
