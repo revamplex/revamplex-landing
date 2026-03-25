@@ -2522,6 +2522,9 @@ cardsRow.addEventListener('scroll', () => {
     });
 
 function openWelcomeAuth(mode = 'register') {
+  // 🔥 exiting demo mode
+  localStorage.removeItem('revamplex_demo');
+
   welcomeOverlay.style.display = 'flex';
 
   if (mode === 'login') {
@@ -2536,8 +2539,9 @@ function openWelcomeAuth(mode = 'register') {
 
 async function initAuthGate() {
   const { data: { session } } = await supabaseClient.auth.getSession();
+  const isDemo = localStorage.getItem('revamplex_demo');
 
-  if (!session) {
+  if (!session && !isDemo) {
     welcomeOverlay.style.display = 'flex';
   } else {
     welcomeOverlay.style.display = 'none';
