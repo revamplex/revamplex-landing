@@ -1664,13 +1664,11 @@ function getCurrentDataset() {
       clearMarkers();
       markerClusterGroup = null;
 
-      items.forEach(item => {
+items.forEach(item => {
 
-  // 🔥 STRICT MODE FILTER (absolute separation)
-const mode = lockedRole || currentMode;
-
-if (mode === 'homeowner' && item.type !== 'contractor') return;
-if (mode === 'contractor' && item.type !== 'job') return;
+  // 🔒 HARD DATA WALL (NO BLEED EVER AGAIN)
+  if (lockedRole === 'homeowner' && item.type !== 'contractor') return;
+  if (lockedRole === 'contractor' && item.type !== 'job') return;
 
   const coords = getDisplayCoords(item);
         
@@ -1820,7 +1818,11 @@ fitMapToItems(items);
         </div>
       `;
     }
-
+items = items.filter(item => {
+  if (lockedRole === 'homeowner') return item.type === 'contractor';
+  if (lockedRole === 'contractor') return item.type === 'job';
+  return true;
+});
        function renderCards(items) {
   if (!items.length) {
     cardsRow.innerHTML = `
