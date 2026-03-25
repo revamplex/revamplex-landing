@@ -760,7 +760,10 @@
       transform:translateX(-50%) translateY(-12px);
     }
 
-    #welcomeOverlay {
+    #welcomeOverlay.hidden {
+  display: none !important;
+  pointer-events: none;
+}
       position:fixed;
       inset:0;
       background:rgba(15,23,42,.65);
@@ -2397,8 +2400,8 @@ async function loadContractors() {
 });
 function exploreDemo() {
   welcomeOverlay.classList.add('hidden');
+  welcomeOverlay.style.display = 'none'; // 🔥 force remove from DOM flow
 
-  // 🔥 mark as demo instead of registered
   localStorage.setItem('revamplex_demo', 'true');
 
   setMode('homeowner');
