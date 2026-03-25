@@ -13,8 +13,7 @@
 <!-- 🔥 ADD THIS INSIDE YOUR TOP NAV / HEADER AREA -->
 
 <div style="position:absolute; top:10px; right:15px; z-index:9999; display:flex; gap:10px;">
-  <button onclick="openAuth('login')" class="auth-btn">Login</button>
-  <button onclick="openAuth('register')" class="auth-btn">Register</button>
+ <div id="authContainer" style="position:absolute; top:10px; right:15px; z-index:9999;"></div>
 </div>
 
 <style>
@@ -2502,12 +2501,17 @@ cardsRow.addEventListener('scroll', () => {
       }, 120);
     });
 
-    const registered = localStorage.getItem('revamplex_registered');
-    if (!registered) {
-      welcomeOverlay.style.display = 'flex';
-    } else {
-      welcomeOverlay.style.display = 'none';
-    }
+    async function initAuthGate() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+
+  if (!session) {
+    welcomeOverlay.style.display = 'flex';
+  } else {
+    welcomeOverlay.style.display = 'none';
+  }
+}
+
+initAuthGate();
 
   populateTradeSelect();
   syncModeUI();
@@ -2515,27 +2519,7 @@ cardsRow.addEventListener('scroll', () => {
   subscribeLive();
   checkUserSession();
   </script>
-<div id="authModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99999; align-items:center; justify-content:center;">
-  <div style="background:white; padding:25px; border-radius:16px; width:300px; box-shadow:0 10px 40px rgba(0,0,0,0.3);">
-
-    <h2 id="authTitle" style="margin-bottom:15px;">Login</h2>
-
-    <input id="email" placeholder="Email" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc;" />
-    <input id="password" type="password" placeholder="Password" style="width:100%; padding:10px; margin-bottom:15px; border-radius:8px; border:1px solid #ccc;" />
-
-    <button onclick="handleAuth()" style="width:100%; background:#f97316; color:white; border:none; padding:12px; border-radius:10px; font-weight:600;">
-      Continue
-    </button>
-
-    <div style="margin-top:10px; text-align:center;">
-      <span onclick="toggleAuth()" style="cursor:pointer; color:#f97316; font-size:14px;">
-        Switch Mode
-      </span>
-    </div>
-
-    <div onclick="closeAuth()" style="margin-top:15px; text-align:center; cursor:pointer; color:#999;">
-      Close
-    </div>
+  
 
   </div>
 </div>
