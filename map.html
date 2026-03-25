@@ -1892,8 +1892,8 @@ fitMapToItems(items);
       filteredItems = source.filter(item => {
 const mode = lockedRole || currentMode;
 
-if (mode === 'homeowner' && item.type !== 'contractor') return;
-if (mode === 'contractor' && item.type !== 'job') return;
+if (mode === 'homeowner' && item.type !== 'contractor') return false;
+if (mode === 'contractor' && item.type !== 'job') return false;
 
         if (currentMode === 'contractor' && item.type === 'job') {
           if ((item.max_bids || 5) <= ((item.bids || []).length)) return false;
