@@ -1246,6 +1246,7 @@ async function checkUserSession() {
   lockedRole = role;
 
   // lock correct mode only
+  lockedRole = role;
   setMode(role);
   syncModeUI();
   applyFilters();
@@ -1413,7 +1414,7 @@ function openProjectRoom(jobId) {
     let activePulseAnimations = [];
     let uiCollapsed = false;
     let selectedWelcomeRole = null;
-    let currentMode = new URLSearchParams(window.location.search).get('view') === 'contractor' ? 'contractor' : 'homeowner';
+    let currentMode = 'homeowner';
 
     const app = document.getElementById('app');
     const cardsRow = document.getElementById('cardsRow');
@@ -2152,10 +2153,12 @@ const bidsHtml = visibleBids.length
     }
 
 function setMode(mode) {
-  // 🔒 HARD LOCK
-  if (lockedRole && mode !== lockedRole) {
-    showStatus(`You are logged in as ${lockedRole}`);
-    return; // 🚫 BLOCK switch completely
+  // 🔒 ABSOLUTE LOCK
+  if (lockedRole) {
+    if (mode !== lockedRole) {
+      showStatus(`Locked as ${lockedRole}`);
+    }
+    mode = lockedRole; // 🔥 FORCE it no matter what
   }
 
   currentMode = mode;
@@ -2409,8 +2412,15 @@ function exploreDemo() {
       setSort('distance');
     });
 
-    homeownerModeBtn.addEventListener('click', () => setMode('homeowner'));
-    contractorModeBtn.addEventListener('click', () => setMode('contractor'));
+homeownerModeBtn.addEventListener('click', () => {
+  if (lockedRole) return;
+  setMode('homeowner');
+});
+
+contractorModeBtn.addEventListener('click', () => {
+  if (lockedRole) return;
+  setMode('contractor');
+});
 
     scrollLeftBtn.addEventListener('click', () => cardsRow.scrollBy({ left: -280, behavior: 'smooth' }));
     scrollRightBtn.addEventListener('click', () => cardsRow.scrollBy({ left: 280, behavior: 'smooth' }));
