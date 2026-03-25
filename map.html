@@ -1246,19 +1246,13 @@ async function checkUserSession() {
   lockedRole = role;
 
   // lock correct mode only
-  currentMode = role;
+  setMode(role);
   syncModeUI();
   applyFilters();
 
-  if (role === 'contractor') {
-    homeownerModeBtn.style.display = 'none';
-    contractorModeBtn.style.display = '';
-    contractorModeBtn.disabled = true;
-  } else {
-    contractorModeBtn.style.display = 'none';
-    homeownerModeBtn.style.display = '';
-    homeownerModeBtn.disabled = true;
-  }
+// 🔒 FULL LOCK UI
+homeownerModeBtn.style.display = 'none';
+contractorModeBtn.style.display = 'none';
 
   authContainer.innerHTML = `
     <div style="display:flex; align-items:center; gap:10px;">
@@ -1508,8 +1502,19 @@ function openProjectRoom(jobId) {
       showStatus._timer = setTimeout(() => statusPill.classList.remove('show'), 2200);
     }
 
-    function getCurrentDataset() {
-  return currentMode === 'homeowner' ? contractors.filter(c => c.type === 'contractor') : jobs;
+function getCurrentDataset() {
+  if (lockedRole === 'contractor') {
+    return jobs; // contractors ONLY see jobs
+  }
+
+  if (lockedRole === 'homeowner') {
+    return contractors; // homeowners ONLY see contractors
+  }
+
+  // fallback (not logged in)
+  return currentMode === 'homeowner'
+    ? contractors
+    : jobs;
 }
 
     function syncModeUI() {
@@ -2146,10 +2151,11 @@ const bidsHtml = visibleBids.length
       }
     }
 
-    function setMode(mode) {
+function setMode(mode) {
+  // 🔒 HARD LOCK
   if (lockedRole && mode !== lockedRole) {
-    showStatus(`Logged in as ${lockedRole} only`);
-    mode = lockedRole;
+    showStatus(`You are logged in as ${lockedRole}`);
+    return; // 🚫 BLOCK switch completely
   }
 
   currentMode = mode;
