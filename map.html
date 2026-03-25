@@ -1230,8 +1230,7 @@ async function checkUserSession() {
   if (profileError) {
     console.error('profile load error', profileError);
   }
-
-  const role = profile?.role;
+const role = profile?.role;
 if (!profile) {
   console.warn("No profile found — creating one");
 
