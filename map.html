@@ -1667,8 +1667,10 @@ function getCurrentDataset() {
       items.forEach(item => {
 
   // 🔥 STRICT MODE FILTER (absolute separation)
-  if (currentMode === 'homeowner' && item.type !== 'contractor') return;
-  if (currentMode === 'contractor' && item.type !== 'job') return;
+const mode = lockedRole || currentMode;
+
+if (mode === 'homeowner' && item.type !== 'contractor') return false;
+if (mode === 'contractor' && item.type !== 'job') return false;
 
   const coords = getDisplayCoords(item);
         
