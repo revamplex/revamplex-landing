@@ -1207,8 +1207,8 @@ async function checkUserSession() {
     lockedRole = null;
 
     authContainer.innerHTML = `
-      <button onclick="openAuth('login')" class="auth-btn">Login</button>
-      <button onclick="openAuth('register')" class="auth-btn">Register</button>
+      <button onclick="openWelcomeAuth('login')" class="auth-btn">Login</button>
+<button onclick="openWelcomeAuth('register')" class="auth-btn">Register</button>
     `;
 
     homeownerModeBtn.style.display = '';
@@ -2525,12 +2525,15 @@ cardsRow.addEventListener('scroll', () => {
     });
 
     async function initAuthGate() {
-  const { data: { session } } = await supabaseClient.auth.getSession();
+  function openWelcomeAuth(mode = 'register') {
+  welcomeOverlay.style.display = 'flex';
 
-  if (!session) {
-    welcomeOverlay.style.display = 'flex';
+  if (mode === 'login') {
+    // simulate login click
+    document.getElementById('loginInsteadBtn')?.click();
   } else {
-    welcomeOverlay.style.display = 'none';
+    // reset to role chooser
+    backToRoleChooser();
   }
 }
 
