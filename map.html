@@ -1192,7 +1192,50 @@
     const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+async function checkUserSession() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
 
+  const authContainer = document.querySelector('[style*="top:10px"]');
+
+  if (!authContainer) return;
+
+  // NOT logged in
+  if (!session) {
+    authContainer.innerHTML = `
+      <button onclick="openAuth('login')" class="auth-btn">Login</button>
+      <button onclick="openAuth('register')" class="auth-btn">Register</button>
+    `;
+    return;
+  }
+
+  // 🔥 Logged in
+  const user = session.user;
+
+  // get role
+  const { data: profile } = await supabaseClient
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  const role = profile?.role || 'homeowner';
+
+  // 🔥 FORCE correct view
+  setMode(role);
+
+  // 🔥 Replace buttons with user info + logout
+  authContainer.innerHTML = `
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span style="font-weight:700;">${role.toUpperCase()}</span>
+      <button onclick="logout()" class="auth-btn">Logout</button>
+    </div>
+  `;
+}
+
+async function logout() {
+  await supabaseClient.auth.signOut();
+  location.reload();
+}
 let authMode = 'login';
 
 function openAuth(mode) {
@@ -2384,6 +2427,7 @@ cardsRow.addEventListener('scroll', () => {
   syncModeUI();
   loadLiveData();
   subscribeLive();
+  checkUserSession();
   </script>
 <div id="authModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99999; align-items:center; justify-content:center;">
   <div style="background:white; padding:25px; border-radius:16px; width:300px; box-shadow:0 10px 40px rgba(0,0,0,0.3);">
