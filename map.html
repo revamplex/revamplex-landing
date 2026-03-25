@@ -2262,10 +2262,10 @@ const bidsHtml = visibleBids.length
       .insert([profilePayload]);
 
     if (profileError) {
-      console.error(profileError);
-      alert("Profile save failed");
-      return;
-    }
+  console.error("PROFILE ERROR:", profileError);
+  alert(profileError.message);
+  return;
+}
 
     // 🔥 FORCE LOGIN AFTER SIGNUP
     const { error: loginError } = await supabaseClient.auth.signInWithPassword({
