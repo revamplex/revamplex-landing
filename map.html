@@ -2524,8 +2524,7 @@ cardsRow.addEventListener('scroll', () => {
       }, 120);
     });
 
-    async function initAuthGate() {
-  function openWelcomeAuth(mode = 'register') {
+function openWelcomeAuth(mode = 'register') {
   welcomeOverlay.style.display = 'flex';
 
   if (mode === 'login') {
@@ -2538,8 +2537,15 @@ cardsRow.addEventListener('scroll', () => {
   }
 }
 
-initAuthGate();
+async function initAuthGate() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
 
+  if (!session) {
+    welcomeOverlay.style.display = 'flex';
+  } else {
+    welcomeOverlay.style.display = 'none';
+  }
+}
   populateTradeSelect();
   syncModeUI();
   loadLiveData();
