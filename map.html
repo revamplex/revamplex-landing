@@ -2191,7 +2191,21 @@ if (!userId) {
         type: 'job'
       }));
     }
+async function loadContractors() {
+  const { data, error } = await supabaseClient
+    .from('contractors')
+    .select('*');
 
+  if (error) {
+    console.error('contractors load error', error);
+    return [];
+  }
+
+  return (data || []).map(item => ({
+    ...item,
+    type: 'contractor'
+  }));
+}
     async function loadLiveData() {
       contractors = await loadContractors();
       jobs = await loadJobs();
