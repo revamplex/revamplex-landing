@@ -107,12 +107,13 @@
   z-index: 1000;
 }
 
-  .topbar-inner {
+.topbar-inner {
   pointer-events: auto;
-  max-width: 1460px;
+  max-width: 100%; /* 🔥 CHANGE THIS */
+  width: 100%;     /* 🔥 ADD THIS */
   margin: 0 auto;
-  border-radius: 20px; /* ⬅️ smaller corners */
-  padding: 8px 10px;   /* ⬅️ slimmer height */
+  border-radius: 20px;
+  padding: 8px 10px;
   background: rgba(255,255,255,.92);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
@@ -125,7 +126,10 @@
       gap: 10px;
       align-items: center;
     }
-    .search-row { margin-bottom: 10px; }
+    .search-row { 
+  margin-bottom: 10px; 
+  flex-wrap: wrap; 
+}
     .mode-row { margin-bottom: 10px; }
 
     .logo-wrap {
