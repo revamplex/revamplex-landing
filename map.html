@@ -1265,14 +1265,20 @@ if (!role) {
 homeownerModeBtn.style.display = 'none';
 contractorModeBtn.style.display = 'none';
 
-  authContainer.innerHTML = `
-    <div style="display:flex; align-items:center; gap:10px;">
-      <span style="font-weight:700; color:white; background:#0f172a; padding:10px 14px; border-radius:10px;">
-        Logged in as ${role.charAt(0).toUpperCase() + role.slice(1)}
-      </span>
-      <button onclick="logout()" class="auth-btn">Logout</button>
-    </div>
-  `;
+authContainer.innerHTML = `
+  <div style="display:flex; align-items:center; gap:10px;">
+    
+    <button onclick="openDashboard()" class="auth-btn">
+      ${role === 'contractor' ? '🛠 Dashboard' : '👤 My Account'}
+    </button>
+
+    <span style="font-weight:700; color:white; background:#0f172a; padding:10px 14px; border-radius:10px;">
+      ${role.charAt(0).toUpperCase() + role.slice(1)}
+    </span>
+
+    <button onclick="logout()" class="auth-btn">Logout</button>
+  </div>
+`;
 }
 
     async function openDashboard() {
