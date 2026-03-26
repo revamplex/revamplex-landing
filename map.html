@@ -1498,7 +1498,7 @@ function openProjectRoom(jobId) {
     const welcomeLogoFallback = document.getElementById('welcomeLogoFallback');
 
     const searchInput = document.getElementById('searchInput');
-    const searchBtn = document.getElementById('searchBtn');
+    const searchBtn = document.getElementById('searchBtn') || null;
     const tradeFilter = document.getElementById('tradeFilter');
     const distanceFilter = document.getElementById('distanceFilter');
     const ratingFilter = document.getElementById('ratingFilter');
@@ -2594,7 +2594,9 @@ function exploreDemo() {
 }
     welcomeSubmitBtn.addEventListener('click', submitWelcomeRegistration);
 
-    searchBtn.addEventListener('click', applyFilters);
+    if (searchBtn) {
+  searchBtn.addEventListener('click', applyFilters);
+}
     searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') applyFilters(); });
     tradeFilter.addEventListener('change', applyFilters);
     distanceFilter.addEventListener('change', applyFilters);
