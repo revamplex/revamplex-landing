@@ -1284,7 +1284,7 @@ authContainer.innerHTML = `
       ${role === 'contractor' ? '🛠 Dashboard' : '👤 My Account'}
     </button>
 
-    <span style="font-weight:700; color:white; background:#0f172a; padding:10px 14px; border-radius:10px;">
+    <span class="mode-badge">
       ${role.charAt(0).toUpperCase() + role.slice(1)}
     </span>
 
@@ -1292,7 +1292,14 @@ authContainer.innerHTML = `
   </div>
 `;
 }
-
+.mode-badge {
+  font-weight: 700;
+  color: white;
+  background: #0f172a;
+  padding: 4px 8px; /* smaller */
+  border-radius: 8px;
+  font-size: 12px; /* smaller text */
+}
     async function openDashboard() {
   const { data: { user } } = await supabaseClient.auth.getUser();
   if (!user) return;
