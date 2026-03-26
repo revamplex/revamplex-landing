@@ -78,11 +78,11 @@
     }
     button, input, select, textarea { font: inherit; }
 
-   #app {
+#app {
   position: relative;
   width: 100%;
-  height: 100%;
-  overflow: visible; /* ⬅️ CRITICAL FIX */
+  height: 100vh; /* 🔥 THIS FIXES EVERYTHING */
+  overflow: hidden;
 }
 
     #map {
@@ -97,23 +97,23 @@
       background: #dbeafe;
     }
 
- .topbar {
+.topbar {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;          /* ⬅️ THIS FIXES WIDTH */
-  width: 100%;       /* ⬅️ IMPORTANT */
-  padding: 12px;
+  right: 0;
+  width: 100%;
+  padding: 8px;
   z-index: 1000;
 }
 
 .topbar-inner {
   pointer-events: auto;
-  max-width: 100%; /* 🔥 CHANGE THIS */
-  width: 100%;     /* 🔥 ADD THIS */
+  width: 100%;
+  max-width: 100%;
   margin: 0 auto;
-  border-radius: 20px;
-  padding: 8px 10px;
+  border-radius: 16px;
+  padding: 8px;
   background: rgba(255,255,255,.92);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
