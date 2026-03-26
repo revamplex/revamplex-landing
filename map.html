@@ -190,13 +190,13 @@
     }
 
 .mode-btn {
+  flex: 0 0 auto !important;   /* 🔥 THIS IS THE KEY FIX */
   height: 32px !important;
-  padding: 0 12px !important;
+  padding: 0 10px !important;
   font-size: 12px !important;
   border-radius: 10px !important;
   font-weight: 600 !important;
-
-  flex: 0 0 auto !important; /* stop stretching */
+  white-space: nowrap;         /* keeps text tight */
 }
 .mode-btn.active {
   background: linear-gradient(135deg,var(--brand),var(--brand-dark));
