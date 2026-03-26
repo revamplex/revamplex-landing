@@ -25,6 +25,14 @@
   box-shadow: 0 6px 16px rgba(0,0,0,0.2);
   transition: 0.2s;
 }
+  .mode-badge {
+  font-weight: 700;
+  color: white;
+  background: #0f172a;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+}
 .auth-btn:hover {
   transform: scale(1.05);
 }
@@ -1292,14 +1300,7 @@ authContainer.innerHTML = `
   </div>
 `;
 }
-.mode-badge {
-  font-weight: 700;
-  color: white;
-  background: #0f172a;
-  padding: 4px 8px; /* smaller */
-  border-radius: 8px;
-  font-size: 12px; /* smaller text */
-}
+
     async function openDashboard() {
   const { data: { user } } = await supabaseClient.auth.getUser();
   if (!user) return;
