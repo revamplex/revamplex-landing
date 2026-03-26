@@ -983,32 +983,50 @@
 
 </div>
 
-        <div class="mode-row">
-          <button class="mode-btn active" id="homeownerMode">🏠 Homeowner View</button>
-          <button class="mode-btn" id="contractorMode">🛠 Contractor View</button>
-        </div>
+        <div class="mode-row"><div class="search-row">
 
-        <div class="filter-row">
-          <select id="tradeFilter" class="filter-select">
-            <option value="all">All Trades</option>
-          </select>
-          <select id="distanceFilter" class="filter-select">
-            <option value="100">Any Distance</option>
-            <option value="5">Within 5 miles</option>
-            <option value="10">Within 10 miles</option>
-            <option value="25">Within 25 miles</option>
-            <option value="50">Within 50 miles</option>
-          </select>
-          <select id="ratingFilter" class="filter-select">
-            <option value="0">Any Rating</option>
-            <option value="4.5">4.5+ stars</option>
-            <option value="4.0">4.0+ stars</option>
-            <option value="3.5">3.5+ stars</option>
-          </select>
-          <button class="filter-pill active" id="sortDistance">Nearest</button>
-          <button class="filter-pill" id="sortRating">Top Rated</button>
-          <button class="filter-pill" id="resetFilters">Reset</button>
-        </div>
+  <div class="logo-wrap">
+    <img src="revamplex-logo.png" alt="RevampLEX Logo" id="logoImg">
+    <div class="logo-fallback" id="logoFallback">
+      <span class="revamp">Revamp</span><span class="lex">LEX</span>
+    </div>
+  </div>
+
+  <div class="search-box">
+    <span>🔍</span>
+    <input id="searchInput" type="text" placeholder="Search..." />
+  </div>
+
+  <div id="authContainer" style="display:flex; gap:8px; align-items:center;"></div>
+
+</div>
+
+<div class="mode-row">
+  <button class="mode-btn active" id="homeownerMode">🏠 Homeowner View</button>
+  <button class="mode-btn" id="contractorMode">🛠 Contractor View</button>
+</div>
+
+<div class="filter-row">
+  <select id="tradeFilter" class="filter-select">
+    <option value="all">All Trades</option>
+  </select>
+  <select id="distanceFilter" class="filter-select">
+    <option value="100">Any Distance</option>
+    <option value="5">Within 5 miles</option>
+    <option value="10">Within 10 miles</option>
+    <option value="25">Within 25 miles</option>
+    <option value="50">Within 50 miles</option>
+  </select>
+  <select id="ratingFilter" class="filter-select">
+    <option value="0">Any Rating</option>
+    <option value="4.5">4.5+ stars</option>
+    <option value="4.0">4.0+ stars</option>
+    <option value="3.5">3.5+ stars</option>
+  </select>
+  <button class="filter-pill active" id="sortDistance">Nearest</button>
+  <button class="filter-pill" id="sortRating">Top Rated</button>
+  <button class="filter-pill" id="resetFilters">Reset</button>
+</div>
       </div>
     </div>
 
