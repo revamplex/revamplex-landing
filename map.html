@@ -1246,11 +1246,17 @@ if (!role) {
   if (!role) {
     console.warn("No role anywhere — showing login state only");
 
-    authContainer.innerHTML = `
-  <div style="display:flex; align-items:center; gap:10px;">
+authContainer.innerHTML = `
+  <div style="display:flex; align-items:center; gap:8px;">
+    
     <button onclick="openDashboard()" class="auth-btn">
       ${role === 'contractor' ? '🛠 Dashboard' : '👤 My Account'}
     </button>
+
+    <span style="font-weight:600; font-size:12px; color:white; background:#0f172a; padding:6px 10px; border-radius:8px; line-height:1;">
+      ${role.charAt(0).toUpperCase() + role.slice(1)}
+    </span>
+
     <button onclick="logout()" class="auth-btn">Logout</button>
   </div>
 `;
