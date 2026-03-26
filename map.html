@@ -25,14 +25,7 @@
   box-shadow: 0 6px 16px rgba(0,0,0,0.2);
   transition: 0.2s;
 }
-  .mode-badge {
-  font-weight: 700;
-  color: white;
-  background: #0f172a;
-  padding: 4px 8px;
-  border-radius: 8px;
-  font-size: 12px;
-}
+
 .auth-btn:hover {
   transform: scale(1.05);
 }
@@ -1292,7 +1285,7 @@ authContainer.innerHTML = `
       ${role === 'contractor' ? '🛠 Dashboard' : '👤 My Account'}
     </button>
 
-    <span class="mode-badge">
+   <span style="font-weight:600; font-size:11px; color:white; background:#0f172a; padding:3px 7px; border-radius:6px; line-height:1;">
       ${role.charAt(0).toUpperCase() + role.slice(1)}
     </span>
 
