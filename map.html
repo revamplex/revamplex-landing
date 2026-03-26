@@ -2072,8 +2072,9 @@ contractor_name: 'Verified Contractor',
             <div class="detail-tags">${(item.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
           </div>
           <div class="card-actions">
-            <button class="mini-btn primary" data-action="message" data-id="${item.id}">Message</button>
-          </div>
+  <button class="mini-btn secondary" data-action="edit" data-id="${item.id}">Edit</button>
+  <button class="mini-btn primary" data-action="message" data-id="${item.id}">Message</button>
+</div>
         `;
       } else {
         const visibleBids = (item.bids || []).filter(bid => {
@@ -2115,7 +2116,8 @@ const bidsHtml = visibleBids.length
             <h4>Bids (${(item.bids || []).length}/${item.max_bids || 5})</h4>
             ${bidsHtml}
           </div>
-          <div class="card-actions">
+         <div class="card-actions">
+  <button class="mini-btn secondary" data-action="edit" data-id="${item.id}">Edit</button>
   <button class="mini-btn primary" onclick="openProjectRoom(${item.id})">
     Submit Bid
   </button>
@@ -2131,7 +2133,11 @@ const bidsHtml = visibleBids.length
     function handleCardAction(action, id) {
       const item = [...contractors, ...jobs].find(entry => String(entry.id) === String(id));
       if (!item) return;
-
+      
+if (action === 'edit') {
+  openEditModal(id);
+  return;
+}
       if (action === 'view' || action === 'job-details') {
         openDetailModal(item);
         return;
@@ -2159,7 +2165,65 @@ const bidsHtml = visibleBids.length
         return;
       }
     }
+async function openEditModal(id) {
+  const item = [...contractors, ...jobs].find(i => String(i.id) === String(id));
+  if (!item) return;
 
+  expandUI();
+  detailModal.classList.add('show');
+
+  if (item.type === 'contractor') {
+
+    detailTitle.textContent = "Edit Profile";
+
+    detailContent.innerHTML = `
+      <div class="field">
+        <label class="label">Trade</label>
+        <input class="input" id="editTrade" value="${item.trade || ''}">
+      </div>
+
+      <div class="field">
+        <label class="label">Bio</label>
+        <textarea class="textarea" id="editBio">${item.bio || ''}</textarea>
+      </div>
+
+      <div class="field">
+        <label class="label">Specialties</label>
+        <input class="input" id="editTags" value="${(item.tags || []).join(', ')}">
+      </div>
+
+      <div class="modal-actions">
+        <button class="modal-btn primary" onclick="saveEdit('${id}', 'contractor')">Save</button>
+      </div>
+    `;
+  }
+
+  if (item.type === 'job') {
+
+    detailTitle.textContent = "Edit Job";
+
+    detailContent.innerHTML = `
+      <div class="field">
+        <label class="label">Title</label>
+        <input class="input" id="editTitle" value="${item.title || ''}">
+      </div>
+
+      <div class="field">
+        <label class="label">Budget</label>
+        <input class="input" id="editBudget" value="${item.budget || ''}">
+      </div>
+
+      <div class="field">
+        <label class="label">Description</label>
+        <textarea class="textarea" id="editDescription">${item.description || ''}</textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="modal-btn primary" onclick="saveEdit('${id}', 'job')">Save</button>
+      </div>
+    `;
+  }
+}
 function setMode(mode) {
   // 🔒 ABSOLUTE LOCK
   if (lockedRole) {
@@ -2281,7 +2345,55 @@ function setMode(mode) {
   alert(profileError.message);
   return;
 }
+async function saveEdit(id, type) {
 
+  try {
+
+    if (type === 'contractor') {
+
+      const payload = {
+        trade: document.getElementById('editTrade').value,
+        bio: document.getElementById('editBio').value,
+        tags: document.getElementById('editTags').value.split(',').map(t => t.trim())
+      };
+
+      const { error } = await supabaseClient
+        .from('contractors')
+        .update(payload)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      showStatus("Profile updated");
+
+    }
+
+    if (type === 'job') {
+
+      const payload = {
+        title: document.getElementById('editTitle').value,
+        budget: document.getElementById('editBudget').value,
+        description: document.getElementById('editDescription').value
+      };
+
+      const { error } = await supabaseClient
+        .from('jobs')
+        .update(payload)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      showStatus("Job updated");
+    }
+
+    closeDetails();
+    await loadLiveData();
+
+  } catch (err) {
+    alert(err.message);
+    console.error(err);
+  }
+}
     // 🔥 FORCE LOGIN AFTER SIGNUP
     const { error: loginError } = await supabaseClient.auth.signInWithPassword({
       email,
