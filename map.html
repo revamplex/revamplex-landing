@@ -1507,10 +1507,22 @@ function openProjectRoom(jobId) {
       showStatus._timer = setTimeout(() => statusPill.classList.remove('show'), 2200);
     }
 
-function getCurrentDataset() {
-  // 🔒 HARD LOCK — ignore currentMode completely when logged in
+async function getCurrentDataset() {
+
+  // 🔒 LOCKED ROLE LOGIC
   if (lockedRole === 'contractor') return jobs;
-  if (lockedRole === 'homeowner') return contractors;
+
+  if (lockedRole === 'homeowner') {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+
+    if (!user) return contractors;
+
+    // 👇 get only THIS homeowner's jobs
+    const myJobs = jobs.filter(j => j.user_id === user.id);
+
+    // 👇 combine contractors + their jobs
+    return [...contractors, ...myJobs];
+  }
 
   // fallback (not logged in)
   return currentMode === 'homeowner' ? contractors : jobs;
@@ -1892,8 +1904,8 @@ function renderCards(items) {
       else items.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
     }
 
-    function applyFilters() {
-      const source = getCurrentDataset();
+    async function applyFilters() {
+      const source = await getCurrentDataset();
       const query = searchInput.value.trim().toLowerCase();
       const selectedTrade = tradeFilter.value;
       const maxDistance = Number(distanceFilter.value);
@@ -1980,6 +1992,7 @@ function setSort(type) {
       const center = map.getCenter();
 
       const payload = {
+        user_id: (await supabaseClient.auth.getUser()).data.user.id,
         title, trade, budget, customer_name, city, description,
         lat: Number(center.lat.toFixed(6)),
         lng: Number(center.lng.toFixed(6)),
