@@ -12,9 +12,7 @@
 
 <!-- 🔥 ADD THIS INSIDE YOUR TOP NAV / HEADER AREA -->
 
-<div style="position:absolute; top:10px; right:15px; z-index:9999; display:flex; gap:10px;">
- <div id="authContainer" style="position:absolute; top:10px; right:15px; z-index:9999;"></div>
-</div>
+<div id="authContainer" style="position:absolute; top:10px; right:15px; z-index:9999;"></div>
 
 <style>
 .auth-btn {
@@ -760,26 +758,23 @@
       transform:translateX(-50%) translateY(-12px);
     }
 
-    #welcomeOverlay.hidden {
+  #welcomeOverlay {
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,.65);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:5000;
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  transition:opacity .2s ease, visibility .2s ease;
+}
+
+#welcomeOverlay.hidden {
   display: none !important;
   pointer-events: none;
 }
-      position:fixed;
-      inset:0;
-      background:rgba(15,23,42,.65);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      z-index:5000;
-      backdrop-filter:blur(6px);
-      -webkit-backdrop-filter:blur(6px);
-      transition:opacity .2s ease, visibility .2s ease;
-    }
-    #welcomeOverlay.hidden {
-      opacity:0;
-      visibility:hidden;
-      pointer-events:none;
-    }
     .welcomeCard {
       width:min(520px, calc(100vw - 24px));
       max-height:calc(100vh - 24px);
@@ -1202,7 +1197,7 @@ async function checkUserSession() {
   const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
   if (sessionError) console.error('session error', sessionError);
 
-  const authContainer = document.querySelector('[style*="top:10px"]');
+  const authContainer = document.getElementById('authContainer');
   if (!authContainer) return;
 
   // not logged in
