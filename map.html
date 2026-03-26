@@ -1683,7 +1683,7 @@ async function getCurrentDataset() {
 items.forEach(item => {
 
   // 🔒 HARD DATA WALL (NO BLEED EVER AGAIN)
-  if (lockedRole === 'homeowner' && item.type !== 'contractor') return;
+  if (lockedRole === 'homeowner' && item.type !== 'contractor' && item.type !== 'job') return;
   if (lockedRole === 'contractor' && item.type !== 'job') return;
 
   const coords = getDisplayCoords(item);
@@ -1914,7 +1914,7 @@ function renderCards(items) {
       filteredItems = source.filter(item => {
 const mode = lockedRole || currentMode;
 
-if (mode === 'homeowner' && item.type !== 'contractor') return false;
+if (mode === 'homeowner' && item.type !== 'contractor' && item.type !== 'job') return false;
 if (mode === 'contractor' && item.type !== 'job') return false;
 
         if (currentMode === 'contractor' && item.type === 'job') {
