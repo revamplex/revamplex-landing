@@ -1241,11 +1241,13 @@ if (!role) {
     console.warn("No role anywhere — showing login state only");
 
     authContainer.innerHTML = `
-      <div style="display:flex; align-items:center; gap:10px;">
-        <span style="font-weight:700;">Logged In</span>
-        <button onclick="logout()" class="auth-btn">Logout</button>
-      </div>
-    `;
+  <div style="display:flex; align-items:center; gap:10px;">
+    <button onclick="openDashboard()" class="auth-btn">
+      ${role === 'contractor' ? '🛠 Dashboard' : '👤 My Account'}
+    </button>
+    <button onclick="logout()" class="auth-btn">Logout</button>
+  </div>
+`;
 
     return;
   }
@@ -1273,6 +1275,57 @@ contractorModeBtn.style.display = 'none';
   `;
 }
 
+    async function openDashboard() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) return;
+
+  expandUI();
+  detailModal.classList.add('show');
+
+  if (lockedRole === 'homeowner') {
+
+    const myJobs = jobs.filter(j => j.user_id === user.id);
+
+    detailTitle.textContent = "My Jobs";
+
+    detailContent.innerHTML = `
+      <div class="detail-panel">
+        <h4>Active Jobs</h4>
+        ${myJobs.length
+          ? myJobs.map(j => `
+              <div style="padding:10px 0; border-bottom:1px solid #e2e8f0;">
+                <strong>${j.title}</strong><br>
+                ${j.budget} • ${j.trade}<br>
+                <button class="mini-btn secondary" onclick="openEditModal('${j.id}')">Edit</button>
+              </div>
+            `).join('')
+          : '<p>No jobs yet</p>'}
+      </div>
+    `;
+  }
+
+  if (lockedRole === 'contractor') {
+
+    detailTitle.textContent = "Dashboard";
+
+    detailContent.innerHTML = `
+      <div class="detail-panel">
+        <h4>Profile</h4>
+        <button class="mini-btn secondary" onclick="openEditModal('${user.id}')">Edit Profile</button>
+      </div>
+
+      <div class="detail-panel">
+        <h4>Active Bids</h4>
+        <p>Coming next</p>
+      </div>
+
+      <div class="detail-panel">
+        <h4>Completed Jobs</h4>
+        <p>Coming next</p>
+      </div>
+    `;
+  }
+}
 async function logout() {
   await supabaseClient.auth.signOut();
   localStorage.removeItem('revamplex_registered');
