@@ -165,7 +165,7 @@ currentUser = user;
       const { data: profile } = await client
         .from("profiles")
         .select("*")
-        .eq("id", user.id)
+        .eq("id", currentUser.id)
         .maybeSingle();
 
       if (!profile) return;
