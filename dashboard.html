@@ -62,7 +62,7 @@
 
   <div class="card">
     <h3>My Profile</h3>
-    <button class="btn">Edit Profile</button>
+    <button class="btn" onclick="openEditProfile()">Edit Profile</button>
   </div>
 
   <div class="card" id="roleSection"></div>
@@ -124,6 +124,9 @@ document.getElementById("userRole").innerText = "Role: " + profile.role;
 }
 
 loadDashboard();
+  function openEditProfile() {
+  alert("Profile editor coming next");
+}
 </script>
 
 </body>
