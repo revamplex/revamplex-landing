@@ -146,13 +146,13 @@
     let currentProfile = null;
 
     async function loadDashboard() {
-      const { data: { user } } = await client.auth.getUser();
+     const { data: { session } } = await client.auth.getSession();
 
-      if (!user) {
-        alert("You must be logged in");
-        window.location.href = "map.html";
-        return;
-      }
+if (!session) {
+  alert("You must be logged in");
+  window.location.href = "map.html";
+  return;
+}
 
       currentUser = user;
       document.getElementById("userEmail").innerText = user.email;
