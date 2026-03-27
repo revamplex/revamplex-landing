@@ -1323,7 +1323,7 @@ authContainer.innerHTML = `
   expandUI();
   detailModal.classList.add('show');
 
- if (lockedRole === 'homeowner') {
+if (lockedRole === 'homeowner') {
 
   const myJobs = jobs.filter(j => j.user_id === user.id);
 
@@ -1350,6 +1350,7 @@ authContainer.innerHTML = `
     </div>
   `;
 }
+      
   if (lockedRole === 'contractor') {
 
 
