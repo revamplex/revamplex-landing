@@ -174,7 +174,7 @@ currentUser = user;
     }
 
     function openEditProfile() {
-
+console.log("ROLE VALUE:", currentProfile?.role);
       if (currentProfile) {
         document.getElementById("profileName").value = currentProfile.name || "";
         document.getElementById("profileCompany").value = currentProfile.company || "";
