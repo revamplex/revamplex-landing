@@ -1328,7 +1328,12 @@ authContainer.innerHTML = `
     const myJobs = jobs.filter(j => j.user_id === user.id);
 
     detailTitle.textContent = "My Jobs";
+detailContent.innerHTML = `
+  <div>
+    <button onclick="goToDashboard()" class="mini-btn secondary">Edit Profile</button>
+  </div>
 
+  <div class="detail-panel">
     detailContent.innerHTML = `
       <div class="detail-panel">
         <h4>Active Jobs</h4>
