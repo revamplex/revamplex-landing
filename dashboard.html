@@ -86,6 +86,9 @@
     .btn-secondary {
       background: #666;
     }
+    .contractor-only {
+  display: none;
+}
   </style>
 </head>
 
@@ -184,7 +187,8 @@ currentUser = user;
 
 document.querySelectorAll(".contractor-only").forEach(el => {
   el.style.display = isContractor ? "block" : "none";
-  el.style.width = "100%";
+  el.style.visibility = isContractor ? "visible" : "hidden";
+  el.style.opacity = isContractor ? "1" : "0";
 });
 
       setTimeout(() => document.getElementById("profileModal").style.display = "flex", 50);
