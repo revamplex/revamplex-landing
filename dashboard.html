@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -44,91 +43,222 @@
       display: inline-block;
       margin-top: 10px;
       cursor: pointer;
+      border: none;
+      font-size: 14px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-box {
+      background: #fff;
+      width: 90%;
+      max-width: 500px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .modal-box h3 {
+      margin-top: 0;
+    }
+
+    .modal-box input,
+    .modal-box textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-secondary {
+      background: #666;
     }
   </style>
-
 </head>
 
 <body>
 
-<div class="header">Revamp Dashboard</div>
+  <div class="header">Revamp Dashboard</div>
 
-<div class="container">
+  <div class="container">
 
-  <div class="card">
-    <h2 id="userEmail">Loading...</h2>
-    <p id="userRole"></p>
+    <div class="card">
+      <h2 id="userEmail">Loading...</h2>
+      <p id="userRole"></p>
+    </div>
+
+    <div class="card">
+      <h3>My Profile</h3>
+      <button class="btn" id="editProfileBtn">Edit Profile</button>
+    </div>
+
+    <div class="card" id="roleSection"></div>
+
   </div>
 
-  <div class="card">
-    <h3>My Profile</h3>
-    <button class="btn" onclick="openEditProfile()">Edit Profile</button>
+  <div class="modal" id="profileModal">
+    <div class="modal-box">
+      <h3>Edit Profile</h3>
+
+      <input type="text" id="profileName" placeholder="Full Name">
+      <input type="text" id="profileCompany" placeholder="Company Name">
+      <input type="text" id="profileTrade" placeholder="Trade">
+      <input type="text" id="profileLocation" placeholder="Location">
+      <textarea id="profileBio" rows="4" placeholder="Bio"></textarea>
+
+      <div class="modal-actions">
+        <button class="btn" id="saveProfileBtn">Save Profile</button>
+        <button class="btn btn-secondary" id="closeProfileBtn">Close</button>
+      </div>
+    </div>
   </div>
 
-  <div class="card" id="roleSection"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-</div>
-  
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const client = window.supabase.createClient(
+      "https://dezvwoedboikshqttdqu.supabase.co",
+      "YOUR_REAL_SUPABASE_ANON_KEY_HERE"
+    );
 
-<script>
-const client = window.supabase.createClient(
-  "https://dezvwoedboikshqttdqu.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E"
-);
+    let currentUser = null;
+    let currentProfile = null;
 
-async function loadDashboard() {
-console.log("DASHBOARD LOADING");
-  const { data: { user } } = await client.auth.getUser();
+    async function loadDashboard() {
+      console.log("DASHBOARD LOADING");
 
-  if (!user) {
-    alert("You must be logged in");
-    window.location.href = "map.html";
-    return;
-  }
+      const { data: { user }, error: userError } = await client.auth.getUser();
 
-  document.getElementById("userEmail").innerText = user.email;
+      if (userError) {
+        console.log("USER ERROR:", userError);
+        return;
+      }
 
- const { data: profile, error } = await client
-  .from("profiles")
-  .select("role")
-  .eq("id", user.id)
-  .maybeSingle();
+      if (!user) {
+        alert("You must be logged in");
+        window.location.href = "map.html";
+        return;
+      }
 
-if (error || !profile) {
-  console.log("PROFILE ERROR:", error);
+      currentUser = user;
+      document.getElementById("userEmail").innerText = user.email;
 
-  document.getElementById("userRole").innerText = "No profile found";
-  return;
-}
+      const { data: profile, error: profileError } = await client
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
 
-document.getElementById("userRole").innerText = "Role: " + profile.role;
-  const roleSection = document.getElementById("roleSection");
+      if (profileError) {
+        console.log("PROFILE ERROR:", profileError);
+        document.getElementById("userRole").innerText = "Profile error";
+        return;
+      }
 
-  if (profile.role === "contractor") {
-    roleSection.innerHTML = `
-      <h3>Contractor Tools</h3>
-      <button class="btn">My Bids</button>
-      <button class="btn">My Jobs</button>
-    `;
-  }
+      if (!profile) {
+        document.getElementById("userRole").innerText = "No profile found";
+        document.getElementById("roleSection").innerHTML = `
+          <h3>No role tools yet</h3>
+          <p>Your profile row was not found in Supabase.</p>
+        `;
+        return;
+      }
 
-  if (profile.role === "homeowner") {
-    roleSection.innerHTML = `
-      <h3>Homeowner Tools</h3>
-      <button class="btn">My Jobs</button>
-      <button class="btn">Post a Job</button>
-    `;
-  }
+      currentProfile = profile;
+      document.getElementById("userRole").innerText = "Role: " + (profile.role || "none");
 
-}
+      if (profile.role === "contractor") {
+        document.getElementById("roleSection").innerHTML = `
+          <h3>Contractor Tools</h3>
+          <button class="btn">My Bids</button>
+          <button class="btn">My Jobs</button>
+        `;
+      } else if (profile.role === "homeowner") {
+        document.getElementById("roleSection").innerHTML = `
+          <h3>Homeowner Tools</h3>
+          <button class="btn">My Jobs</button>
+          <button class="btn">Post a Job</button>
+        `;
+      } else {
+        document.getElementById("roleSection").innerHTML = `
+          <h3>No role tools yet</h3>
+          <p>This account does not have a contractor or homeowner role yet.</p>
+        `;
+      }
+    }
 
-loadDashboard();
-  function openEditProfile() {
-  alert("Profile editor coming next");
-}
-</script>
+    function openEditProfile() {
+      console.log("EDIT PROFILE CLICKED");
+
+      if (currentProfile) {
+        document.getElementById("profileName").value = currentProfile.name || "";
+        document.getElementById("profileCompany").value = currentProfile.company || "";
+        document.getElementById("profileTrade").value = currentProfile.trade || "";
+        document.getElementById("profileLocation").value = currentProfile.location || "";
+        document.getElementById("profileBio").value = currentProfile.bio || "";
+      }
+
+      document.getElementById("profileModal").style.display = "flex";
+    }
+
+    function closeEditProfile() {
+      document.getElementById("profileModal").style.display = "none";
+    }
+
+    async function saveProfile() {
+      if (!currentUser) {
+        alert("No logged in user found");
+        return;
+      }
+
+      const updates = {
+        id: currentUser.id,
+        email: currentUser.email,
+        name: document.getElementById("profileName").value.trim(),
+        company: document.getElementById("profileCompany").value.trim(),
+        trade: document.getElementById("profileTrade").value.trim(),
+        location: document.getElementById("profileLocation").value.trim(),
+        bio: document.getElementById("profileBio").value.trim()
+      };
+
+      const { error } = await client
+        .from("profiles")
+        .upsert(updates);
+
+      if (error) {
+        console.log("SAVE ERROR:", error);
+        alert("Could not save profile");
+        return;
+      }
+
+      alert("Profile saved");
+      closeEditProfile();
+      loadDashboard();
+    }
+
+    document.getElementById("editProfileBtn").addEventListener("click", openEditProfile);
+    document.getElementById("closeProfileBtn").addEventListener("click", closeEditProfile);
+    document.getElementById("saveProfileBtn").addEventListener("click", saveProfile);
+
+    loadDashboard();
+  </script>
 
 </body>
 </html>
-
