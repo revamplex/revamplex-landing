@@ -39,9 +39,6 @@
       color: #fff;
       padding: 10px 15px;
       border-radius: 8px;
-      text-decoration: none;
-      display: inline-block;
-      margin-top: 10px;
       cursor: pointer;
       border: none;
       font-size: 14px;
@@ -63,7 +60,6 @@
       max-width: 500px;
       padding: 20px;
       border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
 
     .modal-box input,
@@ -71,160 +67,135 @@
       width: 100%;
       padding: 10px;
       margin-bottom: 12px;
-      border: 1px solid #ccc;
       border-radius: 8px;
-      font-size: 14px;
-      box-sizing: border-box;
+      border: 1px solid #ccc;
     }
 
-    .modal-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .btn-secondary {
-      background: #666;
-    }
     .contractor-only {
-  display: none;
-}
+      display: none;
+    }
   </style>
 </head>
 
 <body>
 
-  <div class="header">Revamp Dashboard</div>
+<div class="header">Revamp Dashboard</div>
 
-  <div class="container">
+<div class="container">
 
-    <div class="card">
-      <h2 id="userEmail">Loading...</h2>
-      <p id="userRole"></p>
-    </div>
-
-    <div class="card">
-      <h3>My Profile</h3>
-      <button class="btn" id="editProfileBtn">Edit Profile</button>
-    </div>
-
-    <div class="card" id="roleSection"></div>
-
+  <div class="card">
+    <h2 id="userEmail">Loading...</h2>
+    <p id="userRole"></p>
   </div>
 
-  <div class="modal" id="profileModal">
-    <div class="modal-box">
-      <h3>Edit Profile</h3>
-
-      <input type="text" id="profileName" placeholder="Full Name">
-
-      <!-- ✅ FIXED: wrapped contractor-only fields -->
-<div class="contractor-only" style="width:100%;">
-  <input id="profileCompany" type="text" placeholder="Company Name" style="width:100%;">
-</div>
-
-<div class="contractor-only" style="width:100%;">
-  <input id="profileTrade" type="text" placeholder="Trade" style="width:100%;">
-</div>
-
-      <input type="text" id="profileLocation" placeholder="Location">
-      <textarea id="profileBio" rows="4" placeholder="Bio"></textarea>
-
-      <div class="modal-actions">
-        <button class="btn" id="saveProfileBtn">Save Profile</button>
-        <button class="btn btn-secondary" id="closeProfileBtn">Close</button>
-      </div>
-    </div>
+  <div class="card">
+    <h3>My Profile</h3>
+    <button class="btn" id="editProfileBtn">Edit Profile</button>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</div>
 
-  <script>
-    const client = window.supabase.createClient(
-      "https://dezvwoedboikshqttdqu.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E"
-    );
+<div class="modal" id="profileModal">
+  <div class="modal-box">
+    <h3>Edit Profile</h3>
 
-    let currentUser = null;
-    let currentProfile = null;
+    <input id="profileName" placeholder="Full Name">
 
-    async function loadDashboard() {
-     const { data: { session } } = await client.auth.getSession();
+    <div class="contractor-only">
+      <input id="profileCompany" placeholder="Company Name">
+    </div>
 
-if (!session) {
-  alert("You must be logged in");
-  window.location.href = "map.html";
-  return;
+    <div class="contractor-only">
+      <input id="profileTrade" placeholder="Trade">
+    </div>
+
+    <input id="profileLocation" placeholder="Location">
+    <textarea id="profileBio" placeholder="Bio"></textarea>
+
+    <button class="btn" id="saveProfileBtn">Save</button>
+    <button class="btn" id="closeProfileBtn">Close</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const client = window.supabase.createClient(
+  "https://dezvwoedboikshqttdqu.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E"
+);
+
+let currentUser = null;
+let currentProfile = null;
+
+async function loadDashboard() {
+  const { data: { session } } = await client.auth.getSession();
+
+  if (!session) {
+    window.location.href = "map.html";
+    return;
+  }
+
+  currentUser = session.user;
+
+  document.getElementById("userEmail").innerText = currentUser.email;
+
+  const { data: profile } = await client
+    .from("profiles")
+    .select("*")
+    .eq("id", currentUser.id)
+    .single();
+
+  currentProfile = profile;
+
+  document.getElementById("userRole").innerText =
+    "Role: " + (profile.role || "none");
 }
 
-const user = session.user;
-      console.log("USER ID:", user.id);
-currentUser = user;
-      document.getElementById("userEmail").innerText = user.email;
+function openEditProfile() {
 
-      const { data: profile } = await client
-        .from("profiles")
-        .select("*")
-        .eq("id", currentUser.id)
-        .maybeSingle();
+  document.getElementById("profileName").value = currentProfile.name || "";
+  document.getElementById("profileCompany").value = currentProfile.company || "";
+  document.getElementById("profileTrade").value = currentProfile.trade || "";
+  document.getElementById("profileLocation").value = currentProfile.location || "";
+  document.getElementById("profileBio").value = currentProfile.bio || "";
 
-      if (!profile) return;
+  const isContractor =
+    (currentProfile.role || "").toLowerCase() === "contractor";
 
-      currentProfile = profile;
-      console.log("FULL PROFILE:", profile);
-      document.getElementById("userRole").innerText = "Role: " + profile.role;
-    }
+  document.querySelectorAll(".contractor-only").forEach(el => {
+    el.style.display = isContractor ? "block" : "none";
+  });
 
-    function openEditProfile() {
-console.log("ROLE VALUE:", currentProfile?.role);
-      if (currentProfile) {
-        document.getElementById("profileName").value = currentProfile.name || "";
-        document.getElementById("profileCompany").value = currentProfile.company || "";
-        document.getElementById("profileTrade").value = currentProfile.trade || "";
-        document.getElementById("profileLocation").value = currentProfile.location || "";
-        document.getElementById("profileBio").value = currentProfile.bio || "";
-      }
+  document.getElementById("profileModal").style.display = "flex";
+}
 
-      const isContractor = currentProfile?.role === "contractor";
+function closeEditProfile() {
+  document.getElementById("profileModal").style.display = "none";
+}
 
-document.querySelectorAll(".contractor-only").forEach(el => {
-  el.style.display = isContractor ? "block" : "none";
-  el.style.visibility = isContractor ? "visible" : "hidden";
-  el.style.opacity = isContractor ? "1" : "0";
-});
+async function saveProfile() {
+  await client.from("profiles").upsert({
+    id: currentUser.id,
+    email: currentUser.email,
+    name: document.getElementById("profileName").value,
+    company: document.getElementById("profileCompany").value,
+    trade: document.getElementById("profileTrade").value,
+    location: document.getElementById("profileLocation").value,
+    bio: document.getElementById("profileBio").value
+  });
 
-      setTimeout(() => document.getElementById("profileModal").style.display = "flex", 50);
-    }
+  alert("Saved");
+  closeEditProfile();
+  loadDashboard();
+}
 
-    function closeEditProfile() {
-      document.getElementById("profileModal").style.display = "none";
-    }
+document.getElementById("editProfileBtn").onclick = openEditProfile;
+document.getElementById("closeProfileBtn").onclick = closeEditProfile;
+document.getElementById("saveProfileBtn").onclick = saveProfile;
 
-    async function saveProfile() {
-      const updates = {
-        id: currentUser.id,
-        email: currentUser.email,
-        name: document.getElementById("profileName").value.trim(),
-        company: document.getElementById("profileCompany").value.trim(),
-        trade: document.getElementById("profileTrade").value.trim(),
-        location: document.getElementById("profileLocation").value.trim(),
-        bio: document.getElementById("profileBio").value.trim()
-      };
-
-      await client.from("profiles").upsert(updates);
-
-      alert("Profile saved");
-      closeEditProfile();
-      loadDashboard();
-    }
-
-    document.getElementById("editProfileBtn").onclick = openEditProfile;
-    document.getElementById("closeProfileBtn").onclick = closeEditProfile;
-    document.getElementById("saveProfileBtn").onclick = saveProfile;
-
-    loadDashboard();
-    console.log("USER ID:", user.id);
-  </script>
+loadDashboard();
+</script>
 
 </body>
 </html>
