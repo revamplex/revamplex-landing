@@ -1352,7 +1352,7 @@ authContainer.innerHTML = `
     detailContent.innerHTML = `
       <div class="detail-panel">
         <h4>Profile</h4>
-        <button class="mini-btn secondary" onclick="openEditModal('${user.id}')">Edit Profile</button>
+       <button class="mini-btn secondary" onclick="goToDashboard()">Edit Profile</button>
       </div>
 
       <div class="detail-panel">
@@ -2799,6 +2799,10 @@ async function initAuthGate() {
   subscribeLive();
   checkUserSession();
   initAuthGate();
+
+    function goToDashboard() {
+  window.location.href = "dashboard.html";
+}
   </script>
   
 
