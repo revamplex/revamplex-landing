@@ -118,8 +118,8 @@
       <h3>Edit Profile</h3>
 
       <input type="text" id="profileName" placeholder="Full Name">
-      <input type="text" id="profileCompany" placeholder="Company Name">
-      <input type="text" id="profileTrade" placeholder="Trade">
+      <input type="text" id="profileCompany" placeholder="Company Name" class="contractor-only">
+      <input type="text" id="profileTrade" placeholder="Trade" class="contractor-only">
       <input type="text" id="profileLocation" placeholder="Location">
       <textarea id="profileBio" rows="4" placeholder="Bio"></textarea>
 
@@ -207,17 +207,21 @@
     function openEditProfile() {
       console.log("EDIT PROFILE CLICKED");
 
-      if (currentProfile) {
-        document.getElementById("profileName").value = currentProfile.name || "";
-        document.getElementById("profileCompany").value = currentProfile.company || "";
-        document.getElementById("profileTrade").value = currentProfile.trade || "";
-        document.getElementById("profileLocation").value = currentProfile.location || "";
-        document.getElementById("profileBio").value = currentProfile.bio || "";
-      }
+    if (currentProfile) {
+  document.getElementById("profileName").value = currentProfile.name || "";
+  document.getElementById("profileCompany").value = currentProfile.company || "";
+  document.getElementById("profileTrade").value = currentProfile.trade || "";
+  document.getElementById("profileLocation").value = currentProfile.location || "";
+  document.getElementById("profileBio").value = currentProfile.bio || "";
+}
 
-      document.getElementById("profileModal").style.display = "flex";
-    }
+const isContractor = currentProfile && currentProfile.role === "contractor";
 
+document.querySelectorAll(".contractor-only").forEach(el => {
+  el.style.display = isContractor ? "block" : "none";
+});
+
+document.getElementById("profileModal").style.display = "flex";
     function closeEditProfile() {
       document.getElementById("profileModal").style.display = "none";
     }
