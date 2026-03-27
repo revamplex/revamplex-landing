@@ -154,7 +154,8 @@ if (!session) {
   return;
 }
 
-      currentUser = user;
+const user = session.user;
+currentUser = user;
       document.getElementById("userEmail").innerText = user.email;
 
       const { data: profile } = await client
