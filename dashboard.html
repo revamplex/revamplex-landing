@@ -66,10 +66,6 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
 
-    .modal-box h3 {
-      margin-top: 0;
-    }
-
     .modal-box input,
     .modal-box textarea {
       width: 100%;
@@ -118,8 +114,16 @@
       <h3>Edit Profile</h3>
 
       <input type="text" id="profileName" placeholder="Full Name">
-      <input type="text" id="profileCompany" placeholder="Company Name" class="contractor-only">
-      <input type="text" id="profileTrade" placeholder="Trade" class="contractor-only">
+
+      <!-- ✅ FIXED: wrapped contractor-only fields -->
+      <div class="contractor-only">
+        <input type="text" id="profileCompany" placeholder="Company Name">
+      </div>
+
+      <div class="contractor-only">
+        <input type="text" id="profileTrade" placeholder="Trade">
+      </div>
+
       <input type="text" id="profileLocation" placeholder="Location">
       <textarea id="profileBio" rows="4" placeholder="Bio"></textarea>
 
@@ -135,21 +139,14 @@
   <script>
     const client = window.supabase.createClient(
       "https://dezvwoedboikshqttdqu.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E"
+      "YOUR_KEY"
     );
 
     let currentUser = null;
     let currentProfile = null;
 
     async function loadDashboard() {
-      console.log("DASHBOARD LOADING");
-
-      const { data: { user }, error: userError } = await client.auth.getUser();
-
-      if (userError) {
-        console.log("USER ERROR:", userError);
-        return;
-      }
+      const { data: { user } } = await client.auth.getUser();
 
       if (!user) {
         alert("You must be logged in");
@@ -160,79 +157,42 @@
       currentUser = user;
       document.getElementById("userEmail").innerText = user.email;
 
-      const { data: profile, error: profileError } = await client
+      const { data: profile } = await client
         .from("profiles")
         .select("*")
         .eq("id", user.id)
         .maybeSingle();
 
-      if (profileError) {
-        console.log("PROFILE ERROR:", profileError);
-        document.getElementById("userRole").innerText = "Profile error";
-        return;
-      }
-
-      if (!profile) {
-        document.getElementById("userRole").innerText = "No profile found";
-        document.getElementById("roleSection").innerHTML = `
-          <h3>No role tools yet</h3>
-          <p>Your profile row was not found in Supabase.</p>
-        `;
-        return;
-      }
+      if (!profile) return;
 
       currentProfile = profile;
-      document.getElementById("userRole").innerText = "Role: " + (profile.role || "none");
-
-      if (profile.role === "contractor") {
-        document.getElementById("roleSection").innerHTML = `
-          <h3>Contractor Tools</h3>
-          <button class="btn">My Bids</button>
-          <button class="btn">My Jobs</button>
-        `;
-      } else if (profile.role === "homeowner") {
-        document.getElementById("roleSection").innerHTML = `
-          <h3>Homeowner Tools</h3>
-          <button class="btn">My Jobs</button>
-          <button class="btn">Post a Job</button>
-        `;
-      } else {
-        document.getElementById("roleSection").innerHTML = `
-          <h3>No role tools yet</h3>
-          <p>This account does not have a contractor or homeowner role yet.</p>
-        `;
-      }
+      document.getElementById("userRole").innerText = "Role: " + profile.role;
     }
 
     function openEditProfile() {
-      console.log("EDIT PROFILE CLICKED");
 
-    if (currentProfile) {
-  document.getElementById("profileName").value = currentProfile.name || "";
-  document.getElementById("profileCompany").value = currentProfile.company || "";
-  document.getElementById("profileTrade").value = currentProfile.trade || "";
-  document.getElementById("profileLocation").value = currentProfile.location || "";
-  document.getElementById("profileBio").value = currentProfile.bio || "";
-}
+      if (currentProfile) {
+        document.getElementById("profileName").value = currentProfile.name || "";
+        document.getElementById("profileCompany").value = currentProfile.company || "";
+        document.getElementById("profileTrade").value = currentProfile.trade || "";
+        document.getElementById("profileLocation").value = currentProfile.location || "";
+        document.getElementById("profileBio").value = currentProfile.bio || "";
+      }
 
-const isContractor = currentProfile && currentProfile.role === "contractor";
+      const isContractor = currentProfile?.role === "contractor";
 
-document.querySelectorAll(".contractor-only").forEach(el => {
-  el.style.display = isContractor ? "block" : "none";
-});
+      document.querySelectorAll(".contractor-only").forEach(el => {
+        el.style.display = isContractor ? "block" : "none";
+      });
 
-document.getElementById("profileModal").style.display = "flex";
+      document.getElementById("profileModal").style.display = "flex";
     }
+
     function closeEditProfile() {
       document.getElementById("profileModal").style.display = "none";
     }
 
     async function saveProfile() {
-      if (!currentUser) {
-        alert("No logged in user found");
-        return;
-      }
-
       const updates = {
         id: currentUser.id,
         email: currentUser.email,
@@ -243,24 +203,16 @@ document.getElementById("profileModal").style.display = "flex";
         bio: document.getElementById("profileBio").value.trim()
       };
 
-      const { error } = await client
-        .from("profiles")
-        .upsert(updates);
-
-      if (error) {
-        console.log("SAVE ERROR:", error);
-        alert("Could not save profile");
-        return;
-      }
+      await client.from("profiles").upsert(updates);
 
       alert("Profile saved");
       closeEditProfile();
       loadDashboard();
     }
 
-    document.getElementById("editProfileBtn").addEventListener("click", openEditProfile);
-    document.getElementById("closeProfileBtn").addEventListener("click", closeEditProfile);
-    document.getElementById("saveProfileBtn").addEventListener("click", saveProfile);
+    document.getElementById("editProfileBtn").onclick = openEditProfile;
+    document.getElementById("closeProfileBtn").onclick = closeEditProfile;
+    document.getElementById("saveProfileBtn").onclick = saveProfile;
 
     loadDashboard();
   </script>
