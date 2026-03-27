@@ -116,13 +116,13 @@
       <input type="text" id="profileName" placeholder="Full Name">
 
       <!-- ✅ FIXED: wrapped contractor-only fields -->
-      <div class="contractor-only">
-        <input type="text" id="profileCompany" placeholder="Company Name">
-      </div>
+<div class="contractor-only" style="width:100%;">
+  <input id="profileCompany" type="text" placeholder="Company Name" style="width:100%;">
+</div>
 
-      <div class="contractor-only">
-        <input type="text" id="profileTrade" placeholder="Trade">
-      </div>
+<div class="contractor-only" style="width:100%;">
+  <input id="profileTrade" type="text" placeholder="Trade" style="width:100%;">
+</div>
 
       <input type="text" id="profileLocation" placeholder="Location">
       <textarea id="profileBio" rows="4" placeholder="Bio"></textarea>
@@ -182,9 +182,10 @@ currentUser = user;
 
       const isContractor = currentProfile?.role === "contractor";
 
-      document.querySelectorAll(".contractor-only").forEach(el => {
-        el.style.display = isContractor ? "block" : "none";
-      });
+document.querySelectorAll(".contractor-only").forEach(el => {
+  el.style.display = isContractor ? "block" : "none";
+  el.style.width = "100%";
+});
 
       document.getElementById("profileModal").style.display = "flex";
     }
