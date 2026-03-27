@@ -78,7 +78,7 @@ const supabase = window.supabase.createClient(
 );
 
 async function loadDashboard() {
-
+console.log("DASHBOARD LOADING");
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
