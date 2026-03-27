@@ -1368,7 +1368,6 @@ if (lockedRole === 'contractor') {
     </div>
   `;
 }
-}
 async function logout() {
   await supabaseClient.auth.signOut();
   localStorage.removeItem('revamplex_registered');
