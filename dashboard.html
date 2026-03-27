@@ -190,11 +190,13 @@ async function saveProfile() {
   loadDashboard();
 }
 
-document.getElementById("editProfileBtn").onclick = openEditProfile;
-document.getElementById("closeProfileBtn").onclick = closeEditProfile;
-document.getElementById("saveProfileBtn").onclick = saveProfile;
+window.onload = function () {
+  document.getElementById("editProfileBtn").onclick = openEditProfile;
+  document.getElementById("closeProfileBtn").onclick = closeEditProfile;
+  document.getElementById("saveProfileBtn").onclick = saveProfile;
 
-loadDashboard();
+  loadDashboard();
+};
 </script>
 
 </body>
