@@ -187,7 +187,7 @@ document.querySelectorAll(".contractor-only").forEach(el => {
   el.style.width = "100%";
 });
 
-      document.getElementById("profileModal").style.display = "flex";
+      setTimeout(() => document.getElementById("profileModal").style.display = "flex", 50);
     }
 
     function closeEditProfile() {
