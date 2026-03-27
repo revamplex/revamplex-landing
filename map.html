@@ -1347,13 +1347,14 @@ authContainer.innerHTML = `
 
   if (lockedRole === 'contractor') {
 
-    detailTitle.textContent = "Dashboard";
+detailTitle.textContent = "Dashboard";
 
-    detailContent.innerHTML = `
-      <div class="detail-panel">
-        <h4>Profile</h4>
-       <button class="mini-btn secondary" onclick="goToDashboard()">Edit Profile</button>
-      </div>
+detailContent.innerHTML = `
+  <div>
+    <p>${user.email}</p>
+    <button onclick="goToDashboard()" class="mini-btn secondary">Edit Profile</button>
+  </div>
+`;
 
       <div class="detail-panel">
         <h4>Active Bids</h4>
