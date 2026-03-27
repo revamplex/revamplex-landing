@@ -72,14 +72,14 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const supabase = window.supabase.createClient(
+const client = window.supabase.createClient(
   "https://dezvwoedboikshqttdqu.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E"
 );
 
 async function loadDashboard() {
 console.log("DASHBOARD LOADING");
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await client.auth.getUser();
 
   if (!user) {
     alert("You must be logged in");
@@ -89,7 +89,7 @@ console.log("DASHBOARD LOADING");
 
   document.getElementById("userEmail").innerText = user.email;
 
- const { data: profile, error } = await supabase
+ const { data: profile, error } = await client
   .from("profiles")
   .select("role")
   .eq("id", user.id)
