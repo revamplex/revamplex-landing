@@ -90,7 +90,7 @@
 
   <div class="card">
     <h3>My Profile</h3>
-    <button class="btn" id="editProfileBtn">Edit Profile</button>
+    <button class="btn" onclick="openEditProfile()">Edit Profile</button>
   </div>
 
 </div>
@@ -191,7 +191,6 @@ async function saveProfile() {
 }
 
 window.onload = function () {
-  document.getElementById("editProfileBtn").onclick = openEditProfile;
   document.getElementById("closeProfileBtn").onclick = closeEditProfile;
   document.getElementById("saveProfileBtn").onclick = saveProfile;
 
