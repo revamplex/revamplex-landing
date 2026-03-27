@@ -158,6 +158,7 @@ if (!session) {
 }
 
 const user = session.user;
+      console.log("USER ID:", user.id);
 currentUser = user;
       document.getElementById("userEmail").innerText = user.email;
 
@@ -222,6 +223,7 @@ document.querySelectorAll(".contractor-only").forEach(el => {
     document.getElementById("saveProfileBtn").onclick = saveProfile;
 
     loadDashboard();
+    console.log("USER ID:", user.id);
   </script>
 
 </body>
