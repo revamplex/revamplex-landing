@@ -1323,21 +1323,21 @@ authContainer.innerHTML = `
   expandUI();
   detailModal.classList.add('show');
 
-  if (lockedRole === 'homeowner') {
+ if (lockedRole === 'homeowner') {
 
-    const myJobs = jobs.filter(j => j.user_id === user.id);
+  const myJobs = jobs.filter(j => j.user_id === user.id);
 
-    detailTitle.textContent = "My Jobs";
-detailContent.innerHTML = `
-  <div>
-    <button onclick="goToDashboard()" class="mini-btn secondary">Edit Profile</button>
-  </div>
+  detailTitle.textContent = "My Jobs";
 
-  <div class="detail-panel">
-    detailContent.innerHTML = `
-      <div class="detail-panel">
-        <h4>Active Jobs</h4>
-        ${myJobs.length
+  detailContent.innerHTML = `
+    <div>
+      <button onclick="goToDashboard()" class="mini-btn secondary">Edit Profile</button>
+    </div>
+
+    <div class="detail-panel">
+      <h4>Active Jobs</h4>
+      ${
+        myJobs.length
           ? myJobs.map(j => `
               <div style="padding:10px 0; border-bottom:1px solid #e2e8f0;">
                 <strong>${j.title}</strong><br>
@@ -1345,14 +1345,13 @@ detailContent.innerHTML = `
                 <button class="mini-btn secondary" onclick="openEditModal('${j.id}')">Edit</button>
               </div>
             `).join('')
-          : '<p>No jobs yet</p>'}
-      </div>
-    `;
-  }
-
+          : '<p>No jobs yet</p>'
+      }
+    </div>
+  `;
+}
   if (lockedRole === 'contractor') {
 
-if (lockedRole === 'contractor') {
 
   detailTitle.textContent = "Dashboard";
 
