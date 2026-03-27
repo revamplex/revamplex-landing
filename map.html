@@ -1347,26 +1347,27 @@ authContainer.innerHTML = `
 
   if (lockedRole === 'contractor') {
 
-detailTitle.textContent = "Dashboard";
+if (lockedRole === 'contractor') {
 
-detailContent.innerHTML = `
-  <div>
-    <p>${user.email}</p>
-    <button onclick="goToDashboard()" class="mini-btn secondary">Edit Profile</button>
-  </div>
-`;
+  detailTitle.textContent = "Dashboard";
 
-      <div class="detail-panel">
-        <h4>Active Bids</h4>
-        <p>Coming next</p>
-      </div>
+  detailContent.innerHTML = `
+    <div>
+      <p>${user.email}</p>
+      <button onclick="goToDashboard()" class="mini-btn secondary">Edit Profile</button>
+    </div>
 
-      <div class="detail-panel">
-        <h4>Completed Jobs</h4>
-        <p>Coming next</p>
-      </div>
-    `;
-  }
+    <div class="detail-panel">
+      <h4>Active Bids</h4>
+      <p>Coming next</p>
+    </div>
+
+    <div class="detail-panel">
+      <h4>Completed Jobs</h4>
+      <p>Coming next</p>
+    </div>
+  `;
+}
 }
 async function logout() {
   await supabaseClient.auth.signOut();
