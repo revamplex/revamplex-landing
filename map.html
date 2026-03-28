@@ -2152,30 +2152,14 @@ filteredItems = Object.values(
 
 renderCards(filteredItems);
 
-// 🔥 MANUAL DUPLICATE CARD CLEANER
-requestAnimationFrame(() => {
-  const seen = new Set();
 
-  [...cardsRow.querySelectorAll('.listing-card')].forEach(card => {
-    const key = card.innerText.replace(/\s+/g, ' ').trim();
-
-    if (seen.has(key)) {
-      card.remove();
-    } else {
-      seen.add(key);
-    }
-  });
 
   // 🔥 USE ONLY VISIBLE (DEDUPED) CARD DATA
 // 🔥 GET REAL VISIBLE IDS FROM DOM (SOURCE OF TRUTH)
 const visibleIds = [...cardsRow.querySelectorAll('.listing-card[data-id]')]
   .map(card => Number(card.dataset.id));
 // 🔥 MATCH DATA TO WHAT USER ACTUALLY SEES
-const visibleItems = filteredItems.filter(item => 
-  visibleIds.includes(item.id)
-);
-
-renderMarkers(visibleItems);
+renderMarkers(filteredItems);
   formatCount();
 
   const visibleCards = [...cardsRow.querySelectorAll('.listing-card')];
