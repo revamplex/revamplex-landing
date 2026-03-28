@@ -2059,7 +2059,7 @@ function setActive(id, fromMap = false) {
   updateMarkerStates();
 
   const item = filteredItems.find(entry => String(entry.id) === String(id));
-  if (item && panMap) {
+  if (item) {
     const [displayLat, displayLng] = getDisplayCoords(item);
     map.flyTo([displayLat, displayLng], 14, {
   duration: 0.6,
@@ -2086,22 +2086,7 @@ if (marker) {
   activeHighlight.bringToFront();
 }
 if (marker) {
-  const coords = marker.getLatLng();
 
-  if (activeHighlight) {
-    map.removeLayer(activeHighlight);
-  }
-
-  activeHighlight = L.circle(coords, {
-    radius: 1600,
-    color: '#f97316',
-    fillColor: '#f97316',
-    fillOpacity: 0.12,
-    weight: 0
-  }).addTo(map);
-
-  activeHighlight.bringToFront();
-}
     if (marker) marker.openPopup();
   }
 }
