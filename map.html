@@ -1635,23 +1635,24 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 
 async function getCurrentDataset() {
 
-  // 🔒 LOCKED ROLE LOGIC
-  if (lockedRole === 'contractor') return jobs;
+  const mode = lockedRole || currentMode;
 
-  if (lockedRole === 'homeowner') {
+  let data = [];
+
+  if (mode === 'contractor') {
+    data = jobs;
+  } else if (mode === 'homeowner') {
     const { data: { user } } = await supabaseClient.auth.getUser();
 
-    if (!user) return contractors;
-
-    // 👇 get only THIS homeowner's jobs
-    const myJobs = jobs.filter(j => j.user_id === user.id);
-
-    // 👇 combine contractors + their jobs
-    return [...contractors, ...myJobs];
+    if (!user) {
+      data = contractors;
+    } else {
+      data = contractors;
+    }
   }
 
-  // fallback (not logged in)
-  return currentMode === 'homeowner' ? contractors : jobs;
+  // 🔥 HARD DEDUPE (THIS IS THE FIX)
+  return Array.from(new Map(data.map(i => [i.id, i])).values());
 }
 
     function syncModeUI() {
