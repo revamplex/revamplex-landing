@@ -1633,7 +1633,8 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     }
 
 async function getCurrentDataset() {
-
+  return jobs.map(...)
+}
   const mode = lockedRole || currentMode;
 
   if (mode === 'contractor') {
