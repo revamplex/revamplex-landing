@@ -2038,25 +2038,6 @@ function setActive(id, fromMap = false) {
     easeLinearity: 0.25
   });
 
-  const marker = markerIndex.get(String(id));
-  if (marker) {
-    const coords = marker.getLatLng();
-
-    if (activeHighlight) {
-      map.removeLayer(activeHighlight);
-    }
-
-    activeHighlight = L.circle(coords, {
-      radius: 1600,
-      color: '#f97316',
-      fillColor: '#f97316',
-      fillOpacity: 0.15,
-      weight: 0
-    }).addTo(map);
-
-    activeHighlight.bringToFront();
-  }
-}
 
   const [displayLat, displayLng] = getDisplayCoords(item);
   map.flyTo([displayLat, displayLng], 14, {
