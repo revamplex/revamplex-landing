@@ -1579,14 +1579,11 @@ function openProjectRoom(jobId) {
     const map = L.map('map', { zoomControl: false, attributionControl: true }).setView([40.8859, -74.0435], 11);
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   attribution: '&copy; OpenStreetMap &copy; CARTO',
   subdomains: 'abcd',
   maxZoom: 20
 }).addTo(map);
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
 
     function showLogoFallback() {
       if (logoImg) logoImg.style.display = 'none';
