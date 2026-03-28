@@ -2876,6 +2876,7 @@ async function initAuthGate() {
   window.location.href = "dashboard.html";
 }
 // ===== PREMIUM CLUSTER EXPANSION =====
+// ===== PREMIUM CLUSTER EXPANSION (CLEAN) =====
 function expandCluster(group, center) {
 
   // 🔥 CLEAR PREVIOUS EXPANSIONS
@@ -2895,7 +2896,7 @@ function expandCluster(group, center) {
     ];
 
     const core = L.circle(coords, {
-      radius: 0, // 🔥 start small for animation
+      radius: 0,
       color: '#f97316',
       fillColor: '#f97316',
       fillOpacity: 0.35,
