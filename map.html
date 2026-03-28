@@ -2655,7 +2655,7 @@ async function loadContractors() {
 }
 async function loadLiveData() {
 
-  if (isLoadingData) return; // 🔥 PREVENT DUPLICATE LOADS
+  if (isLoadingData) return; // 🚫 prevents duplicate calls
   isLoadingData = true;
 
   try {
@@ -2671,11 +2671,11 @@ async function loadLiveData() {
 
     applyFilters();
 
-  } catch (err) {
-    console.error("LOAD ERROR:", err);
-  }
-
+ } catch (err) {
+  console.error("LOAD ERROR:", err);
+} finally {
   isLoadingData = false;
+}
 }
 
 let liveSubscribed = false;
