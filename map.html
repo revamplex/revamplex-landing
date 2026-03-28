@@ -2097,7 +2097,7 @@ const matchesDistance = Number(item.distance || 999) <= maxDistance;
 const matchesRating = Number(item.rating || 0) >= minRating;
         return matchesQuery && matchesTrade && matchesDistance && matchesRating;
       });
-      
+    filteredItems = Array.from(new Map(filteredItems.map(i => [i.id, i])).values());  
 // 🔥 REMOVE DUPLICATES BY ID
 // 🔥 REMOVE DUPLICATES BY TYPE + ID (CRITICAL FIX)
 filteredItems = Object.values(
