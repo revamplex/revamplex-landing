@@ -1529,7 +1529,6 @@ function openProjectRoom(jobId) {
     let activeId = null;
     let filteredItems = [];
     let markerIndex = new Map();
-    let markerClusterGroup = null;
     let activeCircles = [];
     // ===== ACTIVE EXPANDED CLUSTERS =====
     let activePulseAnimations = [];
@@ -1740,14 +1739,12 @@ function offsetCoords(coords, index) {
     }
 
 function createClusterGroup() {
-  return L.markerClusterGroup({
     maxClusterRadius: 45,
     showCoverageOnHover: false,
     spiderfyOnMaxZoom: true,
     disableClusteringAtZoom: 13,
     iconCreateFunction(cluster) {
       return L.divIcon({
-        html: `<div class="custom-cluster">${cluster.getChildCount()}</div>`,
         className: '',
         iconSize: [42, 42]
       });
