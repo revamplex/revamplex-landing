@@ -1987,7 +1987,7 @@ cardsRow.innerHTML = '';
     if (lockedRole === 'contractor') return item.type === 'job';
     return true;
   });
-
+items = Array.from(new Map(items.map(i => [i.id, i])).values());
   if (!items.length) {
     cardsRow.innerHTML = `
       <div class="listing-card" style="display:flex;align-items:center;justify-content:center;">
@@ -2664,8 +2664,13 @@ async function loadLiveData() {
     const freshJobs = await loadJobs();
 
     // 🔥 CLEAN ASSIGN (NO STACKING)
-    contractors = freshContractors.map(i => ({ ...i, type: 'contractor' }));
-    jobs = freshJobs.map(i => ({ ...i, type: 'job' }));
+contractors = Array.from(new Map(
+  freshContractors.map(i => [i.id, { ...i, type: 'contractor' }])
+).values());
+
+jobs = Array.from(new Map(
+  freshJobs.map(i => [i.id, { ...i, type: 'job' }])
+).values());
 
     const dataset = await getCurrentDataset();
     activeId = dataset[0] ? dataset[0].id : null;
