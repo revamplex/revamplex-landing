@@ -2014,6 +2014,29 @@ items = Array.from(new Map(items.map(i => [i.id, i])).values());
       </div>
     </div>
   `).join('');
+  // 🔥 FORCE CARD INTERACTIONS (FIXES HOMEOWNER HOVER)
+document.querySelectorAll('.listing-card[data-id]').forEach(card => {
+
+  const id = Number(card.dataset.id);
+
+  card.onmouseenter = () => {
+    setActive(id, false);
+
+    const marker = markerIndex.get(id);
+    if (marker) {
+      map.setView(marker.getLatLng(), 13, {
+        animate: true,
+        duration: 0.4
+      });
+    }
+  };
+
+  card.onclick = () => {
+    setActive(id, true);
+    scrollCardIntoView(id);
+  };
+
+});
   // 🔥 CORRECT PLACE FOR CARD INTERACTIONS
 document.querySelectorAll('.listing-card').forEach(card => {
 
@@ -2143,7 +2166,14 @@ filteredItems = Object.values(
       if (!filteredItems.some(item => item.id === activeId)) {
         activeId = filteredItems[0]?.id ?? null;
       }
-
+// 🔥 HARD DEDUPE (BY ID + TYPE)
+filteredItems = Object.values(
+  filteredItems.reduce((acc, item) => {
+    const key = `${item.type}-${item.id}`;
+    acc[key] = item;
+    return acc;
+  }, {})
+);
 renderCards(filteredItems);
 
 
