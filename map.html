@@ -2079,14 +2079,15 @@ const source = await getCurrentDataset();
 if (!Array.isArray(source)) return;
 
     // 🔥 SINGLE DEDUPE (ONLY ONCE — SOURCE OF TRUTH)
-const seen = new Set();
+const cleanSource = Object.values(
+  source.reduce((acc, item) => {
+    const key = `${item.type}-${item.id}`;
+    acc[key] = item;
+    return acc;
+  }, {})
+);
 
-filteredItems = source.filter(item => {
-  const key = `${item.type}-${item.id}`;
-  if (seen.has(key)) return false;
-  seen.add(key);
-  return true;
-});
+filteredItems = cleanSource;
 
     const query = searchInput.value.trim().toLowerCase();
     const selectedTrade = tradeFilter.value;
@@ -2123,7 +2124,7 @@ filteredItems = source.filter(item => {
     if (!filteredItems.some(item => String(item.id) === String(activeId))) {
       activeId = filteredItems[0]?.id ?? null;
     }
-const uniqueMap = new Map();
+
     renderCards(filteredItems);
     renderMarkers(filteredItems);
     formatCount();
