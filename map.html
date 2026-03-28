@@ -1851,10 +1851,11 @@ clickTarget.on('click', () => {
   scrollCardIntoView(item.id);
 });
 
-}); // ✅ CLOSES items.forEach
+}); // ✅ CLOSE forEach LOOP
 
 fitMapToItems(items);
-      }
+
+} // ✅ CLOSE renderMarkers FUNCTION
 
     function fitMapToItems(items) {
       if (!items.length) return;
