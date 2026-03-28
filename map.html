@@ -2653,39 +2653,47 @@ async function loadContractors() {
     type: 'contractor'
   }));
 }
-    async function loadLiveData() {
-const freshContractors = await loadContractors();
-const freshJobs = await loadJobs();
+async function loadLiveData() {
 
-// 🔥 REMOVE DUPLICATES BY ID AT SOURCE
-contractors = Object.values(
-  freshContractors.reduce((acc, item) => {
-    acc[item.id] = item;
-    return acc;
-  }, {})
-);
+  if (isLoadingData) return; // 🔥 PREVENT DUPLICATE LOADS
+  isLoadingData = true;
 
-jobs = Object.values(
-  freshJobs.reduce((acc, item) => {
-    acc[item.id] = item;
-    return acc;
-  }, {})
-);
-      const dataset = await getCurrentDataset();
-      activeId = dataset[0] ? dataset[0].id : null;
-      applyFilters();
-    }
+  try {
+    const freshContractors = await loadContractors();
+    const freshJobs = await loadJobs();
 
-    function subscribeLive() {
-      supabaseClient
-        .channel('revamplex-live')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, loadLiveData)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'bids' }, loadLiveData)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'contractors' }, loadLiveData)
-        .subscribe(status => {
-  console.log("LIVE STATUS:", status);
-});
-    }
+    // 🔥 CLEAN ASSIGN (NO STACKING)
+    contractors = freshContractors.map(i => ({ ...i, type: 'contractor' }));
+    jobs = freshJobs.map(i => ({ ...i, type: 'job' }));
+
+    const dataset = await getCurrentDataset();
+    activeId = dataset[0] ? dataset[0].id : null;
+
+    applyFilters();
+
+  } catch (err) {
+    console.error("LOAD ERROR:", err);
+  }
+
+  isLoadingData = false;
+}
+
+let liveSubscribed = false;
+
+function subscribeLive() {
+
+  if (liveSubscribed) return; // 🔥 PREVENT MULTIPLE SUBSCRIPTIONS
+  liveSubscribed = true;
+
+  supabaseClient
+    .channel('revamplex-live')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, () => loadLiveData())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'bids' }, () => loadLiveData())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'contractors' }, () => loadLiveData())
+    .subscribe(status => {
+      console.log("LIVE STATUS:", status);
+    });
+}
 
     welcomeHomeownerBtn.addEventListener('click', () => startSignup('homeowner'));
     welcomeContractorBtn.addEventListener('click', () => startSignup('contractor'));
