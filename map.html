@@ -27,7 +27,18 @@
   box-shadow: 0 6px 16px rgba(0,0,0,0.2);
   transition: 0.2s;
 }
-
+.cluster-bubble {
+  background: #f97316;
+  color: white;
+  font-weight: bold;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
 .auth-btn:hover {
   transform: scale(1.05);
 }
@@ -1793,7 +1804,21 @@ function clearMarkers() {
   clearMarkers();
   markerClusterGroup = null;
 
-  items.forEach((item, index) => {
+  const groups = {};
+
+items.forEach(item => {
+  const coords = getDisplayCoords(item);
+  const key = coords[0].toFixed(3) + ',' + coords[1].toFixed(3);
+
+  if (!groups[key]) groups[key] = [];
+  groups[key].push(item);
+});
+      Object.values(groups).forEach(group => {
+        const baseCoords = getDisplayCoords(group[0]);
+        if (group.length === 1) {
+  const item = group[0];
+  const coords = baseCoords;
+          
     // 🔒 HARD DATA WALL (NO BLEED EVER AGAIN)
     if (lockedRole === 'homeowner' && item.type !== 'contractor' && item.type !== 'job') return;
     if (lockedRole === 'contractor' && item.type !== 'job') return;
@@ -1854,7 +1879,20 @@ activeCircles.push(core, innerGlow, outerGlow, clickTarget);
 // 🔥 INVISIBLE CLICK TARGET (BIG HIT AREA)
 
 }); // ✅ CLOSE forEach LOOP
+} else {
+  // 🔥 CLUSTER BUBBLE
+  const bubble = L.marker(baseCoords, {
+    icon: L.divIcon({
+      html: `<div class="cluster-bubble">${group.length}</div>`,
+      className: '',
+      iconSize: [40, 40]
+    })
+  }).addTo(map);
 
+  bubble.on('click', () => {
+    expandCluster(group, baseCoords);
+  });
+}
 fitMapToItems(items);
 
 } // ✅ CLOSE renderMarkers FUNCTION
@@ -2820,6 +2858,32 @@ async function initAuthGate() {
 
     function goToDashboard() {
   window.location.href = "dashboard.html";
+}
+    function expandCluster(group, center) {
+  const angleStep = (2 * Math.PI) / group.length;
+  const radius = 0.002;
+
+  group.forEach((item, i) => {
+    const angle = i * angleStep;
+
+    const coords = [
+      center[0] + Math.cos(angle) * radius,
+      center[1] + Math.sin(angle) * radius
+    ];
+
+    const core = L.circle(coords, {
+      radius: 300,
+      color: '#f97316',
+      fillColor: '#f97316',
+      fillOpacity: 0.35,
+      weight: 0
+    }).addTo(map);
+
+    core.on('click', () => {
+      setActive(item.id, true);
+      scrollCardIntoView(item.id);
+    });
+  });
 }
   </script>
   
