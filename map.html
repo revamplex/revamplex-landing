@@ -1993,59 +1993,33 @@ function renderCards(items) {
   `).join('');
 
   document.querySelectorAll('.listing-card[data-id]').forEach(card => {
-    const id = Number(card.dataset.id);
+  const id = Number(card.dataset.id);
 
-card.onmouseenter = () => {
-  if (selectedId === id) return;
+  card.onmouseenter = () => {
+    if (selectedId === id) return;
 
-  setActive(id, false);
-  scrollCardIntoView(id);
+    setActive(id, false);
+    scrollCardIntoView(id);
 
-  const marker = markerIndex.get(String(id));
-  if (marker) {
-    const coords = marker.getLatLng();
+    const marker = markerIndex.get(String(id));
+    if (marker) {
+      const coords = marker.getLatLng();
 
-    map.flyTo(coords, 13, { duration: 0.4 });
+      map.flyTo(coords, 13, { duration: 0.4 });
 
-    activeCircles.forEach(c => {
-      if (c.setStyle) c.setStyle({ fillOpacity: 0.18 });
-    });
-
-    const item = filteredItems.find(i => String(i.id) === String(id));
-    if (item) {
-      const [lat, lng] = getDisplayCoords(item);
-
-      const core = L.circle([lat, lng], {
-        radius: 400,
-        color: '#f97316',
-        fillColor: '#f97316',
-        fillOpacity: 0.6,
-        weight: 0
-      }).addTo(map);
-
-      const glow = L.circle([lat, lng], {
-        radius: 900,
-        color: '#f97316',
-        fillColor: '#f97316',
-        fillOpacity: 0.3,
-        weight: 0
-      }).addTo(map);
-
-      setTimeout(() => {
-        map.removeLayer(core);
-        map.removeLayer(glow);
-      }, 300);
+      activeCircles.forEach(c => {
+        if (c.setStyle) c.setStyle({ fillOpacity: 0.18 });
+      });
     }
-  }
-};
+  };
 
-card.onclick = () => {
-  selectedId = id;
-  setActive(id, true);
-  scrollCardIntoView(id);
-};
+  card.onclick = () => {
+    selectedId = id;
+    setActive(id, true);
+    scrollCardIntoView(id);
+  };
 
-
+});
 function setActive(id, fromMap = false) {
   activeId = Number(id);
   if (fromMap) selectedId = Number(id);
