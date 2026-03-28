@@ -1802,6 +1802,7 @@ const baseCoords = getDisplayCoords(item);
 const coords = offsetCoords(baseCoords, index);
 
     // CORE DOT (center) — CLICKABLE
+// CORE DOT
 const core = L.circle(coords, {
   radius: 300,
   color: '#f97316',
@@ -1810,31 +1811,7 @@ const core = L.circle(coords, {
   weight: 0
 }).addTo(map);
 
-// 🔥 CLICK → ACTIVATE CARD
-core.on('click', () => {
-  setActive(item.id, true);
-  scrollCardIntoView(item.id);
-
-  // 🔥 BRING TO FRONT (KEY FIX)
-  core.bringToFront();
-});
-    innerGlow.on('click', () => {
-  setActive(item.id, true);
-  scrollCardIntoView(item.id);
-  innerGlow.bringToFront();
-});
-    outerGlow.on('click', () => {
-  setActive(item.id, true);
-  scrollCardIntoView(item.id);
-  outerGlow.bringToFront();
-});
-    clickTarget.on('click', () => {
-  setActive(item.id, true);
-  scrollCardIntoView(item.id);
-  clickTarget.bringToFront();
-});
-
-// SOFT INNER GLOW (no click)
+// INNER GLOW
 const innerGlow = L.circle(coords, {
   radius: 700,
   color: '#f97316',
@@ -1843,13 +1820,7 @@ const innerGlow = L.circle(coords, {
   weight: 0
 }).addTo(map);
 
-// 🔥 CLICK HANDLER
-innerGlow.on('click', () => {
-  setActive(item.id, true);
-  scrollCardIntoView(item.id);
-});
-
-// OUTER FADE (no click)
+// OUTER GLOW
 const outerGlow = L.circle(coords, {
   radius: 1200,
   color: '#f97316',
@@ -1858,14 +1829,32 @@ const outerGlow = L.circle(coords, {
   weight: 0
 }).addTo(map);
 
-// 🔥 CLICK HANDLER
-outerGlow.on('click', () => {
+// CLICK TARGET (invisible)
+const clickTarget = L.circle(coords, {
+  radius: 1200,
+  opacity: 0,
+  fillOpacity: 0
+}).addTo(map);
+
+// 🔥 SINGLE CLICK HANDLER (CLEAN + RELIABLE)
+function handleClick() {
   setActive(item.id, true);
   scrollCardIntoView(item.id);
-});
 
-// STORE REFERENCES
-activeCircles.push(core, innerGlow, outerGlow);
+  // bring all layers forward
+  core.bringToFront();
+  innerGlow.bringToFront();
+  outerGlow.bringToFront();
+}
+
+// attach to ALL
+core.on('click', handleClick);
+innerGlow.on('click', handleClick);
+outerGlow.on('click', handleClick);
+clickTarget.on('click', handleClick);
+
+// store
+activeCircles.push(core, innerGlow, outerGlow, clickTarget);
 
 // 🔥 INVISIBLE CLICK TARGET (BIG HIT AREA)
 const clickTarget = L.circle(coords, {
