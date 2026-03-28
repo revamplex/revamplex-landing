@@ -1694,7 +1694,7 @@ async function getCurrentDataset() {
     }
 
     function getDisplayCoords(item) {
-  if (!item.lat || !item.lng) return [40.8859, -74.0435];
+  if (typeof item.lat !== 'number' || typeof item.lng !== 'number') return [40.8859, -74.0435];
 
   if (item.type === 'job' || currentMode === 'homeowner') {
     if (typeof item._maskedLat !== 'number' || typeof item._maskedLng !== 'number') {
@@ -1805,7 +1805,7 @@ function renderMarkers(items) {
   items.forEach((item, index) => {
 
     const baseCoords = getDisplayCoords(item);
-    const coords = baseCoords;
+    const coords = offsetCoords(baseCoords, index);
 
     // 🔥 CORE
     const core = L.circle(coords, {
