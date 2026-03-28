@@ -1837,18 +1837,16 @@ const clickTarget = L.circle(coords, {
 }).addTo(map);
 
 // 🔥 SINGLE CLICK HANDLER (CLEAN + RELIABLE)
-function handleClick() {
+// 🔥 ONLY USE CLICK TARGET (MOST RELIABLE)
+clickTarget.on('click', () => {
   setActive(item.id, true);
   scrollCardIntoView(item.id);
 
-  // bring all layers forward
+  // bring visuals forward
   core.bringToFront();
   innerGlow.bringToFront();
   outerGlow.bringToFront();
-}
-
-// attach to ALL
-core.on('click', handleClick);
+});
 
 // store
 activeCircles.push(core, innerGlow, outerGlow, clickTarget);
