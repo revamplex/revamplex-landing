@@ -2161,15 +2161,15 @@ renderMarkers(filteredItems);
   formatCount();
 
   const visibleCards = [...cardsRow.querySelectorAll('.listing-card')];
-  if (visibleCards.length > 0 && filteredItems.length > 0) {
-    const firstId = visibleItems[0].id;
+if (filteredItems.length > 0) {
+  const firstId = filteredItems[0].id;
+
+  requestAnimationFrame(() => {
     setActive(firstId, false);
     scrollCardIntoView(firstId);
     cardsRow.dispatchEvent(new Event('scroll'));
-  }
-});
-
-} 
+  });
+}
 
 function setSort(type) {
       activeSort = type;
