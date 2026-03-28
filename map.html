@@ -1824,18 +1824,19 @@ function renderMarkers(items) {
 
     // 🔥 INTERACTION LAYER
 const interactionLayer = L.circle(coords, {
-  radius: 1800, // 🔥 bigger detection area
+  radius: 2000, // 🔥 bigger = easier hover
   opacity: 0,
   fillOpacity: 0,
-  interactive: true,
-  bubblingMouseEvents: false // 🔥 prevents overlap blocking
+  interactive: true
 }).addTo(map);
 
-activeCircles.push(core, glow, interactionLayer);
+// 🔥 ALWAYS FLOAT ABOVE
+setTimeout(() => interactionLayer.bringToFront(), 0);
+
+activeCircles.push(core, glow);
+activeCircles.push(interactionLayer); // push last so it's on top
 markerIndex.set(item.id, interactionLayer);
 
-interactionLayer.setZIndexOffset(1000);
-interactionLayer.bringToFront();
 
     // 🔥 HOVER
     interactionLayer.bringToFront();
