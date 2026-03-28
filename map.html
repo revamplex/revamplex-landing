@@ -1314,7 +1314,7 @@ authContainer.innerHTML = `
   lockedRole = role;
   setMode(role);
   syncModeUI();
-  applyFilters();
+  await applyFilters();
 
 // 🔒 FULL LOCK UI
 homeownerModeBtn.style.display = 'none';
@@ -2180,7 +2180,7 @@ function setSort(type) {
       activeSort = type;
       sortDistanceBtn.classList.toggle('active', type === 'distance');
       sortRatingBtn.classList.toggle('active', type === 'rating');
-      applyFilters();
+      await applyFilters();
     }
 
     function getFormattedBudget(value) {
@@ -2474,7 +2474,7 @@ async function setMode(mode) {
   syncModeUI();
   const dataset = await getCurrentDataset();
   activeId = dataset[0] ? dataset[0].id : null;
-  applyFilters();
+  await applyFilters();
   expandUI();
 }
 
@@ -2719,7 +2719,7 @@ jobs = Array.from(new Map(
     const dataset = await getCurrentDataset();
     activeId = dataset[0] ? dataset[0].id : null;
 
-    applyFilters();
+    await applyFilters();
 
  } catch (err) {
   console.error("LOAD ERROR:", err);
@@ -2781,7 +2781,7 @@ function exploreDemo() {
     if (searchBtn) {
   searchBtn.addEventListener('click', applyFilters);
 }
-    searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') applyFilters(); });
+    searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') await applyFilters(); });
     tradeFilter.addEventListener('change', applyFilters);
     distanceFilter.addEventListener('change', applyFilters);
     ratingFilter.addEventListener('change', applyFilters);
