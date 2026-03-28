@@ -2051,7 +2051,6 @@ function setActive(id, fromMap = false) {
   selectedId = id; // 🔥 ADD THIS LINE RIGHT HERE
 
   updateMarkerStates();
-  updateCardsUI();
 
   document.querySelectorAll('.listing-card[data-id]').forEach(card => {
   card.classList.toggle('active', String(card.dataset.id) === String(id));
