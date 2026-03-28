@@ -1883,9 +1883,16 @@ interactionLayer.on('click', () => {
 
   selectedId = item.id;
 
+  // 🔥 ACTIVATE CARD + SYNC
+  setActive(item.id, true);
+  scrollCardIntoView(item.id);
 
-  activeCircles.forEach(c => c.setStyle({ fillOpacity: 0.18 }));
+  // 🔥 RESET ALL
+  activeCircles.forEach(c => {
+    if (c.setStyle) c.setStyle({ fillOpacity: 0.18 });
+  });
 
+  // 🔥 HIGHLIGHT SELECTED
   core.setStyle({ fillOpacity: 0.75 });
   glow.setStyle({ fillOpacity: 0.45 });
 
