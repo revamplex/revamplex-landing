@@ -2115,21 +2115,33 @@ filteredItems = Object.values(
         activeId = filteredItems[0]?.id ?? null;
       }
 
-     renderCards(filteredItems);
-renderMarkers(filteredItems);
-formatCount();
+renderCards(filteredItems);
 
-if (filteredItems.length > 0) {
-  const firstId = filteredItems[0].id;
+// 🔥 MANUAL DUPLICATE CARD CLEANER
+requestAnimationFrame(() => {
+  const seen = new Set();
 
-  requestAnimationFrame(() => {
+  [...cardsRow.querySelectorAll('.listing-card')].forEach(card => {
+    const key = card.innerText.replace(/\s+/g, ' ').trim();
+
+    if (seen.has(key)) {
+      card.remove();
+    } else {
+      seen.add(key);
+    }
+  });
+
+  renderMarkers(filteredItems);
+  formatCount();
+
+  const visibleCards = [...cardsRow.querySelectorAll('.listing-card')];
+  if (visibleCards.length > 0 && filteredItems.length > 0) {
+    const firstId = filteredItems[0].id;
     setActive(firstId, false);
     scrollCardIntoView(firstId);
-
-    // force depth + animation
     cardsRow.dispatchEvent(new Event('scroll'));
-  });
-}
+  }
+});
 
 } 
 
