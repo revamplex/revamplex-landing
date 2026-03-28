@@ -1802,7 +1802,7 @@ function renderMarkers(items) {
   items.forEach((item, index) => {
 
     const baseCoords = getDisplayCoords(item);
-    const coords = offsetCoords(baseCoords, index);
+    const coords = baseCoords;
 
     // 🔥 CORE
     const core = L.circle(coords, {
