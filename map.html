@@ -2111,7 +2111,7 @@ filteredItems = source.filter(item => {
       const matchesTrade =
         selectedTrade === 'all' ||
         String(item.trade || '').toLowerCase().includes(selectedTrade.toLowerCase());
-      const matchesDistance = Number(item.distance || 999) <= maxDistance;
+      const matchesDistance = !item.distance || Number(item.distance) <= maxDistance;
       const matchesRating = Number(item.rating || 0) >= minRating;
 
       return matchesQuery && matchesTrade && matchesDistance && matchesRating;
