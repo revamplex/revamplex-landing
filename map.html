@@ -1821,6 +1821,8 @@ Object.values(groups).forEach(group => {
     const item = group[0];
     const coords = baseCoords;
 
+    // ✅ EVERYTHING USING coords MUST BE INSIDE HERE
+
     const core = L.circle(coords, {
       radius: 300,
       color: '#f97316',
