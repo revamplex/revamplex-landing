@@ -1823,8 +1823,6 @@ items.forEach(item => {
     if (lockedRole === 'homeowner' && item.type !== 'contractor' && item.type !== 'job') return;
     if (lockedRole === 'contractor' && item.type !== 'job') return;
 
-const baseCoords = getDisplayCoords(item);
-const coords = offsetCoords(baseCoords, index);
 
     // CORE DOT (center) — CLICKABLE
 // CORE DOT
