@@ -1796,7 +1796,7 @@ function clearMarkers() {
       `;
     }
 
-// ===== PREMIUM GLOW MAP (ZILLOW FEEL, NO CLUSTERS) =====
+// ===== PREMIUM GLOW MAP (FINAL CLEAN VERSION) =====
 function renderMarkers(items) {
 
   clearMarkers();
@@ -1804,9 +1804,9 @@ function renderMarkers(items) {
   items.forEach((item, index) => {
 
     const baseCoords = getDisplayCoords(item);
-    const coords = offsetCoords(baseCoords, index); // 🔥 prevent overlap
+    const coords = offsetCoords(baseCoords, index);
 
-    // 🔥 CORE (VISIBLE)
+    // 🔥 CORE
     const core = L.circle(coords, {
       radius: 400,
       color: '#f97316',
@@ -1815,7 +1815,7 @@ function renderMarkers(items) {
       weight: 0
     }).addTo(map);
 
-    // 🔥 OUTER GLOW
+    // 🔥 GLOW
     const glow = L.circle(coords, {
       radius: 900,
       color: '#f97316',
@@ -1824,86 +1824,68 @@ function renderMarkers(items) {
       weight: 0
     }).addTo(map);
 
+    // 🔥 INTERACTION LAYER
+    const interactionLayer = L.circle(coords, {
+      radius: 1300,
+      opacity: 0,
+      fillOpacity: 0
+    }).addTo(map);
 
-// 🔥 SUBTLE PULSE
-let pulseRadius = 900;
+    // 🔥 STORE
+    activeCircles.push(core, glow, interactionLayer);
+    markerIndex.set(item.id, interactionLayer);
 
-const pulse = setInterval(() => {
-  pulseRadius += 20;
+    // 🔥 HOVER
+    interactionLayer.on('mouseover', () => {
 
-  if (pulseRadius > 1200) pulseRadius = 900;
+      if (selectedId === item.id) return;
 
-  glow.setRadius(pulseRadius);
+      core.setStyle({ fillOpacity: 0.6 });
+      glow.setStyle({ fillOpacity: 0.3 });
 
-}, 80);
-    // 🔥 BIG INVISIBLE CLICK TARGET (KEY FOR ZILLOW FEEL)
-   // 🔥 LARGE INTERACTION LAYER (FULL GLOW AREA)
-const interactionLayer = L.circle(coords, {
-  radius: 1300,
-  opacity: 0,
-  fillOpacity: 0
-}).addTo(map);
-activeCircles.push(core, glow, interactionLayer);
-markerIndex.set(item.id, interactionLayer);
-    
-// 🔥 HOVER (LIKE ZILLOW)
-interactionLayer.on('mouseover', () => {
+      document.querySelectorAll('.listing-card').forEach(c => c.classList.remove('hovered'));
 
-  if (selectedId === item.id) return;
+      const card = document.querySelector(`[data-id="${item.id}"]`);
+      if (card) card.classList.add('hovered');
 
-  hoveredId = item.id;
+    });
 
-  core.setStyle({ fillOpacity: 0.65 });
-  glow.setStyle({ fillOpacity: 0.35 });
+    interactionLayer.on('mouseout', () => {
 
-  // 🔥 highlight card
-  document.querySelectorAll('.listing-card').forEach(c => c.classList.remove('hovered'));
+      if (selectedId === item.id) return;
 
-  const card = document.querySelector(`[data-id="${item.id}"]`);
-  if (card) card.classList.add('hovered');
+      core.setStyle({ fillOpacity: 0.35 });
+      glow.setStyle({ fillOpacity: 0.18 });
 
-});
+      document.querySelectorAll('.listing-card').forEach(c => c.classList.remove('hovered'));
 
-// 🔥 HOVER OUT
-interactionLayer.on('mouseout', () => {
+    });
 
-  if (selectedId === item.id) return;
+    // 🔥 CLICK
+    interactionLayer.on('click', () => {
 
-  hoveredId = null;
+      selectedId = item.id;
 
-  core.setStyle({ fillOpacity: 0.35 });
-  glow.setStyle({ fillOpacity: 0.18 });
+      setActive(item.id, true);
+      scrollCardIntoView(item.id);
 
-  document.querySelectorAll('.listing-card').forEach(c => c.classList.remove('hovered'));
+      activeCircles.forEach(c => {
+        if (c.setStyle) c.setStyle({ fillOpacity: 0.18 });
+      });
 
-});
+      core.setStyle({ fillOpacity: 0.75 });
+      glow.setStyle({ fillOpacity: 0.45 });
 
-// 🔥 CLICK (SELECT LIKE ZILLOW)
-interactionLayer.on('click', () => {
+      core.bringToFront();
+      glow.bringToFront();
 
-  selectedId = item.id;
+    });
 
-  // 🔥 ACTIVATE CARD + SYNC
-  setActive(item.id, true);
-  scrollCardIntoView(item.id);
-
-  // 🔥 RESET ALL
-  activeCircles.forEach(c => {
-    if (c.setStyle) c.setStyle({ fillOpacity: 0.18 });
   });
-
-  // 🔥 HIGHLIGHT SELECTED
-  core.setStyle({ fillOpacity: 0.75 });
-  glow.setStyle({ fillOpacity: 0.45 });
-
-  core.bringToFront();
-  glow.bringToFront();
-
-});
-
 
   fitMapToItems(items);
 }
+
 // ===== END: TRUE ZILLOW MAP ENGINE =====
 
     function fitMapToItems(items) {
