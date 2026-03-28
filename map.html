@@ -2084,7 +2084,8 @@ if (mode === 'contractor' && item.type !== 'job') return false;
       const matchesTrade =
   selectedTrade === 'all' ||
   String(item.trade || '').toLowerCase().includes(selectedTrade.toLowerCase());
-
+const matchesDistance = Number(item.distance || 999) <= maxDistance;
+const matchesRating = Number(item.rating || 0) >= minRating;
         return matchesQuery && matchesTrade && matchesDistance && matchesRating;
       });
 
@@ -2409,7 +2410,7 @@ async function setMode(mode) {
   window.history.replaceState({}, '', url);
 
   syncModeUI();
-  const dataset = getCurrentDataset();
+  const dataset = await getCurrentDataset();
   activeId = dataset[0] ? dataset[0].id : null;
   applyFilters();
   expandUI();
