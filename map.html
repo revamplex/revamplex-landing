@@ -1814,6 +1814,24 @@ const core = L.circle(coords, {
 core.on('click', () => {
   setActive(item.id, true);
   scrollCardIntoView(item.id);
+
+  // 🔥 BRING TO FRONT (KEY FIX)
+  core.bringToFront();
+});
+    innerGlow.on('click', () => {
+  setActive(item.id, true);
+  scrollCardIntoView(item.id);
+  innerGlow.bringToFront();
+});
+    outerGlow.on('click', () => {
+  setActive(item.id, true);
+  scrollCardIntoView(item.id);
+  outerGlow.bringToFront();
+});
+    clickTarget.on('click', () => {
+  setActive(item.id, true);
+  scrollCardIntoView(item.id);
+  clickTarget.bringToFront();
 });
 
 // SOFT INNER GLOW (no click)
@@ -1877,8 +1895,8 @@ fitMapToItems(items);
       });
     }
 
-    function updateMarkerStates() {
-      filtereditems.forEach((item, index) => {
+function updateMarkerStates() {
+  filteredItems.forEach((item, index) => {
         const marker = markerIndex.get(item.id);
         if (marker) marker.setIcon(makeIcon(item, item.id === activeId));
       });
