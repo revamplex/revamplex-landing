@@ -2650,8 +2650,23 @@ async function loadContractors() {
   }));
 }
     async function loadLiveData() {
-      contractors = await loadContractors();
-      jobs = await loadJobs();
+const freshContractors = await loadContractors();
+const freshJobs = await loadJobs();
+
+// 🔥 REMOVE DUPLICATES BY ID AT SOURCE
+contractors = Object.values(
+  freshContractors.reduce((acc, item) => {
+    acc[item.id] = item;
+    return acc;
+  }, {})
+);
+
+jobs = Object.values(
+  freshJobs.reduce((acc, item) => {
+    acc[item.id] = item;
+    return acc;
+  }, {})
+);
       const dataset = await getCurrentDataset();
       activeId = dataset[0] ? dataset[0].id : null;
       applyFilters();
@@ -2663,7 +2678,9 @@ async function loadContractors() {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, loadLiveData)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'bids' }, loadLiveData)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'contractors' }, loadLiveData)
-        .subscribe();
+        .subscribe(status => {
+  console.log("LIVE STATUS:", status);
+});
     }
 
     welcomeHomeownerBtn.addEventListener('click', () => startSignup('homeowner'));
