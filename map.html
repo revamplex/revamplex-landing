@@ -1637,11 +1637,15 @@ async function getCurrentDataset() {
   const mode = lockedRole || currentMode;
 
   if (mode === 'contractor') {
-    return jobs.map(i => ({ ...i, type: 'job' }));
+    return Array.from(new Map(
+      jobs.map(i => [`job-${i.id}`, { ...i, type: 'job' }])
+    ).values());
   }
 
   if (mode === 'homeowner') {
-    return contractors.map(i => ({ ...i, type: 'contractor' }));
+    return Array.from(new Map(
+      contractors.map(i => [`contractor-${i.id}`, { ...i, type: 'contractor' }])
+    ).values());
   }
 
   return [];
@@ -1795,11 +1799,9 @@ function renderMarkers(items) {
   clearMarkers();
 
   items.forEach((item, index) => {
+    const baseCoords = getDisplayCoords(item);
+    const coords = offsetCoords(baseCoords, index);
 
-const baseCoords = getDisplayCoords(item);
-const coords = offsetCoords(baseCoords, index);
-
-    // 🔥 CORE
     const core = L.circle(coords, {
       radius: 400,
       color: '#f97316',
@@ -1808,7 +1810,6 @@ const coords = offsetCoords(baseCoords, index);
       weight: 0
     }).addTo(map);
 
-    // 🔥 GLOW
     const glow = L.circle(coords, {
       radius: 900,
       color: '#f97316',
@@ -1817,55 +1818,42 @@ const coords = offsetCoords(baseCoords, index);
       weight: 0
     }).addTo(map);
 
-    // 🔥 INTERACTION LAYER
-const interactionLayer = L.circle(coords, {
-  radius: 2000, // 🔥 bigger = easier hover
-  opacity: 0,
-  fillOpacity: 0,
-  interactive: true
-}).addTo(map);
+    const interactionLayer = L.circle(coords, {
+      radius: 2000,
+      opacity: 0,
+      fillOpacity: 0,
+      interactive: true
+    }).addTo(map);
 
-// 🔥 ALWAYS FLOAT ABOVE
-setTimeout(() => interactionLayer.bringToFront(), 0);
+    setTimeout(() => interactionLayer.bringToFront(), 0);
 
-activeCircles.push(core, glow);
-activeCircles.push(interactionLayer); // push last so it's on top
-markerIndex.set(item.id, interactionLayer);
+    activeCircles.push(core, glow, interactionLayer);
+    markerIndex.set(String(item.id), interactionLayer);
 
-
-    // 🔥 HOVER
-    interactionLayer.bringToFront();
     interactionLayer.on('mouseover', () => {
-
       if (selectedId === item.id) return;
 
       core.setStyle({ fillOpacity: 0.6 });
       glow.setStyle({ fillOpacity: 0.3 });
 
       document.querySelectorAll('.listing-card').forEach(c => c.classList.remove('hovered'));
-
-      const card = document.querySelector(`[data-id="${item.id}"]`);
+      const card = document.querySelector(`.listing-card[data-id="${item.id}"]`);
       if (card) card.classList.add('hovered');
-// 🔥 UNIVERSAL CARD INTERACTIONS (BOTH MODES)
 
+      setActive(item.id, false);
+      scrollCardIntoView(item.id);
     });
 
     interactionLayer.on('mouseout', () => {
-
       if (selectedId === item.id) return;
 
       core.setStyle({ fillOpacity: 0.35 });
       glow.setStyle({ fillOpacity: 0.18 });
-
       document.querySelectorAll('.listing-card').forEach(c => c.classList.remove('hovered'));
-
     });
 
-    // 🔥 CLICK
     interactionLayer.on('click', () => {
-
       selectedId = item.id;
-
       setActive(item.id, true);
       scrollCardIntoView(item.id);
 
@@ -1875,12 +1863,9 @@ markerIndex.set(item.id, interactionLayer);
 
       core.setStyle({ fillOpacity: 0.75 });
       glow.setStyle({ fillOpacity: 0.45 });
-
       core.bringToFront();
       glow.bringToFront();
-
     });
-
   });
 
   fitMapToItems(items);
@@ -1979,9 +1964,16 @@ function formatCount() {
     }
 
 function renderCards(items) {
-cardsRow.innerHTML = '';
-  
-  // 🔒 HARD FILTER (MUST BE INSIDE FUNCTION)
+  cardsRow.innerHTML = '';
+
+  items = Object.values(
+    items.reduce((acc, item) => {
+      const key = `${item.type}-${item.id}`;
+      acc[key] = item;
+      return acc;
+    }, {})
+  );
+
   items = items.filter(item => {
     if (lockedRole === 'homeowner') return item.type === 'contractor';
     if (lockedRole === 'contractor') return item.type === 'job';
@@ -2001,82 +1993,71 @@ cardsRow.innerHTML = '';
   }
 
   cardsRow.innerHTML = items.map(item => `
-    <div class="listing-card ${item.id === activeId ? 'active' : ''}" data-id="${item.id}">
+    <div class="listing-card ${String(item.id) === String(activeId) ? 'active' : ''}" data-id="${item.id}">
       <div class="card-inner">
         ${item.type === 'contractor' ? contractorCardHtml(item) : jobCardHtml(item)}
       </div>
     </div>
   `).join('');
-  // 🔥 FORCE CARD INTERACTIONS (FIXES HOMEOWNER HOVER)
-document.querySelectorAll('.listing-card[data-id]').forEach(card => {
 
-  const id = Number(card.dataset.id);
+  document.querySelectorAll('.listing-card[data-id]').forEach(card => {
+    const id = Number(card.dataset.id);
 
-  card.onmouseenter = () => {
-    setActive(id, false);
+    card.onmouseenter = () => {
+      setActive(id, false);
+      scrollCardIntoView(id);
 
-    const marker = markerIndex.get(id);
-    if (marker) {
-      map.setView(marker.getLatLng(), 13, {
-        animate: true,
-        duration: 0.4
-      });
-    }
-  };
+      const marker = markerIndex.get(String(id));
+      if (marker) {
+        map.setView(marker.getLatLng(), 13, {
+          animate: true,
+          duration: 0.4
+        });
+      }
+    };
 
-  card.onclick = () => {
-    setActive(id, true);
-    scrollCardIntoView(id);
-  };
-
-});
+    card.onclick = () => {
+      setActive(id, true);
+      scrollCardIntoView(id);
+    };
+  });
 }
 
 function setActive(id, fromMap = false) {
-
-  activeId = id;
-
-  selectedId = id; // 🔥 ADD THIS LINE RIGHT HERE
-
-  updateMarkerStates();
+  activeId = Number(id);
+  if (fromMap) selectedId = Number(id);
 
   document.querySelectorAll('.listing-card[data-id]').forEach(card => {
-  card.classList.toggle('active', String(card.dataset.id) === String(id));
-});
-
-  updateMarkerStates();
+    card.classList.toggle('active', String(card.dataset.id) === String(id));
+  });
 
   const item = filteredItems.find(entry => String(entry.id) === String(id));
-  if (item) {
-    const [displayLat, displayLng] = getDisplayCoords(item);
-    map.flyTo([displayLat, displayLng], 14, {
-  duration: 0.6,
-  easeLinearity: 0.25
-});
-    
-const marker = markerIndex.get(id);
+  if (!item) return;
 
-if (marker) {
-  const coords = marker.getLatLng();
+  const [displayLat, displayLng] = getDisplayCoords(item);
+  map.flyTo([displayLat, displayLng], 14, {
+    duration: 0.6,
+    easeLinearity: 0.25
+  });
 
-  if (activeHighlight) {
-    map.removeLayer(activeHighlight);
-  }
-
-  activeHighlight = L.circle(coords, {
-    radius: 1600,
-    color: '#f97316',
-    fillColor: '#f97316',
-    fillOpacity: 0.15,
-    weight: 0
-  }).addTo(map);
-
-  activeHighlight.bringToFront();
-}
+  const marker = markerIndex.get(String(id));
   if (marker) {
-  if (marker) marker.openPopup();
-}
-}
+    const coords = marker.getLatLng();
+
+    if (activeHighlight) {
+      map.removeLayer(activeHighlight);
+    }
+
+    activeHighlight = L.circle(coords, {
+      radius: 1600,
+      color: '#f97316',
+      fillColor: '#f97316',
+      fillOpacity: 0.15,
+      weight: 0
+    }).addTo(map);
+
+    activeHighlight.bringToFront();
+  }
 }
 
     function scrollCardIntoView(id) {
@@ -2091,80 +2072,81 @@ if (marker) {
       else items.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
     }
 
-    async function applyFilters() {
-      if (window.__applyingFilters) return;
-window.__applyingFilters = true;
-      const source = await getCurrentDataset();
-      // 🔥 FORCE CLEAN BASE DATA (PREVENT DUPLICATES FROM ANY SOURCE)
-let cleanSource = Object.values(
-  source.reduce((acc, item) => {
-    const key = `${item.type}-${item.id}`;
-    acc[key] = item;
-    return acc;
-    window.__applyingFilters = false;
-  }, {})
-);
-      const query = searchInput.value.trim().toLowerCase();
-      const selectedTrade = tradeFilter.value;
-      const maxDistance = Number(distanceFilter.value);
-      const minRating = Number(ratingFilter.value);
+async function applyFilters() {
+  if (window.__applyingFilters) return;
+  window.__applyingFilters = true;
 
-      filteredItems = cleanSource.filter(item => {
-const mode = lockedRole || currentMode;
+  try {
+    const source = await getCurrentDataset();
+    const cleanSource = Object.values(
+      source.reduce((acc, item) => {
+        const key = `${item.type}-${item.id}`;
+        acc[key] = item;
+        return acc;
+      }, {})
+    );
 
-if (mode === 'homeowner' && item.type !== 'contractor') return false;
-if (mode === 'contractor' && item.type !== 'job') return false;
+    const query = searchInput.value.trim().toLowerCase();
+    const selectedTrade = tradeFilter.value;
+    const maxDistance = Number(distanceFilter.value);
+    const minRating = Number(ratingFilter.value);
+    const mode = lockedRole || currentMode;
 
-        if (currentMode === 'contractor' && item.type === 'job') {
-          if ((item.max_bids || 5) <= ((item.bids || []).length)) return false;
-        }
+    filteredItems = cleanSource.filter(item => {
+      if (mode === 'homeowner' && item.type !== 'contractor') return false;
+      if (mode === 'contractor' && item.type !== 'job') return false;
 
-        const haystack = item.type === 'contractor'
-          ? [item.name, item.trade, item.city, item.bio].join(' ').toLowerCase()
-          : [item.title, item.trade, item.city, item.customer_name, item.description].join(' ').toLowerCase();
-
-        const matchesQuery = !query || haystack.includes(query);
-      const matchesTrade =
-  selectedTrade === 'all' ||
-  String(item.trade || '').toLowerCase().includes(selectedTrade.toLowerCase());
-const matchesDistance = Number(item.distance || 999) <= maxDistance;
-const matchesRating = Number(item.rating || 0) >= minRating;
-        return matchesQuery && matchesTrade && matchesDistance && matchesRating;
-      });
-    
-// 🔥 REMOVE DUPLICATES BY ID
-// 🔥 REMOVE DUPLICATES BY TYPE + ID (CRITICAL FIX)
-filteredItems = Object.values(
-  filteredItems.reduce((acc, item) => {
-    const key = `${item.type}-${item.id}`;
-    acc[key] = item;
-    return acc;
-  }, {})
-);
-      sortItems(filteredItems);
-      syncModeUI();
-
-      if (!filteredItems.some(item => item.id === activeId)) {
-        activeId = filteredItems[0]?.id ?? null;
+      if (mode === 'contractor' && (item.max_bids || 5) <= ((item.bids || []).length)) {
+        return false;
       }
 
-// 🔥 RENDER EVERYTHING FROM SAME DATA
-renderCards(filteredItems);
-renderMarkers(filteredItems);
-formatCount();
+      const haystack = item.type === 'contractor'
+        ? [item.name, item.trade, item.city, item.bio].join(' ').toLowerCase()
+        : [item.title, item.trade, item.city, item.customer_name, item.description].join(' ').toLowerCase();
 
-  const visibleCards = [...cardsRow.querySelectorAll('.listing-card')];
-if (filteredItems.length > 0) {
-  const firstId = filteredItems[0].id;
+      const matchesQuery = !query || haystack.includes(query);
+      const matchesTrade =
+        selectedTrade === 'all' ||
+        String(item.trade || '').toLowerCase().includes(selectedTrade.toLowerCase());
+      const matchesDistance = Number(item.distance || 999) <= maxDistance;
+      const matchesRating = Number(item.rating || 0) >= minRating;
 
-  requestAnimationFrame(() => {
-    setActive(firstId, false);
-    scrollCardIntoView(firstId);
-    cardsRow.dispatchEvent(new Event('scroll'));
-  });
+      return matchesQuery && matchesTrade && matchesDistance && matchesRating;
+    });
+
+    filteredItems = Object.values(
+      filteredItems.reduce((acc, item) => {
+        const key = `${item.type}-${item.id}`;
+        acc[key] = item;
+        return acc;
+      }, {})
+    );
+
+    sortItems(filteredItems);
+    syncModeUI();
+
+    if (!filteredItems.some(item => String(item.id) === String(activeId))) {
+      activeId = filteredItems[0]?.id ?? null;
+    }
+
+    renderCards(filteredItems);
+    renderMarkers(filteredItems);
+    formatCount();
+
+    if (filteredItems.length > 0) {
+      const firstId = filteredItems[0].id;
+
+      requestAnimationFrame(() => {
+        setActive(firstId, false);
+        scrollCardIntoView(firstId);
+        cardsRow.dispatchEvent(new Event('scroll'));
+      });
+    }
+  } finally {
+    window.__applyingFilters = false;
+  }
 }
-}
-    
+
 function setSort(type) {
       activeSort = type;
       sortDistanceBtn.classList.toggle('active', type === 'distance');
