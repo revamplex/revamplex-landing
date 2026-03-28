@@ -1883,17 +1883,12 @@ interactionLayer.on('click', () => {
 
   selectedId = item.id;
 
-  setActive(item.id, true);
-  scrollCardIntoView(item.id);
 
-  // reset all circles
   activeCircles.forEach(c => c.setStyle({ fillOpacity: 0.18 }));
 
-  // highlight selected
   core.setStyle({ fillOpacity: 0.75 });
   glow.setStyle({ fillOpacity: 0.45 });
 
-  // bring to front
   core.bringToFront();
   glow.bringToFront();
 
