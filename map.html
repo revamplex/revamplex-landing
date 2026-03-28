@@ -1807,7 +1807,7 @@ function clearMarkers() {
   const groups = {};
 
 items.forEach(item => {
-  const coords = getDisplayCoords(item); // ✅ ADD THIS LINE
+  const coords = getDisplayCoords(item); // 🔥 THIS LINE IS MISSING
 
   const key = coords[0].toFixed(3) + ',' + coords[1].toFixed(3);
 
