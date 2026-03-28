@@ -2391,7 +2391,7 @@ async function openEditModal(id) {
     `;
   }
 }
-function setMode(mode) {
+async function setMode(mode) {
   // 🔒 ABSOLUTE LOCK
   if (lockedRole) {
     if (mode !== lockedRole) {
