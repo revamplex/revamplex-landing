@@ -2053,7 +2053,7 @@ function setActive(id, fromMap = false) {
   document.querySelectorAll('.listing-card[data-id]').forEach(card => {
     card.classList.toggle('active', String(card.dataset.id) === String(id));
   });
-
+}
   const item = filteredItems.find(entry => String(entry.id) === String(id));
   if (!item) return;
 
