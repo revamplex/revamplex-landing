@@ -2637,7 +2637,7 @@ async function loadContractors() {
     async function loadLiveData() {
       contractors = await loadContractors();
       jobs = await loadJobs();
-      const dataset = getCurrentDataset();
+      const dataset = await getCurrentDataset();
       activeId = dataset[0] ? dataset[0].id : null;
       applyFilters();
     }
