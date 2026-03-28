@@ -1873,14 +1873,8 @@ function renderMarkers(items) {
     }
 
 function updateMarkerStates() {
-  // 🔥 NO LONGER USING marker.setIcon (circleMarker doesn't support it)
-  // We'll control styles directly later if needed
+  // 🔥 CLEAN — no icon logic anymore
 }
-  filteredItems.forEach((item, index) => {
-        const marker = markerIndex.get(item.id);
-        if (marker) marker.setIcon(makeIcon(item, item.id === activeId));
-      });
-    }
 
     function formatCount() {
       const noun = currentMode === 'homeowner' ? 'contractor' : 'job';
