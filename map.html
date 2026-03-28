@@ -2831,44 +2831,7 @@ async function initAuthGate() {
     function goToDashboard() {
   window.location.href = "dashboard.html";
 }
-// ===== PREMIUM CLUSTER EXPANSION =====
-// ===== PREMIUM CLUSTER EXPANSION (CLEAN) =====
-// ===== CLEAN EXPAND CLUSTER (FINAL) =====
 
-  const angleStep = (2 * Math.PI) / group.length;
-  const radius = 0.0025;
-
-  group.forEach((item, i) => {
-
-    const angle = i * angleStep;
-
-    const coords = [
-      center[0] + Math.cos(angle) * radius,
-      center[1] + Math.sin(angle) * radius
-    ];
-
-    const core = L.circle(coords, {
-      radius: 0,
-      color: '#f97316',
-      fillColor: '#f97316',
-      fillOpacity: 0.35,
-      weight: 0
-    }).addTo(map);
-
-    expandedClusters.push(core);
-
-    setTimeout(() => {
-      core.setRadius(300);
-    }, i * 60);
-
-    core.on('click', () => {
-      setActive(item.id, true);
-      scrollCardIntoView(item.id);
-    });
-
-  });
-
-}
   </script>
   
 
