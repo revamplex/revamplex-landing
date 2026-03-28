@@ -2075,16 +2075,18 @@ async function applyFilters() {
   window.__applyingFilters = true;
 
   try {
+    if (!Array.isArray(source)) return;
     const source = await getCurrentDataset();
 
     // 🔥 SINGLE DEDUPE (ONLY ONCE — SOURCE OF TRUTH)
-    filteredItems = Object.values(
-      source.reduce((acc, item) => {
-        const key = `${item.type}-${item.id}`;
-        acc[key] = item;
-        return acc;
-      }, {})
-    );
+const seen = new Set();
+
+filteredItems = source.filter(item => {
+  const key = `${item.type}-${item.id}`;
+  if (seen.has(key)) return false;
+  seen.add(key);
+  return true;
+});
 
     const query = searchInput.value.trim().toLowerCase();
     const selectedTrade = tradeFilter.value;
@@ -2121,7 +2123,13 @@ async function applyFilters() {
     if (!filteredItems.some(item => String(item.id) === String(activeId))) {
       activeId = filteredItems[0]?.id ?? null;
     }
+const uniqueMap = new Map();
 
+items.forEach(item => {
+  uniqueMap.set(item.id, item);
+});
+
+items = Array.from(uniqueMap.values());
     renderCards(filteredItems);
     renderMarkers(filteredItems);
     formatCount();
@@ -2683,7 +2691,12 @@ jobs = Array.from(new Map(
     const dataset = await getCurrentDataset();
     activeId = dataset[0] ? dataset[0].id : null;
 
-    applyFilters();
+if (!window.__initialRenderDone) {
+  applyFilters();
+  window.__initialRenderDone = true;
+} else {
+  applyFilters();
+}
 
  } catch (err) {
   console.error("LOAD ERROR:", err);
