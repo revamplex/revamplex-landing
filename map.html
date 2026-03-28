@@ -1532,7 +1532,6 @@ function openProjectRoom(jobId) {
     let markerClusterGroup = null;
     let activeCircles = [];
     // ===== ACTIVE EXPANDED CLUSTERS =====
-let expandedClusters = [];
     let activePulseAnimations = [];
     let uiCollapsed = false;
     let selectedWelcomeRole = null;
@@ -1808,110 +1807,72 @@ function clearMarkers() {
       `;
     }
 
-// ===== START: CLEAN ZILLOW CLUSTER SYSTEM =====
+// ===== START: TRUE ZILLOW MAP ENGINE =====
 function renderMarkers(items) {
-  console.log("RENDERING ITEMS:", items);
 
   clearMarkers();
 
-  const groups = {};
+  // 🔥 CREATE CLUSTER GROUP
+  if (markerClusterGroup) {
+    map.removeLayer(markerClusterGroup);
+  }
 
-  // 🔥 GROUP BY LOCATION
+  markerClusterGroup = L.markerClusterGroup({
+    maxClusterRadius: 60,
+    showCoverageOnHover: false,
+    spiderfyOnMaxZoom: true,
+    animate: true,
+    animateAddingMarkers: true,
+    disableClusteringAtZoom: 15,
+
+    iconCreateFunction(cluster) {
+      return L.divIcon({
+        html: `<div class="cluster-bubble">${cluster.getChildCount()}</div>`,
+        className: '',
+        iconSize: [42, 42]
+      });
+    }
+  });
+
+  // 🔥 ADD MARKERS
   items.forEach(item => {
+
     const coords = getDisplayCoords(item);
 
-    const key = coords[0].toFixed(3) + ',' + coords[1].toFixed(3);
+    const marker = L.circleMarker(coords, {
+      radius: 8,
+      fillColor: '#f97316',
+      color: '#fff',
+      weight: 2,
+      fillOpacity: 0.9
+    });
 
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(item);
+    // 🔥 CLICK → SYNC CARD
+    marker.on('click', () => {
+      setActive(item.id, true);
+      scrollCardIntoView(item.id);
+    });
+
+    // 🔥 HOVER EFFECT
+    marker.on('mouseover', () => {
+      marker.setStyle({ radius: 10, fillOpacity: 1 });
+    });
+
+    marker.on('mouseout', () => {
+      marker.setStyle({ radius: 8, fillOpacity: 0.9 });
+    });
+
+    markerClusterGroup.addLayer(marker);
+
+    // 🔥 STORE FOR CARD → MAP SYNC
+    markerIndex.set(item.id, marker);
   });
 
-  // 🔥 LOOP GROUPS
-  Object.values(groups).forEach(group => {
-
-    const baseCoords = getDisplayCoords(group[0]);
-
-    // =========================
-    // SINGLE ITEM
-    // =========================
-    if (group.length === 1) {
-
-      const item = group[0];
-      const coords = baseCoords;
-
-      const core = L.circle(coords, {
-        radius: 300,
-        color: '#f97316',
-        fillColor: '#f97316',
-        fillOpacity: 0.35,
-        weight: 0
-      }).addTo(map);
-
-      const innerGlow = L.circle(coords, {
-        radius: 700,
-        color: '#f97316',
-        fillColor: '#f97316',
-        fillOpacity: 0.18,
-        weight: 0
-      }).addTo(map);
-
-      const outerGlow = L.circle(coords, {
-        radius: 1200,
-        color: '#f97316',
-        fillColor: '#f97316',
-        fillOpacity: 0.08,
-        weight: 0
-      }).addTo(map);
-
-      const clickTarget = L.circle(coords, {
-        radius: 1200,
-        opacity: 0,
-        fillOpacity: 0
-      }).addTo(map);
-
-      clickTarget.on('click', () => {
-        setActive(item.id, true);
-        scrollCardIntoView(item.id);
-
-        core.bringToFront();
-        innerGlow.bringToFront();
-        outerGlow.bringToFront();
-      });
-
-      activeCircles.push(core, innerGlow, outerGlow, clickTarget);
-core.on('mouseover', () => {
-  core.setStyle({ fillOpacity: 0.55 });
-});
-
-core.on('mouseout', () => {
-  core.setStyle({ fillOpacity: 0.35 });
-});
-    }
-
-    // =========================
-    // MULTIPLE ITEMS (CLUSTER)
-    // =========================
-    else {
-
-      const bubble = L.marker(baseCoords, {
-        icon: L.divIcon({
-          html: `<div class="cluster-bubble">${group.length}</div>`,
-          className: '',
-          iconSize: [40, 40]
-        })
-      }).addTo(map);
-
-      bubble.on('click', () => {
-        expandCluster(group, baseCoords);
-      });
-
-    }
-
-  });
+  map.addLayer(markerClusterGroup);
 
   fitMapToItems(items);
 }
-// ===== END: CLEAN ZILLOW CLUSTER SYSTEM ===== // ✅ CLOSE renderMarkers FUNCTION
+// ===== END: TRUE ZILLOW MAP ENGINE =====
 
     function fitMapToItems(items) {
       if (!items.length) return;
@@ -2878,10 +2839,6 @@ async function initAuthGate() {
 // ===== PREMIUM CLUSTER EXPANSION =====
 // ===== PREMIUM CLUSTER EXPANSION (CLEAN) =====
 // ===== CLEAN EXPAND CLUSTER (FINAL) =====
-function expandCluster(group, center) {
-
-  expandedClusters.forEach(layer => map.removeLayer(layer));
-  expandedClusters = [];
 
   const angleStep = (2 * Math.PI) / group.length;
   const radius = 0.0025;
