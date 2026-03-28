@@ -2106,7 +2106,7 @@ let cleanSource = Object.values(
       const maxDistance = Number(distanceFilter.value);
       const minRating = Number(ratingFilter.value);
 
-      filteredItems = source.filter(item => {
+      filteredItems = cleanSource.filter(item => {
 const mode = lockedRole || currentMode;
 
 if (mode === 'homeowner' && item.type !== 'contractor') return false;
