@@ -1979,7 +1979,8 @@ function updateMarkerStates() {
     }
 
 function renderCards(items) {
-
+cardsRow.innerHTML = '';
+  
   // 🔒 HARD FILTER (MUST BE INSIDE FUNCTION)
   items = items.filter(item => {
     if (lockedRole === 'homeowner') return item.type === 'contractor';
