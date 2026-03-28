@@ -2124,12 +2124,6 @@ filteredItems = source.filter(item => {
       activeId = filteredItems[0]?.id ?? null;
     }
 const uniqueMap = new Map();
-
-items.forEach(item => {
-  uniqueMap.set(item.id, item);
-});
-
-items = Array.from(uniqueMap.values());
     renderCards(filteredItems);
     renderMarkers(filteredItems);
     formatCount();
