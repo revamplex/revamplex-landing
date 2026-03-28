@@ -1828,7 +1828,7 @@ function renderMarkers(items) {
     setTimeout(() => interactionLayer.bringToFront(), 0);
 
     activeCircles.push(core, glow, interactionLayer);
-    markerIndex.set(String(item.id), interactionLayer);
+    markerIndex.set(`${item.type}-${item.id}`, interactionLayer);
 
     interactionLayer.on('mouseover', () => {
       if (selectedId === item.id) return;
@@ -1985,7 +1985,7 @@ function renderCards(items) {
   }
 
   cardsRow.innerHTML = items.map(item => `
-    <div class="listing-card ${String(item.id) === String(activeId) ? 'active' : ''}" data-id="${item.id}">
+    <div class="listing-card ${String(item.id) === String(activeId) ? 'active' : ''}" data-id="${item.type}-${item.id}">
       <div class="card-inner">
         ${item.type === 'contractor' ? contractorCardHtml(item) : jobCardHtml(item)}
       </div>
@@ -1993,7 +1993,7 @@ function renderCards(items) {
   `).join('');
 
   document.querySelectorAll('.listing-card[data-id]').forEach(card => {
-  const id = Number(card.dataset.id);
+  const id = card.dataset.id;
 
   card.onmouseenter = () => {
     if (selectedId === id) return;
@@ -2001,7 +2001,7 @@ function renderCards(items) {
     setActive(id, false);
     scrollCardIntoView(id);
 
-    const marker = markerIndex.get(String(id));
+    const marker = markerIndex.get(id);
     if (marker) {
       const coords = marker.getLatLng();
 
@@ -2022,14 +2022,14 @@ function renderCards(items) {
 });
 }
 function setActive(id, fromMap = false) {
-  activeId = Number(id);
+  activeId = id;
   if (fromMap) selectedId = Number(id);
 
   document.querySelectorAll('.listing-card[data-id]').forEach(card => {
     card.classList.toggle('active', String(card.dataset.id) === String(id));
   });
 
-  const item = filteredItems.find(entry => String(entry.id) === String(id));
+  const item = filteredItems.find(entry => `${entry.type}-${entry.id}` === id);
   if (!item) return;
 
   const [displayLat, displayLng] = getDisplayCoords(item);
@@ -2039,9 +2039,6 @@ function setActive(id, fromMap = false) {
     easeLinearity: 0.25
   });
 
-  const marker = markerIndex.get(String(id));
-  if (marker) {
-    const coords = marker.getLatLng();
 
     if (activeHighlight) {
       map.removeLayer(activeHighlight);
@@ -2846,7 +2843,7 @@ cardsRow.addEventListener('scroll', () => {
     const center = rect.left + rect.width / 2;
     const diff = Math.abs(center - rowCenter);
 
-    const id = Number(card.dataset.id);
+    const id = card.dataset.id;
 
     // 🔥 CLEAN STATE
     card.classList.remove('near', 'far');
