@@ -1714,22 +1714,24 @@ async function getCurrentDataset() {
       });
     }
 
-    function createClusterGroup() {
-      return L.markerClusterGroup({
-        maxClusterRadius: 45,
-        showCoverageOnHover: false,
-        spiderfyOnMaxZoom: true,
-        disableClusteringAtZoom: 13,
-        iconCreateFunction(cluster) {
-          return L.divIcon({
-            html: `<div class="custom-cluster">${cluster.getChildCount()}</div>`,
-            className: '',
-            iconSize: [42, 42]
-          });
-        }
+function createClusterGroup() {
+  return L.markerClusterGroup({
+    maxClusterRadius: 45,
+    showCoverageOnHover: false,
+    spiderfyOnMaxZoom: true,
+    disableClusteringAtZoom: 13,
+    iconCreateFunction(cluster) {
+      return L.divIcon({
+        html: `<div class="custom-cluster">${cluster.getChildCount()}</div>`,
+        className: '',
+        iconSize: [42, 42]
+      });
+    }
+  });
+}
 
+function clearMarkers() {
 
-    function clearMarkers() {
 
   // stop animations
   activePulseAnimations.forEach(anim => {
@@ -1778,51 +1780,45 @@ async function getCurrentDataset() {
     }
 
     function renderMarkers(items) {
-      console.log("RENDERING ITEMS:", items);
-      clearMarkers();
-      markerClusterGroup = null;
+  console.log("RENDERING ITEMS:", items);
+  clearMarkers();
+  markerClusterGroup = null;
 
-items.forEach(item => {
+  items.forEach(item => {
+    // 🔒 HARD DATA WALL (NO BLEED EVER AGAIN)
+    if (lockedRole === 'homeowner' && item.type !== 'contractor' && item.type !== 'job') return;
+    if (lockedRole === 'contractor' && item.type !== 'job') return;
 
-  // 🔒 HARD DATA WALL (NO BLEED EVER AGAIN)
-  if (lockedRole === 'homeowner' && item.type !== 'contractor' && item.type !== 'job') return;
-  if (lockedRole === 'contractor' && item.type !== 'job') return;
+    const coords = getDisplayCoords(item);
 
-  const coords = getDisplayCoords(item);
-        
-// 🔥 CLEAN ZILLOW-STYLE MARKER (SOFT GLOW)
+    const core = L.circle(coords, {
+      radius: 300,
+      color: '#f97316',
+      fillColor: '#f97316',
+      fillOpacity: 0.35,
+      weight: 0
+    }).addTo(map);
 
-// CORE DOT (center)
-const core = L.circle(coords, {
-  radius: 300,
-  color: '#f97316',
-  fillColor: '#f97316',
-  fillOpacity: 0.35,
-  weight: 0
-}).addTo(map);
+    const innerGlow = L.circle(coords, {
+      radius: 700,
+      color: '#f97316',
+      fillColor: '#f97316',
+      fillOpacity: 0.18,
+      weight: 0
+    }).addTo(map);
 
-// SOFT INNER GLOW
-const innerGlow = L.circle(coords, {
-  radius: 700,
-  color: '#f97316',
-  fillColor: '#f97316',
-  fillOpacity: 0.18,
-  weight: 0
-}).addTo(map);
+    const outerGlow = L.circle(coords, {
+      radius: 1200,
+      color: '#f97316',
+      fillColor: '#f97316',
+      fillOpacity: 0.08,
+      weight: 0
+    }).addTo(map);
 
-// OUTER FADE GLOW
-const outerGlow = L.circle(coords, {
-  radius: 1200,
-  color: '#f97316',
-  fillColor: '#f97316',
-  fillOpacity: 0.08,
-  weight: 0
-}).addTo(map);
+    activeCircles.push(core, innerGlow, outerGlow);
+  });
 
-// STORE REFERENCES (IMPORTANT — DO NOT REMOVE)
-activeCircles.push(core, innerGlow, outerGlow);
-
-fitMapToItems(items);
+  fitMapToItems(items);
 }
 
     function fitMapToItems(items) {
