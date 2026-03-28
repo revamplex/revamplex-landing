@@ -2143,8 +2143,7 @@ filteredItems = Object.values(
       if (!filteredItems.some(item => item.id === activeId)) {
         activeId = filteredItems[0]?.id ?? null;
       }
-// 🔥 HARD DEDUPE (BY ID + TYPE)
-      // 🔥 GLOBAL DEDUPE (SOURCE OF TRUTH)
+// 🔥 SINGLE SOURCE OF TRUTH (DEDUPED DATA)
 filteredItems = Object.values(
   filteredItems.reduce((acc, item) => {
     const key = `${item.type}-${item.id}`;
@@ -2152,17 +2151,11 @@ filteredItems = Object.values(
     return acc;
   }, {})
 );
+
+// 🔥 RENDER EVERYTHING FROM SAME DATA
 renderCards(filteredItems);
-
-
-
-  // 🔥 USE ONLY VISIBLE (DEDUPED) CARD DATA
-// 🔥 GET REAL VISIBLE IDS FROM DOM (SOURCE OF TRUTH)
-const visibleIds = [...cardsRow.querySelectorAll('.listing-card[data-id]')]
-  .map(card => Number(card.dataset.id));
-// 🔥 MATCH DATA TO WHAT USER ACTUALLY SEES
 renderMarkers(filteredItems);
-  formatCount();
+formatCount();
 
   const visibleCards = [...cardsRow.querySelectorAll('.listing-card')];
 if (filteredItems.length > 0) {
