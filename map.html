@@ -2048,14 +2048,6 @@ function renderCards(items) {
   });
 }
 
-  card.onclick = () => {
-    selectedId = id;
-    setActive(id, true);
-    scrollCardIntoView(id);
-  };
-
-});
-}
 function setActive(id, fromMap = false) {
   activeId = id;
   if (fromMap) selectedId = Number(id);
