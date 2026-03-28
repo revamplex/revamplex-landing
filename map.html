@@ -1966,14 +1966,6 @@ function formatCount() {
 function renderCards(items) {
   cardsRow.innerHTML = '';
 
-  items = Object.values(
-    items.reduce((acc, item) => {
-      const key = `${item.type}-${item.id}`;
-      acc[key] = item;
-      return acc;
-    }, {})
-  );
-
   items = items.filter(item => {
     if (lockedRole === 'homeowner') return item.type === 'contractor';
     if (lockedRole === 'contractor') return item.type === 'job';
@@ -2003,25 +1995,53 @@ function renderCards(items) {
   document.querySelectorAll('.listing-card[data-id]').forEach(card => {
     const id = Number(card.dataset.id);
 
-    card.onmouseenter = () => {
-      setActive(id, false);
-      scrollCardIntoView(id);
+card.onmouseenter = () => {
+  if (selectedId === id) return;
 
-      const marker = markerIndex.get(String(id));
-      if (marker) {
-        map.setView(marker.getLatLng(), 13, {
-          animate: true,
-          duration: 0.4
-        });
-      }
-    };
+  setActive(id, false);
+  scrollCardIntoView(id);
 
-    card.onclick = () => {
-      setActive(id, true);
-      scrollCardIntoView(id);
-    };
-  });
-}
+  const marker = markerIndex.get(String(id));
+  if (marker) {
+    const coords = marker.getLatLng();
+
+    map.flyTo(coords, 13, {
+      duration: 0.4
+    });
+
+    // 🔥 highlight circle on hover (same as map hover)
+    activeCircles.forEach(c => {
+      if (c.setStyle) c.setStyle({ fillOpacity: 0.18 });
+    });
+
+    // find matching circles
+    const item = filteredItems.find(i => String(i.id) === String(id));
+    if (item) {
+      const [lat, lng] = getDisplayCoords(item);
+
+      const core = L.circle([lat, lng], {
+        radius: 400,
+        color: '#f97316',
+        fillColor: '#f97316',
+        fillOpacity: 0.6,
+        weight: 0
+      }).addTo(map);
+
+      const glow = L.circle([lat, lng], {
+        radius: 900,
+        color: '#f97316',
+        fillColor: '#f97316',
+        fillOpacity: 0.3,
+        weight: 0
+      }).addTo(map);
+
+      setTimeout(() => {
+        map.removeLayer(core);
+        map.removeLayer(glow);
+      }, 300);
+    }
+  }
+};
 
 function setActive(id, fromMap = false) {
   activeId = Number(id);
@@ -2080,7 +2100,7 @@ async function applyFilters() {
     const source = await getCurrentDataset();
 
     // 🔥 SINGLE DEDUPE (ONLY ONCE — SOURCE OF TRUTH)
-    let filteredItems = Object.values(
+    filteredItems = Object.values(
       source.reduce((acc, item) => {
         const key = `${item.type}-${item.id}`;
         acc[key] = item;
