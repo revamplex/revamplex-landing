@@ -1646,9 +1646,6 @@ async function getCurrentDataset() {
 
   return [];
 }
-  // 🔥 HARD DEDUPE (THIS IS THE FIX)
-  return data;
-}
 
     function syncModeUI() {
       homeownerModeBtn.classList.toggle('active', currentMode === 'homeowner');
@@ -2109,7 +2106,7 @@ let cleanSource = Object.values(
       const maxDistance = Number(distanceFilter.value);
       const minRating = Number(ratingFilter.value);
 
-      filteredItems = Source.filter(item => {
+      filteredItems = source.filter(item => {
 const mode = lockedRole || currentMode;
 
 if (mode === 'homeowner' && item.type !== 'contractor') return false;
