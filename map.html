@@ -2877,9 +2877,10 @@ async function initAuthGate() {
 }
 // ===== PREMIUM CLUSTER EXPANSION =====
 // ===== PREMIUM CLUSTER EXPANSION (CLEAN) =====
+// ===== CLEAN EXPAND CLUSTER (FINAL) =====
 function expandCluster(group, center) {
 
-  // 🔥 CLEAR PREVIOUS EXPANSIONS
+  // clear previous
   expandedClusters.forEach(layer => map.removeLayer(layer));
   expandedClusters = [];
 
@@ -2905,7 +2906,6 @@ function expandCluster(group, center) {
 
     expandedClusters.push(core);
 
-    // 🔥 ANIMATE OUTWARD
     setTimeout(() => {
       core.setRadius(300);
     }, i * 60);
@@ -2916,6 +2916,8 @@ function expandCluster(group, center) {
     });
 
   });
+
+}
 
   const angleStep = (2 * Math.PI) / group.length;
   const radius = 0.002;
