@@ -2100,12 +2100,20 @@ if (marker) {
 
     async function applyFilters() {
       const source = await getCurrentDataset();
+      // 🔥 FORCE CLEAN BASE DATA (PREVENT DUPLICATES FROM ANY SOURCE)
+let cleanSource = Object.values(
+  source.reduce((acc, item) => {
+    const key = `${item.type}-${item.id}`;
+    acc[key] = item;
+    return acc;
+  }, {})
+);
       const query = searchInput.value.trim().toLowerCase();
       const selectedTrade = tradeFilter.value;
       const maxDistance = Number(distanceFilter.value);
       const minRating = Number(ratingFilter.value);
 
-      filteredItems = source.filter(item => {
+      filteredItems = cleanSource.filter(item => {
 const mode = lockedRole || currentMode;
 
 if (mode === 'homeowner' && item.type !== 'contractor' && item.type !== 'job') return false;
