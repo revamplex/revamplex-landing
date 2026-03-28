@@ -1850,10 +1850,10 @@ clickTarget.on('click', () => {
   setActive(item.id, true);
   scrollCardIntoView(item.id);
 });
-    
-    
-  fitMapToItems(items);
-}
+
+}); // ✅ CLOSES items.forEach
+
+fitMapToItems(items); // ✅ RUNS AFTER LOOP
 
     function fitMapToItems(items) {
       if (!items.length) return;
