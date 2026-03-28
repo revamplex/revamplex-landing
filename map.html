@@ -2500,26 +2500,7 @@ async function saveEdit(id, type) {
     console.error(err);
   }
 }
-    // 🔥 FORCE LOGIN AFTER SIGNUP
-    const { error: loginError } = await supabaseClient.auth.signInWithPassword({
-      email,
-      password
-    });
 
-    if (loginError) throw loginError;
-
-    // 🔥 SAVE STATE
-    localStorage.setItem('revamplex_registered', 'true');
-    localStorage.setItem('revamplex_role', selectedWelcomeRole);
-
-    // 🔥 HARD REDIRECT (clean state)
-    window.location.href = `map.html?view=${selectedWelcomeRole}`;
-
-  } catch (err) {
-    alert(err.message);
-    console.error(err);
-  }
-}
     async function loadJobs() {
       const { data, error } = await supabaseClient
         .from('jobs')
