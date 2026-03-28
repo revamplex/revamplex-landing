@@ -1995,23 +1995,58 @@ function renderCards(items) {
   document.querySelectorAll('.listing-card[data-id]').forEach(card => {
   const id = card.dataset.id;
 
-  card.onmouseenter = () => {
-    if (selectedId === id) return;
+function renderCards(items) {
+  cardsRow.innerHTML = '';
 
-    setActive(id, false);
-    scrollCardIntoView(id);
+  items = items.filter(item => {
+    if (lockedRole === 'homeowner') return item.type === 'contractor';
+    if (lockedRole === 'contractor') return item.type === 'job';
+    return true;
+  });
 
-    const marker = markerIndex.get(id);
-    if (marker) {
-      const coords = marker.getLatLng();
+  if (!items.length) {
+    cardsRow.innerHTML = `
+      <div class="listing-card">
+        <div style="padding:22px;text-align:center;">
+          <div style="font-size:17px;font-weight:900;margin-bottom:8px;">No results found</div>
+        </div>
+      </div>
+    `;
+    return;
+  }
 
-      map.flyTo(coords, 13, { duration: 0.4 });
+  cardsRow.innerHTML = items.map(item => `
+    <div class="listing-card ${`${item.type}-${item.id}` === activeId ? 'active' : ''}" 
+         data-id="${item.type}-${item.id}">
+      <div class="card-inner">
+        ${item.type === 'contractor' ? contractorCardHtml(item) : jobCardHtml(item)}
+      </div>
+    </div>
+  `).join('');
 
-      activeCircles.forEach(c => {
-        if (c.setStyle) c.setStyle({ fillOpacity: 0.18 });
-      });
-    }
-  };
+  document.querySelectorAll('.listing-card[data-id]').forEach(card => {
+    const id = card.dataset.id;
+
+    card.onmouseenter = () => {
+      if (selectedId === id) return;
+
+      setActive(id, false);
+      scrollCardIntoView(id);
+
+      const marker = markerIndex.get(id);
+      if (marker) {
+        const coords = marker.getLatLng();
+        map.flyTo(coords, 13, { duration: 0.4 });
+      }
+    };
+
+    card.onclick = () => {
+      selectedId = id;
+      setActive(id, true);
+      scrollCardIntoView(id);
+    };
+  });
+}
 
   card.onclick = () => {
     selectedId = id;
