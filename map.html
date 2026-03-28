@@ -2781,7 +2781,9 @@ function exploreDemo() {
     if (searchBtn) {
   searchBtn.addEventListener('click', applyFilters);
 }
-    searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') await applyFilters(); });
+    searchInput.addEventListener('keydown', async (e) => {
+  if (e.key === 'Enter') await applyFilters();
+});
     tradeFilter.addEventListener('change', applyFilters);
     distanceFilter.addEventListener('change', applyFilters);
     ratingFilter.addEventListener('change', applyFilters);
