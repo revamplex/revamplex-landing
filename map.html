@@ -2075,8 +2075,8 @@ async function applyFilters() {
   window.__applyingFilters = true;
 
   try {
-    if (!Array.isArray(source)) return;
-    const source = await getCurrentDataset();
+const source = await getCurrentDataset();
+if (!Array.isArray(source)) return;
 
     // 🔥 SINGLE DEDUPE (ONLY ONCE — SOURCE OF TRUTH)
 const seen = new Set();
