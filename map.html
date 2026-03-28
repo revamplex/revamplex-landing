@@ -2038,13 +2038,6 @@ function setActive(id, fromMap = false) {
     easeLinearity: 0.25
   });
 
-
-  const [displayLat, displayLng] = getDisplayCoords(item);
-  map.flyTo([displayLat, displayLng], 14, {
-    duration: 0.6,
-    easeLinearity: 0.25
-  });
-
   const marker = markerIndex.get(String(id));
   if (marker) {
     const coords = marker.getLatLng();
@@ -2064,7 +2057,6 @@ function setActive(id, fromMap = false) {
     activeHighlight.bringToFront();
   }
 }
-
     function scrollCardIntoView(id) {
       const target = [...document.querySelectorAll('.listing-card[data-id]')].find(card => Number(card.dataset.id) === id);
       if (!target) return;
