@@ -1636,20 +1636,16 @@ async function getCurrentDataset() {
 
   const mode = lockedRole || currentMode;
 
-  let data = [];
-
   if (mode === 'contractor') {
-    data = jobs;
-  } else if (mode === 'homeowner') {
-    const { data: { user } } = await supabaseClient.auth.getUser();
-
-    if (!user) {
-      data = contractors;
-    } else {
-      data = contractors;
-    }
+    return jobs.map(i => ({ ...i, type: 'job' }));
   }
 
+  if (mode === 'homeowner') {
+    return contractors.map(i => ({ ...i, type: 'contractor' }));
+  }
+
+  return [];
+}
   // 🔥 HARD DEDUPE (THIS IS THE FIX)
   return data;
 }
