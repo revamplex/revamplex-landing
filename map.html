@@ -1314,7 +1314,7 @@ authContainer.innerHTML = `
   lockedRole = role;
   setMode(role);
   syncModeUI();
-  await applyFilters();
+  applyFilters();
 
 // 🔒 FULL LOCK UI
 homeownerModeBtn.style.display = 'none';
@@ -2474,7 +2474,7 @@ async function setMode(mode) {
   syncModeUI();
   const dataset = await getCurrentDataset();
   activeId = dataset[0] ? dataset[0].id : null;
-  await applyFilters();
+  applyFilters();
   expandUI();
 }
 
@@ -2719,7 +2719,7 @@ jobs = Array.from(new Map(
     const dataset = await getCurrentDataset();
     activeId = dataset[0] ? dataset[0].id : null;
 
-    await applyFilters();
+    applyFilters();
 
  } catch (err) {
   console.error("LOAD ERROR:", err);
@@ -2781,8 +2781,8 @@ function exploreDemo() {
     if (searchBtn) {
   searchBtn.addEventListener('click', applyFilters);
 }
-    searchInput.addEventListener('keydown', async (e) => {
-  if (e.key === 'Enter') await applyFilters();
+searchInput.addEventListener('keydown', async (e) => {
+  if (e.key === 'Enter') applyFilters();
 });
     tradeFilter.addEventListener('change', applyFilters);
     distanceFilter.addEventListener('change', applyFilters);
