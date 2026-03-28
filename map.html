@@ -2015,6 +2015,21 @@ items = Array.from(new Map(items.map(i => [i.id, i])).values());
       </div>
     </div>
   `).join('');
+  // 🔥 CORRECT PLACE FOR CARD INTERACTIONS
+document.querySelectorAll('.listing-card').forEach(card => {
+
+  const id = Number(card.dataset.id);
+
+  card.onmouseenter = () => {
+    setActive(id, false);
+  };
+
+  card.onclick = () => {
+    setActive(id, true);
+    scrollCardIntoView(id);
+  };
+
+});
 }
 
 function setActive(id, fromMap = false) {
@@ -2866,14 +2881,6 @@ cardsRow.addEventListener('scroll', () => {
   const diff = Math.abs(center - rowCenter);
 
   const id = Number(card.dataset.id);
-card.onmouseenter = () => {
-    setActive(id, false);
-  };
-
-  card.onclick = () => {
-    setActive(id, true);
-    scrollCardIntoView(id);
-  };
 
 });
   // 🔥 CLEAR previous states
