@@ -1799,94 +1799,104 @@ function clearMarkers() {
       `;
     }
 
-    function renderMarkers(items) {
+// ===== START: CLEAN ZILLOW CLUSTER SYSTEM =====
+function renderMarkers(items) {
   console.log("RENDERING ITEMS:", items);
+
   clearMarkers();
-  markerClusterGroup = null;
 
   const groups = {};
 
-items.forEach(item => {
-  const coords = getDisplayCoords(item); // 🔥 THIS LINE IS MISSING
+  // 🔥 GROUP BY LOCATION
+  items.forEach(item => {
+    const coords = getDisplayCoords(item);
 
-  const key = coords[0].toFixed(3) + ',' + coords[1].toFixed(3);
+    const key = coords[0].toFixed(3) + ',' + coords[1].toFixed(3);
 
-  if (!groups[key]) groups[key] = [];
-  groups[key].push(item);
-});
-Object.values(groups).forEach(group => {
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(item);
+  });
 
-  const baseCoords = getDisplayCoords(group[0]);
+  // 🔥 LOOP GROUPS
+  Object.values(groups).forEach(group => {
 
-  if (group.length === 1) {
+    const baseCoords = getDisplayCoords(group[0]);
 
-    const item = group[0];
-    const coords = baseCoords;
+    // =========================
+    // SINGLE ITEM
+    // =========================
+    if (group.length === 1) {
 
-    // ✅ EVERYTHING USING coords MUST BE INSIDE HERE
+      const item = group[0];
+      const coords = baseCoords;
 
-    const core = L.circle(coords, {
-      radius: 300,
-      color: '#f97316',
-      fillColor: '#f97316',
-      fillOpacity: 0.35,
-      weight: 0
-    }).addTo(map);
+      const core = L.circle(coords, {
+        radius: 300,
+        color: '#f97316',
+        fillColor: '#f97316',
+        fillOpacity: 0.35,
+        weight: 0
+      }).addTo(map);
 
-    const innerGlow = L.circle(coords, {
-      radius: 700,
-      color: '#f97316',
-      fillColor: '#f97316',
-      fillOpacity: 0.18,
-      weight: 0
-    }).addTo(map);
+      const innerGlow = L.circle(coords, {
+        radius: 700,
+        color: '#f97316',
+        fillColor: '#f97316',
+        fillOpacity: 0.18,
+        weight: 0
+      }).addTo(map);
 
-    const outerGlow = L.circle(coords, {
-      radius: 1200,
-      color: '#f97316',
-      fillColor: '#f97316',
-      fillOpacity: 0.08,
-      weight: 0
-    }).addTo(map);
+      const outerGlow = L.circle(coords, {
+        radius: 1200,
+        color: '#f97316',
+        fillColor: '#f97316',
+        fillOpacity: 0.08,
+        weight: 0
+      }).addTo(map);
 
-    const clickTarget = L.circle(coords, {
-      radius: 1200,
-      opacity: 0,
-      fillOpacity: 0
-    }).addTo(map);
+      const clickTarget = L.circle(coords, {
+        radius: 1200,
+        opacity: 0,
+        fillOpacity: 0
+      }).addTo(map);
 
-    clickTarget.on('click', () => {
-      setActive(item.id, true);
-      scrollCardIntoView(item.id);
+      clickTarget.on('click', () => {
+        setActive(item.id, true);
+        scrollCardIntoView(item.id);
 
-      core.bringToFront();
-      innerGlow.bringToFront();
-      outerGlow.bringToFront();
-    });
+        core.bringToFront();
+        innerGlow.bringToFront();
+        outerGlow.bringToFront();
+      });
 
-    activeCircles.push(core, innerGlow, outerGlow, clickTarget);
+      activeCircles.push(core, innerGlow, outerGlow, clickTarget);
 
-  } else {
+    }
 
-    const bubble = L.marker(baseCoords, {
-      icon: L.divIcon({
-        html: `<div class="cluster-bubble">${group.length}</div>`,
-        className: '',
-        iconSize: [40, 40]
-      })
-    }).addTo(map);
+    // =========================
+    // MULTIPLE ITEMS (CLUSTER)
+    // =========================
+    else {
 
-    bubble.on('click', () => {
-      expandCluster(group, baseCoords);
-    });
+      const bubble = L.marker(baseCoords, {
+        icon: L.divIcon({
+          html: `<div class="cluster-bubble">${group.length}</div>`,
+          className: '',
+          iconSize: [40, 40]
+        })
+      }).addTo(map);
 
-  }
+      bubble.on('click', () => {
+        expandCluster(group, baseCoords);
+      });
 
-}); // ✅ CLOSE forEach
+    }
 
-fitMapToItems(items); // ✅ OUTSIDE loop
+  });
 
-} // ✅ CLOSE renderMarkers FUNCTION
+  fitMapToItems(items);
+}
+// ===== END: CLEAN ZILLOW CLUSTER SYSTEM ===== // ✅ CLOSE renderMarkers FUNCTION
 
     function fitMapToItems(items) {
       if (!items.length) return;
