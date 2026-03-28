@@ -1998,8 +1998,11 @@ function renderCards(items) {
 card.onmouseenter = () => {
   if (selectedId === id) return;
 
-  setActive(id, false);
+card.onclick = () => {
+  selectedId = id;
+  setActive(id, true);
   scrollCardIntoView(id);
+};
 
   const marker = markerIndex.get(String(id));
   if (marker) {
