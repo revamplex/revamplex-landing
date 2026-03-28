@@ -2876,29 +2876,28 @@ cardsRow.addEventListener('scroll', () => {
   let closestDiff = Infinity;
 
   cards.forEach(card => {
-  const rect = card.getBoundingClientRect();
-  const center = rect.left + rect.width / 2;
-  const diff = Math.abs(center - rowCenter);
+    const rect = card.getBoundingClientRect();
+    const center = rect.left + rect.width / 2;
+    const diff = Math.abs(center - rowCenter);
 
-  const id = Number(card.dataset.id);
+    const id = Number(card.dataset.id);
 
-});
-  // 🔥 CLEAR previous states
-  card.classList.remove('near', 'far');
+    // 🔥 CLEAN STATE
+    card.classList.remove('near', 'far');
 
-  if (id === activeId) return; // active handled separately
+    if (id === activeId) return;
 
-  if (diff < 120) {
-    card.classList.add('near');
-  } else {
-    card.classList.add('far');
-  }
+    if (diff < 120) {
+      card.classList.add('near');
+    } else {
+      card.classList.add('far');
+    }
 
-  if (diff < closestDiff) {
-    closestDiff = diff;
-    closestId = id;
-  }
-});
+    if (diff < closestDiff) {
+      closestDiff = diff;
+      closestId = id;
+    }
+  });
 
   scrollTimer = setTimeout(() => {
     if (closestId !== null) {
