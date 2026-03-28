@@ -2078,7 +2078,9 @@ async function applyFilters() {
 
   try {
     const source = await getCurrentDataset();
-    const cleanSource = Object.values(
+
+    // 🔥 SINGLE DEDUPE (ONLY ONCE — SOURCE OF TRUTH)
+    let filteredItems = Object.values(
       source.reduce((acc, item) => {
         const key = `${item.type}-${item.id}`;
         acc[key] = item;
@@ -2092,7 +2094,8 @@ async function applyFilters() {
     const minRating = Number(ratingFilter.value);
     const mode = lockedRole || currentMode;
 
-    filteredItems = cleanSource.filter(item => {
+    // 🔥 FILTER CLEAN DATA (NOT BEFORE DEDUPE)
+    filteredItems = filteredItems.filter(item => {
       if (mode === 'homeowner' && item.type !== 'contractor') return false;
       if (mode === 'contractor' && item.type !== 'job') return false;
 
@@ -2114,14 +2117,6 @@ async function applyFilters() {
       return matchesQuery && matchesTrade && matchesDistance && matchesRating;
     });
 
-    filteredItems = Object.values(
-      filteredItems.reduce((acc, item) => {
-        const key = `${item.type}-${item.id}`;
-        acc[key] = item;
-        return acc;
-      }, {})
-    );
-
     sortItems(filteredItems);
     syncModeUI();
 
@@ -2142,11 +2137,11 @@ async function applyFilters() {
         cardsRow.dispatchEvent(new Event('scroll'));
       });
     }
+
   } finally {
     window.__applyingFilters = false;
   }
 }
-
 function setSort(type) {
       activeSort = type;
       sortDistanceBtn.classList.toggle('active', type === 'distance');
