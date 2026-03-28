@@ -2020,9 +2020,17 @@ document.querySelectorAll('.listing-card').forEach(card => {
 
   const id = Number(card.dataset.id);
 
-  card.onmouseenter = () => {
-    setActive(id, false);
-  };
+ card.onmouseenter = () => {
+  setActive(id, false);
+
+  const marker = markerIndex.get(id);
+  if (marker) {
+    map.setView(marker.getLatLng(), 13, {
+      animate: true,
+      duration: 0.4
+    });
+  }
+};
 
   card.onclick = () => {
     setActive(id, true);
