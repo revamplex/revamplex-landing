@@ -2137,7 +2137,12 @@ requestAnimationFrame(() => {
     }
   });
 
-  renderMarkers(filteredItems);
+  // 🔥 USE ONLY VISIBLE (DEDUPED) CARD DATA
+const visibleItems = Array.from(
+  new Map(filteredItems.map(i => [i.id, i])).values()
+);
+
+renderMarkers(visibleItems);
   formatCount();
 
   const visibleCards = [...cardsRow.querySelectorAll('.listing-card')];
