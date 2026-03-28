@@ -402,6 +402,11 @@
   border: 2px solid rgba(249,115,22,0.5);
   box-shadow: 0 20px 40px rgba(249,115,22,0.25);
 }
+    .listing-card.hovered {
+  transform: scale(1.03);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  border: 2px solid #f97316;
+}
     .card-top {
       display:flex;
       justify-content:space-between;
@@ -1531,6 +1536,8 @@ function openProjectRoom(jobId) {
     let markerIndex = new Map();
     let activeCircles = [];
     let activeHighlight = null;
+    let hoveredId = null;
+    let selectedId = null;
     // ===== ACTIVE EXPANDED CLUSTERS =====
     let activePulseAnimations = [];
     let uiCollapsed = false;
@@ -1817,7 +1824,8 @@ function renderMarkers(items) {
       weight: 0
     }).addTo(map);
 
-    activeCircles.push(core, glow);
+    activeCircles.push(core, glow, interactionLayer);
+markerIndex.set(item.id, interactionLayer);
 // 🔥 SUBTLE PULSE
 let pulseRadius = 900;
 
@@ -1830,11 +1838,65 @@ const pulse = setInterval(() => {
 
 }, 80);
     // 🔥 BIG INVISIBLE CLICK TARGET (KEY FOR ZILLOW FEEL)
-    const clickTarget = L.circle(coords, {
-      radius: 1200,
-      opacity: 0,
-      fillOpacity: 0
-    }).addTo(map);
+   // 🔥 LARGE INTERACTION LAYER (FULL GLOW AREA)
+const interactionLayer = L.circle(coords, {
+  radius: 1300,
+  opacity: 0,
+  fillOpacity: 0
+}).addTo(map);
+
+// 🔥 HOVER (LIKE ZILLOW)
+interactionLayer.on('mouseover', () => {
+
+  if (selectedId === item.id) return;
+
+  hoveredId = item.id;
+
+  core.setStyle({ fillOpacity: 0.65 });
+  glow.setStyle({ fillOpacity: 0.35 });
+
+  // 🔥 highlight card
+  document.querySelectorAll('.listing-card').forEach(c => c.classList.remove('hovered'));
+
+  const card = document.querySelector(`[data-id="${item.id}"]`);
+  if (card) card.classList.add('hovered');
+
+});
+
+// 🔥 HOVER OUT
+interactionLayer.on('mouseout', () => {
+
+  if (selectedId === item.id) return;
+
+  hoveredId = null;
+
+  core.setStyle({ fillOpacity: 0.35 });
+  glow.setStyle({ fillOpacity: 0.18 });
+
+  document.querySelectorAll('.listing-card').forEach(c => c.classList.remove('hovered'));
+
+});
+
+// 🔥 CLICK (SELECT LIKE ZILLOW)
+interactionLayer.on('click', () => {
+
+  selectedId = item.id;
+
+  setActive(item.id, true);
+  scrollCardIntoView(item.id);
+
+  // reset all circles
+  activeCircles.forEach(c => c.setStyle({ fillOpacity: 0.18 }));
+
+  // highlight selected
+  core.setStyle({ fillOpacity: 0.75 });
+  glow.setStyle({ fillOpacity: 0.45 });
+
+  // bring to front
+  core.bringToFront();
+  glow.bringToFront();
+
+});
 
     // 🔥 CLICK → CARD + MAP SYNC
    clickTarget.on('mouseover', () => {
@@ -1990,14 +2052,14 @@ function renderCards(items) {
   `).join('');
 }
 
-   function setActive(id, panMap = false) {
-
-  const alreadyActive = activeId === id &&
-    document.querySelector(`.listing-card[data-id="${id}"]`)?.classList.contains('active');
-
-  if (alreadyActive) return;
+function setActive(id, fromMap = false) {
 
   activeId = id;
+
+  selectedId = id; // 🔥 ADD THIS LINE RIGHT HERE
+
+  updateMarkerStates();
+  updateCardsUI();
 
   document.querySelectorAll('.listing-card[data-id]').forEach(card => {
   card.classList.toggle('active', String(card.dataset.id) === String(id));
@@ -2026,7 +2088,7 @@ if (marker) {
     radius: 1600,
     color: '#f97316',
     fillColor: '#f97316',
-    fillOpacity: 0.12,
+    fillOpacity: 0.15,
     weight: 0
   }).addTo(map);
 
