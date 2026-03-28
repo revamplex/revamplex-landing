@@ -1530,6 +1530,7 @@ function openProjectRoom(jobId) {
     let filteredItems = [];
     let markerIndex = new Map();
     let activeCircles = [];
+    let activeHighlight = null;
     // ===== ACTIVE EXPANDED CLUSTERS =====
     let activePulseAnimations = [];
     let uiCollapsed = false;
@@ -1817,7 +1818,17 @@ function renderMarkers(items) {
     }).addTo(map);
 
     activeCircles.push(core, glow);
+// 🔥 SUBTLE PULSE
+let pulseRadius = 900;
 
+const pulse = setInterval(() => {
+  pulseRadius += 20;
+
+  if (pulseRadius > 1200) pulseRadius = 900;
+
+  glow.setRadius(pulseRadius);
+
+}, 80);
     // 🔥 BIG INVISIBLE CLICK TARGET (KEY FOR ZILLOW FEEL)
     const clickTarget = L.circle(coords, {
       radius: 1200,
@@ -1826,24 +1837,40 @@ function renderMarkers(items) {
     }).addTo(map);
 
     // 🔥 CLICK → CARD + MAP SYNC
-    clickTarget.on('click', () => {
-      setActive(item.id, true);
-      scrollCardIntoView(item.id);
-    });
+   clickTarget.on('mouseover', () => {
+  core.setStyle({ fillOpacity: 0.6 });
+  glow.setStyle({ fillOpacity: 0.3 });
+});
+clickTarget.on('mouseout', () => {
+  core.setStyle({ fillOpacity: 0.35 });
+  glow.setStyle({ fillOpacity: 0.18 });
+});
+  // 🔥 ACTIVATE CARD
+  setActive(item.id, true);
+  scrollCardIntoView(item.id);
 
-    // 🔥 HOVER FEEDBACK (PREMIUM FEEL)
-    clickTarget.on('mouseover', () => {
-      core.setStyle({ fillOpacity: 0.55 });
-    });
+  // 🔥 REMOVE OLD HIGHLIGHT
+  if (activeHighlight) {
+    map.removeLayer(activeHighlight);
+  }
 
-    clickTarget.on('mouseout', () => {
-      core.setStyle({ fillOpacity: 0.35 });
-    });
+  // 🔥 CREATE PREMIUM GLOW RING
+  activeHighlight = L.circle(coords, {
+    radius: 1600,
+    color: '#f97316',
+    fillColor: '#f97316',
+    fillOpacity: 0.12,
+    weight: 0
+  }).addTo(map);
 
-    // 🔥 STORE FOR CARD → MAP SYNC
-    markerIndex.set(item.id, clickTarget);
+  activeHighlight.bringToFront();
 
+  // 🔥 SMOOTH ZOOM (ZILLOW FEEL)
+  map.flyTo(coords, 14, {
+    duration: 0.8
   });
+
+});
 
   fitMapToItems(items);
 }
@@ -1985,7 +2012,43 @@ function renderCards(items) {
   duration: 0.6,
   easeLinearity: 0.25
 });
-    const marker = markerIndex.get(id);
+    
+const marker = markerIndex.get(id);
+
+if (marker) {
+  const coords = marker.getLatLng();
+
+  if (activeHighlight) {
+    map.removeLayer(activeHighlight);
+  }
+
+  activeHighlight = L.circle(coords, {
+    radius: 1600,
+    color: '#f97316',
+    fillColor: '#f97316',
+    fillOpacity: 0.12,
+    weight: 0
+  }).addTo(map);
+
+  activeHighlight.bringToFront();
+}
+if (marker) {
+  const coords = marker.getLatLng();
+
+  if (activeHighlight) {
+    map.removeLayer(activeHighlight);
+  }
+
+  activeHighlight = L.circle(coords, {
+    radius: 1600,
+    color: '#f97316',
+    fillColor: '#f97316',
+    fillOpacity: 0.12,
+    weight: 0
+  }).addTo(map);
+
+  activeHighlight.bringToFront();
+}
     if (marker) marker.openPopup();
   }
 }
