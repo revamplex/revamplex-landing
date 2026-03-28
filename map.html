@@ -1828,7 +1828,13 @@ const outerGlow = L.circle(coords, {
 
 // STORE REFERENCES
 activeCircles.push(core, innerGlow, outerGlow);
-  });
+    core.on('mouseover', () => {
+  core.setStyle({ fillOpacity: 0.5 });
+});
+
+core.on('mouseout', () => {
+  core.setStyle({ fillOpacity: 0.35 });
+});
 
   fitMapToItems(items);
 }
