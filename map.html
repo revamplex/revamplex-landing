@@ -1594,10 +1594,7 @@ function openProjectRoom(jobId) {
     const map = L.map('map', { zoomControl: false, attributionControl: true }).setView([40.8859, -74.0435], 11);
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 // 🔥 CLICK MAP TO CLOSE CLUSTERS
-map.on('click', () => {
-  expandedClusters.forEach(layer => map.removeLayer(layer));
-  expandedClusters = [];
-});
+
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   attribution: '&copy; OpenStreetMap &copy; CARTO',
   subdomains: 'abcd',
