@@ -2180,7 +2180,7 @@ function setSort(type) {
       activeSort = type;
       sortDistanceBtn.classList.toggle('active', type === 'distance');
       sortRatingBtn.classList.toggle('active', type === 'rating');
-      await applyFilters();
+      applyFilters();
     }
 
     function getFormattedBudget(value) {
