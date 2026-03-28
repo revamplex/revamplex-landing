@@ -1909,11 +1909,17 @@ function updateMarkerStates() {
   // 🔥 CLEAN — no icon logic anymore
 }
 
-    function formatCount() {
-      const noun = currentMode === 'homeowner' ? 'contractor' : 'job';
-      const count = filteredItems.length;
-      resultsCount.textContent = `${count} ${noun}${count === 1 ? '' : 's'} found`;
-    }
+function formatCount() {
+
+  const visibleCards = document.querySelectorAll('.listing-card').length;
+
+  const label = lockedRole === 'homeowner'
+    ? 'contractors'
+    : 'jobs';
+
+  document.getElementById('resultsCount').innerText =
+    `${visibleCards} ${label} found`;
+}
 
     function contractorCardHtml(item) {
       return `
