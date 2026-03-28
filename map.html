@@ -2880,7 +2880,6 @@ async function initAuthGate() {
 // ===== CLEAN EXPAND CLUSTER (FINAL) =====
 function expandCluster(group, center) {
 
-  // clear previous
   expandedClusters.forEach(layer => map.removeLayer(layer));
   expandedClusters = [];
 
@@ -2917,32 +2916,6 @@ function expandCluster(group, center) {
 
   });
 
-}
-
-  const angleStep = (2 * Math.PI) / group.length;
-  const radius = 0.002;
-
-  group.forEach((item, i) => {
-    const angle = i * angleStep;
-
-    const coords = [
-      center[0] + Math.cos(angle) * radius,
-      center[1] + Math.sin(angle) * radius
-    ];
-
-    const core = L.circle(coords, {
-      radius: 300,
-      color: '#f97316',
-      fillColor: '#f97316',
-      fillOpacity: 0.35,
-      weight: 0
-    }).addTo(map);
-
-    core.on('click', () => {
-      setActive(item.id, true);
-      scrollCardIntoView(item.id);
-    });
-  });
 }
   </script>
   
