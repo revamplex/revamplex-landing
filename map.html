@@ -1804,63 +1804,62 @@ function clearMarkers() {
       `;
     }
 
-// ===== START: TRUE ZILLOW MAP ENGINE =====
+// ===== PREMIUM GLOW MAP (ZILLOW FEEL, NO CLUSTERS) =====
 function renderMarkers(items) {
 
   clearMarkers();
 
-  // remove old cluster group if exists
-  if (markerClusterGroup) {
-    map.removeLayer(markerClusterGroup);
-  }
+  items.forEach((item, index) => {
 
-  markerClusterGroup = L.markerClusterGroup({
-    maxClusterRadius: 60,
-    showCoverageOnHover: false,
-    spiderfyOnMaxZoom: true,
-    animate: true,
-    animateAddingMarkers: true,
-    disableClusteringAtZoom: 15,
+    const baseCoords = getDisplayCoords(item);
+    const coords = offsetCoords(baseCoords, index); // 🔥 prevent overlap
 
-    iconCreateFunction(cluster) {
-      return L.divIcon({
-        html: `<div class="cluster-bubble">${cluster.getChildCount()}</div>`,
-        className: '',
-        iconSize: [42, 42]
-      });
-    }
-  });
-
-  items.forEach(item => {
-
-    const coords = getDisplayCoords(item);
-
-    const marker = L.circleMarker(coords, {
-      radius: 8,
+    // 🔥 CORE (VISIBLE)
+    const core = L.circle(coords, {
+      radius: 400,
+      color: '#f97316',
       fillColor: '#f97316',
-      color: '#fff',
-      weight: 2,
-      fillOpacity: 0.9
-    });
+      fillOpacity: 0.35,
+      weight: 0
+    }).addTo(map);
 
-    marker.on('click', () => {
+    // 🔥 OUTER GLOW
+    const glow = L.circle(coords, {
+      radius: 900,
+      color: '#f97316',
+      fillColor: '#f97316',
+      fillOpacity: 0.18,
+      weight: 0
+    }).addTo(map);
+
+    activeCircles.push(core, glow);
+
+    // 🔥 BIG INVISIBLE CLICK TARGET (KEY FOR ZILLOW FEEL)
+    const clickTarget = L.circle(coords, {
+      radius: 1200,
+      opacity: 0,
+      fillOpacity: 0
+    }).addTo(map);
+
+    // 🔥 CLICK → CARD + MAP SYNC
+    clickTarget.on('click', () => {
       setActive(item.id, true);
       scrollCardIntoView(item.id);
     });
 
-    marker.on('mouseover', () => {
-      marker.setStyle({ radius: 10, fillOpacity: 1 });
+    // 🔥 HOVER FEEDBACK (PREMIUM FEEL)
+    clickTarget.on('mouseover', () => {
+      core.setStyle({ fillOpacity: 0.55 });
     });
 
-    marker.on('mouseout', () => {
-      marker.setStyle({ radius: 8, fillOpacity: 0.9 });
+    clickTarget.on('mouseout', () => {
+      core.setStyle({ fillOpacity: 0.35 });
     });
 
-    markerClusterGroup.addLayer(marker);
-    markerIndex.set(item.id, marker);
+    // 🔥 STORE FOR CARD → MAP SYNC
+    markerIndex.set(item.id, clickTarget);
+
   });
-
-  map.addLayer(markerClusterGroup);
 
   fitMapToItems(items);
 }
@@ -1877,6 +1876,9 @@ function renderMarkers(items) {
     }
 
 function updateMarkerStates() {
+  // 🔥 NO LONGER USING marker.setIcon (circleMarker doesn't support it)
+  // We'll control styles directly later if needed
+}
   filteredItems.forEach((item, index) => {
         const marker = markerIndex.get(item.id);
         if (marker) marker.setIcon(makeIcon(item, item.id === activeId));
