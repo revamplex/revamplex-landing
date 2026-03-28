@@ -2155,9 +2155,8 @@ requestAnimationFrame(() => {
 
   // 🔥 USE ONLY VISIBLE (DEDUPED) CARD DATA
 // 🔥 GET REAL VISIBLE IDS FROM DOM (SOURCE OF TRUTH)
-const visibleIds = [...cardsRow.querySelectorAll('.listing-card')]
+const visibleIds = [...cardsRow.querySelectorAll('.listing-card[data-id]')]
   .map(card => Number(card.dataset.id));
-
 // 🔥 MATCH DATA TO WHAT USER ACTUALLY SEES
 const visibleItems = filteredItems.filter(item => 
   visibleIds.includes(item.id)
