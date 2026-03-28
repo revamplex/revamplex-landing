@@ -1812,7 +1812,7 @@ function renderMarkers(items) {
 
   clearMarkers();
 
-  // 🔥 CREATE CLUSTER GROUP
+  // remove old cluster group if exists
   if (markerClusterGroup) {
     map.removeLayer(markerClusterGroup);
   }
@@ -1834,7 +1834,6 @@ function renderMarkers(items) {
     }
   });
 
-  // 🔥 ADD MARKERS
   items.forEach(item => {
 
     const coords = getDisplayCoords(item);
@@ -1847,13 +1846,11 @@ function renderMarkers(items) {
       fillOpacity: 0.9
     });
 
-    // 🔥 CLICK → SYNC CARD
     marker.on('click', () => {
       setActive(item.id, true);
       scrollCardIntoView(item.id);
     });
 
-    // 🔥 HOVER EFFECT
     marker.on('mouseover', () => {
       marker.setStyle({ radius: 10, fillOpacity: 1 });
     });
@@ -1863,8 +1860,6 @@ function renderMarkers(items) {
     });
 
     markerClusterGroup.addLayer(marker);
-
-    // 🔥 STORE FOR CARD → MAP SYNC
     markerIndex.set(item.id, marker);
   });
 
