@@ -1854,16 +1854,6 @@ core.on('click', handleClick);
 activeCircles.push(core, innerGlow, outerGlow, clickTarget);
 
 // 🔥 INVISIBLE CLICK TARGET (BIG HIT AREA)
-const clickTarget = L.circle(coords, {
-  radius: 1200,
-  opacity: 0,
-  fillOpacity: 0
-}).addTo(map);
-
-clickTarget.on('click', () => {
-  setActive(item.id, true);
-  scrollCardIntoView(item.id);
-});
 
 }); // ✅ CLOSE forEach LOOP
 
