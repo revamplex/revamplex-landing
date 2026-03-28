@@ -28,19 +28,22 @@
   transition: 0.2s;
 }
 .cluster-bubble {
-  background: #f97316;
+  background: linear-gradient(135deg, #f97316, #ea580c);
   color: white;
   font-weight: bold;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.auth-btn:hover {
-  transform: scale(1.05);
+
+.cluster-bubble:hover {
+  transform: scale(1.15);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.35);
 }
 .submit-bid-btn {
   display: flex;
@@ -1528,6 +1531,8 @@ function openProjectRoom(jobId) {
     let markerIndex = new Map();
     let markerClusterGroup = null;
     let activeCircles = [];
+    // ===== ACTIVE EXPANDED CLUSTERS =====
+let expandedClusters = [];
     let activePulseAnimations = [];
     let uiCollapsed = false;
     let selectedWelcomeRole = null;
@@ -1589,7 +1594,11 @@ function openProjectRoom(jobId) {
 
     const map = L.map('map', { zoomControl: false, attributionControl: true }).setView([40.8859, -74.0435], 11);
     L.control.zoom({ position: 'bottomright' }).addTo(map);
-
+// 🔥 CLICK MAP TO CLOSE CLUSTERS
+map.on('click', () => {
+  expandedClusters.forEach(layer => map.removeLayer(layer));
+  expandedClusters = [];
+});
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   attribution: '&copy; OpenStreetMap &copy; CARTO',
   subdomains: 'abcd',
@@ -1870,7 +1879,13 @@ function renderMarkers(items) {
       });
 
       activeCircles.push(core, innerGlow, outerGlow, clickTarget);
+core.on('mouseover', () => {
+  core.setStyle({ fillOpacity: 0.55 });
+});
 
+core.on('mouseout', () => {
+  core.setStyle({ fillOpacity: 0.35 });
+});
     }
 
     // =========================
@@ -2860,7 +2875,48 @@ async function initAuthGate() {
     function goToDashboard() {
   window.location.href = "dashboard.html";
 }
-    function expandCluster(group, center) {
+// ===== PREMIUM CLUSTER EXPANSION =====
+function expandCluster(group, center) {
+
+  // 🔥 CLEAR PREVIOUS EXPANSIONS
+  expandedClusters.forEach(layer => map.removeLayer(layer));
+  expandedClusters = [];
+
+  const angleStep = (2 * Math.PI) / group.length;
+  const radius = 0.0025;
+
+  group.forEach((item, i) => {
+
+    const angle = i * angleStep;
+
+    const coords = [
+      center[0] + Math.cos(angle) * radius,
+      center[1] + Math.sin(angle) * radius
+    ];
+
+    const core = L.circle(coords, {
+      radius: 0, // 🔥 start small for animation
+      color: '#f97316',
+      fillColor: '#f97316',
+      fillOpacity: 0.35,
+      weight: 0
+    }).addTo(map);
+
+    expandedClusters.push(core);
+
+    // 🔥 ANIMATE OUTWARD
+    setTimeout(() => {
+      core.setRadius(300);
+    }, i * 60);
+
+    core.on('click', () => {
+      setActive(item.id, true);
+      scrollCardIntoView(item.id);
+    });
+
+  });
+
+}
   const angleStep = (2 * Math.PI) / group.length;
   const radius = 0.002;
 
