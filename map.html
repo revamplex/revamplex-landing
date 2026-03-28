@@ -1974,38 +1974,6 @@ function renderCards(items) {
 
   if (!items.length) {
     cardsRow.innerHTML = `
-      <div class="listing-card" style="display:flex;align-items:center;justify-content:center;">
-        <div style="padding:22px;text-align:center;">
-          <div style="font-size:17px;font-weight:900;margin-bottom:8px;">No results found</div>
-          <div style="font-size:13px;color:#64748b;">Try changing the search or filter settings.</div>
-        </div>
-      </div>
-    `;
-    return;
-  }
-
-  cardsRow.innerHTML = items.map(item => `
-    <div class="listing-card ${String(item.id) === String(activeId) ? 'active' : ''}" data-id="${item.type}-${item.id}">
-      <div class="card-inner">
-        ${item.type === 'contractor' ? contractorCardHtml(item) : jobCardHtml(item)}
-      </div>
-    </div>
-  `).join('');
-
-  document.querySelectorAll('.listing-card[data-id]').forEach(card => {
-  const id = card.dataset.id;
-
-function renderCards(items) {
-  cardsRow.innerHTML = '';
-
-  items = items.filter(item => {
-    if (lockedRole === 'homeowner') return item.type === 'contractor';
-    if (lockedRole === 'contractor') return item.type === 'job';
-    return true;
-  });
-
-  if (!items.length) {
-    cardsRow.innerHTML = `
       <div class="listing-card">
         <div style="padding:22px;text-align:center;">
           <div style="font-size:17px;font-weight:900;margin-bottom:8px;">No results found</div>
@@ -2044,6 +2012,7 @@ function renderCards(items) {
       selectedId = id;
       setActive(id, true);
       scrollCardIntoView(id);
+    };
   });
 }
 
