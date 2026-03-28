@@ -1651,7 +1651,7 @@ async function getCurrentDataset() {
   }
 
   // 🔥 HARD DEDUPE (THIS IS THE FIX)
-  return Array.from(new Map(data.map(i => [i.id, i])).values());
+  return data;
 }
 
     function syncModeUI() {
@@ -2113,7 +2113,7 @@ let cleanSource = Object.values(
       const maxDistance = Number(distanceFilter.value);
       const minRating = Number(ratingFilter.value);
 
-      filteredItems = cleanSource.filter(item => {
+      filteredItems = Source.filter(item => {
 const mode = lockedRole || currentMode;
 
 if (mode === 'homeowner' && item.type !== 'contractor') return false;
@@ -2151,14 +2151,6 @@ filteredItems = Object.values(
       if (!filteredItems.some(item => item.id === activeId)) {
         activeId = filteredItems[0]?.id ?? null;
       }
-// 🔥 SINGLE SOURCE OF TRUTH (DEDUPED DATA)
-filteredItems = Object.values(
-  filteredItems.reduce((acc, item) => {
-    const key = `${item.type}-${item.id}`;
-    acc[key] = item;
-    return acc;
-  }, {})
-);
 
 // 🔥 RENDER EVERYTHING FROM SAME DATA
 renderCards(filteredItems);
