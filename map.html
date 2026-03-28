@@ -1525,13 +1525,15 @@ if (profile.role === 'contractor') {
       'Pressure Washing','Roofing','Septic Systems','Siding','Solar','Sunrooms','Tile & Stone','Tree Services',
       'Water Damage Restoration','Windows'
     ];
-
+    
+    let map;
     let contractors = [];
     let jobs = [];
     let activeSort = 'distance';
     let activeId = null;
     let filteredItems = [];
     let markerIndex = new Map();
+    let isLoadingData = false;
     let activeCircles = [];
     let activeHighlight = null;
     let hoveredId = null;
