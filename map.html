@@ -1846,16 +1846,6 @@ core.on('mouseout', () => {
   core.setStyle({ fillOpacity: 0.35 });
 });
     
-const clickTarget = L.circle(coords, {
-  radius: 1200,
-  opacity: 0,
-  fillOpacity: 0
-}).addTo(map);
-
-clickTarget.on('click', () => {
-  setActive(item.id, true);
-  scrollCardIntoView(item.id);
-});
     
   fitMapToItems(items);
 }
