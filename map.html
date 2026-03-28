@@ -1823,15 +1823,19 @@ function renderMarkers(items) {
     }).addTo(map);
 
     // 🔥 INTERACTION LAYER
-    const interactionLayer = L.circle(coords, {
-      radius: 1300,
-      opacity: 0,
-      fillOpacity: 0
-    }).addTo(map);
+const interactionLayer = L.circle(coords, {
+  radius: 1800, // 🔥 bigger detection area
+  opacity: 0,
+  fillOpacity: 0,
+  interactive: true,
+  bubblingMouseEvents: false // 🔥 prevents overlap blocking
+}).addTo(map);
 
-    // 🔥 STORE
-    activeCircles.push(core, glow, interactionLayer);
-    markerIndex.set(item.id, interactionLayer);
+activeCircles.push(core, glow, interactionLayer);
+markerIndex.set(item.id, interactionLayer);
+
+interactionLayer.setZIndexOffset(1000);
+interactionLayer.bringToFront();
 
     // 🔥 HOVER
     interactionLayer.on('mouseover', () => {
