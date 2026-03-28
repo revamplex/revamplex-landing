@@ -2839,13 +2839,6 @@ cardsRow.addEventListener('click', e => {
   if (card) setActive(card.dataset.id, true);
 });
     
-detailContent.addEventListener('click', e => {
-  const button = e.target.closest('[data-action]');
-  if (!button) return;
-  e.preventDefault();
-  e.stopPropagation();
-  handleCardAction(button.dataset.action, button.dataset.id);
-});
 
     detailContent.addEventListener('click', e => {
       const button = e.target.closest('[data-action]');
