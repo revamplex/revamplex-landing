@@ -12,7 +12,6 @@
 
 <!-- 🔥 ADD THIS INSIDE YOUR TOP NAV / HEADER AREA -->
 
-
 <style>
 .auth-btn {
   background: linear-gradient(135deg, #f97316, #ea580c);
@@ -1804,13 +1803,12 @@ function renderMarkers(items) {
 
   items.forEach((item, index) => {
 
-  // 🔥 FORCE CONSISTENT INDEX BASED ON ORDER
+  const baseCoords = getDisplayCoords(item);
+
   const realIndex = items.findIndex(i => i.id === item.id);
 
-  const baseCoords = getDisplayCoords(item);
   const coords = offsetCoords(baseCoords, realIndex);
 
-    const baseCoords = getDisplayCoords(item);
 
     // 🔥 CORE
     const core = L.circle(coords, {
