@@ -2124,8 +2124,6 @@ function setActive(id, fromMap = false) {
     activeHighlight.bringToFront();
   }
 }
-  const item = filteredItems.find(entry => String(entry.id) === String(id));
-  if (!item) return;
 
   const [displayLat, displayLng] = getDisplayCoords(item);
   map.flyTo([displayLat, displayLng], 14, {
