@@ -1807,6 +1807,8 @@ function clearMarkers() {
   const groups = {};
 
 items.forEach(item => {
+  const coords = getDisplayCoords(item); // ✅ ADD THIS LINE
+
   const key = coords[0].toFixed(3) + ',' + coords[1].toFixed(3);
 
   if (!groups[key]) groups[key] = [];
