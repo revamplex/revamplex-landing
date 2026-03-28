@@ -2096,9 +2096,11 @@ const matchesRating = Number(item.rating || 0) >= minRating;
       });
       
 // 🔥 REMOVE DUPLICATES BY ID
+// 🔥 REMOVE DUPLICATES BY TYPE + ID (CRITICAL FIX)
 filteredItems = Object.values(
   filteredItems.reduce((acc, item) => {
-    acc[item.id] = item;
+    const key = `${item.type}-${item.id}`;
+    acc[key] = item;
     return acc;
   }, {})
 );
