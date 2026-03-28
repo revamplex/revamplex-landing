@@ -89,6 +89,7 @@
       position: absolute;
       inset: 0;
       z-index: 1;
+      filter: saturate(0.9) contrast(0.95);
     }
 
     .leaflet-container {
@@ -1578,7 +1579,11 @@ function openProjectRoom(jobId) {
     const map = L.map('map', { zoomControl: false, attributionControl: true }).setView([40.8859, -74.0435], 11);
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; OpenStreetMap &copy; CARTO',
+  subdomains: 'abcd',
+  maxZoom: 20
+}).addTo(map);
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
@@ -1789,62 +1794,37 @@ items.forEach(item => {
 
   const coords = getDisplayCoords(item);
         
-// 🔥 GLOW CORE
+// 🔥 CLEAN ZILLOW-STYLE MARKER (SOFT GLOW)
+
+// CORE DOT (center)
 const core = L.circle(coords, {
-  radius: 400, // ⬅️ bigger
-  color: '#ff0000',
-  fillColor: '#ff0000',
+  radius: 300,
+  color: '#f97316',
+  fillColor: '#f97316',
   fillOpacity: 0.35,
   weight: 0
 }).addTo(map);
 
-// 🔥 OUTER GLOW
-const glow = L.circle(coords, {
-  radius: 900, // ⬅️ much bigger
-  color: '#ff0000',
-  fillColor: '#ff0000',
-  fillOpacity: 0.2,
+// SOFT INNER GLOW
+const innerGlow = L.circle(coords, {
+  radius: 700,
+  color: '#f97316',
+  fillColor: '#f97316',
+  fillOpacity: 0.18,
   weight: 0
 }).addTo(map);
 
-activeCircles.push(core, glow);
+// OUTER FADE GLOW
+const outerGlow = L.circle(coords, {
+  radius: 1200,
+  color: '#f97316',
+  fillColor: '#f97316',
+  fillOpacity: 0.08,
+  weight: 0
+}).addTo(map);
 
-// 🔥 MULTI RING RIPPLE
-const rings = [];
-
-for (let i = 0; i < 3; i++) {
-  const ring = L.circle(coords, {
-    radius: 600 + (i * 400), // ⬅️ bigger spread
-    color: '#ff0000',
-    fillColor: '#ff0000',
-    fillOpacity: 0.18 - (i * 0.05),
-    weight: 0
-  }).addTo(map);
-
-  rings.push({
-    ring,
-    radius: 600 + (i * 400),
-    opacity: 0.18 - (i * 0.05)
-  });
-}
-
-const pulse = setInterval(() => {
-  rings.forEach(r => {
-    r.radius += 20;
-    r.opacity -= 0.015;
-
-    if (r.radius > 2200) {
-      r.radius = 600;
-      r.opacity = 0.18;
-    }
-
-    r.ring.setRadius(r.radius);
-    r.ring.setStyle({ fillOpacity: r.opacity });
-  });
-}, 60);
-
-activePulseAnimations.push({ rings, timer: pulse });
-}); 
+// STORE REFERENCES (IMPORTANT — DO NOT REMOVE)
+activeCircles.push(core, innerGlow, outerGlow);
 
 fitMapToItems(items);
 }
