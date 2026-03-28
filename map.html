@@ -1791,31 +1791,43 @@ function clearMarkers() {
 
     const coords = getDisplayCoords(item);
 
-    const core = L.circle(coords, {
-      radius: 300,
-      color: '#f97316',
-      fillColor: '#f97316',
-      fillOpacity: 0.35,
-      weight: 0
-    }).addTo(map);
+    // CORE DOT (center) — CLICKABLE
+const core = L.circle(coords, {
+  radius: 300,
+  color: '#f97316',
+  fillColor: '#f97316',
+  fillOpacity: 0.35,
+  weight: 0
+}).addTo(map);
 
-    const innerGlow = L.circle(coords, {
-      radius: 700,
-      color: '#f97316',
-      fillColor: '#f97316',
-      fillOpacity: 0.18,
-      weight: 0
-    }).addTo(map);
+// 🔥 CLICK → ACTIVATE CARD
+core.on('click', () => {
+  setActive(item.id, true);
+  scrollCardIntoView(item.id);
+});
 
-    const outerGlow = L.circle(coords, {
-      radius: 1200,
-      color: '#f97316',
-      fillColor: '#f97316',
-      fillOpacity: 0.08,
-      weight: 0
-    }).addTo(map);
+// SOFT INNER GLOW (no click)
+const innerGlow = L.circle(coords, {
+  radius: 700,
+  color: '#f97316',
+  fillColor: '#f97316',
+  fillOpacity: 0.18,
+  weight: 0,
+  interactive: false
+}).addTo(map);
 
-    activeCircles.push(core, innerGlow, outerGlow);
+// OUTER FADE (no click)
+const outerGlow = L.circle(coords, {
+  radius: 1200,
+  color: '#f97316',
+  fillColor: '#f97316',
+  fillOpacity: 0.08,
+  weight: 0,
+  interactive: false
+}).addTo(map);
+
+// STORE REFERENCES
+activeCircles.push(core, innerGlow, outerGlow);
   });
 
   fitMapToItems(items);
