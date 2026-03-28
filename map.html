@@ -2094,7 +2094,14 @@ const matchesDistance = Number(item.distance || 999) <= maxDistance;
 const matchesRating = Number(item.rating || 0) >= minRating;
         return matchesQuery && matchesTrade && matchesDistance && matchesRating;
       });
-
+      
+// 🔥 REMOVE DUPLICATES BY ID
+filteredItems = Object.values(
+  filteredItems.reduce((acc, item) => {
+    acc[item.id] = item;
+    return acc;
+  }, {})
+);
       sortItems(filteredItems);
       syncModeUI();
 
