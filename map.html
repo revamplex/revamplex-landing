@@ -2092,6 +2092,8 @@ if (marker) {
     }
 
     async function applyFilters() {
+      if (window.__applyingFilters) return;
+window.__applyingFilters = true;
       const source = await getCurrentDataset();
       // 🔥 FORCE CLEAN BASE DATA (PREVENT DUPLICATES FROM ANY SOURCE)
 let cleanSource = Object.values(
@@ -2099,6 +2101,7 @@ let cleanSource = Object.values(
     const key = `${item.type}-${item.id}`;
     acc[key] = item;
     return acc;
+    window.__applyingFilters = false;
   }, {})
 );
       const query = searchInput.value.trim().toLowerCase();
