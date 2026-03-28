@@ -1824,8 +1824,7 @@ function renderMarkers(items) {
       weight: 0
     }).addTo(map);
 
-    activeCircles.push(core, glow, interactionLayer);
-markerIndex.set(item.id, interactionLayer);
+
 // 🔥 SUBTLE PULSE
 let pulseRadius = 900;
 
@@ -1844,7 +1843,9 @@ const interactionLayer = L.circle(coords, {
   opacity: 0,
   fillOpacity: 0
 }).addTo(map);
-
+activeCircles.push(core, glow, interactionLayer);
+markerIndex.set(item.id, interactionLayer);
+    
 // 🔥 HOVER (LIKE ZILLOW)
 interactionLayer.on('mouseover', () => {
 
@@ -1898,15 +1899,6 @@ interactionLayer.on('click', () => {
 
 });
 
-    // 🔥 CLICK → CARD + MAP SYNC
-   clickTarget.on('mouseover', () => {
-  core.setStyle({ fillOpacity: 0.6 });
-  glow.setStyle({ fillOpacity: 0.3 });
-});
-clickTarget.on('mouseout', () => {
-  core.setStyle({ fillOpacity: 0.35 });
-  glow.setStyle({ fillOpacity: 0.18 });
-});
   // 🔥 ACTIVATE CARD
   setActive(item.id, true);
   scrollCardIntoView(item.id);
