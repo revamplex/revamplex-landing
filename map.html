@@ -1994,7 +1994,13 @@ cardsRow.innerHTML = '';
     if (lockedRole === 'contractor') return item.type === 'job';
     return true;
   });
-items = Array.from(new Map(items.map(i => [i.id, i])).values());
+items = Object.values(
+  items.reduce((acc, item) => {
+    const key = `${item.type}-${item.id}`;
+    acc[key] = item;
+    return acc;
+  }, {})
+);
   if (!items.length) {
     cardsRow.innerHTML = `
       <div class="listing-card" style="display:flex;align-items:center;justify-content:center;">
