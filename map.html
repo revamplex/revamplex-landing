@@ -2116,7 +2116,7 @@ let cleanSource = Object.values(
       filteredItems = cleanSource.filter(item => {
 const mode = lockedRole || currentMode;
 
-if (mode === 'homeowner' && item.type !== 'contractor' && item.type !== 'job') return false;
+if (mode === 'homeowner' && item.type !== 'contractor') return false;
 if (mode === 'contractor' && item.type !== 'job') return false;
 
         if (currentMode === 'contractor' && item.type === 'job') {
