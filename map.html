@@ -1812,9 +1812,14 @@ const innerGlow = L.circle(coords, {
   color: '#f97316',
   fillColor: '#f97316',
   fillOpacity: 0.18,
-  weight: 0,
-  interactive: false
+  weight: 0
 }).addTo(map);
+
+// 🔥 CLICK HANDLER
+innerGlow.on('click', () => {
+  setActive(item.id, true);
+  scrollCardIntoView(item.id);
+});
 
 // OUTER FADE (no click)
 const outerGlow = L.circle(coords, {
@@ -1822,9 +1827,14 @@ const outerGlow = L.circle(coords, {
   color: '#f97316',
   fillColor: '#f97316',
   fillOpacity: 0.08,
-  weight: 0,
-  interactive: false
+  weight: 0
 }).addTo(map);
+
+// 🔥 CLICK HANDLER
+outerGlow.on('click', () => {
+  setActive(item.id, true);
+  scrollCardIntoView(item.id);
+});
 
 // STORE REFERENCES
 activeCircles.push(core, innerGlow, outerGlow);
@@ -1835,7 +1845,18 @@ activeCircles.push(core, innerGlow, outerGlow);
 core.on('mouseout', () => {
   core.setStyle({ fillOpacity: 0.35 });
 });
+    
+const clickTarget = L.circle(coords, {
+  radius: 1200,
+  opacity: 0,
+  fillOpacity: 0
+}).addTo(map);
 
+clickTarget.on('click', () => {
+  setActive(item.id, true);
+  scrollCardIntoView(item.id);
+});
+    
   fitMapToItems(items);
 }
 
