@@ -1854,7 +1854,16 @@ markerIndex.set(item.id, interactionLayer);
 
       const card = document.querySelector(`[data-id="${item.id}"]`);
       if (card) card.classList.add('hovered');
+// 🔥 UNIVERSAL CARD INTERACTIONS (BOTH MODES)
 
+card.onmouseenter = () => {
+  setActive(item.id, false); // hover highlight
+};
+
+card.onclick = () => {
+  setActive(item.id, true);  // click = zoom/focus
+  scrollCardIntoView(item.id);
+};
     });
 
     interactionLayer.on('mouseout', () => {
