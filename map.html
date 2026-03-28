@@ -2039,17 +2039,22 @@ function setActive(id, fromMap = false) {
       map.removeLayer(activeHighlight);
     }
 
-    activeHighlight = L.circle(coords, {
-      radius: 1600,
-      color: '#f97316',
-      fillColor: '#f97316',
-      fillOpacity: 0.15,
-      weight: 0
-    }).addTo(map);
+    const coords = [displayLat, displayLng];
 
-    activeHighlight.bringToFront();
-  }
+if (activeHighlight) {
+  map.removeLayer(activeHighlight);
 }
+
+activeHighlight = L.circle(coords, {
+  radius: 1600,
+  color: '#f97316',
+  fillColor: '#f97316',
+  fillOpacity: 0.15,
+  weight: 0
+}).addTo(map);
+
+activeHighlight.bringToFront();
+  }
     function scrollCardIntoView(id) {
       const target = [...document.querySelectorAll('.listing-card[data-id]')].find(card => Number(card.dataset.id) === id);
       if (!target) return;
