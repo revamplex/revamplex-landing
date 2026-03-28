@@ -2081,9 +2081,9 @@ if (mode === 'contractor' && item.type !== 'job') return false;
           : [item.title, item.trade, item.city, item.customer_name, item.description].join(' ').toLowerCase();
 
         const matchesQuery = !query || haystack.includes(query);
-        const matchesTrade = selectedTrade === 'all' || item.trade === selectedTrade;
-        const matchesDistance = Number(item.distance || 999) <= maxDistance;
-        const matchesRating = Number(item.rating || 0) >= minRating;
+      const matchesTrade =
+  selectedTrade === 'all' ||
+  String(item.trade || '').toLowerCase().includes(selectedTrade.toLowerCase());
 
         return matchesQuery && matchesTrade && matchesDistance && matchesRating;
       });
