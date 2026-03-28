@@ -1856,14 +1856,6 @@ markerIndex.set(item.id, interactionLayer);
       if (card) card.classList.add('hovered');
 // 🔥 UNIVERSAL CARD INTERACTIONS (BOTH MODES)
 
-card.onmouseenter = () => {
-  setActive(item.id, false); // hover highlight
-};
-
-card.onclick = () => {
-  setActive(item.id, true);  // click = zoom/focus
-  scrollCardIntoView(item.id);
-};
     });
 
     interactionLayer.on('mouseout', () => {
@@ -2147,8 +2139,13 @@ requestAnimationFrame(() => {
   });
 
   // 🔥 USE ONLY VISIBLE (DEDUPED) CARD DATA
-const visibleItems = Array.from(
-  new Map(filteredItems.map(i => [i.id, i])).values()
+// 🔥 GET REAL VISIBLE IDS FROM DOM (SOURCE OF TRUTH)
+const visibleIds = [...cardsRow.querySelectorAll('.listing-card')]
+  .map(card => Number(card.dataset.id));
+
+// 🔥 MATCH DATA TO WHAT USER ACTUALLY SEES
+const visibleItems = filteredItems.filter(item => 
+  visibleIds.includes(item.id)
 );
 
 renderMarkers(visibleItems);
@@ -2869,7 +2866,16 @@ cardsRow.addEventListener('scroll', () => {
   const diff = Math.abs(center - rowCenter);
 
   const id = Number(card.dataset.id);
+card.onmouseenter = () => {
+    setActive(id, false);
+  };
 
+  card.onclick = () => {
+    setActive(id, true);
+    scrollCardIntoView(id);
+  };
+
+});
   // 🔥 CLEAR previous states
   card.classList.remove('near', 'far');
 
