@@ -2662,6 +2662,9 @@ async function loadContractors() {
 }
 async function loadLiveData() {
 
+  contractors = [];
+jobs = [];
+  
   if (isLoadingData) return; // 🚫 prevents duplicate calls
   isLoadingData = true;
 
@@ -2698,10 +2701,16 @@ if (!window.__initialRenderDone) {
 let liveSubscribed = false;
 
 function subscribeLive() {
+  if (!liveSubscribed) {
+    liveSubscribed = true;
 
-  if (liveSubscribed) return; // 🔥 PREVENT MULTIPLE SUBSCRIPTIONS
-  liveSubscribed = true;
-
+    supabaseClient.channel('realtime-jobs')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, payload => {
+        loadLiveData();
+      })
+      .subscribe();
+  }
+}
   supabaseClient
     .channel('revamplex-live')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, () => loadLiveData())
