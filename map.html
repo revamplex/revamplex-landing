@@ -386,7 +386,10 @@
 }
 
 .listing-card.active {
-  opacity: 1;
+  transform: scale(1.04);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  border: 2px solid #f97316;
+  z-index: 10;
 }
 
 .listing-card.active .card-inner {
@@ -1535,6 +1538,8 @@ if (profile.role === 'contractor') {
     let activeHighlight = null;
     let hoveredId = null;
     let selectedId = null;
+
+    let hoverTimeout = null;
     // ===== ACTIVE EXPANDED CLUSTERS =====
     let activePulseAnimations = [];
     let uiCollapsed = false;
@@ -1993,19 +1998,29 @@ function renderCards(items) {
   document.querySelectorAll('.listing-card[data-id]').forEach(card => {
     const id = card.dataset.id;
 
-    card.onmouseenter = () => {
-      if (selectedId === id) return;
+card.onmouseenter = () => {
+  if (selectedId === id) return;
 
-      setActive(id, false);
-      scrollCardIntoView(id);
+  clearTimeout(hoverTimeout);
 
-      const marker = markerIndex.get(id);
-      if (marker) {
-        const coords = marker.getLatLng();
-        map.flyTo(coords, 13, { duration: 0.4 });
-      }
-    };
+  hoverTimeout = setTimeout(() => {
+    setActive(id, false);
+    scrollCardIntoView(id);
 
+    const marker = markerIndex.get(id);
+    if (marker) {
+      const coords = marker.getLatLng();
+
+      map.flyTo(coords, 13, {
+        duration: 0.8,
+        easeLinearity: 0.15
+      });
+    }
+  }, 120); // 🔥 magic delay
+};
+card.onmouseleave = () => {
+  clearTimeout(hoverTimeout);
+};
     card.onclick = () => {
       selectedId = id;
       setActive(id, true);
@@ -2027,10 +2042,10 @@ function setActive(id, fromMap = false) {
 
   const [displayLat, displayLng] = getDisplayCoords(item);
 
-  map.flyTo([displayLat, displayLng], 14, {
-    duration: 0.6,
-    easeLinearity: 0.25
-  });
+map.flyTo([displayLat, displayLng], 14, {
+  duration: 0.9,
+  easeLinearity: 0.12
+});
 
 
     if (activeHighlight) {
@@ -2047,7 +2062,7 @@ activeHighlight = L.circle(coords, {
   radius: 1600,
   color: '#f97316',
   fillColor: '#f97316',
-  fillOpacity: 0.15,
+  fillOpacity: 0.10,
   weight: 0
 }).addTo(map);
 
