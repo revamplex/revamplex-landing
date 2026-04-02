@@ -2016,10 +2016,10 @@ function renderCards(items) {
 
 function setActive(id, fromMap = false) {
   activeId = id;
-  if (fromMap) selectedId = Number(id);
+  if (fromMap) selectedId = id;
 
   document.querySelectorAll('.listing-card[data-id]').forEach(card => {
-    card.classList.toggle('active', String(card.dataset.id) === String(id));
+    card.classList.toggle('active', card.dataset.id === id);
   });
 
   const item = filteredItems.find(entry => `${entry.type}-${entry.id}` === id);
@@ -2032,33 +2032,31 @@ function setActive(id, fromMap = false) {
     easeLinearity: 0.25
   });
 
+  const coords = [displayLat, displayLng];
 
-    if (activeHighlight) {
-      map.removeLayer(activeHighlight);
-    }
-
-    const coords = [displayLat, displayLng];
-
-if (activeHighlight) {
-  map.removeLayer(activeHighlight);
-}
-
-activeHighlight = L.circle(coords, {
-  radius: 1600,
-  color: '#f97316',
-  fillColor: '#f97316',
-  fillOpacity: 0.15,
-  weight: 0
-}).addTo(map);
-
-activeHighlight.bringToFront();
+  if (activeHighlight) {
+    map.removeLayer(activeHighlight);
   }
-    function scrollCardIntoView(id) {
-      const target = [...document.querySelectorAll('.listing-card[data-id]')].find(card => Number(card.dataset.id) === id);
-      if (!target) return;
-      const left = target.offsetLeft - (cardsRow.clientWidth / 2) + (target.clientWidth / 2);
-      cardsRow.scrollTo({ left, behavior: 'smooth' });
-    }
+
+  activeHighlight = L.circle(coords, {
+    radius: 1600,
+    color: '#f97316',
+    fillColor: '#f97316',
+    fillOpacity: 0.15,
+    weight: 0
+  }).addTo(map);
+
+  activeHighlight.bringToFront();
+}
+function scrollCardIntoView(id) {
+  const target = [...document.querySelectorAll('.listing-card[data-id]')]
+    .find(card => card.dataset.id === id);
+
+  if (!target) return;
+
+  const left = target.offsetLeft - (cardsRow.clientWidth / 2) + (target.clientWidth / 2);
+  cardsRow.scrollTo({ left, behavior: 'smooth' });
+}
 
     function sortItems(items) {
       if (activeSort === 'distance') items.sort((a, b) => Number(a.distance || 999) - Number(b.distance || 999));
