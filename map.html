@@ -2661,54 +2661,56 @@ async function loadContractors() {
   }));
 }
 async function loadLiveData() {
-
-  if (isLoadingData) return; // 🚫 prevents duplicate calls
+  if (isLoadingData) return;
   isLoadingData = true;
 
   try {
+    // hard reset first
+    contractors = [];
+    jobs = [];
+
     const freshContractors = await loadContractors();
     const freshJobs = await loadJobs();
 
-    // 🔥 CLEAN ASSIGN (NO STACKING)
-contractors = Array.from(new Map(
-  freshContractors.map(i => [i.id, { ...i, type: 'contractor' }])
-).values());
+    contractors = Array.from(new Map(
+      (freshContractors || []).map(i => [i.id, { ...i, type: 'contractor' }])
+    ).values());
 
-jobs = Array.from(new Map(
-  freshJobs.map(i => [i.id, { ...i, type: 'job' }])
-).values());
+    jobs = Array.from(new Map(
+      (freshJobs || []).map(i => [i.id, { ...i, type: 'job' }])
+    ).values());
 
     const dataset = await getCurrentDataset();
-    activeId = dataset[0] ? dataset[0].id : null;
+    activeId = dataset[0] ? `${dataset[0].type}-${dataset[0].id}` : null;
 
-if (!window.__initialRenderDone) {
-  applyFilters();
-  window.__initialRenderDone = true;
-} else {
-  applyFilters();
-}
+    applyFilters();
 
- } catch (err) {
-  console.error("LOAD ERROR:", err);
-} finally {
-  isLoadingData = false;
-}
+  } catch (err) {
+    console.error("LOAD ERROR:", err);
+  } finally {
+    isLoadingData = false;
+  }
 }
 
 let liveSubscribed = false;
 
 function subscribeLive() {
-
-  if (liveSubscribed) return; // 🔥 PREVENT MULTIPLE SUBSCRIPTIONS
+  if (liveSubscribed) return;
   liveSubscribed = true;
 
   supabaseClient
     .channel('revamplex-live')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, () => loadLiveData())
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'bids' }, () => loadLiveData())
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'contractors' }, () => loadLiveData())
-    .subscribe(status => {
-      console.log("LIVE STATUS:", status);
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, () => {
+      loadLiveData();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'bids' }, () => {
+      loadLiveData();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'contractors' }, () => {
+      loadLiveData();
+    })
+    .subscribe((status) => {
+      console.log('LIVE STATUS:', status);
     });
 }
 
