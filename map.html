@@ -2079,18 +2079,18 @@ async function applyFilters() {
   window.__applyingFilters = true;
 
   try {
-const source = await getCurrentDataset();
-if (!Array.isArray(source)) return;
+    const source = await getCurrentDataset();
+    if (!Array.isArray(source)) return;
 
-    // 🔥 SINGLE DEDUPE (ONLY ONCE — SOURCE OF TRUTH)
-const cleanSource = Object.values(
-  source.reduce((acc, item) => {
-    const key = `${item.type}-${item.id}`;
-    acc[key] = item;
-    return acc;
-  }, {})
-);
+    const cleanSource = Object.values(
+      source.reduce((acc, item) => {
+        const key = `${item.type}-${item.id}`;
+        acc[key] = item;
+        return acc;
+      }, {})
+    );
 
+    filteredItems = cleanSource;
 
     const query = searchInput.value.trim().toLowerCase();
     const selectedTrade = tradeFilter.value;
@@ -2098,7 +2098,6 @@ const cleanSource = Object.values(
     const minRating = Number(ratingFilter.value);
     const mode = lockedRole || currentMode;
 
-    // 🔥 FILTER CLEAN DATA (NOT BEFORE DEDUPE)
     filteredItems = filteredItems.filter(item => {
       if (mode === 'homeowner' && item.type !== 'contractor') return false;
       if (mode === 'contractor' && item.type !== 'job') return false;
@@ -2124,18 +2123,10 @@ const cleanSource = Object.values(
     sortItems(filteredItems);
     syncModeUI();
 
-
-    filteredItems = source.filter(item => {
-      // your filters here
-      return true;
-    });
-
-    // 🔥 PREVENT DOUBLE RENDER FRAME (PUT IT HERE)
-    if (window.__lastRenderHash === JSON.stringify(filteredItems.map(i => i.id))) {
-      return;
-    }
-
-    window.__lastRenderHash = JSON.stringify(filteredItems.map(i => i.id));
+    // 🔥 PREVENT DOUBLE RENDER
+    const hash = JSON.stringify(filteredItems.map(i => `${i.type}-${i.id}`));
+    if (window.__lastRenderHash === hash) return;
+    window.__lastRenderHash = hash;
 
     renderCards(filteredItems);
     renderMarkers(filteredItems);
