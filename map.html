@@ -1962,7 +1962,7 @@ function formatCount() {
     }
 
 function renderCards(items) {
-  cardsRow.innerHTML = '';
+  cardsRow.innerHTML = '';  // 🔥 FORCE RESET DOM
 
   items = items.filter(item => {
     if (lockedRole === 'homeowner') return item.type === 'contractor';
@@ -2118,9 +2118,16 @@ filteredItems = cleanSource;
       activeId = filteredItems[0]?.id ?? null;
     }
 
-    renderCards(filteredItems);
-    renderMarkers(filteredItems);
-    formatCount();
+// 🔥 PREVENT DOUBLE RENDER FRAME
+if (window.__lastRenderHash === JSON.stringify(filteredItems.map(i => i.id))) {
+  return;
+}
+
+window.__lastRenderHash = JSON.stringify(filteredItems.map(i => i.id));
+
+renderCards(filteredItems);
+renderMarkers(filteredItems);
+formatCount();
 
     if (filteredItems.length > 0) {
       const firstId = filteredItems[0].id;
@@ -2793,7 +2800,8 @@ contractorModeBtn.addEventListener('click', () => {
 
     detailModal.addEventListener('click', e => { if (e.target === detailModal) closeDetails(); });
     jobModal.addEventListener('click', e => { if (e.target === jobModal) closeJobForm(); });
-
+    
+if (!e.target.closest('.listing-card')) return;
 cardsRow.addEventListener('click', e => {
   const button = e.target.closest('[data-action]');
   if (button) {
