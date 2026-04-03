@@ -1962,7 +1962,7 @@ function formatCount() {
     }
 
 function renderCards(items) {
-  cardsRow.innerHTML = '';
+  cardsRow.replaceChildren();
 
   items = items.filter(item => {
     if (lockedRole === 'homeowner') return item.type === 'contractor';
@@ -2117,15 +2117,25 @@ filteredItems = cleanSource;
     syncModeUI();
 
     if (!filteredItems.some(item => String(item.id) === String(activeId))) {
-      activeId = filteredItems[0]?.id ?? null;
+      activeId = filteredItems[0] ? `${filteredItems[0].type}-${filteredItems[0].id}` : null;
     }
 
-    renderCards(filteredItems);
+    // 🔥 FINAL SAFETY DEDUPE (guaranteed clean)
+const finalItems = Object.values(
+  filteredItems.reduce((acc, item) => {
+    acc[`${item.type}-${item.id}`] = item;
+    return acc;
+  }, {})
+);
+
+renderCards(finalItems);
+renderMarkers(finalItems);
+formatCount();
     renderMarkers(filteredItems);
     formatCount();
 
     if (filteredItems.length > 0) {
-      const firstId = filteredItems[0].id;
+      const firstId = `${filteredItems[0].type}-${filteredItems[0].id}`;
 
       requestAnimationFrame(() => {
         setActive(firstId, false);
