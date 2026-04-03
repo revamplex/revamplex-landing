@@ -1529,6 +1529,7 @@ if (profile.role === 'contractor') {
     let activeSort = 'distance';
     let activeId = null;
     let filteredItems = [];
+    let __lastRenderKey = '';
     let markerIndex = new Map();
     let isLoadingData = false;
     let activeCircles = [];
@@ -2128,11 +2129,15 @@ const finalItems = Object.values(
   }, {})
 );
 
-renderCards(finalItems);
-renderMarkers(finalItems);
+// 🔥 HARD RENDER LOCK (PREVENT DUPLICATES)
+const renderKey = JSON.stringify(filteredItems.map(i => `${i.type}-${i.id}`));
+
+if (__lastRenderKey === renderKey) return;
+__lastRenderKey = renderKey;
+
+renderCards(filteredItems);
+renderMarkers(filteredItems);
 formatCount();
-    renderMarkers(filteredItems);
-    formatCount();
 
     if (filteredItems.length > 0) {
       const firstId = `${filteredItems[0].type}-${filteredItems[0].id}`;
@@ -2691,12 +2696,8 @@ jobs = Array.from(new Map(
     const dataset = await getCurrentDataset();
     activeId = dataset[0] ? dataset[0].id : null;
 
-if (!window.__initialRenderDone) {
-  applyFilters();
-  window.__initialRenderDone = true;
-} else {
-  applyFilters();
-}
+// 🔥 ONLY ONE RENDER TRIGGER
+applyFilters();
 
  } catch (err) {
   console.error("LOAD ERROR:", err);
