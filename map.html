@@ -2114,69 +2114,7 @@ async function applyFilters() {
       const matchesTrade =
         selectedTrade === 'all' ||
         String(item.trade || '').toLowerCase().includes(selectedTrade.toLowerCase());
-      async function applyFilters() {
-  if (window.__applyingFilters) return;
-  window.__applyingFilters = true;
-
-  try {
-    const source = await getCurrentDataset();
-    if (!Array.isArray(source)) return;
-
-    const cleanSource = Object.values(
-      source.reduce((acc, item) => {
-        const key = `${item.type}-${item.id}`;
-        acc[key] = item;
-        return acc;
-      }, {})
-    );
-
-    filteredItems = cleanSource;
-
-    const query = searchInput.value.trim().toLowerCase();
-    const selectedTrade = tradeFilter.value;
-    const maxDistance = Number(distanceFilter.value);
-    const minRating = Number(ratingFilter.value);
-    const mode = lockedRole || currentMode;
-
-    filteredItems = filteredItems.filter(item => {
-      if (mode === 'homeowner' && item.type !== 'contractor') return false;
-      if (mode === 'contractor' && item.type !== 'job') return false;
-
-      if (mode === 'contractor' && (item.max_bids || 5) <= ((item.bids || []).length)) {
-        return false;
-      }
-
-      const haystack = item.type === 'contractor'
-        ? [item.name, item.trade, item.city, item.bio].join(' ').toLowerCase()
-        : [item.title, item.trade, item.city, item.customer_name, item.description].join(' ').toLowerCase();
-
-      const matchesQuery = !query || haystack.includes(query);
-      const matchesTrade =
-        selectedTrade === 'all' ||
-        String(item.trade || '').toLowerCase().includes(selectedTrade.toLowerCase());
-      const matchesDistance = !item.distance || Number(item.distance) <= maxDistance;
-      const matchesRating = Number(item.rating || 0) >= minRating;
-
-      return matchesQuery && matchesTrade && matchesDistance && matchesRating;
-    });
-
-    sortItems(filteredItems);
-    syncModeUI();
-
-    const hash = JSON.stringify(filteredItems.map(i => `${i.type}-${i.id}`));
-    if (window.__lastRenderHash === hash) return;
-    window.__lastRenderHash = hash;
-
-    renderCards(filteredItems);
-    renderMarkers(filteredItems);
-    formatCount();
-
-  } finally {
-    window.__applyingFilters = false;
-  }
-}
-
-
+     
 function setSort(type) {
       activeSort = type;
       sortDistanceBtn.classList.toggle('active', type === 'distance');
