@@ -2091,7 +2091,6 @@ const cleanSource = Object.values(
   }, {})
 );
 
-filteredItems = cleanSource;
 
     const query = searchInput.value.trim().toLowerCase();
     const selectedTrade = tradeFilter.value;
@@ -2125,12 +2124,6 @@ filteredItems = cleanSource;
     sortItems(filteredItems);
     syncModeUI();
 
-   async function applyFilters() {
-  if (window.__applyingFilters) return;
-  window.__applyingFilters = true;
-
-  try {
-    const source = await getCurrentDataset();
 
     filteredItems = source.filter(item => {
       // your filters here
