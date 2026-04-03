@@ -1793,18 +1793,7 @@ function clearMarkers() {
 
 // ===== PREMIUM GLOW MAP (FINAL CLEAN VERSION) =====
 function renderMarkers(items) {
-// 🔥 CLEAR OLD MARKERS + CIRCLES
-markerIndex.forEach(marker => {
-  map.removeLayer(marker);
-});
 
-markerIndex.clear();
-
-activeCircles.forEach(circle => {
-  map.removeLayer(circle);
-});
-
-activeCircles = [];
   clearMarkers();
 
   items.forEach((item, index) => {
@@ -1973,7 +1962,7 @@ function formatCount() {
     }
 
 function renderCards(items) {
-  cardsRow.innerHTML = '';  // 🔥 FORCE RESET DOM
+  cardsRow.innerHTML = '';
 
   items = items.filter(item => {
     if (lockedRole === 'homeowner') return item.type === 'contractor';
@@ -2027,10 +2016,10 @@ function renderCards(items) {
 
 function setActive(id, fromMap = false) {
   activeId = id;
-  if (fromMap) selectedId = id;
+  if (fromMap) selectedId = Number(id);
 
   document.querySelectorAll('.listing-card[data-id]').forEach(card => {
-    card.classList.toggle('active', card.dataset.id === id);
+    card.classList.toggle('active', String(card.dataset.id) === String(id));
   });
 
   const item = filteredItems.find(entry => `${entry.type}-${entry.id}` === id);
@@ -2043,31 +2032,33 @@ function setActive(id, fromMap = false) {
     easeLinearity: 0.25
   });
 
-  const coords = [displayLat, displayLng];
 
-  if (activeHighlight) {
-    map.removeLayer(activeHighlight);
+    if (activeHighlight) {
+      map.removeLayer(activeHighlight);
+    }
+
+    const coords = [displayLat, displayLng];
+
+if (activeHighlight) {
+  map.removeLayer(activeHighlight);
+}
+
+activeHighlight = L.circle(coords, {
+  radius: 1600,
+  color: '#f97316',
+  fillColor: '#f97316',
+  fillOpacity: 0.15,
+  weight: 0
+}).addTo(map);
+
+activeHighlight.bringToFront();
   }
-
-  activeHighlight = L.circle(coords, {
-    radius: 1600,
-    color: '#f97316',
-    fillColor: '#f97316',
-    fillOpacity: 0.15,
-    weight: 0
-  }).addTo(map);
-
-  activeHighlight.bringToFront();
-}
-function scrollCardIntoView(id) {
-  const target = [...document.querySelectorAll('.listing-card[data-id]')]
-    .find(card => card.dataset.id === id);
-
-  if (!target) return;
-
-  const left = target.offsetLeft - (cardsRow.clientWidth / 2) + (target.clientWidth / 2);
-  cardsRow.scrollTo({ left, behavior: 'smooth' });
-}
+    function scrollCardIntoView(id) {
+      const target = [...document.querySelectorAll('.listing-card[data-id]')].find(card => Number(card.dataset.id) === id);
+      if (!target) return;
+      const left = target.offsetLeft - (cardsRow.clientWidth / 2) + (target.clientWidth / 2);
+      cardsRow.scrollTo({ left, behavior: 'smooth' });
+    }
 
     function sortItems(items) {
       if (activeSort === 'distance') items.sort((a, b) => Number(a.distance || 999) - Number(b.distance || 999));
@@ -2079,18 +2070,19 @@ async function applyFilters() {
   window.__applyingFilters = true;
 
   try {
-    const source = await getCurrentDataset();
-    if (!Array.isArray(source)) return;
+const source = await getCurrentDataset();
+if (!Array.isArray(source)) return;
 
-    const cleanSource = Object.values(
-      source.reduce((acc, item) => {
-        const key = `${item.type}-${item.id}`;
-        acc[key] = item;
-        return acc;
-      }, {})
-    );
+    // 🔥 SINGLE DEDUPE (ONLY ONCE — SOURCE OF TRUTH)
+const cleanSource = Object.values(
+  source.reduce((acc, item) => {
+    const key = `${item.type}-${item.id}`;
+    acc[key] = item;
+    return acc;
+  }, {})
+);
 
-    filteredItems = cleanSource;
+filteredItems = cleanSource;
 
     const query = searchInput.value.trim().toLowerCase();
     const selectedTrade = tradeFilter.value;
@@ -2098,6 +2090,7 @@ async function applyFilters() {
     const minRating = Number(ratingFilter.value);
     const mode = lockedRole || currentMode;
 
+    // 🔥 FILTER CLEAN DATA (NOT BEFORE DEDUPE)
     filteredItems = filteredItems.filter(item => {
       if (mode === 'homeowner' && item.type !== 'contractor') return false;
       if (mode === 'contractor' && item.type !== 'job') return false;
@@ -2114,7 +2107,37 @@ async function applyFilters() {
       const matchesTrade =
         selectedTrade === 'all' ||
         String(item.trade || '').toLowerCase().includes(selectedTrade.toLowerCase());
-     
+      const matchesDistance = !item.distance || Number(item.distance) <= maxDistance;
+      const matchesRating = Number(item.rating || 0) >= minRating;
+
+      return matchesQuery && matchesTrade && matchesDistance && matchesRating;
+    });
+
+    sortItems(filteredItems);
+    syncModeUI();
+
+    if (!filteredItems.some(item => String(item.id) === String(activeId))) {
+      activeId = filteredItems[0]?.id ?? null;
+    }
+
+    renderCards(filteredItems);
+    renderMarkers(filteredItems);
+    formatCount();
+
+    if (filteredItems.length > 0) {
+      const firstId = filteredItems[0].id;
+
+      requestAnimationFrame(() => {
+        setActive(firstId, false);
+        scrollCardIntoView(firstId);
+        cardsRow.dispatchEvent(new Event('scroll'));
+      });
+    }
+
+  } finally {
+    window.__applyingFilters = false;
+  }
+}
 function setSort(type) {
       activeSort = type;
       sortDistanceBtn.classList.toggle('active', type === 'distance');
@@ -2638,56 +2661,54 @@ async function loadContractors() {
   }));
 }
 async function loadLiveData() {
-  if (isLoadingData) return;
+
+  if (isLoadingData) return; // 🚫 prevents duplicate calls
   isLoadingData = true;
 
   try {
-    // hard reset first
-    contractors = [];
-    jobs = [];
-
     const freshContractors = await loadContractors();
     const freshJobs = await loadJobs();
 
-    contractors = Array.from(new Map(
-      (freshContractors || []).map(i => [i.id, { ...i, type: 'contractor' }])
-    ).values());
+    // 🔥 CLEAN ASSIGN (NO STACKING)
+contractors = Array.from(new Map(
+  freshContractors.map(i => [i.id, { ...i, type: 'contractor' }])
+).values());
 
-    jobs = Array.from(new Map(
-      (freshJobs || []).map(i => [i.id, { ...i, type: 'job' }])
-    ).values());
+jobs = Array.from(new Map(
+  freshJobs.map(i => [i.id, { ...i, type: 'job' }])
+).values());
 
     const dataset = await getCurrentDataset();
-    activeId = dataset[0] ? `${dataset[0].type}-${dataset[0].id}` : null;
+    activeId = dataset[0] ? dataset[0].id : null;
 
-    applyFilters();
+if (!window.__initialRenderDone) {
+  applyFilters();
+  window.__initialRenderDone = true;
+} else {
+  applyFilters();
+}
 
-  } catch (err) {
-    console.error("LOAD ERROR:", err);
-  } finally {
-    isLoadingData = false;
-  }
+ } catch (err) {
+  console.error("LOAD ERROR:", err);
+} finally {
+  isLoadingData = false;
+}
 }
 
 let liveSubscribed = false;
 
 function subscribeLive() {
-  if (liveSubscribed) return;
+
+  if (liveSubscribed) return; // 🔥 PREVENT MULTIPLE SUBSCRIPTIONS
   liveSubscribed = true;
 
   supabaseClient
     .channel('revamplex-live')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, () => {
-      loadLiveData();
-    })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'bids' }, () => {
-      loadLiveData();
-    })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'contractors' }, () => {
-      loadLiveData();
-    })
-    .subscribe((status) => {
-      console.log('LIVE STATUS:', status);
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, () => loadLiveData())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'bids' }, () => loadLiveData())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'contractors' }, () => loadLiveData())
+    .subscribe(status => {
+      console.log("LIVE STATUS:", status);
     });
 }
 
@@ -2772,10 +2793,8 @@ contractorModeBtn.addEventListener('click', () => {
 
     detailModal.addEventListener('click', e => { if (e.target === detailModal) closeDetails(); });
     jobModal.addEventListener('click', e => { if (e.target === jobModal) closeJobForm(); });
-    
-// ================= FIXED CLICK HANDLER =================
-cardsRow.addEventListener('click', e => {
 
+cardsRow.addEventListener('click', e => {
   const button = e.target.closest('[data-action]');
   if (button) {
     e.preventDefault();
@@ -2787,9 +2806,23 @@ cardsRow.addEventListener('click', e => {
   const card = e.target.closest('.listing-card[data-id]');
   if (card) setActive(card.dataset.id, true);
 });
+    
 
-// ================= SCROLL SYNC =================
-let scrollTimer = null;
+    detailContent.addEventListener('click', e => {
+      const button = e.target.closest('[data-action]');
+      if (!button) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (button.dataset.action === 'accept-bid') {
+        showStatus('Bid accepted');
+        return;
+      }
+
+      handleCardAction(button.dataset.action, Number(button.dataset.id));
+    });
+
+    let scrollTimer = null;
 
 cardsRow.addEventListener('scroll', () => {
   clearTimeout(scrollTimer);
@@ -2810,6 +2843,7 @@ cardsRow.addEventListener('scroll', () => {
 
     const id = card.dataset.id;
 
+    // 🔥 CLEAN STATE
     card.classList.remove('near', 'far');
 
     if (id === activeId) return;
@@ -2832,14 +2866,56 @@ cardsRow.addEventListener('scroll', () => {
     }
   }, 70);
 });
+    map.on('click', () => {
+      if (!uiCollapsed) collapseUI();
+      else expandUI();
+    });
 
-// ================= INIT =================
-populateTradeSelect();
-syncModeUI();
-loadLiveData();
-subscribeLive();
-checkUserSession();
-initAuthGate();
+    window.addEventListener('resize', () => {
+      setTimeout(() => {
+        map.invalidateSize();
+        if (filteredItems.length) {
+          fitMapToItems(filteredItems);
+          if (activeId) scrollCardIntoView(activeId);
+        }
+      }, 120);
+    });
+
+function openWelcomeAuth(mode = 'register') {
+  // 🔥 EXIT DEMO MODE
+  localStorage.removeItem('revamplex_demo');
+
+  // 🔥 FORCE OVERLAY VISIBLE (THIS IS THE FIX)
+  welcomeOverlay.classList.remove('hidden');
+  welcomeOverlay.style.display = 'flex';
+
+  // 🔥 RESET UI STATE
+  backToRoleChooser();
+
+  if (mode === 'login') {
+    const loginBtn = document.getElementById('loginInsteadBtn');
+    if (loginBtn) {
+      setTimeout(() => loginBtn.click(), 100);
+    }
+  }
+}
+
+async function initAuthGate() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  const isDemo = localStorage.getItem('revamplex_demo');
+
+  if (!session && !isDemo) {
+    welcomeOverlay.style.display = 'flex';
+  } else {
+    welcomeOverlay.style.display = 'none';
+  }
+}
+  populateTradeSelect();
+  syncModeUI();
+  loadLiveData();
+  subscribeLive();
+  checkUserSession();
+  initAuthGate();
 
 function goToDashboard() {
   window.location.href = "dashboard.html";
