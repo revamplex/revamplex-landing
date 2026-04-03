@@ -1794,7 +1794,13 @@ function clearMarkers() {
 
 // ===== PREMIUM GLOW MAP (FINAL CLEAN VERSION) =====
 function renderMarkers(items) {
-
+const seen = new Set();
+items = items.filter(item => {
+  const key = `${item.type}-${item.id}`;
+  if (seen.has(key)) return false;
+  seen.add(key);
+  return true;
+});
   clearMarkers();
 
   items.forEach((item, index) => {
@@ -1963,25 +1969,30 @@ function formatCount() {
     }
 
 function renderCards(items) {
-  cardsRow.replaceChildren();
 
-  items = items.filter(item => {
-    if (lockedRole === 'homeowner') return item.type === 'contractor';
-    if (lockedRole === 'contractor') return item.type === 'job';
+  // 🔥 HARD DEDUPE RIGHT BEFORE RENDER (FINAL FIX)
+  const seen = new Set();
+  const uniqueItems = items.filter(item => {
+    const key = `${item.type}-${item.id}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
     return true;
   });
 
-  if (!items.length) {
-    cardsRow.innerHTML = `
-      <div class="listing-card">
-        <div style="padding:22px;text-align:center;">
-          <div style="font-size:17px;font-weight:900;margin-bottom:8px;">No results found</div>
-        </div>
-      </div>
-    `;
-    return;
-  }
+  // 🔥 CLEAR DOM
+  cardsRow.innerHTML = '';
 
+  // 🔥 RENDER ONLY CLEAN ITEMS
+  cardsRow.innerHTML = uniqueItems.map(item => `
+    <div class="listing-card" data-id="${item.type}-${item.id}">
+      <div class="card-inner">
+        ${item.type === 'contractor'
+          ? contractorCardHtml(item)
+          : jobCardHtml(item)}
+      </div>
+    </div>
+  `).join('');
+}
   cardsRow.innerHTML = items.map(item => `
     <div class="listing-card ${`${item.type}-${item.id}` === activeId ? 'active' : ''}" 
          data-id="${item.type}-${item.id}">
@@ -2071,14 +2082,10 @@ async function applyFilters() {
   window.__applyingFilters = true;
 
   try {
-const source = await getCurrentDataset();
-if (!Array.isArray(source)) return;
-
-    // 🔥 SINGLE DEDUPE (ONLY ONCE — SOURCE OF TRUTH)
+// 🔥 FORCE CLEAN DATASET (ABSOLUTE FINAL FIX)
 const cleanSource = Object.values(
-  source.reduce((acc, item) => {
-    const key = `${item.type}-${item.id}`;
-    acc[key] = item;
+  (source || []).reduce((acc, item) => {
+    acc[`${item.type}-${item.id}`] = item;
     return acc;
   }, {})
 );
@@ -2677,7 +2684,10 @@ async function loadContractors() {
 }
 async function loadLiveData() {
 
-  if (isLoadingData) return; // 🚫 prevents duplicate calls
+  contractors = [];
+  jobs = [];
+
+  if (isLoadingData) return;
   isLoadingData = true;
 
   try {
