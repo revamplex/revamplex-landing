@@ -1793,7 +1793,18 @@ function clearMarkers() {
 
 // ===== PREMIUM GLOW MAP (FINAL CLEAN VERSION) =====
 function renderMarkers(items) {
+// 🔥 CLEAR OLD MARKERS + CIRCLES
+markerIndex.forEach(marker => {
+  map.removeLayer(marker);
+});
 
+markerIndex.clear();
+
+activeCircles.forEach(circle => {
+  map.removeLayer(circle);
+});
+
+activeCircles = [];
   clearMarkers();
 
   items.forEach((item, index) => {
