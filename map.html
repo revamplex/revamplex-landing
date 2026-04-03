@@ -2835,6 +2835,7 @@ contractorModeBtn.addEventListener('click', () => {
     detailModal.addEventListener('click', e => { if (e.target === detailModal) closeDetails(); });
     jobModal.addEventListener('click', e => { if (e.target === jobModal) closeJobForm(); });
     
+// ================= FIXED CLICK HANDLER =================
 cardsRow.addEventListener('click', e => {
 
   const button = e.target.closest('[data-action]');
@@ -2848,23 +2849,9 @@ cardsRow.addEventListener('click', e => {
   const card = e.target.closest('.listing-card[data-id]');
   if (card) setActive(card.dataset.id, true);
 });
-    
 
-    detailContent.addEventListener('click', e => {
-      const button = e.target.closest('[data-action]');
-      if (!button) return;
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (button.dataset.action === 'accept-bid') {
-        showStatus('Bid accepted');
-        return;
-      }
-
-      handleCardAction(button.dataset.action, Number(button.dataset.id));
-    });
-
-    let scrollTimer = null;
+// ================= SCROLL SYNC =================
+let scrollTimer = null;
 
 cardsRow.addEventListener('scroll', () => {
   clearTimeout(scrollTimer);
@@ -2885,7 +2872,6 @@ cardsRow.addEventListener('scroll', () => {
 
     const id = card.dataset.id;
 
-    // 🔥 CLEAN STATE
     card.classList.remove('near', 'far');
 
     if (id === activeId) return;
@@ -2908,56 +2894,14 @@ cardsRow.addEventListener('scroll', () => {
     }
   }, 70);
 });
-    map.on('click', () => {
-      if (!uiCollapsed) collapseUI();
-      else expandUI();
-    });
 
-    window.addEventListener('resize', () => {
-      setTimeout(() => {
-        map.invalidateSize();
-        if (filteredItems.length) {
-          fitMapToItems(filteredItems);
-          if (activeId) scrollCardIntoView(activeId);
-        }
-      }, 120);
-    });
-
-function openWelcomeAuth(mode = 'register') {
-  // 🔥 EXIT DEMO MODE
-  localStorage.removeItem('revamplex_demo');
-
-  // 🔥 FORCE OVERLAY VISIBLE (THIS IS THE FIX)
-  welcomeOverlay.classList.remove('hidden');
-  welcomeOverlay.style.display = 'flex';
-
-  // 🔥 RESET UI STATE
-  backToRoleChooser();
-
-  if (mode === 'login') {
-    const loginBtn = document.getElementById('loginInsteadBtn');
-    if (loginBtn) {
-      setTimeout(() => loginBtn.click(), 100);
-    }
-  }
-}
-
-async function initAuthGate() {
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  const isDemo = localStorage.getItem('revamplex_demo');
-
-  if (!session && !isDemo) {
-    welcomeOverlay.style.display = 'flex';
-  } else {
-    welcomeOverlay.style.display = 'none';
-  }
-}
-  populateTradeSelect();
-  syncModeUI();
-  loadLiveData();
-  subscribeLive();
-  checkUserSession();
-  initAuthGate();
+// ================= INIT =================
+populateTradeSelect();
+syncModeUI();
+loadLiveData();
+subscribeLive();
+checkUserSession();
+initAuthGate();
 
 function goToDashboard() {
   window.location.href = "dashboard.html";
