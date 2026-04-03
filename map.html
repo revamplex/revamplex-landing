@@ -2125,20 +2125,33 @@ filteredItems = cleanSource;
     sortItems(filteredItems);
     syncModeUI();
 
-    if (!filteredItems.some(item => String(item.id) === String(activeId))) {
-      activeId = filteredItems[0]?.id ?? null;
+   async function applyFilters() {
+  if (window.__applyingFilters) return;
+  window.__applyingFilters = true;
+
+  try {
+    const source = await getCurrentDataset();
+
+    filteredItems = source.filter(item => {
+      // your filters here
+      return true;
+    });
+
+    // 🔥 PREVENT DOUBLE RENDER FRAME (PUT IT HERE)
+    if (window.__lastRenderHash === JSON.stringify(filteredItems.map(i => i.id))) {
+      return;
     }
 
-// 🔥 PREVENT DOUBLE RENDER FRAME
-if (window.__lastRenderHash === JSON.stringify(filteredItems.map(i => i.id))) {
-  return;
+    window.__lastRenderHash = JSON.stringify(filteredItems.map(i => i.id));
+
+    renderCards(filteredItems);
+    renderMarkers(filteredItems);
+    formatCount();
+
+  } finally {
+    window.__applyingFilters = false;
+  }
 }
-
-window.__lastRenderHash = JSON.stringify(filteredItems.map(i => i.id));
-
-renderCards(filteredItems);
-renderMarkers(filteredItems);
-formatCount();
 
     if (filteredItems.length > 0) {
       const firstId = filteredItems[0].id;
@@ -2814,7 +2827,6 @@ contractorModeBtn.addEventListener('click', () => {
     
 cardsRow.addEventListener('click', e => {
 
-  if (!e.target.closest('.listing-card')) return;
 
   const button = e.target.closest('[data-action]');
   if (button) {
