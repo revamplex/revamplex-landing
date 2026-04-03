@@ -2812,8 +2812,21 @@ contractorModeBtn.addEventListener('click', () => {
     detailModal.addEventListener('click', e => { if (e.target === detailModal) closeDetails(); });
     jobModal.addEventListener('click', e => { if (e.target === jobModal) closeJobForm(); });
     
-if (!e.target.closest('.listing-card')) return;
 cardsRow.addEventListener('click', e => {
+
+  if (!e.target.closest('.listing-card')) return;
+
+  const button = e.target.closest('[data-action]');
+  if (button) {
+    e.preventDefault();
+    e.stopPropagation();
+    handleCardAction(button.dataset.action, button.dataset.id);
+    return;
+  }
+
+  const card = e.target.closest('.listing-card[data-id]');
+  if (card) setActive(card.dataset.id, true);
+});
   const button = e.target.closest('[data-action]');
   if (button) {
     e.preventDefault();
