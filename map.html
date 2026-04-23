@@ -1265,7 +1265,7 @@ async function checkUserSession() {
   }
 
   const user = session.user;
-
+window.__currentUserId = user.id;
   const { data: profile, error: profileError } = await supabaseClient
     .from('profiles')
     .select('role,email')
@@ -1359,7 +1359,7 @@ if (lockedRole === 'homeowner') {
               <div style="padding:10px 0; border-bottom:1px solid #e2e8f0;">
                 <strong>${j.title}</strong><br>
                 ${j.budget} • ${j.trade}<br>
-                <button class="mini-btn secondary" onclick="openEditModal('${j.id}')">Edit</button>
+                ${canEditItem(item) ? `${canEditItem(item) ? `<button class="mini-btn secondary" data-action="edit" data-id="${item.id}">Edit</button>` : ''}` : ''}
               </div>
             `).join('')
           : '<p>No jobs yet</p>'
@@ -2270,9 +2270,18 @@ contractor_name: 'Verified Contractor',
         console.error(err);
       }
     }
+function canEditItem(item) {
+  const currentUserId = window.__currentUserId || null;
+  if (!currentUserId || !item) return false;
 
+  return String(item.user_id || item.owner_id || item.profile_id || item.contractor_id || '') === String(currentUserId);
+}
     function openDetailModal(item) {
       if (!item) return;
+      if (!canEditItem(item)) {
+  showStatus("You can only edit your own posts");
+  return;
+}
       expandUI();
       detailModal.classList.add('show');
 
@@ -2365,6 +2374,11 @@ const bidsHtml = visibleBids.length
       if (!item) return;
       
 if (action === 'edit') {
+  if (!canEditItem(item)) {
+    showStatus("You can only edit your own posts");
+    return;
+  }
+
   openEditModal(id);
   return;
 }
