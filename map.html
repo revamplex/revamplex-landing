@@ -1632,22 +1632,44 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     }
 
 async function getCurrentDataset() {
-
   const mode = lockedRole || currentMode;
 
+  let dataset = [];
+
   if (mode === 'contractor') {
-    return Array.from(new Map(
-      jobs.map(i => [`job-${i.id}`, { ...i, type: 'job' }])
-    ).values());
+    dataset = jobs.map(i => ({ ...i, type: 'job' }));
   }
 
   if (mode === 'homeowner') {
-    return Array.from(new Map(
-      contractors.map(i => [`contractor-${i.id}`, { ...i, type: 'contractor' }])
-    ).values());
+    dataset = contractors.map(i => ({ ...i, type: 'contractor' }));
   }
 
-  return [];
+  const seen = new Map();
+
+  dataset.forEach(item => {
+    const key = item.type === 'contractor'
+      ? [
+          item.type,
+          String(item.trade || '').toLowerCase().trim(),
+          String(item.city || '').toLowerCase().trim(),
+          String(item.rating || ''),
+          String(item.distance || ''),
+          String(item.projects_completed || '')
+        ].join('|')
+      : [
+          item.type,
+          String(item.title || '').toLowerCase().trim(),
+          String(item.trade || '').toLowerCase().trim(),
+          String(item.city || '').toLowerCase().trim(),
+          String(item.budget || '')
+        ].join('|');
+
+    if (!seen.has(key)) {
+      seen.set(key, item);
+    }
+  });
+
+  return Array.from(seen.values());
 }
 
     function syncModeUI() {
@@ -2055,7 +2077,7 @@ activeHighlight = L.circle(coords, {
 activeHighlight.bringToFront();
   }
     function scrollCardIntoView(id) {
-      const target = [...document.querySelectorAll('.listing-card[data-id]')].find(card => Number(card.dataset.id) === id);
+      const target = [...document.querySelectorAll('.listing-card[data-id]')].find(card => card.dataset.id === id);
       if (!target) return;
       const left = target.offsetLeft - (cardsRow.clientWidth / 2) + (target.clientWidth / 2);
       cardsRow.scrollTo({ left, behavior: 'smooth' });
