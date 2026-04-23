@@ -2276,12 +2276,8 @@ function canEditItem(item) {
 
   return String(item.user_id || item.owner_id || item.profile_id || item.contractor_id || '') === String(currentUserId);
 }
-    function openDetailModal(item) {
-      if (!item) return;
-      if (!canEditItem(item)) {
-  showStatus("You can only edit your own posts");
-  return;
-}
+   function openDetailModal(item) {
+  if (!item) return;
       expandUI();
       detailModal.classList.add('show');
 
@@ -2311,7 +2307,7 @@ function canEditItem(item) {
             <div class="detail-tags">${(item.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
           </div>
           <div class="card-actions">
-  <button class="mini-btn secondary" data-action="edit" data-id="${item.id}">Edit</button>
+  ${canEditItem(item) ? `<button class="mini-btn secondary" data-action="edit" data-id="${item.id}">Edit</button>` : ''}
   <button class="mini-btn primary" data-action="message" data-id="${item.id}">Message</button>
 </div>
         `;
@@ -2416,7 +2412,10 @@ const bidsHtml = visibleBids.length
 async function openEditModal(id) {
   const item = [...contractors, ...jobs].find(i => String(i.id) === String(id));
   if (!item) return;
-
+  if (!canEditItem(item)) {
+    showStatus("You can only edit your own posts");
+    return;
+  }
   expandUI();
   detailModal.classList.add('show');
 
