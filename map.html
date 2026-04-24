@@ -2980,11 +2980,12 @@ async function deleteMyJob(jobId) {
     return;
   }
 
-  const { data, error } = await supabaseClient
-    .from('jobs')
-    .delete()
-.eq('id', jobId)
-.select();
+const { data, error } = await supabaseClient
+  .from('jobs')
+  .delete()
+  .eq('id', jobId)
+  .eq('user_id', user.id)
+  .select();
 
   if (error) {
     console.error("DELETE JOB ERROR:", error);
