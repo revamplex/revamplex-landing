@@ -1942,7 +1942,7 @@ function formatCount() {
           </div>
           <div class="card-actions">
             <button class="mini-btn secondary" data-action="view" data-id="${item.id}">View</button>
-            <button class="mini-btn primary" onclick="event.stopPropagation(); openContractorProjectRoom('${item.id}')">Message</button>
+            <button class="mini-btn primary" data-action="message" data-id="${item.id}">Message</button>
           </div>
         </div>
       `;
@@ -2394,15 +2394,21 @@ const bidsHtml = visibleBids.length
     return;
   }
 
-  if (action === 'message') {
-    const contractor = contractors.find(c => String(c.id) === String(id));
-    if (contractor) {
-      sessionStorage.setItem('revampSelectedContractor', JSON.stringify(getSafeContractorSessionItem(contractor)));
-    }
+ if (action === 'message') {
+  const contractor = contractors.find(c => String(c.id) === String(id));
 
-    window.location.href = `project-room.html?mode=homeowner&contractor=${id}`;
-    return;
+  if (contractor) {
+    sessionStorage.setItem(
+      'revampSelectedContractor',
+      JSON.stringify(getSafeContractorSessionItem(contractor))
+    );
   }
+
+  console.log("OPENING CONTRACTOR PROJECT ROOM:", id);
+
+  window.location.assign(`project-room.html?mode=homeowner&contractor=${id}`);
+  return;
+}
 
   if (action === 'project-room') {
     openProjectRoom(id);
