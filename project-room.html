@@ -809,7 +809,7 @@
         <button id="backToFeed" class="btn btn-soft">
 Back to Project Feed
 </button>
-        <button class="btn btn-primary">Invite Customer</button>
+        <button id="inviteBtn" class="btn btn-primary">Invite Customer</button>
       </div>
     </div>
 
@@ -847,7 +847,7 @@ Back to Project Feed
         <aside class="side-summary">
           <h3>Quick Project Summary</h3>
           <div class="summary-line"><span>Trade Type</span><strong id="jobTrade">Loading...</strong></div>
-          <div class="summary-line"><span>Start Goal</span><<strong id="jobStartGoal">Loading...</strong></div>
+          <div class="summary-line"><span>Start Goal</span><strong id="jobStartGoal">Loading...</strong></div>
           <div class="summary-line"><span>Deposit Requested</span><strong id="jobDeposit">Loading...</strong></div>
           <div class="summary-line"><span>Proposal Version</span><strong>v3.2</strong></div>
           <div class="summary-line"><span>Private Bid Visibility</span><strong>Customer + Assigned Contractor Only</strong></div>
@@ -1363,21 +1363,37 @@ const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null
 
 /* ---------- MODE SWITCH ---------- */
 
-function applyWorkspaceMode(){
+function applyWorkspaceMode() {
+  const inviteBtn = document.getElementById("inviteBtn");
 
-  const inviteBtn = document.querySelector('.top-actions .btn-primary');
-
-  if(mode === "homeowner"){
-
-    document.querySelectorAll(".contractor-tools").forEach(el=>{
-      el.style.display="none";
+  if (mode === "homeowner") {
+    document.querySelectorAll(".contractor-tools").forEach(el => {
+      el.style.display = "none";
     });
 
-    const title=document.querySelector(".brand h1");
-
-    if(title){
-      title.textContent="Revamp Project Room™ — Homeowner Workspace";
+    const title = document.querySelector(".brand h1");
+    if (title) {
+      title.textContent = "Revamp Project Room™ — Homeowner Workspace";
     }
+
+    if (inviteBtn) {
+      inviteBtn.textContent = "Invite Contractor";
+    }
+
+  } else {
+    document.querySelectorAll(".contractor-tools").forEach(el => {
+      el.style.display = "";
+    });
+
+    const title = document.querySelector(".brand h1");
+    if (title) {
+      title.textContent = "Revamp Project Room™ — Contractor Workspace";
+    }
+
+    if (inviteBtn) {
+      inviteBtn.textContent = "Invite Customer";
+    }
+  }
 }
 
 /* ---------- BACK BUTTON ---------- */
