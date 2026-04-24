@@ -2025,11 +2025,13 @@ function renderCards(items) {
       }
     };
 
-    card.onclick = () => {
-      selectedId = id;
-      setActive(id, true);
-      scrollCardIntoView(id);
-    };
+    card.onclick = (e) => {
+  if (e.target.closest('button')) return;
+
+  selectedId = id;
+  setActive(id, true);
+  scrollCardIntoView(id);
+};
   });
 }
 
