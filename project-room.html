@@ -884,7 +884,31 @@ Back to Project Feed
               <button class="btn btn-dark">Record Session</button>
             </div>
           </div>
+<div style="background:white; border-radius:18px; padding:16px; box-shadow:0 8px 22px rgba(0,0,0,.12); margin-bottom:18px;">
+  <h2 style="margin-top:0;">Video Call</h2>
 
+  <button id="startVideoCallBtn" style="
+    width:100%;
+    height:48px;
+    border:0;
+    border-radius:14px;
+    background:#f97316;
+    color:white;
+    font-weight:900;
+    cursor:pointer;
+  ">
+    Start Video Call
+  </button>
+
+  <div id="videoCallBox" style="
+    display:none;
+    margin-top:14px;
+    height:520px;
+    border-radius:16px;
+    overflow:hidden;
+    background:#0f172a;
+  "></div>
+</div>
           <div class="two-col">
             <div class="video-stage">
               <div class="video-badge">● Waiting Room Active</div>
@@ -1670,6 +1694,42 @@ function acceptBid(index){
 
 }
 </script>
-  
+  <script src="https://meet.jit.si/external_api.js"></script>
+  <script>
+let jitsiApi = null;
+
+function getProjectRoomName() {
+  const params = new URLSearchParams(window.location.search);
+
+  const jobId = params.get("job") || "no-job";
+  const contractorId = params.get("contractor") || "no-contractor";
+
+  return `revamplex-${jobId}-${contractorId}`.replace(/[^a-zA-Z0-9-_]/g, "");
+}
+
+document.getElementById("startVideoCallBtn").addEventListener("click", () => {
+  const box = document.getElementById("videoCallBox");
+  box.style.display = "block";
+
+  if (jitsiApi) return;
+
+  const roomName = getProjectRoomName();
+
+  jitsiApi = new JitsiMeetExternalAPI("meet.jit.si", {
+    roomName: roomName,
+    parentNode: box,
+    width: "100%",
+    height: "100%",
+    configOverwrite: {
+      startWithAudioMuted: true,
+      startWithVideoMuted: false
+    },
+    interfaceConfigOverwrite: {
+      SHOW_JITSI_WATERMARK: false,
+      SHOW_WATERMARK_FOR_GUESTS: false
+    }
+  });
+});
+</script>
 </body>
 </html>
