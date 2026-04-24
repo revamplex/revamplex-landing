@@ -2272,6 +2272,17 @@ async function createJobFromForm() {
   window.location.href = `project-room.html?mode=homeowner&contractor=${contractorId}`;
 }
 
+    function openProjectRoom(jobId) {
+  const job = jobs.find(entry => String(entry.id) === String(jobId));
+
+  if (!job) {
+    alert("Job not found");
+    return;
+  }
+
+  window.location.href = `project-room.html?mode=contractor&job=${jobId}`;
+}
+    
     async function submitBid(jobId) {
       try {
         const amount = prompt("Enter your bid amount:");
@@ -2382,9 +2393,9 @@ const bidsHtml = visibleBids.length
           </div>
          <div class="card-actions">
  ${canEditItem(item) ? `<button class="mini-btn secondary" data-action="edit" data-id="${item.id}">Edit</button>` : ''}
-  <button class="mini-btn primary" onclick="openProjectRoom(${item.id})">
-    Submit Bid
-  </button>
+<button class="mini-btn primary" data-action="project-room" data-id="${item.id}">
+  Submit Bid
+</button>
 </div>
         `;
       }
