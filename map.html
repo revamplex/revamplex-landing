@@ -1942,7 +1942,7 @@ function formatCount() {
           </div>
           <div class="card-actions">
             <button class="mini-btn secondary" data-action="view" data-id="${item.id}">View</button>
-            <button class="mini-btn primary" data-action="message" data-id="${item.id}">Message</button>
+            <button class="mini-btn primary" onclick="event.stopPropagation(); openContractorProjectRoom('${item.id}')">Message</button>
           </div>
         </div>
       `;
