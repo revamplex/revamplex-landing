@@ -2199,42 +2199,54 @@ function setSort(type) {
       document.getElementById('jobTrade').selectedIndex = 0;
     }
 
-    async function createJobFromForm() {
-      const title = document.getElementById('jobTitle').value.trim() || 'New Job';
-      const trade = document.getElementById('jobTrade').value || 'General Contractors';
-      const budget = getFormattedBudget(document.getElementById('jobBudget').value);
-      const customer_name = 'Customer';
-      const city = document.getElementById('jobCity').value.trim() || 'North Jersey, NJ';
-      const description = document.getElementById('jobDescription').value.trim() || 'Customer posted a new project on Revamp.';
-      const center = map.getCenter();
+async function createJobFromForm() {
+  const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
 
-      const payload = {
-        user_id: (await supabaseClient.auth.getUser()).data.user.id,
-        title, trade, budget, customer_name, city, description,
-        lat: Number(center.lat.toFixed(6)),
-        lng: Number(center.lng.toFixed(6)),
-        rating: 5.0,
-        reviews: 1,
-        distance: 1.0,
-        verified: true,
-        posted_ago: 'Just now',
-        max_bids: 5,
-        type: 'job'
-      };
+  if (userError || !user) {
+    alert("You must be logged in to post a job.");
+    return;
+  }
 
-      const { error } = await supabaseClient.from('jobs').insert([payload]);
-      if (error) {
-        console.error(error);
-        alert('Error posting job');
-        return;
-      }
+  const title = document.getElementById('jobTitle').value.trim() || 'New Job';
+  const trade = document.getElementById('jobTrade').value || 'General Contractors';
+  const budget = getFormattedBudget(document.getElementById('jobBudget').value);
+  const city = document.getElementById('jobCity').value.trim() || 'North Jersey, NJ';
+  const description = document.getElementById('jobDescription').value.trim() || 'Customer posted a new project on Revamp.';
+  const center = map.getCenter();
 
-      closeJobForm();
-      clearJobForm();
-      showStatus('Job posted');
-      await loadLiveData();
-      setMode('contractor');
-    }
+  const payload = {
+    user_id: user.id,
+    title,
+    trade,
+    budget,
+    customer_name: 'Customer',
+    city,
+    description,
+    lat: Number(center.lat.toFixed(6)),
+    lng: Number(center.lng.toFixed(6)),
+    rating: 5.0,
+    reviews: 1,
+    distance: 1.0,
+    verified: true,
+    posted_ago: 'Just now',
+    max_bids: 5,
+    type: 'job'
+  };
+
+  const { error } = await supabaseClient.from('jobs').insert([payload]);
+
+  if (error) {
+    console.error("JOB POST ERROR:", error);
+    alert(error.message);
+    return;
+  }
+
+  closeJobForm();
+  clearJobForm();
+  showStatus('Job posted');
+  await loadLiveData();
+  setMode('homeowner');
+}
 
     function openProjectRoom(jobId) {
       const job = jobs.find(entry => String(entry.id) === String(jobId));
