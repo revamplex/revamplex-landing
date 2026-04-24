@@ -1365,9 +1365,9 @@ if (lockedRole === 'homeowner') {
                   Edit
                 </button>
 
-                <button class="mini-btn primary" style="background:#dc2626;" onclick="deleteMyJob('${j.id}')">
-                  Delete
-                </button>
+                <button class="mini-btn primary" style="background:#dc2626;" data-action="delete-my-job" data-id="${j.id}">
+  Delete
+</button>
               </div>
             `).join('')
           : '<p>No jobs posted yet.</p>'
@@ -2890,19 +2890,25 @@ cardsRow.addEventListener('click', e => {
 });
     
 
-    detailContent.addEventListener('click', e => {
-      const button = e.target.closest('[data-action]');
-      if (!button) return;
-      e.preventDefault();
-      e.stopPropagation();
+detailContent.addEventListener('click', e => {
+  const button = e.target.closest('[data-action]');
+  if (!button) return;
 
-      if (button.dataset.action === 'accept-bid') {
-        showStatus('Bid accepted');
-        return;
-      }
+  e.preventDefault();
+  e.stopPropagation();
 
-      handleCardAction(button.dataset.action, button.dataset.id);
-    });
+  if (button.dataset.action === 'delete-my-job') {
+    deleteMyJob(button.dataset.id);
+    return;
+  }
+
+  if (button.dataset.action === 'accept-bid') {
+    showStatus('Bid accepted');
+    return;
+  }
+
+  handleCardAction(button.dataset.action, button.dataset.id);
+});
 
     let scrollTimer = null;
 
@@ -2962,6 +2968,7 @@ cardsRow.addEventListener('scroll', () => {
         }
       }, 120);
     });
+    
 async function deleteMyJob(jobId) {
   const confirmed = confirm("Delete this job? This cannot be undone.");
   if (!confirmed) return;
@@ -2973,11 +2980,12 @@ async function deleteMyJob(jobId) {
     return;
   }
 
-  const { error } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from('jobs')
     .delete()
     .eq('id', jobId)
-    .eq('user_id', user.id);
+    .eq('user_id', user.id)
+    .select();
 
   if (error) {
     console.error("DELETE JOB ERROR:", error);
@@ -2985,10 +2993,16 @@ async function deleteMyJob(jobId) {
     return;
   }
 
+  if (!data || data.length === 0) {
+    alert("No job was deleted. This usually means the job does not belong to this account or Supabase RLS is blocking delete.");
+    return;
+  }
+
   showStatus("Job deleted");
   await loadLiveData();
   openDashboard();
 }
+    
 function openWelcomeAuth(mode = 'register') {
   // 🔥 EXIT DEMO MODE
   localStorage.removeItem('revamplex_demo');
