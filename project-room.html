@@ -1378,30 +1378,6 @@ function applyWorkspaceMode(){
     if(title){
       title.textContent="Revamp Project Room™ — Homeowner Workspace";
     }
-
-if (inviteBtn) {
-  inviteBtn.onclick = async () => {
-
-    const params = new URLSearchParams(window.location.search);
-
-    const jobId = params.get("job") || "no-job";
-    const contractorId = params.get("contractor") || "no-contractor";
-
-    const mode = currentMode === 'homeowner' ? 'contractor' : 'homeowner';
-
-const inviteLink = `${window.location.origin}/project-room.html?mode=${mode}&job=${jobId}&contractor=${contractorId}`;
-
-    try {
-      await navigator.clipboard.writeText(inviteLink);
-
-      alert("Invite link copied. Send this to the other person:\n\n" + inviteLink);
-
-    } catch (err) {
-      alert("Copy this link:\n\n" + inviteLink);
-    }
-  };
-}
-
 }
 
 /* ---------- BACK BUTTON ---------- */
@@ -1730,6 +1706,27 @@ document.getElementById("startVideoCallBtn").addEventListener("click", () => {
     }
   });
 });
+    const inviteBtnSafe = document.getElementById("inviteBtn") || document.getElementById("inviteContractorBtn");
+
+if (inviteBtnSafe) {
+  inviteBtnSafe.addEventListener("click", async () => {
+    const params = new URLSearchParams(window.location.search);
+
+    const jobId = params.get("job") || "no-job";
+    const contractorId = params.get("contractor") || "no-contractor";
+    const currentRoomMode = params.get("mode") || "homeowner";
+    const inviteMode = currentRoomMode === "homeowner" ? "contractor" : "homeowner";
+
+    const inviteLink = `${window.location.origin}/project-room.html?mode=${inviteMode}&job=${jobId}&contractor=${contractorId}`;
+
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      alert("Invite link copied:\n\n" + inviteLink);
+    } catch (err) {
+      alert("Copy this invite link:\n\n" + inviteLink);
+    }
+  });
+}
 </script>
 </body>
 </html>
