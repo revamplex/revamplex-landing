@@ -2352,7 +2352,7 @@ const bidsHtml = visibleBids.length
             ${bidsHtml}
           </div>
          <div class="card-actions">
-  <button class="mini-btn secondary" data-action="edit" data-id="${item.id}">Edit</button>
+ ${canEditItem(item) ? `<button class="mini-btn secondary" data-action="edit" data-id="${item.id}">Edit</button>` : ''}
   <button class="mini-btn primary" onclick="openProjectRoom(${item.id})">
     Submit Bid
   </button>
@@ -2370,10 +2370,7 @@ const bidsHtml = visibleBids.length
   if (!item) return;
 
   if (action === 'edit') {
-    if (!canEditItem(item)) {
-      showStatus("You can only edit your own posts");
-      return;
-    }
+   
 
     openEditModal(id);
     return;
