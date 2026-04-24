@@ -2962,7 +2962,33 @@ cardsRow.addEventListener('scroll', () => {
         }
       }, 120);
     });
+async function deleteMyJob(jobId) {
+  const confirmed = confirm("Delete this job? This cannot be undone.");
+  if (!confirmed) return;
 
+  const { data: { user } } = await supabaseClient.auth.getUser();
+
+  if (!user) {
+    showStatus("You must be logged in");
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from('jobs')
+    .delete()
+    .eq('id', jobId)
+    .eq('user_id', user.id);
+
+  if (error) {
+    console.error("DELETE JOB ERROR:", error);
+    alert(error.message);
+    return;
+  }
+
+  showStatus("Job deleted");
+  await loadLiveData();
+  openDashboard();
+}
 function openWelcomeAuth(mode = 'register') {
   // 🔥 EXIT DEMO MODE
   localStorage.removeItem('revamplex_demo');
