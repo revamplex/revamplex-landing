@@ -1338,30 +1338,44 @@ authContainer.innerHTML = `
 
 if (lockedRole === 'homeowner') {
 
-  const myJobs = jobs.filter(j => j.user_id === user.id);
+  const myJobs = jobs.filter(j => String(j.user_id) === String(user.id));
 
   detailTitle.textContent = "My Jobs";
 
   detailContent.innerHTML = `
-    <div>
+    <div style="margin-bottom:12px;">
       <button onclick="goToDashboard()" class="mini-btn secondary">Edit Profile</button>
     </div>
 
     <div class="detail-panel">
-      <h4>Active Jobs</h4>
+      <h4>My Posted Jobs</h4>
+
       ${
         myJobs.length
           ? myJobs.map(j => `
-              <div style="padding:10px 0; border-bottom:1px solid #e2e8f0;">
-                <strong>${j.title}</strong><br>
-                ${j.budget} • ${j.trade}<br>
-                ${canEditItem(item) ? `${canEditItem(item) ? `<button class="mini-btn secondary" data-action="edit" data-id="${item.id}">Edit</button>` : ''}` : ''}
+              <div style="padding:12px 0; border-bottom:1px solid #e2e8f0;">
+                <strong>${j.title || 'Untitled Job'}</strong><br>
+                <span>${j.trade || 'Trade'} • ${j.city || 'Location'} • ${j.budget || '$0'}</span><br><br>
+
+                <button class="mini-btn secondary" onclick="openProjectRoom(${j.id})">
+                  Open Project Room
+                </button>
+
+                <button class="mini-btn secondary" onclick="openEditModal('${j.id}')">
+                  Edit
+                </button>
+
+                <button class="mini-btn primary" style="background:#dc2626;" onclick="deleteMyJob('${j.id}')">
+                  Delete
+                </button>
               </div>
             `).join('')
-          : '<p>No jobs yet</p>'
+          : '<p>No jobs posted yet.</p>'
       }
     </div>
   `;
+
+  return;
 }
       
   if (lockedRole === 'contractor') {
