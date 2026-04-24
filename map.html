@@ -1932,6 +1932,23 @@ function formatCount() {
     `${visibleCards} ${label} found`;
 }
 
+    function getJobImage(trade) {
+  const t = String(trade || '').toLowerCase();
+
+  if (t.includes('kitchen')) return 'images/jobs/kitchen.jpg';
+  if (t.includes('bath')) return 'images/jobs/bathroom.jpg';
+  if (t.includes('roof')) return 'images/jobs/roofing.jpg';
+  if (t.includes('tile')) return 'images/jobs/tile.jpg';
+  if (t.includes('paint')) return 'images/jobs/painting.jpg';
+  if (t.includes('floor')) return 'images/jobs/flooring.jpg';
+  if (t.includes('plumb')) return 'images/jobs/plumbing.jpg';
+  if (t.includes('electric')) return 'images/jobs/electrical.jpg';
+  if (t.includes('deck')) return 'images/jobs/deck.jpg';
+  if (t.includes('siding')) return 'images/jobs/siding.jpg';
+
+  return 'images/jobs/default.jpg';
+}
+    
     function contractorCardHtml(item) {
       return `
         <div class="card-top">
@@ -1966,6 +1983,10 @@ function formatCount() {
 
     function jobCardHtml(item) {
       return `
+              <img src="${getJobImage(item.trade)}" 
+             onerror="this.src='images/jobs/default.jpg'"
+             style="width:100%; height:116px; object-fit:cover; display:block;">
+             
         <div class="card-top">
           <div class="card-title-wrap">
             <h3 class="card-title">${item.title}</h3>
