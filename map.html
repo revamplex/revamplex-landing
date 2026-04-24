@@ -1932,21 +1932,48 @@ function formatCount() {
     `${visibleCards} ${label} found`;
 }
 
-    function getJobImage(trade) {
-  const t = String(trade || '').toLowerCase();
+function getJobImage(trade) {
+  const map = {
+    'Kitchen Renovation': 'images/jobs/kitchen.jpg',
+    'Bathroom Renovation': 'images/jobs/bathroom.jpg',
+    'Additions & Remodeling': 'images/jobs/additions-remodeling.jpg',
+    'General Contractors': 'images/jobs/general-contractors.jpg',
+    'Carpentry': 'images/jobs/carpentry.jpg',
+    'Concrete & Masonry': 'images/jobs/concrete-masonry.jpg',
+    'Decks & Porches': 'images/jobs/decks-porches.jpg',
+    'Doors': 'images/jobs/doors.jpg',
+    'Drywall & Insulation': 'images/jobs/drywall-insulation.jpg',
+    'Electrical': 'images/jobs/electrical.jpg',
+    'Fencing': 'images/jobs/fencing.jpg',
+    'Flooring': 'images/jobs/flooring.jpg',
+    'Garage Doors': 'images/jobs/garage-doors.jpg',
+    'Glass & Mirrors': 'images/jobs/glass-mirrors.jpg',
+    'Gutters': 'images/jobs/gutters.jpg',
+    'Handyman Services': 'images/jobs/handyman-services.jpg',
+    'HVAC': 'images/jobs/hvac.jpg',
+    'Junk Removal': 'images/jobs/junk-removal.jpg',
+    'Land Surveying': 'images/jobs/land-surveying.jpg',
+    'Landscaping': 'images/jobs/landscaping.jpg',
+    'Lawn Care': 'images/jobs/lawn-care.jpg',
+    'Locksmith': 'images/jobs/locksmith.jpg',
+    'Painting': 'images/jobs/painting.jpg',
+    'Patios': 'images/jobs/patios.jpg',
+    'Pest Control': 'images/jobs/pest-control.jpg',
+    'Plumbing': 'images/jobs/plumbing.jpg',
+    'Pools & Spas': 'images/jobs/pools-spas.jpg',
+    'Pressure Washing': 'images/jobs/pressure-washing.jpg',
+    'Roofing': 'images/jobs/roofing.jpg',
+    'Septic Systems': 'images/jobs/septic-systems.jpg',
+    'Siding': 'images/jobs/siding.jpg',
+    'Solar': 'images/jobs/solar.jpg',
+    'Sunrooms': 'images/jobs/sunrooms.jpg',
+    'Tile & Stone': 'images/jobs/tile-stone.jpg',
+    'Tree Services': 'images/jobs/tree-services.jpg',
+    'Water Damage Restoration': 'images/jobs/water-damage-restoration.jpg',
+    'Windows': 'images/jobs/windows.jpg'
+  };
 
-  if (t.includes('kitchen')) return 'images/jobs/kitchen.jpg';
-  if (t.includes('bath')) return 'images/jobs/bathroom.jpg';
-  if (t.includes('roof')) return 'images/jobs/roofing.jpg';
-  if (t.includes('tile')) return 'images/jobs/tile.jpg';
-  if (t.includes('paint')) return 'images/jobs/painting.jpg';
-  if (t.includes('floor')) return 'images/jobs/flooring.jpg';
-  if (t.includes('plumb')) return 'images/jobs/plumbing.jpg';
-  if (t.includes('electric')) return 'images/jobs/electrical.jpg';
-  if (t.includes('deck')) return 'images/jobs/deck.jpg';
-  if (t.includes('siding')) return 'images/jobs/siding.jpg';
-
-  return 'images/jobs/default.jpg';
+  return map[trade] || 'images/jobs/default.jpg';
 }
     
     function contractorCardHtml(item) {
