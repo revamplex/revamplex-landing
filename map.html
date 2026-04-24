@@ -2243,12 +2243,18 @@ async function createJobFromForm() {
   setMode('homeowner');
 }
 
-    function openProjectRoom(jobId) {
-      const job = jobs.find(entry => String(entry.id) === String(jobId));
-      console.log("OPENING JOB:", jobId, job);
-      if (!job) return;
-      window.location.href = `project-room.html?mode=contractor&job=${jobId}`;
-    }
+    function openContractorProjectRoom(contractorId) {
+  const contractor = contractors.find(c => String(c.id) === String(contractorId));
+
+  if (contractor) {
+    sessionStorage.setItem(
+      'revampSelectedContractor',
+      JSON.stringify(getSafeContractorSessionItem(contractor))
+    );
+  }
+
+  window.location.href = `project-room.html?mode=homeowner&contractor=${contractorId}`;
+}
 
     async function submitBid(jobId) {
       try {
