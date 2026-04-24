@@ -2015,8 +2015,8 @@ function renderCards(items) {
   }
 
   cardsRow.innerHTML = items.map(item => `
-    <div class="listing-card ${`${item.type}-${item.id}` === activeId ? 'active' : ''}" 
-         data-id="${item.type}-${item.id}">
+    <img src="${item.type === 'job' ? getJobImage(item.trade) : 'images/jobs/default.jpg'}"
+     style="width:100%; height:120px; object-fit:cover; border-radius:12px; margin-bottom:8px;">
       <div class="card-inner">
         ${item.type === 'contractor' ? contractorCardHtml(item) : jobCardHtml(item)}
       </div>
@@ -2169,6 +2169,22 @@ const renderKey = JSON.stringify(filteredItems.map(i => `${i.type}-${i.id}`));
 if (__lastRenderKey === renderKey) return;
 __lastRenderKey = renderKey;
 
+    function getJobImage(trade) {
+  const t = String(trade || '').toLowerCase();
+
+  if (t.includes('kitchen')) return 'images/jobs/kitchen.jpg';
+  if (t.includes('bath')) return 'images/jobs/bathroom.jpg';
+  if (t.includes('roof')) return 'images/jobs/roofing.jpg';
+  if (t.includes('tile')) return 'images/jobs/tile.jpg';
+  if (t.includes('paint')) return 'images/jobs/painting.jpg';
+  if (t.includes('floor')) return 'images/jobs/flooring.jpg';
+  if (t.includes('plumb')) return 'images/jobs/plumbing.jpg';
+  if (t.includes('electric')) return 'images/jobs/electrical.jpg';
+
+  return 'images/jobs/default.jpg';
+}
+    
+    function renderCards(items) {
 renderCards(filteredItems);
 renderMarkers(filteredItems);
 formatCount();
@@ -3052,6 +3068,20 @@ async function initAuthGate() {
 
 function goToDashboard() {
   window.location.href = "dashboard.html";
+}
+    function getJobImage(trade) {
+  const t = String(trade || '').toLowerCase();
+
+  if (t.includes('kitchen')) return 'images/jobs/kitchen.jpg';
+  if (t.includes('bath')) return 'images/jobs/bathroom.jpg';
+  if (t.includes('roof')) return 'images/jobs/roofing.jpg';
+  if (t.includes('tile')) return 'images/jobs/tile.jpg';
+  if (t.includes('paint')) return 'images/jobs/painting.jpg';
+  if (t.includes('floor')) return 'images/jobs/flooring.jpg';
+  if (t.includes('plumb')) return 'images/jobs/plumbing.jpg';
+  if (t.includes('electric')) return 'images/jobs/electrical.jpg';
+
+  return 'images/jobs/default.jpg';
 }
 </script>
   
