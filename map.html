@@ -1081,6 +1081,10 @@
           <input class="input" id="jobBudget" placeholder="$12,000" />
         </div>
 
+        <div class="field">
+          <label class="label" for="jobCustomer">Customer name</label>
+          <input class="input" id="jobCustomer" placeholder="John D." />
+        </div>
 
         <div class="field">
           <label class="label" for="jobCity">City</label>
@@ -1338,44 +1342,30 @@ authContainer.innerHTML = `
 
 if (lockedRole === 'homeowner') {
 
-  const myJobs = jobs.filter(j => String(j.user_id) === String(user.id));
+  const myJobs = jobs.filter(j => j.user_id === user.id);
 
   detailTitle.textContent = "My Jobs";
 
   detailContent.innerHTML = `
-    <div style="margin-bottom:12px;">
+    <div>
       <button onclick="goToDashboard()" class="mini-btn secondary">Edit Profile</button>
     </div>
 
     <div class="detail-panel">
-      <h4>My Posted Jobs</h4>
-
+      <h4>Active Jobs</h4>
       ${
         myJobs.length
           ? myJobs.map(j => `
-              <div style="padding:12px 0; border-bottom:1px solid #e2e8f0;">
-                <strong>${j.title || 'Untitled Job'}</strong><br>
-                <span>${j.trade || 'Trade'} • ${j.city || 'Location'} • ${j.budget || '$0'}</span><br><br>
-
-                <button class="mini-btn secondary" onclick="openProjectRoom(${j.id})">
-                  Open Project Room
-                </button>
-
-                <button class="mini-btn secondary" onclick="openEditModal('${j.id}')">
-                  Edit
-                </button>
-
-                <button class="mini-btn primary" style="background:#dc2626;" data-action="delete-my-job" data-id="${j.id}">
-  Delete
-</button>
+              <div style="padding:10px 0; border-bottom:1px solid #e2e8f0;">
+                <strong>${j.title}</strong><br>
+                ${j.budget} • ${j.trade}<br>
+                ${canEditItem(item) ? `${canEditItem(item) ? `<button class="mini-btn secondary" data-action="edit" data-id="${item.id}">Edit</button>` : ''}` : ''}
               </div>
             `).join('')
-          : '<p>No jobs posted yet.</p>'
+          : '<p>No jobs yet</p>'
       }
     </div>
   `;
-
-  return;
 }
       
   if (lockedRole === 'contractor') {
@@ -2006,22 +1996,33 @@ function renderCards(items) {
   if (!items.length) {
     cardsRow.innerHTML = `
       <div class="listing-card">
-        <div style="padding:22px;text-align:center;">
-          <div style="font-size:17px;font-weight:900;margin-bottom:8px;">No results found</div>
+        <div class="card-inner">
+          <div style="padding:22px;text-align:center;">
+            <div style="font-size:17px;font-weight:900;margin-bottom:8px;">No results found</div>
+          </div>
         </div>
       </div>
     `;
     return;
   }
 
-  cardsRow.innerHTML = items.map(item => `
-    <img src="${item.type === 'job' ? getJobImage(item.trade) : 'images/jobs/default.jpg'}"
-     style="width:100%; height:120px; object-fit:cover; border-radius:12px; margin-bottom:8px;">
-      <div class="card-inner">
-        ${item.type === 'contractor' ? contractorCardHtml(item) : jobCardHtml(item)}
+  cardsRow.innerHTML = items.map(item => {
+    const cardId = `${item.type}-${item.id}`;
+    const jobImageHtml = item.type === 'job'
+      ? `<img src="${getJobImage(item.trade)}"
+              onerror="this.onerror=null;this.src='images/jobs/default.jpg';"
+              style="width:100%; height:120px; object-fit:cover; display:block;">`
+      : '';
+
+    return `
+      <div class="listing-card ${cardId === activeId ? 'active' : ''}" data-id="${cardId}">
+        <div class="card-inner">
+          ${jobImageHtml}
+          ${item.type === 'contractor' ? contractorCardHtml(item) : jobCardHtml(item)}
+        </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 
   document.querySelectorAll('.listing-card[data-id]').forEach(card => {
     const id = card.dataset.id;
@@ -2040,12 +2041,12 @@ function renderCards(items) {
     };
 
     card.onclick = (e) => {
-  if (e.target.closest('button')) return;
+      if (e.target.closest('button')) return;
 
-  selectedId = id;
-  setActive(id, true);
-  scrollCardIntoView(id);
-};
+      selectedId = id;
+      setActive(id, true);
+      scrollCardIntoView(id);
+    };
   });
 }
 
@@ -2169,22 +2170,6 @@ const renderKey = JSON.stringify(filteredItems.map(i => `${i.type}-${i.id}`));
 if (__lastRenderKey === renderKey) return;
 __lastRenderKey = renderKey;
 
-    function getJobImage(trade) {
-  const t = String(trade || '').toLowerCase();
-
-  if (t.includes('kitchen')) return 'images/jobs/kitchen.jpg';
-  if (t.includes('bath')) return 'images/jobs/bathroom.jpg';
-  if (t.includes('roof')) return 'images/jobs/roofing.jpg';
-  if (t.includes('tile')) return 'images/jobs/tile.jpg';
-  if (t.includes('paint')) return 'images/jobs/painting.jpg';
-  if (t.includes('floor')) return 'images/jobs/flooring.jpg';
-  if (t.includes('plumb')) return 'images/jobs/plumbing.jpg';
-  if (t.includes('electric')) return 'images/jobs/electrical.jpg';
-
-  return 'images/jobs/default.jpg';
-}
-    
-    function renderCards(items) {
 renderCards(filteredItems);
 renderMarkers(filteredItems);
 formatCount();
@@ -2221,84 +2206,56 @@ function setSort(type) {
     function clearJobForm() {
       document.getElementById('jobTitle').value = '';
       document.getElementById('jobBudget').value = '';
+      document.getElementById('jobCustomer').value = '';
       document.getElementById('jobCity').value = '';
       document.getElementById('jobDescription').value = '';
       document.getElementById('jobTrade').selectedIndex = 0;
     }
 
-async function createJobFromForm() {
-  const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    async function createJobFromForm() {
+      const title = document.getElementById('jobTitle').value.trim() || 'New Job';
+      const trade = document.getElementById('jobTrade').value || 'General Contractors';
+      const budget = getFormattedBudget(document.getElementById('jobBudget').value);
+      const customer_name = 'Customer';
+      const city = document.getElementById('jobCity').value.trim() || 'North Jersey, NJ';
+      const description = document.getElementById('jobDescription').value.trim() || 'Customer posted a new project on Revamp.';
+      const center = map.getCenter();
 
-  if (userError || !user) {
-    alert("You must be logged in to post a job.");
-    return;
-  }
+      const payload = {
+        user_id: (await supabaseClient.auth.getUser()).data.user.id,
+        title, trade, budget, customer_name, city, description,
+        lat: Number(center.lat.toFixed(6)),
+        lng: Number(center.lng.toFixed(6)),
+        rating: 5.0,
+        reviews: 1,
+        distance: 1.0,
+        verified: true,
+        posted_ago: 'Just now',
+        max_bids: 5,
+        type: 'job'
+      };
 
-  const title = document.getElementById('jobTitle').value.trim() || 'New Job';
-  const trade = document.getElementById('jobTrade').value || 'General Contractors';
-  const budget = getFormattedBudget(document.getElementById('jobBudget').value);
-  const city = document.getElementById('jobCity').value.trim() || 'North Jersey, NJ';
-  const description = document.getElementById('jobDescription').value.trim() || 'Customer posted a new project on Revamp.';
-  const center = map.getCenter();
+      const { error } = await supabaseClient.from('jobs').insert([payload]);
+      if (error) {
+        console.error(error);
+        alert('Error posting job');
+        return;
+      }
 
-  const payload = {
-    user_id: user.id,
-    title,
-    trade,
-    budget,
-    customer_name: 'Customer',
-    city,
-    description,
-    lat: Number(center.lat.toFixed(6)),
-    lng: Number(center.lng.toFixed(6)),
-    rating: 5.0,
-    reviews: 1,
-    distance: 1.0,
-    verified: true,
-    posted_ago: 'Just now',
-    max_bids: 5,
-    type: 'job'
-  };
-
-  const { error } = await supabaseClient.from('jobs').insert([payload]);
-
-  if (error) {
-    console.error("JOB POST ERROR:", error);
-    alert(error.message);
-    return;
-  }
-
-  closeJobForm();
-  clearJobForm();
-  showStatus('Job posted');
-  await loadLiveData();
-  setMode('homeowner');
-}
-
-    function openContractorProjectRoom(contractorId) {
-  const contractor = contractors.find(c => String(c.id) === String(contractorId));
-
-  if (contractor) {
-    sessionStorage.setItem(
-      'revampSelectedContractor',
-      JSON.stringify(getSafeContractorSessionItem(contractor))
-    );
-  }
-
-  window.location.href = `project-room.html?mode=homeowner&contractor=${contractorId}`;
-}
+      closeJobForm();
+      clearJobForm();
+      showStatus('Job posted');
+      await loadLiveData();
+      setMode('contractor');
+    }
 
     function openProjectRoom(jobId) {
-  const job = jobs.find(entry => String(entry.id) === String(jobId));
+      const job = jobs.find(entry => String(entry.id) === String(jobId));
+      console.log("OPENING JOB:", jobId, job);
+      if (!job) return;
+      window.location.href = `project-room.html?mode=contractor&job=${jobId}`;
+    }
 
-  if (!job) {
-    alert("Job not found");
-    return;
-  }
-
-  window.location.href = `project-room.html?mode=contractor&job=${jobId}`;
-}
-    
     async function submitBid(jobId) {
       try {
         const amount = prompt("Enter your bid amount:");
@@ -2332,8 +2289,12 @@ function canEditItem(item) {
 
   return String(item.user_id || item.owner_id || item.profile_id || item.contractor_id || '') === String(currentUserId);
 }
-   function openDetailModal(item) {
-  if (!item) return;
+    function openDetailModal(item) {
+      if (!item) return;
+      if (!canEditItem(item)) {
+  showStatus("You can only edit your own posts");
+  return;
+}
       expandUI();
       detailModal.classList.add('show');
 
@@ -2363,7 +2324,7 @@ function canEditItem(item) {
             <div class="detail-tags">${(item.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
           </div>
           <div class="card-actions">
-  ${canEditItem(item) ? `<button class="mini-btn secondary" data-action="edit" data-id="${item.id}">Edit</button>` : ''}
+  <button class="mini-btn secondary" data-action="edit" data-id="${item.id}">Edit</button>
   <button class="mini-btn primary" data-action="message" data-id="${item.id}">Message</button>
 </div>
         `;
@@ -2408,10 +2369,10 @@ const bidsHtml = visibleBids.length
             ${bidsHtml}
           </div>
          <div class="card-actions">
- ${canEditItem(item) ? `<button class="mini-btn secondary" data-action="edit" data-id="${item.id}">Edit</button>` : ''}
-<button class="mini-btn primary" data-action="project-room" data-id="${item.id}">
-  Submit Bid
-</button>
+  <button class="mini-btn secondary" data-action="edit" data-id="${item.id}">Edit</button>
+  <button class="mini-btn primary" onclick="openProjectRoom(${item.id})">
+    Submit Bid
+  </button>
 </div>
         `;
       }
@@ -2426,7 +2387,10 @@ const bidsHtml = visibleBids.length
   if (!item) return;
 
   if (action === 'edit') {
-   
+    if (!canEditItem(item)) {
+      showStatus("You can only edit your own posts");
+      return;
+    }
 
     openEditModal(id);
     return;
@@ -2437,21 +2401,15 @@ const bidsHtml = visibleBids.length
     return;
   }
 
- if (action === 'message') {
-  const contractor = contractors.find(c => String(c.id) === String(id));
+  if (action === 'message') {
+    const contractor = contractors.find(c => String(c.id) === String(id));
+    if (contractor) {
+      sessionStorage.setItem('revampSelectedContractor', JSON.stringify(getSafeContractorSessionItem(contractor)));
+    }
 
-  if (contractor) {
-    sessionStorage.setItem(
-      'revampSelectedContractor',
-      JSON.stringify(getSafeContractorSessionItem(contractor))
-    );
+    window.location.href = `project-room.html?mode=homeowner&contractor=${id}`;
+    return;
   }
-
-  console.log("OPENING CONTRACTOR PROJECT ROOM:", id);
-
-  window.location.assign(`project-room.html?mode=homeowner&contractor=${id}`);
-  return;
-}
 
   if (action === 'project-room') {
     openProjectRoom(id);
@@ -2471,10 +2429,7 @@ const bidsHtml = visibleBids.length
 async function openEditModal(id) {
   const item = [...contractors, ...jobs].find(i => String(i.id) === String(id));
   if (!item) return;
-  if (!canEditItem(item)) {
-    showStatus("You can only edit your own posts");
-    return;
-  }
+
   expandUI();
   detailModal.classList.add('show');
 
@@ -2917,25 +2872,19 @@ cardsRow.addEventListener('click', e => {
 });
     
 
-detailContent.addEventListener('click', e => {
-  const button = e.target.closest('[data-action]');
-  if (!button) return;
+    detailContent.addEventListener('click', e => {
+      const button = e.target.closest('[data-action]');
+      if (!button) return;
+      e.preventDefault();
+      e.stopPropagation();
 
-  e.preventDefault();
-  e.stopPropagation();
+      if (button.dataset.action === 'accept-bid') {
+        showStatus('Bid accepted');
+        return;
+      }
 
-  if (button.dataset.action === 'delete-my-job') {
-    deleteMyJob(button.dataset.id);
-    return;
-  }
-
-  if (button.dataset.action === 'accept-bid') {
-    showStatus('Bid accepted');
-    return;
-  }
-
-  handleCardAction(button.dataset.action, button.dataset.id);
-});
+      handleCardAction(button.dataset.action, Number(button.dataset.id));
+    });
 
     let scrollTimer = null;
 
@@ -2995,41 +2944,7 @@ cardsRow.addEventListener('scroll', () => {
         }
       }, 120);
     });
-    
-async function deleteMyJob(jobId) {
-  const confirmed = confirm("Delete this job? This cannot be undone.");
-  if (!confirmed) return;
 
-  const { data: { user } } = await supabaseClient.auth.getUser();
-
-  if (!user) {
-    showStatus("You must be logged in");
-    return;
-  }
-
-const { data, error } = await supabaseClient
-  .from('jobs')
-  .delete()
-  .eq('id', jobId)
-  .eq('user_id', user.id)
-  .select();
-
-  if (error) {
-    console.error("DELETE JOB ERROR:", error);
-    alert(error.message);
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    alert("No job was deleted. This usually means the job does not belong to this account or Supabase RLS is blocking delete.");
-    return;
-  }
-
-  showStatus("Job deleted");
-  await loadLiveData();
-  openDashboard();
-}
-    
 function openWelcomeAuth(mode = 'register') {
   // 🔥 EXIT DEMO MODE
   localStorage.removeItem('revamplex_demo');
@@ -3068,20 +2983,6 @@ async function initAuthGate() {
 
 function goToDashboard() {
   window.location.href = "dashboard.html";
-}
-    function getJobImage(trade) {
-  const t = String(trade || '').toLowerCase();
-
-  if (t.includes('kitchen')) return 'images/jobs/kitchen.jpg';
-  if (t.includes('bath')) return 'images/jobs/bathroom.jpg';
-  if (t.includes('roof')) return 'images/jobs/roofing.jpg';
-  if (t.includes('tile')) return 'images/jobs/tile.jpg';
-  if (t.includes('paint')) return 'images/jobs/painting.jpg';
-  if (t.includes('floor')) return 'images/jobs/flooring.jpg';
-  if (t.includes('plumb')) return 'images/jobs/plumbing.jpg';
-  if (t.includes('electric')) return 'images/jobs/electrical.jpg';
-
-  return 'images/jobs/default.jpg';
 }
 </script>
   
