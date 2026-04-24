@@ -2887,7 +2887,7 @@ cardsRow.addEventListener('click', e => {
         return;
       }
 
-      handleCardAction(button.dataset.action, Number(button.dataset.id));
+      handleCardAction(button.dataset.action, button.dataset.id);
     });
 
     let scrollTimer = null;
