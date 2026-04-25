@@ -2264,28 +2264,52 @@ function getFullTradeText(item) {
 }
 
 function cleanPublicLocationText(value) {
-  const raw = String(value || '').trim();
+  let raw = String(value || '').trim();
   if (!raw) return '';
 
-  // If it is a full street address like "123 Main St, Oakland, NJ 07436",
-  // show only the city/state part to the public.
+  // Normalize line breaks/tabs so "110 W Oakland Ave.\nOakland, NJ" can be cleaned safely.
+  raw = raw.replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+
   const parts = raw.split(',').map(p => p.trim()).filter(Boolean);
 
-  if (parts.length >= 3) {
-    const city = parts[parts.length - 2] || '';
-    let state = parts[parts.length - 1] || '';
-    state = state.replace(/\b\d{5}(?:-\d{4})?\b/g, '').trim();
+  // Clean state/zip like "NJ 07436" -> "NJ"
+  const cleanState = (v) => String(v || '')
+    .replace(/\b\d{5}(?:-\d{4})?\b/g, '')
+    .trim();
+
+  // If a value starts with a street number, NEVER return that street portion.
+  // Example: "110 W Oakland Ave. Oakland, NJ" -> "Oakland, NJ"
+  if (/^\d+\s+/.test(raw)) {
+    const state = cleanState(parts.length >= 2 ? parts[parts.length - 1] : '');
+    let beforeState = parts.length >= 2 ? parts.slice(0, -1).join(' ') : raw;
+
+    // Remove everything through the street suffix, leaving the city when possible.
+    let city = beforeState.replace(
+      /^\d+\s+.*?\b(?:ave|avenue|st|street|rd|road|blvd|boulevard|dr|drive|ln|lane|ct|court|pl|place|way|ter|terrace|pkwy|parkway|hwy|highway)\.?\s*/i,
+      ''
+    ).trim();
+
+    // Remove apartment/unit fragments if they are accidentally left behind.
+    city = city.replace(/\b(?:apt|apartment|unit|suite|ste|floor|fl)\b.*$/i, '').trim();
+
+    // If we could not safely find a city, show nothing instead of leaking street address.
+    if (!city || /^\d+\s+/.test(city)) return '';
+
     return [city, state].filter(Boolean).join(', ');
   }
 
-  // If user typed "Oakland, NJ", keep it.
-  if (parts.length === 2) {
-    let state = parts[1].replace(/\b\d{5}(?:-\d{4})?\b/g, '').trim();
-    return [parts[0], state].filter(Boolean).join(', ');
+  // Full address with commas: "123 Main St, Oakland, NJ" -> "Oakland, NJ"
+  if (parts.length >= 3) {
+    const city = parts[parts.length - 2] || '';
+    const state = cleanState(parts[parts.length - 1] || '');
+    return [city, state].filter(Boolean).join(', ');
   }
 
-  // Last safety: if it starts with a street number, do not show it.
-  if (/^\d+\s+/.test(raw)) return '';
+  // City/state only: "Oakland, NJ" -> keep it.
+  if (parts.length === 2) {
+    const state = cleanState(parts[1]);
+    return [parts[0], state].filter(Boolean).join(', ');
+  }
 
   return raw;
 }
@@ -2576,7 +2600,7 @@ const finalItems = Object.values(
 );
 
 // 🔥 HARD RENDER LOCK (PREVENT DUPLICATES)
-const renderKey = JSON.stringify(filteredItems.map(i => `${i.type}-${i.id}-${formatDistance(i)}-${i.location || i.city || ''}-${i.trade || ''}-${i.trades_full || ''}`));
+const renderKey = JSON.stringify(filteredItems.map(i => `${i.type}-${i.id}-${formatDistance(i)}-${getDisplayCity(i)}-${i.trade || ''}-${i.trades_full || ''}`));
 
 if (__lastRenderKey === renderKey) return;
 __lastRenderKey = renderKey;
