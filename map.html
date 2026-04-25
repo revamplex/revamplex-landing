@@ -1941,6 +1941,70 @@ function offsetCoords(coords, index) {
     coords[1] + Math.sin(angle) * offset
   ];
 }
+
+
+// 🔥 DISTANCE FIX — calculate miles from the visitor's real position to the contractor/job coordinates
+let userDistanceCoords = null;
+let askedForDistanceLocation = false;
+
+function toNumberOrNull(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function haversineMiles(lat1, lng1, lat2, lng2) {
+  const R = 3958.8;
+  const toRad = deg => deg * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function getItemLatLng(item) {
+  const lat = toNumberOrNull(item.lat);
+  const lng = toNumberOrNull(item.lng);
+  if (lat === null || lng === null) return null;
+  return [lat, lng];
+}
+
+function getDistanceMiles(item) {
+  const coords = getItemLatLng(item);
+
+  if (userDistanceCoords && coords) {
+    return haversineMiles(userDistanceCoords[0], userDistanceCoords[1], coords[0], coords[1]);
+  }
+
+  const storedDistance = toNumberOrNull(item.distance);
+  if (storedDistance !== null && storedDistance > 0) return storedDistance;
+
+  return null;
+}
+
+function formatDistance(item) {
+  const miles = getDistanceMiles(item);
+  return miles === null ? '— mi' : `${miles.toFixed(1)} mi`;
+}
+
+function requestDistanceLocation() {
+  if (askedForDistanceLocation || !navigator.geolocation) return;
+  askedForDistanceLocation = true;
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      userDistanceCoords = [pos.coords.latitude, pos.coords.longitude];
+      __lastRenderKey = '';
+      applyFilters();
+    },
+    err => {
+      console.warn('Distance location not available:', err.message);
+    },
+    { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 }
+  );
+}
     function getSafeContractorSessionItem(item) {
       return {
         ...item,
@@ -2008,7 +2072,7 @@ function clearMarkers() {
           <div>
             <div style="font-size:15px;font-weight:900;margin-bottom:6px;">${anonymizeContractorName(item)}</div>
             <div style="font-size:13px;color:#64748b;margin-bottom:4px;">${getCompactTradeLabel(item)} • ${getDisplayCity(item)}</div>
-            <div style="font-size:13px;color:#64748b;">⭐ ${Number(item.rating || 0).toFixed(1)} • ${Number(item.distance || 0).toFixed(1)} mi</div>
+            <div style="font-size:13px;color:#64748b;">⭐ ${Number(item.rating || 0).toFixed(1)} • ${formatDistance(item)}</div>
           </div>
         `;
       }
@@ -2243,7 +2307,7 @@ function getContractorImage(item) {
             </div>
             <div class="meta-box">
               <div class="meta-label">Distance</div>
-              <div class="meta-value">${Number(item.distance || 0).toFixed(1)} mi</div>
+              <div class="meta-value">${formatDistance(item)}</div>
             </div>
           </div>
           <div class="info-row">
@@ -2396,8 +2460,11 @@ activeHighlight.bringToFront();
     }
 
     function sortItems(items) {
-      if (activeSort === 'distance') items.sort((a, b) => Number(a.distance || 999) - Number(b.distance || 999));
-      else items.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
+      if (activeSort === 'distance') {
+        items.sort((a, b) => (getDistanceMiles(a) ?? 999) - (getDistanceMiles(b) ?? 999));
+      } else {
+        items.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
+      }
     }
 
 async function applyFilters() {
@@ -2442,7 +2509,8 @@ filteredItems = cleanSource;
       const matchesTrade =
         selectedTrade === 'all' ||
         String(item.type === 'contractor' ? getFullTradeText(item) : item.trade || '').toLowerCase().includes(selectedTrade.toLowerCase());
-      const matchesDistance = !item.distance || Number(item.distance) <= maxDistance;
+      const itemDistance = getDistanceMiles(item);
+      const matchesDistance = itemDistance === null || itemDistance <= maxDistance;
       const matchesRating = Number(item.rating || 0) >= minRating;
 
       return matchesQuery && matchesTrade && matchesDistance && matchesRating;
@@ -2464,7 +2532,7 @@ const finalItems = Object.values(
 );
 
 // 🔥 HARD RENDER LOCK (PREVENT DUPLICATES)
-const renderKey = JSON.stringify(filteredItems.map(i => `${i.type}-${i.id}`));
+const renderKey = JSON.stringify(filteredItems.map(i => `${i.type}-${i.id}-${formatDistance(i)}-${i.location || i.city || ''}-${i.trade || ''}-${i.trades_full || ''}`));
 
 if (__lastRenderKey === renderKey) return;
 __lastRenderKey = renderKey;
@@ -3393,6 +3461,7 @@ async function initAuthGate() {
   subscribeLive();
   checkUserSession();
   initAuthGate();
+  requestDistanceLocation();
 
 function goToDashboard() {
   window.location.href = "dashboard.html";
