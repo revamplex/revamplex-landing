@@ -114,7 +114,6 @@
       <p><strong>Trade:</strong> <span id="displayTrade">—</span></p>
     </div>
 
-    <p><strong>Location:</strong> <span id="displayLocation">—</span></p>
 
     <button class="btn" onclick="openEditProfile()">Edit Profile</button>
   </div>
@@ -135,7 +134,6 @@
       <input id="profileTrade" placeholder="Trade">
     </div>
 
-    <input id="profileLocation" placeholder="Location">
 
     <button class="btn" id="saveProfileBtn">Save</button>
     <button class="btn secondary" id="closeProfileBtn">Close</button>
@@ -180,8 +178,6 @@ function renderProfile() {
   document.getElementById("displayName").innerText = safeText(currentProfile.name || currentProfile.full_name);
   document.getElementById("displayCompany").innerText = safeText(currentProfile.company);
   document.getElementById("displayTrade").innerText = safeText(currentProfile.trade);
-  document.getElementById("displayLocation").innerText = safeText(currentProfile.location || currentProfile.address);
-
   updateRoleVisibility();
 }
 
@@ -247,8 +243,6 @@ function openEditProfile() {
   document.getElementById("profileName").value = currentProfile.name || currentProfile.full_name || "";
   document.getElementById("profileCompany").value = currentProfile.company || "";
   document.getElementById("profileTrade").value = currentProfile.trade || "";
-  document.getElementById("profileLocation").value = currentProfile.location || currentProfile.address || "";
-
   updateRoleVisibility();
   document.getElementById("profileModal").classList.add("active");
 }
@@ -269,8 +263,7 @@ async function saveProfile() {
     id: currentUser.id,
     email: currentUser.email,
     role: currentProfile.role || "homeowner",
-    name: document.getElementById("profileName").value.trim(),
-    location: document.getElementById("profileLocation").value.trim()
+    name: document.getElementById("profileName").value.trim()
   };
 
   if (isContractor) {
