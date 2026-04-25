@@ -18,6 +18,7 @@
       padding: 15px;
       text-align: center;
       font-size: 20px;
+      font-weight: 700;
     }
 
     .container {
@@ -46,7 +47,7 @@
     }
 
     .btn.secondary {
-      background: #333;
+      background: #111;
     }
 
     .modal {
@@ -67,7 +68,7 @@
 
     .modal-box {
       background: #fff;
-      width: 90%;
+      width: 100%;
       max-width: 500px;
       padding: 20px;
       border-radius: 12px;
@@ -85,13 +86,8 @@
       font-size: 14px;
     }
 
-    .modal-box textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-
     .contractor-only,
-    .contractor-profile-row {
+    .homeowner-hidden {
       display: none;
     }
   </style>
@@ -112,10 +108,13 @@
     <h3>My Profile</h3>
 
     <p><strong>Name:</strong> <span id="displayName">—</span></p>
-    <p class="contractor-profile-row"><strong>Company:</strong> <span id="displayCompany">—</span></p>
-    <p class="contractor-profile-row"><strong>Trade:</strong> <span id="displayTrade">—</span></p>
+
+    <div class="contractor-display">
+      <p><strong>Company:</strong> <span id="displayCompany">—</span></p>
+      <p><strong>Trade:</strong> <span id="displayTrade">—</span></p>
+    </div>
+
     <p><strong>Location:</strong> <span id="displayLocation">—</span></p>
-    <p><strong>Bio:</strong> <span id="displayBio">—</span></p>
 
     <button class="btn" onclick="openEditProfile()">Edit Profile</button>
   </div>
@@ -137,7 +136,6 @@
     </div>
 
     <input id="profileLocation" placeholder="Location">
-    <textarea id="profileBio" placeholder="Bio"></textarea>
 
     <button class="btn" id="saveProfileBtn">Save</button>
     <button class="btn secondary" id="closeProfileBtn">Close</button>
@@ -155,31 +153,45 @@ const client = window.supabase.createClient(
 let currentUser = null;
 let currentProfile = null;
 
-function isContractorProfile() {
-  return (currentProfile?.role || "").toLowerCase() === "contractor";
+function safeText(value) {
+  return value && String(value).trim() !== "" ? value : "—";
 }
 
-function updateProfileDisplay() {
-  if (!currentProfile) return;
+function getRole() {
+  return (currentProfile?.role || "homeowner").toLowerCase();
+}
 
-  const isContractor = isContractorProfile();
+function updateRoleVisibility() {
+  const isContractor = getRole() === "contractor";
 
-  document.getElementById("userRole").innerText =
-    "Role: " + (currentProfile.role || "none");
+  document.querySelectorAll(".contractor-only").forEach(el => {
+    el.style.display = isContractor ? "block" : "none";
+  });
 
-  document.getElementById("displayName").innerText = currentProfile.name || currentProfile.full_name || "—";
-  document.getElementById("displayCompany").innerText = currentProfile.company || "—";
-  document.getElementById("displayTrade").innerText = currentProfile.trade || "—";
-  document.getElementById("displayLocation").innerText = currentProfile.location || currentProfile.address || "—";
-  document.getElementById("displayBio").innerText = currentProfile.bio || "—";
-
-  document.querySelectorAll(".contractor-profile-row").forEach(el => {
+  document.querySelectorAll(".contractor-display").forEach(el => {
     el.style.display = isContractor ? "block" : "none";
   });
 }
 
+function renderProfile() {
+  if (!currentProfile) return;
+
+  document.getElementById("userRole").innerText = "Role: " + safeText(currentProfile.role);
+  document.getElementById("displayName").innerText = safeText(currentProfile.name || currentProfile.full_name);
+  document.getElementById("displayCompany").innerText = safeText(currentProfile.company);
+  document.getElementById("displayTrade").innerText = safeText(currentProfile.trade);
+  document.getElementById("displayLocation").innerText = safeText(currentProfile.location || currentProfile.address);
+
+  updateRoleVisibility();
+}
+
 async function loadDashboard() {
-  const { data: { session } } = await client.auth.getSession();
+  const { data: { session }, error: sessionError } = await client.auth.getSession();
+
+  if (sessionError) {
+    alert("Session error: " + sessionError.message);
+    return;
+  }
 
   if (!session) {
     window.location.href = "map.html";
@@ -197,7 +209,6 @@ async function loadDashboard() {
 
   if (error) {
     alert("Profile load error: " + error.message);
-    console.error("Profile load error:", error);
     return;
   }
 
@@ -211,12 +222,11 @@ async function loadDashboard() {
         email: currentUser.email,
         role: savedRole
       })
-      .select()
+      .select("*")
       .single();
 
     if (createError) {
       alert("Could not create profile: " + createError.message);
-      console.error("Could not create profile:", createError);
       return;
     }
 
@@ -225,27 +235,21 @@ async function loadDashboard() {
     currentProfile = profile;
   }
 
-  updateProfileDisplay();
+  renderProfile();
 }
 
-async function openEditProfile() {
+function openEditProfile() {
   if (!currentProfile) {
-    await loadDashboard();
-    if (!currentProfile) return;
+    alert("Profile is still loading. Please try again in a second.");
+    return;
   }
 
   document.getElementById("profileName").value = currentProfile.name || currentProfile.full_name || "";
   document.getElementById("profileCompany").value = currentProfile.company || "";
   document.getElementById("profileTrade").value = currentProfile.trade || "";
   document.getElementById("profileLocation").value = currentProfile.location || currentProfile.address || "";
-  document.getElementById("profileBio").value = currentProfile.bio || "";
 
-  const isContractor = isContractorProfile();
-
-  document.querySelectorAll(".contractor-only").forEach(el => {
-    el.style.display = isContractor ? "block" : "none";
-  });
-
+  updateRoleVisibility();
   document.getElementById("profileModal").classList.add("active");
 }
 
@@ -255,49 +259,47 @@ function closeEditProfile() {
 
 async function saveProfile() {
   if (!currentUser || !currentProfile) {
-    alert("Profile is still loading. Try again.");
+    alert("Profile is not ready yet.");
     return;
   }
 
-  const isContractor = isContractorProfile();
+  const isContractor = getRole() === "contractor";
 
-  const updates = {
+  const updatedProfile = {
     id: currentUser.id,
     email: currentUser.email,
-    role: currentProfile.role || localStorage.getItem("revamplex_role") || "homeowner",
+    role: currentProfile.role || "homeowner",
     name: document.getElementById("profileName").value.trim(),
-    location: document.getElementById("profileLocation").value.trim(),
-    bio: document.getElementById("profileBio").value.trim()
+    location: document.getElementById("profileLocation").value.trim()
   };
 
   if (isContractor) {
-    updates.company = document.getElementById("profileCompany").value.trim();
-    updates.trade = document.getElementById("profileTrade").value.trim();
+    updatedProfile.company = document.getElementById("profileCompany").value.trim();
+    updatedProfile.trade = document.getElementById("profileTrade").value.trim();
   }
 
   const { data, error } = await client
     .from("profiles")
-    .upsert(updates)
-    .select()
+    .upsert(updatedProfile)
+    .select("*")
     .single();
 
   if (error) {
     alert("Could not save profile: " + error.message);
-    console.error("Could not save profile:", error);
     return;
   }
 
   currentProfile = data;
-  updateProfileDisplay();
+  renderProfile();
   closeEditProfile();
   alert("Profile saved");
 }
 
-window.addEventListener("load", () => {
+window.onload = function () {
   document.getElementById("closeProfileBtn").onclick = closeEditProfile;
   document.getElementById("saveProfileBtn").onclick = saveProfile;
   loadDashboard();
-});
+};
 </script>
 
 </body>
