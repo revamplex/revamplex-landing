@@ -243,6 +243,12 @@ function setText(id, value) {
   document.getElementById(id).innerText = value || "—";
 }
 
+function getSelectedTrades() {
+  return Array.from(document.querySelectorAll("#tradeCheckboxes input[type='checkbox']:checked"))
+    .map(cb => cb.value)
+    .join(", ");
+}
+
 function refreshDisplay() {
   if (!currentProfile) return;
 
@@ -353,21 +359,9 @@ async function saveProfile() {
     alert("Profile is not ready yet. Refresh and try again.");
     return;
   }
-if (currentProfile.role === "contractor") {
-  await client.from("contractors").upsert({
-    id: currentUser.id,
-    name: document.getElementById("profileName").value,
-    trade: document.getElementById("profileTrade").value,
-    location: document.getElementById("profileLocation").value,
-    lat: 40.9,  // TEMP (we’ll fix with real geolocation next)
-    lng: -74.1
-  });
-}
-  const isContractor = isContractorProfile();
 
-  const selectedTrades = Array.from(document.querySelectorAll("#tradeCheckboxes input[type='checkbox']:checked"))
-    .map(cb => cb.value)
-    .join(", ");
+  const isContractor = isContractorProfile();
+  const selectedTrades = getSelectedTrades();
 
   const updateData = {
     id: currentUser.id,
@@ -398,6 +392,31 @@ if (currentProfile.role === "contractor") {
   }
 
   currentProfile = data;
+
+  if (isContractor) {
+    const contractorData = {
+      id: currentUser.id,
+      name: updateData.name,
+      trade: selectedTrades,
+      location: updateData.location,
+      lat: 40.9,
+      lng: -74.1,
+      rating: 5,
+      reviews: 1
+    };
+
+    const { error: contractorError } = await client
+      .from("contractors")
+      .upsert(contractorData);
+
+    if (contractorError) {
+      alert("Profile saved, but contractor map card was NOT saved: " + contractorError.message);
+      refreshDisplay();
+      closeEditProfile();
+      return;
+    }
+  }
+
   refreshDisplay();
   closeEditProfile();
   alert("Saved");
