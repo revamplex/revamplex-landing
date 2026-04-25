@@ -2670,44 +2670,43 @@ const bidsHtml = visibleBids.length
   }
 
 if (action === 'message') {
-  const contractor = contractors.find(c => String(c.id) === String(id));
+const contractor = activeItem || selectedItem;
 
-  if (!contractor) {
-    showStatus("Contractor not found");
-    return;
-  }
+if (!contractor) {
+  showStatus("Contractor not found");
+  return;
+}
 
-  const userId = window.__currentUserId;
+const userId = window.__currentUserId;
 
-  if (!userId) {
-    showStatus("Login required to message contractor");
-    return;
-  }
+if (!userId) {
+  showStatus("Login required to message contractor");
+  return;
+}
 
-  const matchingJob = jobs.find(job =>
-    String(job.user_id) === String(userId) &&
-    String(job.trade || '').toLowerCase().trim() === String(contractor.trade || '').toLowerCase().trim()
-  );
+const matchingJob = jobs.find(job =>
+  String(job.user_id) === String(userId) &&
+  String(job.trade || '').toLowerCase().trim() === String(contractor.trade || '').toLowerCase().trim()
+);
 
-  if (!matchingJob) {
-    showStatus("Post a matching job first before messaging this contractor");
-    return;
-  }
+if (!matchingJob) {
+  showStatus("Post a matching job first before messaging this contractor");
+  return;
+}
 
-  sessionStorage.setItem(
-    'revampSelectedContractor',
-    JSON.stringify(getSafeContractorSessionItem(contractor))
-  );
+sessionStorage.setItem(
+  'revampSelectedContractor',
+  JSON.stringify(getSafeContractorSessionItem(contractor))
+);
 
-  sessionStorage.setItem(
-    'revampSelectedJob',
-    JSON.stringify(getSafeJobSessionItem(matchingJob))
-  );
+sessionStorage.setItem(
+  'revampSelectedJob',
+  JSON.stringify(getSafeJobSessionItem(matchingJob))
+);
 
-  window.location.assign(
-    `project-room.html?mode=homeowner&contractor=${contractor.id}&job=${matchingJob.id}`
-  );
-
+window.location.assign(
+  `project-room.html?mode=homeowner&contractor=${contractor.id}&job=${matchingJob.id}`
+);
   return;
 }
 
