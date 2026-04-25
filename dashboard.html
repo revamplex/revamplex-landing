@@ -44,15 +44,22 @@
       font-size: 14px;
     }
 
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 9999;
-      align-items: center;
-      justify-content: center;
-    }
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 9999;
+
+  /* 🔥 ADD THESE */
+  display: none;
+}
+
+.modal.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
     .modal-box {
       background: #fff;
@@ -172,11 +179,11 @@ function openEditProfile() {
     el.style.display = isContractor ? "block" : "none";
   });
 
-  document.getElementById("profileModal").style.display = "flex";
+document.getElementById("profileModal").classList.add("active");
 }
 
 function closeEditProfile() {
-  document.getElementById("profileModal").style.display = "none";
+document.getElementById("profileModal").classList.remove("active");
 }
 
 async function saveProfile() {
