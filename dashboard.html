@@ -353,7 +353,16 @@ async function saveProfile() {
     alert("Profile is not ready yet. Refresh and try again.");
     return;
   }
-
+if (currentProfile.role === "contractor") {
+  await client.from("contractors").upsert({
+    id: currentUser.id,
+    name: document.getElementById("profileName").value,
+    trade: document.getElementById("profileTrade").value,
+    location: document.getElementById("profileLocation").value,
+    lat: 40.9,  // TEMP (we’ll fix with real geolocation next)
+    lng: -74.1
+  });
+}
   const isContractor = isContractorProfile();
 
   const selectedTrades = Array.from(document.querySelectorAll("#tradeCheckboxes input[type='checkbox']:checked"))
