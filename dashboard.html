@@ -192,65 +192,9 @@ async function saveProfile() {
 
 window.onload = function () {
   document.getElementById("closeProfileBtn").onclick = closeEditProfile;
-  document.getElementById("saveProfileBtn").addEventListener("click", async () => {
-  const user = await supabase.auth.getUser();
-  const userId = user.data.user.id;
-
-  const updates = {
-    id: userId,
-    name: document.getElementById("profileName").value,
-    location: document.getElementById("profileLocation").value,
-    bio: document.getElementById("profileBio").value,
-    company: document.getElementById("profileCompany").value,
-    trade: document.getElementById("profileTrade").value
-  };
-
-  const { error } = await supabase
-    .from("profiles")
-    .upsert(updates);
-
-  if (error) {
-    alert("Error saving profile");
-    return;
-  }
-
-  alert("Profile updated!");
-  document.getElementById("profileModal").style.display = "none";
-});
-
+  document.getElementById("saveProfileBtn").onclick = saveProfile;
   loadDashboard();
 };
-async function openProfileModal() {
-  const user = await supabase.auth.getUser();
-  const userId = user.data.user.id;
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .single();
-
-  if (!profile) return;
-
-  // Fill fields
-  document.getElementById("profileName").value = profile.name || "";
-  document.getElementById("profileLocation").value = profile.location || "";
-  document.getElementById("profileBio").value = profile.bio || "";
-
-  document.getElementById("profileCompany").value = profile.company || "";
-  document.getElementById("profileTrade").value = profile.trade || "";
-
-  // 🔥 ROLE CONTROL
-  const isContractor = profile.role === "contractor";
-
-  document.querySelectorAll(".contractor-only").forEach(el => {
-    el.style.display = isContractor ? "block" : "none";
-  });
-
-  document.getElementById("profileModal").style.display = "flex";
-}
-  
-  document.getElementById("editProfileBtn").addEventListener("click", openProfileModal);
   
 </script>
 
