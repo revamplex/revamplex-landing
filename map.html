@@ -971,42 +971,48 @@
       color:var(--text);
       border:1px solid var(--line);
     }
-/* 🔥 FINAL SLIM DESKTOP TOPBAR */
+/* 🔥 FIXED SLIM HEADER — NO OVERLAP */
 @media (min-width: 641px) {
   .topbar {
-    padding: 4px 8px !important;
+    padding: 6px 8px !important;
   }
 
   .topbar-inner {
-    padding: 6px 10px !important;
+    padding: 8px 10px !important;
     border-radius: 14px !important;
   }
 
   .search-row {
-    margin-bottom: 4px !important;
+    margin-bottom: 6px !important;
+    flex-wrap: nowrap !important;
     align-items: center !important;
   }
 
   .logo-wrap {
-    height: 56px !important;
-    min-width: 150px !important;
+    height: 58px !important;
+    min-width: 170px !important;
+    flex: 0 0 170px !important;
     padding: 0 10px !important;
   }
 
   .logo-wrap img {
-    max-height: 54px !important;
+    max-height: 56px !important;
   }
 
   .search-box {
-    height: 40px !important;
-    border-radius: 15px !important;
-    padding: 0 14px !important;
+    height: 42px !important;
+    border-radius: 16px !important;
+  }
+
+  .mode-row {
+    justify-content: flex-end !important;
+    margin: 0 0 6px 0 !important;
   }
 
   .filter-row {
-    margin-top: -42px !important;
-    padding-right: 530px !important;
+    margin-top: 0 !important;
     gap: 6px !important;
+    padding-right: 0 !important;
   }
 
   .filter-select,
@@ -1017,21 +1023,15 @@
     border-radius: 12px !important;
   }
 
-  .mode-row {
-    justify-content: flex-end !important;
-    margin-top: -2px !important;
-    margin-bottom: 0 !important;
-  }
-
   .mode-btn {
-    height: 36px !important;
+    height: 34px !important;
     padding: 0 12px !important;
     font-size: 13px !important;
     border-radius: 12px !important;
   }
 
   .count-pill {
-    top: 150px !important;
+    top: 165px !important;
   }
 }
     /* 🔥 SHORTER CARDS WITHOUT SHRINKING IMAGE OR TEXT */
