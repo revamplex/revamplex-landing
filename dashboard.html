@@ -10,50 +10,76 @@
       margin: 0;
       font-family: Arial, sans-serif;
       background: #f5f5f5;
+      color: #111;
     }
 
     .header {
       background: #111;
       color: #fff;
-      padding: 15px;
-      text-align: center;
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
       font-size: 20px;
+      font-weight: 700;
+    }
+
+    .back-btn {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #fff;
+      color: #111;
+      border: none;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
     }
 
     .container {
-      padding: 20px;
+      padding: 24px;
       max-width: 900px;
       margin: auto;
     }
 
     .card {
       background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      padding: 24px;
+      border-radius: 14px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    .card h2,
+    .card h3 {
+      margin-top: 0;
     }
 
     .btn {
       background: #f97316;
       color: #fff;
-      padding: 10px 15px;
-      border-radius: 8px;
+      padding: 11px 16px;
+      border-radius: 9px;
       cursor: pointer;
       border: none;
       font-size: 14px;
+      font-weight: 700;
       margin-right: 8px;
     }
 
     .btn.secondary {
-      background: #333;
+      background: #111;
     }
 
     .modal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.55);
       z-index: 9999;
       align-items: center;
       justify-content: center;
@@ -67,39 +93,104 @@
 
     .modal-box {
       background: #fff;
-      width: 90%;
-      max-width: 500px;
-      padding: 20px;
-      border-radius: 12px;
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 22px;
+      border-radius: 14px;
       box-sizing: border-box;
     }
 
     .modal-box input,
     .modal-box textarea {
       width: 100%;
-      padding: 10px;
+      padding: 11px;
       margin-bottom: 12px;
-      border-radius: 8px;
+      border-radius: 9px;
       border: 1px solid #ccc;
       box-sizing: border-box;
       font-size: 14px;
     }
 
     .modal-box textarea {
-      min-height: 100px;
+      min-height: 90px;
       resize: vertical;
     }
 
     .contractor-only,
-    .contractor-profile-row {
+    .contractor-display {
       display: none;
+    }
+
+    .trade-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin: 8px 0 14px;
+    }
+
+    .trade-option {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 9px 10px;
+      font-size: 14px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      cursor: pointer;
+      background: #fafafa;
+    }
+
+    .trade-option input {
+      width: auto;
+      margin: 0;
+    }
+
+    .small-note {
+      font-size: 13px;
+      color: #666;
+      margin-top: -4px;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 650px) {
+      .header {
+        font-size: 17px;
+        padding-top: 18px;
+        padding-bottom: 18px;
+      }
+
+      .back-btn {
+        position: static;
+        transform: none;
+        margin-right: auto;
+      }
+
+      .header-title {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+      }
+
+      .container {
+        padding: 16px;
+      }
+
+      .trade-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 
 <body>
 
-<div class="header">Revamp Dashboard</div>
+<div class="header">
+  <button class="back-btn" onclick="goBackToMap()">← Back to Map</button>
+  <span class="header-title">Revamp Dashboard</span>
+</div>
 
 <div class="container">
 
@@ -112,8 +203,12 @@
     <h3>My Profile</h3>
 
     <p><strong>Name:</strong> <span id="displayName">—</span></p>
-    <p class="contractor-profile-row"><strong>Company:</strong> <span id="displayCompany">—</span></p>
-    <p class="contractor-profile-row"><strong>Trade:</strong> <span id="displayTrade">—</span></p>
+
+    <div class="contractor-display">
+      <p><strong>Company:</strong> <span id="displayCompany">—</span></p>
+      <p><strong>Trades:</strong> <span id="displayTrade">—</span></p>
+    </div>
+
     <p><strong>Location:</strong> <span id="displayLocation">—</span></p>
     <p><strong>Bio:</strong> <span id="displayBio">—</span></p>
 
@@ -130,10 +225,28 @@
 
     <div class="contractor-only">
       <input id="profileCompany" placeholder="Company Name">
-    </div>
 
-    <div class="contractor-only">
-      <input id="profileTrade" placeholder="Trade">
+      <p><strong>Select Trade(s)</strong></p>
+      <p class="small-note">Contractors can choose more than one.</p>
+
+      <div class="trade-grid" id="tradeCheckboxes">
+        <label class="trade-option"><input type="checkbox" value="Kitchen Renovation"> Kitchen Renovation</label>
+        <label class="trade-option"><input type="checkbox" value="Bathroom Renovation"> Bathroom Renovation</label>
+        <label class="trade-option"><input type="checkbox" value="Additions & Remodeling"> Additions & Remodeling</label>
+        <label class="trade-option"><input type="checkbox" value="Roofing"> Roofing</label>
+        <label class="trade-option"><input type="checkbox" value="Siding"> Siding</label>
+        <label class="trade-option"><input type="checkbox" value="Windows & Doors"> Windows & Doors</label>
+        <label class="trade-option"><input type="checkbox" value="Decks & Patios"> Decks & Patios</label>
+        <label class="trade-option"><input type="checkbox" value="Masonry & Concrete"> Masonry & Concrete</label>
+        <label class="trade-option"><input type="checkbox" value="Electrical"> Electrical</label>
+        <label class="trade-option"><input type="checkbox" value="Plumbing"> Plumbing</label>
+        <label class="trade-option"><input type="checkbox" value="HVAC"> HVAC</label>
+        <label class="trade-option"><input type="checkbox" value="Painting"> Painting</label>
+        <label class="trade-option"><input type="checkbox" value="Flooring"> Flooring</label>
+        <label class="trade-option"><input type="checkbox" value="Tile"> Tile</label>
+        <label class="trade-option"><input type="checkbox" value="Drywall & Framing"> Drywall & Framing</label>
+        <label class="trade-option"><input type="checkbox" value="General Contractor"> General Contractor</label>
+      </div>
     </div>
 
     <input id="profileLocation" placeholder="Location">
@@ -149,37 +262,79 @@
 <script>
 const client = window.supabase.createClient(
   "https://dezvwoedboikshqttdqu.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E"
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXAiLCJyZWYiOiJkZXp2d29lZGJvaWtzaHF0dGRxdSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzczMDAzMzc0LCJleHAiOjIwODg1NzkzNzR9.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E"
 );
 
 let currentUser = null;
 let currentProfile = null;
 
-function isContractorProfile() {
-  return (currentProfile?.role || "").toLowerCase() === "contractor";
+function safeText(value) {
+  return value && String(value).trim() !== "" ? value : "—";
 }
 
-function updateProfileDisplay() {
-  if (!currentProfile) return;
+function getRole() {
+  return (currentProfile?.role || "homeowner").toLowerCase();
+}
 
-  const isContractor = isContractorProfile();
+function goBackToMap() {
+  const role = getRole();
 
-  document.getElementById("userRole").innerText =
-    "Role: " + (currentProfile.role || "none");
+  if (role === "contractor") {
+    window.location.href = "map.html?view=contractor";
+  } else {
+    window.location.href = "map.html?view=homeowner";
+  }
+}
 
-  document.getElementById("displayName").innerText = currentProfile.name || currentProfile.full_name || "—";
-  document.getElementById("displayCompany").innerText = currentProfile.company || "—";
-  document.getElementById("displayTrade").innerText = currentProfile.trade || "—";
-  document.getElementById("displayLocation").innerText = currentProfile.location || currentProfile.address || "—";
-  document.getElementById("displayBio").innerText = currentProfile.bio || "—";
+function updateRoleVisibility() {
+  const isContractor = getRole() === "contractor";
 
-  document.querySelectorAll(".contractor-profile-row").forEach(el => {
+  document.querySelectorAll(".contractor-only").forEach(el => {
+    el.style.display = isContractor ? "block" : "none";
+  });
+
+  document.querySelectorAll(".contractor-display").forEach(el => {
     el.style.display = isContractor ? "block" : "none";
   });
 }
 
+function renderProfile() {
+  if (!currentProfile) return;
+
+  document.getElementById("userRole").innerText = "Role: " + safeText(currentProfile.role);
+  document.getElementById("displayName").innerText = safeText(currentProfile.name || currentProfile.full_name);
+  document.getElementById("displayCompany").innerText = safeText(currentProfile.company);
+  document.getElementById("displayTrade").innerText = safeText(currentProfile.trade);
+  document.getElementById("displayLocation").innerText = safeText(currentProfile.location || currentProfile.address);
+  document.getElementById("displayBio").innerText = safeText(currentProfile.bio);
+
+  updateRoleVisibility();
+}
+
+function getSelectedTrades() {
+  return Array.from(document.querySelectorAll("#tradeCheckboxes input[type='checkbox']:checked"))
+    .map(input => input.value)
+    .join(", ");
+}
+
+function setSelectedTrades(tradeText) {
+  const savedTrades = (tradeText || "")
+    .split(",")
+    .map(t => t.trim())
+    .filter(Boolean);
+
+  document.querySelectorAll("#tradeCheckboxes input[type='checkbox']").forEach(input => {
+    input.checked = savedTrades.includes(input.value);
+  });
+}
+
 async function loadDashboard() {
-  const { data: { session } } = await client.auth.getSession();
+  const { data: { session }, error: sessionError } = await client.auth.getSession();
+
+  if (sessionError) {
+    alert("Session error: " + sessionError.message);
+    return;
+  }
 
   if (!session) {
     window.location.href = "map.html";
@@ -197,7 +352,6 @@ async function loadDashboard() {
 
   if (error) {
     alert("Profile load error: " + error.message);
-    console.error("Profile load error:", error);
     return;
   }
 
@@ -211,12 +365,11 @@ async function loadDashboard() {
         email: currentUser.email,
         role: savedRole
       })
-      .select()
+      .select("*")
       .single();
 
     if (createError) {
       alert("Could not create profile: " + createError.message);
-      console.error("Could not create profile:", createError);
       return;
     }
 
@@ -225,27 +378,22 @@ async function loadDashboard() {
     currentProfile = profile;
   }
 
-  updateProfileDisplay();
+  renderProfile();
 }
 
-async function openEditProfile() {
+function openEditProfile() {
   if (!currentProfile) {
-    await loadDashboard();
-    if (!currentProfile) return;
+    alert("Profile is still loading. Please try again in a second.");
+    return;
   }
 
   document.getElementById("profileName").value = currentProfile.name || currentProfile.full_name || "";
   document.getElementById("profileCompany").value = currentProfile.company || "";
-  document.getElementById("profileTrade").value = currentProfile.trade || "";
   document.getElementById("profileLocation").value = currentProfile.location || currentProfile.address || "";
   document.getElementById("profileBio").value = currentProfile.bio || "";
 
-  const isContractor = isContractorProfile();
-
-  document.querySelectorAll(".contractor-only").forEach(el => {
-    el.style.display = isContractor ? "block" : "none";
-  });
-
+  setSelectedTrades(currentProfile.trade || "");
+  updateRoleVisibility();
   document.getElementById("profileModal").classList.add("active");
 }
 
@@ -255,49 +403,45 @@ function closeEditProfile() {
 
 async function saveProfile() {
   if (!currentUser || !currentProfile) {
-    alert("Profile is still loading. Try again.");
+    alert("Profile is not loaded yet.");
     return;
   }
 
-  const isContractor = isContractorProfile();
+  const isContractor = getRole() === "contractor";
 
   const updates = {
     id: currentUser.id,
     email: currentUser.email,
-    role: currentProfile.role || localStorage.getItem("revamplex_role") || "homeowner",
+    role: currentProfile.role || "homeowner",
     name: document.getElementById("profileName").value.trim(),
     location: document.getElementById("profileLocation").value.trim(),
-    bio: document.getElementById("profileBio").value.trim()
+    bio: document.getElementById("profileBio").value.trim(),
+    company: isContractor ? document.getElementById("profileCompany").value.trim() : null,
+    trade: isContractor ? getSelectedTrades() : null
   };
-
-  if (isContractor) {
-    updates.company = document.getElementById("profileCompany").value.trim();
-    updates.trade = document.getElementById("profileTrade").value.trim();
-  }
 
   const { data, error } = await client
     .from("profiles")
     .upsert(updates)
-    .select()
+    .select("*")
     .single();
 
   if (error) {
     alert("Could not save profile: " + error.message);
-    console.error("Could not save profile:", error);
     return;
   }
 
   currentProfile = data;
-  updateProfileDisplay();
+  renderProfile();
   closeEditProfile();
   alert("Profile saved");
 }
 
-window.addEventListener("load", () => {
+window.onload = function () {
   document.getElementById("closeProfileBtn").onclick = closeEditProfile;
   document.getElementById("saveProfileBtn").onclick = saveProfile;
   loadDashboard();
-});
+};
 </script>
 
 </body>
