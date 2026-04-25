@@ -148,13 +148,18 @@ async function loadDashboard() {
 
   currentProfile = profile;
 
-  document.getElementById("userRole").innerText =
-    "Role: " + (profile.role || "none");
+document.getElementById("userRole").innerText =
+  "Role: " + (profile?.role || "none");
 }
 
 function openEditProfile() {
 
-  document.getElementById("profileName").value = currentProfile.name || "";
+ if (!currentProfile) {
+  alert("Profile not loaded yet. Refresh the page or check Supabase profiles table.");
+  return;
+}
+
+  document.getElementById("profileName").value = currentProfile.name || currentProfile.full_name || "";
   document.getElementById("profileCompany").value = currentProfile.company || "";
   document.getElementById("profileTrade").value = currentProfile.trade || "";
   document.getElementById("profileLocation").value = currentProfile.location || "";
