@@ -1403,9 +1403,8 @@ async function checkUserSession() {
     `;
 
 // LOGGED IN
-homeownerModeBtn.style.display = 'none';
-contractorModeBtn.style.display = 'none';
-document.querySelector('.mode-row').style.display = 'none';
+homeownerModeBtn.style.display = '';
+contractorModeBtn.style.display = '';
     
 homeownerModeBtn.disabled = false;
 contractorModeBtn.disabled = false;
@@ -1464,9 +1463,8 @@ authContainer.innerHTML = `
 
 // 🔒 FULL LOCK UI
 // NOT LOGGED IN (DEMO MODE)
-homeownerModeBtn.style.display = '';
-contractorModeBtn.style.display = '';
-document.querySelector('.mode-row').style.display = 'flex';
+homeownerModeBtn.style.display = 'none';
+contractorModeBtn.style.display = 'none';
 
 homeownerModeBtn.disabled = false;
 contractorModeBtn.disabled = false;
