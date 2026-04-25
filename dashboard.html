@@ -399,8 +399,46 @@ function compactTradeForCard(tradesText) {
     .map(t => t.trim())
     .filter(Boolean);
 
-  if (trades.length <= 3) return trades.join(", ");
-  return trades.slice(0, 3).join(", ") + "...";
+  if (!trades.length) return "General Contractors";
+  if (trades.length === 1) return trades[0];
+  return trades[0] + " & more!";
+}
+
+async function geocodeProfileLocation(locationText) {
+  const clean = (locationText || "").trim();
+  if (!clean) return null;
+
+  // Fast fallback for your test location and common North Jersey city format.
+  const key = clean.toLowerCase().replace(/\./g, "").replace(/\s+/g, " ").trim();
+  const knownLocations = {
+    "oakland nj": { lat: 41.0132, lng: -74.2643 },
+    "oakland, nj": { lat: 41.0132, lng: -74.2643 },
+    "hackensack nj": { lat: 40.8859, lng: -74.0435 },
+    "hackensack, nj": { lat: 40.8859, lng: -74.0435 },
+    "saddle river nj": { lat: 41.0318, lng: -74.1021 },
+    "saddle river, nj": { lat: 41.0318, lng: -74.1021 },
+    "elmwood park nj": { lat: 40.9039, lng: -74.1185 },
+    "elmwood park, nj": { lat: 40.9039, lng: -74.1185 }
+  };
+
+  if (knownLocations[key]) return knownLocations[key];
+
+  try {
+    const url = "https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" + encodeURIComponent(clean);
+    const response = await fetch(url, { headers: { "Accept": "application/json" } });
+    const results = await response.json();
+
+    if (Array.isArray(results) && results[0]) {
+      return {
+        lat: Number(results[0].lat),
+        lng: Number(results[0].lon)
+      };
+    }
+  } catch (err) {
+    console.warn("Could not geocode location:", err);
+  }
+
+  return null;
 }
 
 async function saveProfile() {
@@ -450,25 +488,32 @@ async function saveProfile() {
 
   if (isContractor) {
     const cardImage = getContractorImage(selectedTrades);
+    const geo = await geocodeProfileLocation(profileLocation);
+
+    const contractorPayload = {
+      id: currentUser.id,
+      name: profileName,
+      company: profileCompany,
+      trade: compactTradeForCard(selectedTrades),
+      trades_full: selectedTrades,
+      city: profileLocation,
+      location: profileLocation,
+      bio: profileBio,
+      image: cardImage,
+      image_url: cardImage,
+      rating: 5,
+      reviews: 1
+    };
+
+    // Only overwrite lat/lng when the typed city/state can be converted to real coordinates.
+    if (geo && Number.isFinite(geo.lat) && Number.isFinite(geo.lng)) {
+      contractorPayload.lat = geo.lat;
+      contractorPayload.lng = geo.lng;
+    }
 
     const { error: contractorError } = await client
       .from("contractors")
-      .upsert({
-        id: currentUser.id,
-        name: profileName,
-        company: profileCompany,
-        trade: compactTradeForCard(selectedTrades),
-        trades_full: selectedTrades,
-        city: profileLocation,
-        location: profileLocation,
-        bio: profileBio,
-        image: cardImage,
-        image_url: cardImage,
-        lat: 40.9,
-        lng: -74.1,
-        rating: 5,
-        reviews: 1
-      });
+      .upsert(contractorPayload);
 
     if (contractorError) {
       alert("Profile saved, but contractor map card was NOT saved. You probably need to add the missing contractors columns in Supabase SQL. Error: " + contractorError.message);
