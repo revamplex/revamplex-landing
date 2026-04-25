@@ -2507,7 +2507,7 @@ async function createJobFromForm() {
   await loadLiveData();
   setMode('homeowner');
 }
-
+const { data } = await client.from("contractors").select("*");
     function openContractorProjectRoom(contractorId) {
   const contractor = contractors.find(c => String(c.id) === String(contractorId));
 
