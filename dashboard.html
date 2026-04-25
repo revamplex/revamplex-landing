@@ -243,12 +243,6 @@ function setText(id, value) {
   document.getElementById(id).innerText = value || "—";
 }
 
-function getSelectedTrades() {
-  return Array.from(document.querySelectorAll("#tradeCheckboxes input[type='checkbox']:checked"))
-    .map(cb => cb.value)
-    .join(", ");
-}
-
 function refreshDisplay() {
   if (!currentProfile) return;
 
@@ -361,19 +355,27 @@ async function saveProfile() {
   }
 
   const isContractor = isContractorProfile();
-  const selectedTrades = getSelectedTrades();
+
+  const selectedTrades = Array.from(document.querySelectorAll("#tradeCheckboxes input[type='checkbox']:checked"))
+    .map(cb => cb.value)
+    .join(", ");
+
+  const profileName = cleanText(document.getElementById("profileName").value);
+  const profileCompany = cleanText(document.getElementById("profileCompany").value);
+  const profileLocation = cleanText(document.getElementById("profileLocation").value);
+  const profileBio = cleanText(document.getElementById("profileBio").value);
 
   const updateData = {
     id: currentUser.id,
     email: currentUser.email,
     role: currentProfile.role,
-    name: cleanText(document.getElementById("profileName").value),
-    location: cleanText(document.getElementById("profileLocation").value),
-    bio: cleanText(document.getElementById("profileBio").value)
+    name: profileName,
+    location: profileLocation,
+    bio: profileBio
   };
 
   if (isContractor) {
-    updateData.company = cleanText(document.getElementById("profileCompany").value);
+    updateData.company = profileCompany;
     updateData.trade = selectedTrades;
   } else {
     updateData.company = null;
@@ -391,32 +393,29 @@ async function saveProfile() {
     return;
   }
 
-  currentProfile = data;
-
   if (isContractor) {
-    const contractorData = {
-      id: currentUser.id,
-      name: updateData.name,
-      trade: selectedTrades,
-      location: updateData.location,
-      lat: 40.9,
-      lng: -74.1,
-      rating: 5,
-      reviews: 1
-    };
-
     const { error: contractorError } = await client
       .from("contractors")
-      .upsert(contractorData);
+      .upsert({
+        id: currentUser.id,
+        name: profileName,
+        trade: selectedTrades,
+        lat: 40.9,
+        lng: -74.1,
+        rating: 5,
+        reviews: 1
+      });
 
     if (contractorError) {
       alert("Profile saved, but contractor map card was NOT saved: " + contractorError.message);
+      currentProfile = data;
       refreshDisplay();
       closeEditProfile();
       return;
     }
   }
 
+  currentProfile = data;
   refreshDisplay();
   closeEditProfile();
   alert("Saved");
