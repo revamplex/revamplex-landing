@@ -2007,7 +2007,7 @@ function clearMarkers() {
         return `
           <div>
             <div style="font-size:15px;font-weight:900;margin-bottom:6px;">${anonymizeContractorName(item)}</div>
-            <div style="font-size:13px;color:#64748b;margin-bottom:4px;">${item.trade} • ${item.city || ''}</div>
+            <div style="font-size:13px;color:#64748b;margin-bottom:4px;">${getCompactTradeLabel(item)} • ${getDisplayCity(item)}</div>
             <div style="font-size:13px;color:#64748b;">⭐ ${Number(item.rating || 0).toFixed(1)} • ${Number(item.distance || 0).toFixed(1)} mi</div>
           </div>
         `;
@@ -2170,17 +2170,67 @@ function getJobImage(trade) {
 
   return map[trade] || 'images/jobs/default.jpg';
 }
+
+function splitTrades(value) {
+  return String(value || '')
+    .split(',')
+    .map(t => t.trim())
+    .filter(Boolean);
+}
+
+function getPrimaryTrade(item) {
+  const fullTradeText = item.trades_full || item.trade || '';
+  const trades = splitTrades(fullTradeText);
+  return trades[0] || item.trade || 'General Contractors';
+}
+
+function getCompactTradeLabel(item) {
+  const fullTradeText = item.trades_full || item.trade || '';
+  const trades = splitTrades(fullTradeText);
+
+  if (trades.length > 1) {
+    return `${trades[0]} & more!`;
+  }
+
+  return trades[0] || item.trade || 'General Contractors';
+}
+
+function getFullTradeText(item) {
+  return item.trades_full || item.trade || '';
+}
+
+function getDisplayCity(item) {
+  return item.city || item.location || item.address || '';
+}
+
+function getContractorImage(item) {
+  if (item.image_url) return item.image_url;
+  if (item.image) return item.image;
+
+  const trades = splitTrades(item.trades_full || item.trade || '');
+
+  if (trades.length > 1) {
+    return getJobImage('General Contractors');
+  }
+
+  return getJobImage(getPrimaryTrade(item));
+}
+
     
     function contractorCardHtml(item) {
+      const tradeLabel = getCompactTradeLabel(item);
+      const displayCity = getDisplayCity(item);
+      const imageSrc = getContractorImage(item);
+
       return `
-              <img src="${getJobImage(item.trade)}" 
+              <img src="${imageSrc}" 
              onerror="this.src='images/jobs/default.jpg'"
              style="width:100%; height:116px; object-fit:cover; display:block;">
              
         <div class="card-top">
           <div class="card-title-wrap">
             <h3 class="card-title">${anonymizeContractorName(item)}</h3>
-            <p class="card-sub">${item.trade} • ${item.city || ''}</p>
+            <p class="card-sub">${tradeLabel} • ${displayCity}</p>
           </div>
           <div class="rating-pill">⭐ ${Number(item.rating || 0).toFixed(1)}</div>
         </div>
@@ -2216,7 +2266,7 @@ function getJobImage(trade) {
         <div class="card-top">
           <div class="card-title-wrap">
             <h3 class="card-title">${item.title}</h3>
-            <p class="card-sub">${item.trade} • ${item.city || ''}</p>
+            <p class="card-sub">${getCompactTradeLabel(item)} • ${getDisplayCity(item)}</p>
           </div>
           <div class="rating-pill">⭐ ${Number(item.rating || 0).toFixed(1)}</div>
         </div>
@@ -2384,13 +2434,13 @@ filteredItems = cleanSource;
       }
 
       const haystack = item.type === 'contractor'
-        ? [item.name, item.trade, item.city, item.bio].join(' ').toLowerCase()
+        ? [item.name, getFullTradeText(item), getCompactTradeLabel(item), getDisplayCity(item), item.bio].join(' ').toLowerCase()
         : [item.title, item.trade, item.city, item.customer_name, item.description].join(' ').toLowerCase();
 
       const matchesQuery = !query || haystack.includes(query);
       const matchesTrade =
         selectedTrade === 'all' ||
-        String(item.trade || '').toLowerCase().includes(selectedTrade.toLowerCase());
+        String(item.type === 'contractor' ? getFullTradeText(item) : item.trade || '').toLowerCase().includes(selectedTrade.toLowerCase());
       const matchesDistance = !item.distance || Number(item.distance) <= maxDistance;
       const matchesRating = Number(item.rating || 0) >= minRating;
 
@@ -2574,7 +2624,7 @@ function canEditItem(item) {
         detailTitle.textContent = anonymizeContractorName(item);
         detailContent.innerHTML = `
           <div class="detail-panel">
-            <h4>${item.trade} • ${item.city || ''}</h4>
+            <h4>${getCompactTradeLabel(item)} • ${getDisplayCity(item)}</h4>
             <p>${item.bio || ''}</p>
           </div>
           <div class="modal-grid">
@@ -2623,7 +2673,7 @@ const bidsHtml = visibleBids.length
         detailTitle.textContent = item.title;
         detailContent.innerHTML = `
           <div class="detail-panel">
-            <h4>${item.trade} • ${item.city || ''}</h4>
+            <h4>${getCompactTradeLabel(item)} • ${getDisplayCity(item)}</h4>
             <p>${item.description || ''}</p>
           </div>
           <div class="modal-grid">
@@ -3027,6 +3077,9 @@ async function loadContractors() {
 
   return (data || []).map(item => ({
     ...item,
+    city: item.city || item.location || item.address || '',
+    trades_full: item.trades_full || item.trade || '',
+    trade: getCompactTradeLabel(item),
     type: 'contractor'
   }));
 }
