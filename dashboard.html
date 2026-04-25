@@ -176,15 +176,34 @@ async function loadDashboard() {
     "Role: " + (currentProfile.role || "none");
 }
 
-function openEditProfile() {
+async function openEditProfile() {
 
   console.log("OPEN EDIT CLICKED"); // 🔥 debug
 
-  if (!currentProfile) {
-    console.log("NO PROFILE FOUND");
-    alert("No profile found. You need to create one.");
+if (!currentProfile) {
+  const createIt = confirm("No profile found. Create one now?");
+
+  if (!createIt) return;
+
+  const role = localStorage.getItem("revamplex_role") || "homeowner";
+
+  const { data, error } = await client
+    .from("profiles")
+    .upsert({
+      id: currentUser.id,
+      email: currentUser.email,
+      role: role
+    })
+    .select()
+    .single();
+
+  if (error) {
+    alert("Could not create profile: " + error.message);
     return;
   }
+
+  currentProfile = data;
+}
 
   document.getElementById("profileName").value = currentProfile.name || "";
   document.getElementById("profileCompany").value = currentProfile.company || "";
