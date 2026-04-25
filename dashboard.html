@@ -260,7 +260,20 @@ async function saveProfile() {
 window.onload = function () {
   document.getElementById("closeProfileBtn").onclick = closeEditProfile;
   document.getElementById("saveProfileBtn").onclick = saveProfile;
-  loadDashboard();
+  currentProfile = {
+  ...currentProfile,
+  name: document.getElementById("profileName").value,
+  company: document.getElementById("profileCompany").value,
+  trade: document.getElementById("profileTrade").value,
+  location: document.getElementById("profileLocation").value,
+  bio: document.getElementById("profileBio").value
+};
+
+document.getElementById("displayName").innerText = currentProfile.name || "—";
+document.getElementById("displayCompany").innerText = currentProfile.company || "—";
+document.getElementById("displayTrade").innerText = currentProfile.trade || "—";
+document.getElementById("displayLocation").innerText = currentProfile.location || "—";
+document.getElementById("displayBio").innerText = currentProfile.bio || "—";
 };
   
 </script>
