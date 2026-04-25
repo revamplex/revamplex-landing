@@ -2654,86 +2654,68 @@ const bidsHtml = visibleBids.length
     }
 
    function handleCardAction(action, id) {
-  const item = [...contractors, ...jobs].find(entry => String(entry.id) === String(id));
-  if (!item) return;
+  const cleanId = String(id).replace('contractor-', '').replace('job-', '');
 
   if (action === 'edit') {
-   
-
-    openEditModal(id);
+    openEditModal(cleanId);
     return;
   }
 
   if (action === 'view' || action === 'job-details') {
-    openDetailModal(item);
+    const item = [...contractors, ...jobs].find(entry => String(entry.id) === cleanId);
+    if (item) openDetailModal(item);
     return;
   }
 
-if (action === 'message') {
-  const contractor = contractors.find(c => String(c.id) === String(id));
+  if (action === 'message') {
+    const contractor = contractors.find(c => String(c.id) === cleanId);
 
-  if (!contractor) {
-    showStatus("Contractor not found");
+    if (!contractor) {
+      showStatus("Contractor not found");
+      return;
+    }
+
+    const userId = window.__currentUserId;
+
+    if (!userId) {
+      showStatus("Login required to message contractor");
+      return;
+    }
+
+    const matchingJob = jobs.find(job =>
+      String(job.user_id) === String(userId) &&
+      String(job.trade || '').toLowerCase().trim() === String(contractor.trade || '').toLowerCase().trim()
+    );
+
+    if (!matchingJob) {
+      showStatus("Post a matching job first before messaging this contractor");
+      return;
+    }
+
+    sessionStorage.setItem(
+      'revampSelectedContractor',
+      JSON.stringify(getSafeContractorSessionItem(contractor))
+    );
+
+    sessionStorage.setItem(
+      'revampSelectedJob',
+      JSON.stringify(getSafeJobSessionItem(matchingJob))
+    );
+
+    window.location.assign(
+      `project-room.html?mode=homeowner&contractor=${contractor.id}&job=${matchingJob.id}`
+    );
+
     return;
   }
-
-  const userId = window.__currentUserId;
-
-  if (!userId) {
-    showStatus("Login required to message contractor");
-    return;
-  }
-
-  const matchingJob = jobs.find(job =>
-    String(job.user_id) === String(userId) &&
-    String(job.trade || '').toLowerCase().trim() === String(contractor.trade || '').toLowerCase().trim()
-  );
-
-  if (!matchingJob) {
-    showStatus("Post a matching job first before messaging this contractor");
-    return;
-  }
-
-  sessionStorage.setItem(
-    'revampSelectedContractor',
-    JSON.stringify(getSafeContractorSessionItem(contractor))
-  );
-
-  sessionStorage.setItem(
-    'revampSelectedJob',
-    JSON.stringify(getSafeJobSessionItem(matchingJob))
-  );
-
-  window.location.assign(
-    `project-room.html?mode=homeowner&contractor=${contractor.id}&job=${matchingJob.id}`
-  );
-
-  return;
-}
-
-sessionStorage.setItem(
-  'revampSelectedContractor',
-  JSON.stringify(getSafeContractorSessionItem(contractor))
-);
-
-sessionStorage.setItem(
-  'revampSelectedJob',
-  JSON.stringify(getSafeJobSessionItem(matchingJob))
-);
-
-window.location.assign(
-  `project-room.html?mode=homeowner&contractor=${contractor.id}&job=${matchingJob.id}`
-);
-  return;
-}
 
   if (action === 'project-room') {
-    openProjectRoom(id);
+    openProjectRoom(cleanId);
     return;
   }
 
   if (action === 'bid') {
-    submitBid(id);
+    submitBid(cleanId);
     return;
   }
 
