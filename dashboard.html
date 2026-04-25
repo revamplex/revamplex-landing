@@ -180,13 +180,14 @@ const { data: profile, error } = await client
     currentProfile = profile;
   }
 
-  document.getElementById("userRole").innerText =
-    document.getElementById("displayName").innerText = currentProfile.name || currentProfile.full_name || "—";
+document.getElementById("userRole").innerText =
+  "Role: " + (currentProfile.role || "none");
+
+document.getElementById("displayName").innerText = currentProfile.name || currentProfile.full_name || "—";
 document.getElementById("displayCompany").innerText = currentProfile.company || "—";
 document.getElementById("displayTrade").innerText = currentProfile.trade || "—";
 document.getElementById("displayLocation").innerText = currentProfile.location || currentProfile.address || "—";
 document.getElementById("displayBio").innerText = currentProfile.bio || "—";
-    "Role: " + (currentProfile.role || "none");
 }
   
 async function openEditProfile() {
@@ -260,13 +261,7 @@ async function saveProfile() {
 window.onload = function () {
   document.getElementById("closeProfileBtn").onclick = closeEditProfile;
   document.getElementById("saveProfileBtn").onclick = saveProfile;
-  currentProfile = {
-  ...currentProfile,
-  name: document.getElementById("profileName").value,
-  company: document.getElementById("profileCompany").value,
-  trade: document.getElementById("profileTrade").value,
-  location: document.getElementById("profileLocation").value,
-  bio: document.getElementById("profileBio").value
+  loadDashboard();
 };
 
 document.getElementById("displayName").innerText = currentProfile.name || "—";
