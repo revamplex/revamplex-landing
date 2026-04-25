@@ -154,12 +154,12 @@ document.getElementById("userRole").innerText =
 
 function openEditProfile() {
 
- if (!currentProfile) {
-  alert("Profile not loaded yet. Refresh the page or check Supabase profiles table.");
-  return;
-}
+  if (!currentProfile) {
+    alert("Profile not loaded yet. Refresh page.");
+    return;
+  }
 
-  document.getElementById("profileName").value = currentProfile.name || currentProfile.full_name || "";
+  document.getElementById("profileName").value = currentProfile.name || "";
   document.getElementById("profileCompany").value = currentProfile.company || "";
   document.getElementById("profileTrade").value = currentProfile.trade || "";
   document.getElementById("profileLocation").value = currentProfile.location || "";
