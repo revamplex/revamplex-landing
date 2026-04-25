@@ -971,7 +971,7 @@
       color:var(--text);
       border:1px solid var(--line);
     }
-/* 🔥 FINAL COMPACT HEADER — NO LOGO CLIP */
+/* 🔥 STABLE COMPACT HEADER — WORKS LOGGED IN + LOGGED OUT */
 @media (min-width: 641px) {
   .topbar {
     padding: 4px 8px !important;
@@ -983,22 +983,22 @@
   }
 
   .search-row {
-    margin-bottom: 4px !important;
+    margin-bottom: 6px !important;
     flex-wrap: nowrap !important;
     align-items: center !important;
   }
 
   .logo-wrap {
-    height: 56px !important;
-    min-width: 250px !important;
-    flex: 0 0 250px !important;
+    height: 54px !important;
+    min-width: 245px !important;
+    flex: 0 0 245px !important;
     padding: 0 12px !important;
     overflow: visible !important;
   }
 
   .logo-wrap img {
-    max-height: 52px !important;
-    max-width: 230px !important;
+    max-height: 50px !important;
+    max-width: 225px !important;
   }
 
   .search-box {
@@ -1008,13 +1008,14 @@
 
   .mode-row {
     justify-content: flex-end !important;
-    margin: 0 0 4px 0 !important;
+    margin: 0 0 6px 0 !important;
+    min-height: 34px !important;
   }
 
   .filter-row {
-    margin-top: -40px !important;
-    padding-right: 520px !important;
+    margin-top: 0 !important;   /* 🔥 THIS FIXES LOGGED-IN OVERLAP */
     gap: 6px !important;
+    padding-right: 0 !important;
   }
 
   .filter-select,
@@ -1033,7 +1034,7 @@
   }
 
   .count-pill {
-    top: 135px !important;
+    top: 150px !important;
   }
 }
     /* 🔥 SHORTER CARDS WITHOUT SHRINKING IMAGE OR TEXT */
