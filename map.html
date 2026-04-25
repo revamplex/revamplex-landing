@@ -2200,7 +2200,8 @@ function getFullTradeText(item) {
 }
 
 function getDisplayCity(item) {
-  return item.city || item.location || item.address || '';
+  // use typed contractor profile location first; GPS/map city only as fallback
+  return item.location || item.address || item.profile_location || item.city || '';
 }
 
 function getContractorImage(item) {
@@ -2624,7 +2625,7 @@ function canEditItem(item) {
         detailTitle.textContent = anonymizeContractorName(item);
         detailContent.innerHTML = `
           <div class="detail-panel">
-            <h4>${getCompactTradeLabel(item)} • ${getDisplayCity(item)}</h4>
+            <h4>${getFullTradeText(item) || getCompactTradeLabel(item)} • ${getDisplayCity(item)}</h4>
             <p>${item.bio || ''}</p>
           </div>
           <div class="modal-grid">
@@ -2673,7 +2674,7 @@ const bidsHtml = visibleBids.length
         detailTitle.textContent = item.title;
         detailContent.innerHTML = `
           <div class="detail-panel">
-            <h4>${getCompactTradeLabel(item)} • ${getDisplayCity(item)}</h4>
+            <h4>${getFullTradeText(item) || getCompactTradeLabel(item)} • ${getDisplayCity(item)}</h4>
             <p>${item.description || ''}</p>
           </div>
           <div class="modal-grid">
@@ -3077,9 +3078,11 @@ async function loadContractors() {
 
   return (data || []).map(item => ({
     ...item,
-    city: item.city || item.location || item.address || '',
+    // profile typed location controls the displayed city/location
+    city: item.location || item.address || item.profile_location || item.city || '',
     trades_full: item.trades_full || item.trade || '',
-    trade: getCompactTradeLabel(item),
+    // keep full trade data here; small cards shorten it with getCompactTradeLabel()
+    trade: item.trade || item.trades_full || 'General Contractors',
     type: 'contractor'
   }));
 }
