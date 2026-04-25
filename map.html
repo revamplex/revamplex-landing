@@ -292,7 +292,7 @@
 
     .count-pill,.status-pill {
       position:absolute;
-      z-index:950;
+      z-index:6000;
       left:50%;
       transform:translateX(-50%);
       border-radius:999px;
@@ -307,11 +307,12 @@
       transition:opacity .25s ease, transform .25s ease;
     }
     .count-pill { top:194px; }
-    .status-pill {
-      top:236px;
-      background: rgba(249,115,22,.92);
-      display:none;
-    }
+.status-pill {
+  top:236px;
+  background: rgba(249,115,22,.92);
+  display:none;
+  z-index: 6000 !important;
+}
     .status-pill.show { display:block; }
 
   .results-shell {
