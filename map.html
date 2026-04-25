@@ -992,10 +992,6 @@
   margin-bottom: 4px;
 }
 
-/* 🔥 AUTO-COLLAPSE WHEN EMPTY */
-.mode-row:empty {
-  display: none;
-}
 
   .logo-wrap {
     height: 54px !important;
@@ -1397,10 +1393,11 @@ async function checkUserSession() {
 <button onclick="openWelcomeAuth('register')" class="auth-btn">Register</button>
     `;
 
-    homeownerModeBtn.style.display = '';
-    contractorModeBtn.style.display = '';
-    homeownerModeBtn.disabled = false;
-    contractorModeBtn.disabled = false;
+homeownerModeBtn.style.display = 'none';
+contractorModeBtn.style.display = 'none';
+document.querySelector('.mode-row').style.display = 'none';
+homeownerModeBtn.disabled = false;
+contractorModeBtn.disabled = false;
 
     return;
   }
@@ -1457,6 +1454,7 @@ authContainer.innerHTML = `
 // 🔒 FULL LOCK UI
 homeownerModeBtn.style.display = 'none';
 contractorModeBtn.style.display = 'none';
+document.querySelector('.mode-row').style.display = 'none';
   
 authContainer.innerHTML = `
   <div style="display:flex; align-items:center; gap:10px;">
