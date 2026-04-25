@@ -161,8 +161,11 @@ document.getElementById("userRole").innerText =
 
 function openEditProfile() {
 
+  console.log("OPEN EDIT CLICKED"); // 🔥 debug
+
   if (!currentProfile) {
-    alert("Profile not loaded yet. Refresh page.");
+    console.log("NO PROFILE FOUND");
+    alert("No profile found. You need to create one.");
     return;
   }
 
@@ -178,6 +181,11 @@ function openEditProfile() {
   document.querySelectorAll(".contractor-only").forEach(el => {
     el.style.display = isContractor ? "block" : "none";
   });
+
+  console.log("OPENING MODAL"); // 🔥 debug
+
+  document.getElementById("profileModal").style.display = "flex";
+}
 
 document.getElementById("profileModal").classList.add("active");
 }
