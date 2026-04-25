@@ -3095,16 +3095,23 @@ searchInput.addEventListener('keydown', async (e) => {
     tradeFilter.addEventListener('change', applyFilters);
     distanceFilter.addEventListener('change', applyFilters);
     ratingFilter.addEventListener('change', applyFilters);
-    sortDistanceBtn.addEventListener('click', () => setSort('distance'));
-    sortRatingBtn.addEventListener('click', () => setSort('rating'));
+if (sortDistanceBtn) {
+  sortDistanceBtn.addEventListener('click', () => setSort('distance'));
+}
 
-    resetFiltersBtn.addEventListener('click', () => {
-      searchInput.value = '';
-      tradeFilter.value = 'all';
-      distanceFilter.value = '100';
-      ratingFilter.value = '0';
-      setSort('distance');
-    });
+if (sortRatingBtn) {
+  sortRatingBtn.addEventListener('click', () => setSort('rating'));
+}
+
+if (resetFiltersBtn) {
+  resetFiltersBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    tradeFilter.value = 'all';
+    distanceFilter.value = '100';
+    ratingFilter.value = '0';
+    setSort('distance');
+  });
+}
 
 homeownerModeBtn.addEventListener('click', () => {
   if (lockedRole) return;
