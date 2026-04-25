@@ -2200,7 +2200,7 @@ function getJobImage(trade) {
           </div>
           <div class="card-actions">
             <button class="mini-btn secondary" data-action="view" data-id="${item.id}">View</button>
-            <button class="mini-btn primary" onclick="handleCardAction('message', '${item.id}')">Message</button>
+            <button class="mini-btn primary modal-message-btn" data-contractor-id="${item.id}">Message</button>
           </div>
         </div>
       `;
@@ -3181,6 +3181,14 @@ cardsRow.addEventListener('click', e => {
     
 
 detailContent.addEventListener('click', e => {
+  const modalMessageBtn = e.target.closest('.modal-message-btn');
+  if (modalMessageBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+    handleCardAction('message', modalMessageBtn.dataset.contractorId);
+    return;
+  }
+
   const button = e.target.closest('[data-action]');
   if (!button) return;
 
