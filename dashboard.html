@@ -147,16 +147,33 @@ async function loadDashboard() {
 
   document.getElementById("userEmail").innerText = currentUser.email;
 
-  const { data: profile } = await client
+  const { data: profile, error } = await client
     .from("profiles")
     .select("*")
     .eq("id", currentUser.id)
     .single();
 
-  currentProfile = profile;
+  // 🔥 FIX: HANDLE MISSING PROFILE
+  if (error || !profile) {
+    console.log("No profile found — creating one");
 
-document.getElementById("userRole").innerText =
-  "Role: " + (profile?.role || "none");
+    const { data: newProfile } = await client
+      .from("profiles")
+      .insert({
+        id: currentUser.id,
+        email: currentUser.email,
+        role: "homeowner" // default
+      })
+      .select()
+      .single();
+
+    currentProfile = newProfile;
+  } else {
+    currentProfile = profile;
+  }
+
+  document.getElementById("userRole").innerText =
+    "Role: " + (currentProfile.role || "none");
 }
 
 function openEditProfile() {
