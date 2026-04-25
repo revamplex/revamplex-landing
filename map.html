@@ -1396,6 +1396,7 @@ async function checkUserSession() {
 
     homeownerModeBtn.style.display = '';
     contractorModeBtn.style.display = '';
+    document.querySelector('.mode-row').style.display = 'flex';
     homeownerModeBtn.disabled = false;
     contractorModeBtn.disabled = false;
 
@@ -1454,7 +1455,8 @@ authContainer.innerHTML = `
 // 🔒 FULL LOCK UI
 homeownerModeBtn.style.display = 'none';
 contractorModeBtn.style.display = 'none';
-
+document.querySelector('.mode-row').style.display = 'none';
+  
 authContainer.innerHTML = `
   <div style="display:flex; align-items:center; gap:10px;">
     
