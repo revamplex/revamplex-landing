@@ -1177,8 +1177,6 @@
   <button class="filter-pill active" id="sortDistance">Nearest</button>
   <button class="filter-pill" id="sortRating">Top Rated</button>
   <button class="filter-pill" id="resetFilters">Reset</button>
-  <button class="mode-btn active" id="homeownerMode">🏠 Homeowner</button>
-<button class="mode-btn" id="contractorMode">🛠 Contractor</button>
 </div>
       </div>
     </div>
@@ -1190,10 +1188,39 @@
     <div class="count-pill" id="resultsCount">0 results</div>
     <div class="status-pill" id="statusPill"></div>
 
-    <div class="fab-wrap" id="fabWrap">
-      <button class="fab" id="postJobBtn">➕ Post a Job</button>
-      <button class="fab secondary" id="locateBtn">📍 Center Map</button>
-    </div>
+<div class="fab-wrap" id="fabWrap">
+/* 🔥 MODE BUTTONS FLOATING ON MAP */
+.mode-fab {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.mode-fab .mode-btn {
+  width: 50px;
+  height: 44px;
+  border-radius: 12px;
+  background: white;
+  border: 1px solid rgba(15,23,42,0.1);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+  font-size: 18px;
+}
+
+.mode-fab .mode-btn.active {
+  background: linear-gradient(135deg,var(--brand),var(--brand-dark));
+  color: white;
+}
+  <!-- 🔥 MODE TOGGLE -->
+  <div class="mode-fab">
+    <button class="mode-btn active" id="homeownerMode">🏠</button>
+    <button class="mode-btn" id="contractorMode">🛠</button>
+  </div>
+
+  <button class="fab" id="postJobBtn">➕ Post a Job</button>
+  <button class="fab secondary" id="locateBtn">📍 Center Map</button>
+
+</div>
 
     <div class="results-shell">
       <div class="results-shell-inner">
@@ -1403,8 +1430,8 @@ async function checkUserSession() {
     `;
 
 // LOGGED IN
-homeownerModeBtn.style.display = '';
-contractorModeBtn.style.display = '';
+homeownerModeBtn.style.display = 'none';
+contractorModeBtn.style.display = 'none';
     
 homeownerModeBtn.disabled = false;
 contractorModeBtn.disabled = false;
@@ -1463,8 +1490,8 @@ authContainer.innerHTML = `
 
 // 🔒 FULL LOCK UI
 // NOT LOGGED IN (DEMO MODE)
-homeownerModeBtn.style.display = 'none';
-contractorModeBtn.style.display = 'none';
+homeownerModeBtn.style.display = '';
+contractorModeBtn.style.display = '';
 
 homeownerModeBtn.disabled = false;
 contractorModeBtn.disabled = false;
