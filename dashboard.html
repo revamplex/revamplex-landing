@@ -96,9 +96,16 @@
   </div>
 
   <div class="card">
-    <h3>My Profile</h3>
-    <button class="btn" onclick="openEditProfile()">Edit Profile</button>
-  </div>
+  <h3>My Profile</h3>
+
+  <p><strong>Name:</strong> <span id="displayName">—</span></p>
+  <p><strong>Company:</strong> <span id="displayCompany">—</span></p>
+  <p><strong>Trade:</strong> <span id="displayTrade">—</span></p>
+  <p><strong>Location:</strong> <span id="displayLocation">—</span></p>
+  <p><strong>Bio:</strong> <span id="displayBio">—</span></p>
+
+  <button class="btn" onclick="openEditProfile()">Edit Profile</button>
+</div>
 
 </div>
 
@@ -176,6 +183,12 @@ async function loadDashboard() {
     "Role: " + (currentProfile.role || "none");
 }
 
+  document.getElementById("displayName").innerText = currentProfile.name || currentProfile.full_name || "—";
+document.getElementById("displayCompany").innerText = currentProfile.company || "—";
+document.getElementById("displayTrade").innerText = currentProfile.trade || "—";
+document.getElementById("displayLocation").innerText = currentProfile.location || currentProfile.address || "—";
+document.getElementById("displayBio").innerText = currentProfile.bio || "—";
+  
 async function openEditProfile() {
 
   console.log("OPEN EDIT CLICKED"); // 🔥 debug
