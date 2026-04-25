@@ -1393,9 +1393,11 @@ async function checkUserSession() {
 <button onclick="openWelcomeAuth('register')" class="auth-btn">Register</button>
     `;
 
+// LOGGED IN
 homeownerModeBtn.style.display = 'none';
 contractorModeBtn.style.display = 'none';
 document.querySelector('.mode-row').style.display = 'none';
+    
 homeownerModeBtn.disabled = false;
 contractorModeBtn.disabled = false;
 
@@ -1452,9 +1454,13 @@ authContainer.innerHTML = `
   applyFilters();
 
 // 🔒 FULL LOCK UI
-homeownerModeBtn.style.display = 'none';
-contractorModeBtn.style.display = 'none';
-document.querySelector('.mode-row').style.display = 'none';
+// NOT LOGGED IN (DEMO MODE)
+homeownerModeBtn.style.display = '';
+contractorModeBtn.style.display = '';
+document.querySelector('.mode-row').style.display = 'flex';
+
+homeownerModeBtn.disabled = false;
+contractorModeBtn.disabled = false;
   
 authContainer.innerHTML = `
   <div style="display:flex; align-items:center; gap:10px;">
