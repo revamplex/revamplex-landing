@@ -2669,19 +2669,45 @@ const bidsHtml = visibleBids.length
     return;
   }
 
- if (action === 'message') {
+if (action === 'message') {
   const contractor = contractors.find(c => String(c.id) === String(id));
 
-  if (contractor) {
-    sessionStorage.setItem(
-      'revampSelectedContractor',
-      JSON.stringify(getSafeContractorSessionItem(contractor))
-    );
+  if (!contractor) {
+    showStatus("Contractor not found");
+    return;
   }
 
-  console.log("OPENING CONTRACTOR PROJECT ROOM:", id);
+  const userId = window.__currentUserId;
 
-  window.location.assign(`project-room.html?mode=homeowner&contractor=${id}`);
+  if (!userId) {
+    showStatus("Login required to message contractor");
+    return;
+  }
+
+  const matchingJob = jobs.find(job =>
+    String(job.user_id) === String(userId) &&
+    String(job.trade || '').toLowerCase().trim() === String(contractor.trade || '').toLowerCase().trim()
+  );
+
+  if (!matchingJob) {
+    showStatus("Post a matching job first before messaging this contractor");
+    return;
+  }
+
+  sessionStorage.setItem(
+    'revampSelectedContractor',
+    JSON.stringify(getSafeContractorSessionItem(contractor))
+  );
+
+  sessionStorage.setItem(
+    'revampSelectedJob',
+    JSON.stringify(getSafeJobSessionItem(matchingJob))
+  );
+
+  window.location.assign(
+    `project-room.html?mode=homeowner&contractor=${contractor.id}&job=${matchingJob.id}`
+  );
+
   return;
 }
 
