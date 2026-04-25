@@ -2263,9 +2263,53 @@ function getFullTradeText(item) {
   return item.trades_full || item.trade || '';
 }
 
+function cleanPublicLocationText(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+
+  // If it is a full street address like "123 Main St, Oakland, NJ 07436",
+  // show only the city/state part to the public.
+  const parts = raw.split(',').map(p => p.trim()).filter(Boolean);
+
+  if (parts.length >= 3) {
+    const city = parts[parts.length - 2] || '';
+    let state = parts[parts.length - 1] || '';
+    state = state.replace(/\b\d{5}(?:-\d{4})?\b/g, '').trim();
+    return [city, state].filter(Boolean).join(', ');
+  }
+
+  // If user typed "Oakland, NJ", keep it.
+  if (parts.length === 2) {
+    let state = parts[1].replace(/\b\d{5}(?:-\d{4})?\b/g, '').trim();
+    return [parts[0], state].filter(Boolean).join(', ');
+  }
+
+  // Last safety: if it starts with a street number, do not show it.
+  if (/^\d+\s+/.test(raw)) return '';
+
+  return raw;
+}
+
+function getPublicLocation(item) {
+  const city = cleanPublicLocationText(item.city);
+  const state = cleanPublicLocationText(item.state);
+
+  if (city && state && !city.includes(',')) return `${city}, ${state}`;
+  if (city) return city;
+
+  // Prefer explicit public fields first. Only parse private/exact address as fallback.
+  return (
+    cleanPublicLocationText(item.public_location) ||
+    cleanPublicLocationText(item.profile_location) ||
+    cleanPublicLocationText(item.location) ||
+    cleanPublicLocationText(item.private_address) ||
+    cleanPublicLocationText(item.address) ||
+    ''
+  );
+}
+
 function getDisplayCity(item) {
-  // use typed contractor profile location first; GPS/map city only as fallback
-  return item.location || item.address || item.profile_location || item.city || '';
+  return getPublicLocation(item);
 }
 
 function getContractorImage(item) {
@@ -3144,15 +3188,22 @@ async function loadContractors() {
     return [];
   }
 
-  return (data || []).map(item => ({
-    ...item,
-    // profile typed location controls the displayed city/location
-    city: item.location || item.address || item.profile_location || item.city || '',
-    trades_full: item.trades_full || item.trade || '',
-    // keep full trade data here; small cards shorten it with getCompactTradeLabel()
-    trade: item.trade || item.trades_full || 'General Contractors',
-    type: 'contractor'
-  }));
+  return (data || []).map(item => {
+    const publicLocation = getPublicLocation(item);
+
+    return {
+      ...item,
+      // PUBLIC DISPLAY ONLY — never expose exact street address on cards/modals.
+      city: publicLocation,
+      location: publicLocation,
+      address: '',
+      private_address: '',
+      trades_full: item.trades_full || item.trade || '',
+      // keep full trade data here; small cards shorten it with getCompactTradeLabel()
+      trade: item.trade || item.trades_full || 'General Contractors',
+      type: 'contractor'
+    };
+  });
 }
 async function loadLiveData() {
 
