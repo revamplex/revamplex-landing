@@ -42,24 +42,28 @@
       cursor: pointer;
       border: none;
       font-size: 14px;
+      margin-right: 8px;
     }
 
-.modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 9999;
+    .btn.secondary {
+      background: #333;
+    }
 
-  /* 🔥 ADD THESE */
-  display: none;
-}
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
 
-.modal.active {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+    .modal.active {
+      display: flex;
+    }
 
     .modal-box {
       background: #fff;
@@ -67,6 +71,7 @@
       max-width: 500px;
       padding: 20px;
       border-radius: 12px;
+      box-sizing: border-box;
     }
 
     .modal-box input,
@@ -76,9 +81,17 @@
       margin-bottom: 12px;
       border-radius: 8px;
       border: 1px solid #ccc;
+      box-sizing: border-box;
+      font-size: 14px;
     }
 
-    .contractor-only {
+    .modal-box textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .contractor-only,
+    .contractor-profile-row {
       display: none;
     }
   </style>
@@ -96,16 +109,16 @@
   </div>
 
   <div class="card">
-  <h3>My Profile</h3>
+    <h3>My Profile</h3>
 
-  <p><strong>Name:</strong> <span id="displayName">—</span></p>
-  <p><strong>Company:</strong> <span id="displayCompany">—</span></p>
-  <p><strong>Trade:</strong> <span id="displayTrade">—</span></p>
-  <p><strong>Location:</strong> <span id="displayLocation">—</span></p>
-  <p><strong>Bio:</strong> <span id="displayBio">—</span></p>
+    <p><strong>Name:</strong> <span id="displayName">—</span></p>
+    <p class="contractor-profile-row"><strong>Company:</strong> <span id="displayCompany">—</span></p>
+    <p class="contractor-profile-row"><strong>Trade:</strong> <span id="displayTrade">—</span></p>
+    <p><strong>Location:</strong> <span id="displayLocation">—</span></p>
+    <p><strong>Bio:</strong> <span id="displayBio">—</span></p>
 
-  <button class="btn" onclick="openEditProfile()">Edit Profile</button>
-</div>
+    <button class="btn" onclick="openEditProfile()">Edit Profile</button>
+  </div>
 
 </div>
 
@@ -127,7 +140,7 @@
     <textarea id="profileBio" placeholder="Bio"></textarea>
 
     <button class="btn" id="saveProfileBtn">Save</button>
-    <button class="btn" id="closeProfileBtn">Close</button>
+    <button class="btn secondary" id="closeProfileBtn">Close</button>
   </div>
 </div>
 
@@ -136,11 +149,34 @@
 <script>
 const client = window.supabase.createClient(
   "https://dezvwoedboikshqttdqu.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E"
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E"
 );
 
 let currentUser = null;
 let currentProfile = null;
+
+function isContractorProfile() {
+  return (currentProfile?.role || "").toLowerCase() === "contractor";
+}
+
+function updateProfileDisplay() {
+  if (!currentProfile) return;
+
+  const isContractor = isContractorProfile();
+
+  document.getElementById("userRole").innerText =
+    "Role: " + (currentProfile.role || "none");
+
+  document.getElementById("displayName").innerText = currentProfile.name || currentProfile.full_name || "—";
+  document.getElementById("displayCompany").innerText = currentProfile.company || "—";
+  document.getElementById("displayTrade").innerText = currentProfile.trade || "—";
+  document.getElementById("displayLocation").innerText = currentProfile.location || currentProfile.address || "—";
+  document.getElementById("displayBio").innerText = currentProfile.bio || "—";
+
+  document.querySelectorAll(".contractor-profile-row").forEach(el => {
+    el.style.display = isContractor ? "block" : "none";
+  });
+}
 
 async function loadDashboard() {
   const { data: { session } } = await client.auth.getSession();
@@ -151,126 +187,117 @@ async function loadDashboard() {
   }
 
   currentUser = session.user;
-
   document.getElementById("userEmail").innerText = currentUser.email;
 
-await new Promise(res => setTimeout(res, 200));
-const { data: profile, error } = await client
-  .from("profiles")
-  .select("*")
-  .eq("id", currentUser.id)
-  .maybeSingle();
+  const { data: profile, error } = await client
+    .from("profiles")
+    .select("*")
+    .eq("id", currentUser.id)
+    .maybeSingle();
 
-  // 🔥 FIX: HANDLE MISSING PROFILE
-  if (error || !profile) {
-    console.log("No profile found — creating one");
+  if (error) {
+    alert("Profile load error: " + error.message);
+    console.error("Profile load error:", error);
+    return;
+  }
 
-    const { data: newProfile } = await client
+  if (!profile) {
+    const savedRole = localStorage.getItem("revamplex_role") || "homeowner";
+
+    const { data: newProfile, error: createError } = await client
       .from("profiles")
       .insert({
         id: currentUser.id,
         email: currentUser.email,
-        role: "homeowner" // default
+        role: savedRole
       })
       .select()
       .single();
+
+    if (createError) {
+      alert("Could not create profile: " + createError.message);
+      console.error("Could not create profile:", createError);
+      return;
+    }
 
     currentProfile = newProfile;
   } else {
     currentProfile = profile;
   }
 
-document.getElementById("userRole").innerText =
-  "Role: " + (currentProfile.role || "none");
-
-document.getElementById("displayName").innerText = currentProfile.name || currentProfile.full_name || "—";
-document.getElementById("displayCompany").innerText = currentProfile.company || "—";
-document.getElementById("displayTrade").innerText = currentProfile.trade || "—";
-document.getElementById("displayLocation").innerText = currentProfile.location || currentProfile.address || "—";
-document.getElementById("displayBio").innerText = currentProfile.bio || "—";
+  updateProfileDisplay();
 }
-  
+
 async function openEditProfile() {
-
-  console.log("OPEN EDIT CLICKED"); // 🔥 debug
-
-if (!currentProfile) {
-  const createIt = confirm("No profile found. Create one now?");
-
-  if (!createIt) return;
-
-  const role = localStorage.getItem("revamplex_role") || "homeowner";
-
-  const { data, error } = await client
-    .from("profiles")
-    .upsert({
-      id: currentUser.id,
-      email: currentUser.email,
-      role: role
-    })
-    .select()
-    .single();
-
-  if (error) {
-    alert("Could not create profile: " + error.message);
-    return;
+  if (!currentProfile) {
+    await loadDashboard();
+    if (!currentProfile) return;
   }
 
-  currentProfile = data;
-}
-
-  document.getElementById("profileName").value = currentProfile.name || "";
+  document.getElementById("profileName").value = currentProfile.name || currentProfile.full_name || "";
   document.getElementById("profileCompany").value = currentProfile.company || "";
   document.getElementById("profileTrade").value = currentProfile.trade || "";
-  document.getElementById("profileLocation").value = currentProfile.location || "";
+  document.getElementById("profileLocation").value = currentProfile.location || currentProfile.address || "";
   document.getElementById("profileBio").value = currentProfile.bio || "";
 
-  const isContractor =
-    (currentProfile.role || "").toLowerCase() === "contractor";
+  const isContractor = isContractorProfile();
 
   document.querySelectorAll(".contractor-only").forEach(el => {
     el.style.display = isContractor ? "block" : "none";
   });
 
-  console.log("OPENING MODAL"); // 🔥 debug
-
-
-document.getElementById("profileModal").classList.add("active");
+  document.getElementById("profileModal").classList.add("active");
 }
 
 function closeEditProfile() {
-document.getElementById("profileModal").classList.remove("active");
+  document.getElementById("profileModal").classList.remove("active");
 }
 
 async function saveProfile() {
-  await client.from("profiles").upsert({
+  if (!currentUser || !currentProfile) {
+    alert("Profile is still loading. Try again.");
+    return;
+  }
+
+  const isContractor = isContractorProfile();
+
+  const updates = {
     id: currentUser.id,
     email: currentUser.email,
-    name: document.getElementById("profileName").value,
-    company: document.getElementById("profileCompany").value,
-    trade: document.getElementById("profileTrade").value,
-    location: document.getElementById("profileLocation").value,
-    bio: document.getElementById("profileBio").value
-  });
+    role: currentProfile.role || localStorage.getItem("revamplex_role") || "homeowner",
+    name: document.getElementById("profileName").value.trim(),
+    location: document.getElementById("profileLocation").value.trim(),
+    bio: document.getElementById("profileBio").value.trim()
+  };
 
-  alert("Saved");
+  if (isContractor) {
+    updates.company = document.getElementById("profileCompany").value.trim();
+    updates.trade = document.getElementById("profileTrade").value.trim();
+  }
+
+  const { data, error } = await client
+    .from("profiles")
+    .upsert(updates)
+    .select()
+    .single();
+
+  if (error) {
+    alert("Could not save profile: " + error.message);
+    console.error("Could not save profile:", error);
+    return;
+  }
+
+  currentProfile = data;
+  updateProfileDisplay();
   closeEditProfile();
-  loadDashboard();
+  alert("Profile saved");
 }
 
-window.onload = function () {
+window.addEventListener("load", () => {
   document.getElementById("closeProfileBtn").onclick = closeEditProfile;
   document.getElementById("saveProfileBtn").onclick = saveProfile;
   loadDashboard();
-};
-
-document.getElementById("displayName").innerText = currentProfile.name || "—";
-document.getElementById("displayCompany").innerText = currentProfile.company || "—";
-document.getElementById("displayTrade").innerText = currentProfile.trade || "—";
-document.getElementById("displayLocation").innerText = currentProfile.location || "—";
-document.getElementById("displayBio").innerText = currentProfile.bio || "—";
-};
-  
+});
 </script>
 
 </body>
