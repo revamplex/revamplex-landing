@@ -141,6 +141,18 @@
       gap: 10px;
       align-items: center;
     }
+    .filter-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap; /* 🔥 prevents breaking on smaller screens */
+}
+    .mode-btn {
+  height: 34px !important;
+  font-size: 13px !important;
+  padding: 0 10px !important;
+  border-radius: 10px !important;
+}
     /* 🔥 COMPACT FILTER DROPDOWNS */
 .topbar-inner select,
 .topbar-inner button {
@@ -1144,11 +1156,6 @@
   <div id="authContainer" style="display:flex; gap:8px; align-items:center;"></div>
 </div>
 
-<div class="mode-row">
-
-  <button class="mode-btn active" id="homeownerMode">🏠 Homeowner View</button>
-  <button class="mode-btn" id="contractorMode">🛠 Contractor View</button>
-</div>
 
 <div class="filter-row">
   <select id="tradeFilter" class="filter-select">
@@ -1170,6 +1177,8 @@
   <button class="filter-pill active" id="sortDistance">Nearest</button>
   <button class="filter-pill" id="sortRating">Top Rated</button>
   <button class="filter-pill" id="resetFilters">Reset</button>
+  <button class="mode-btn active" id="homeownerMode">🏠 Homeowner</button>
+<button class="mode-btn" id="contractorMode">🛠 Contractor</button>
 </div>
       </div>
     </div>
