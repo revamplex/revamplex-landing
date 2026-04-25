@@ -154,11 +154,12 @@ async function loadDashboard() {
 
   document.getElementById("userEmail").innerText = currentUser.email;
 
-  const { data: profile, error } = await client
-    .from("profiles")
-    .select("*")
-    .eq("id", currentUser.id)
-    .single();
+await new Promise(res => setTimeout(res, 200));
+const { data: profile, error } = await client
+  .from("profiles")
+  .select("*")
+  .eq("id", currentUser.id)
+  .maybeSingle();
 
   // 🔥 FIX: HANDLE MISSING PROFILE
   if (error || !profile) {
