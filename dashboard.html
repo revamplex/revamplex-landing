@@ -6,99 +6,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-    }
-
-    .header {
-      background: #111;
-      color: #fff;
-      padding: 15px;
-      text-align: center;
-      font-size: 20px;
-      font-weight: 700;
-    }
-
-    .container {
-      padding: 20px;
-      max-width: 900px;
-      margin: auto;
-    }
-
-    .card {
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-
-    .btn {
-      background: #f97316;
-      color: #fff;
-      padding: 10px 15px;
-      border-radius: 8px;
-      cursor: pointer;
-      border: none;
-      font-size: 14px;
-      margin-right: 8px;
-    }
-
-    .btn.secondary {
-      background: #111;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 9999;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      box-sizing: border-box;
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .modal-box {
-      background: #fff;
-      width: 100%;
-      max-width: 500px;
-      padding: 20px;
-      border-radius: 12px;
-      box-sizing: border-box;
-    }
-
-    .modal-box input,
-    .modal-box textarea {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 12px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-      font-size: 14px;
-    }
-
-    .contractor-only,
-    .homeowner-hidden {
-      display: none;
-    }
+    body { margin: 0; font-family: Arial, sans-serif; background: #f5f5f5; }
+    .header { background: #111; color: #fff; padding: 15px; text-align: center; font-size: 20px; }
+    .container { padding: 20px; max-width: 900px; margin: auto; }
+    .card { background: #fff; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+    .btn { background: #f97316; color: #fff; padding: 10px 15px; border-radius: 8px; cursor: pointer; border: none; font-size: 14px; }
+    .btn.secondary { background: #111; margin-left: 8px; }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; }
+    .modal.active { display: flex; align-items: center; justify-content: center; }
+    .modal-box { background: #fff; width: 90%; max-width: 500px; padding: 20px; border-radius: 12px; }
+    .modal-box input, .modal-box select { width: 100%; padding: 10px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
+    .note { color: #666; font-size: 13px; line-height: 1.4; }
   </style>
 </head>
 
 <body>
-
 <div class="header">Revamp Dashboard</div>
 
 <div class="container">
-
   <div class="card">
     <h2 id="userEmail">Loading...</h2>
     <p id="userRole"></p>
@@ -106,34 +31,25 @@
 
   <div class="card">
     <h3>My Profile</h3>
-
-    <p><strong>Name:</strong> <span id="displayName">—</span></p>
-
-    <div class="contractor-display">
-      <p><strong>Company:</strong> <span id="displayCompany">—</span></p>
-      <p><strong>Trade:</strong> <span id="displayTrade">—</span></p>
-    </div>
-
-
+    <p><strong>Email:</strong> <span id="displayEmail">—</span></p>
+    <p><strong>Role:</strong> <span id="displayRole">—</span></p>
+    <p class="note">
+      This safe version only saves email and role because your Supabase profiles table does not currently have name, company, trade, location, or bio columns.
+    </p>
     <button class="btn" onclick="openEditProfile()">Edit Profile</button>
   </div>
-
 </div>
 
 <div class="modal" id="profileModal">
   <div class="modal-box">
     <h3>Edit Profile</h3>
 
-    <input id="profileName" placeholder="Full Name">
+    <input id="profileEmail" placeholder="Email" disabled>
 
-    <div class="contractor-only">
-      <input id="profileCompany" placeholder="Company Name">
-    </div>
-
-    <div class="contractor-only">
-      <input id="profileTrade" placeholder="Trade">
-    </div>
-
+    <select id="profileRole">
+      <option value="homeowner">homeowner</option>
+      <option value="contractor">contractor</option>
+    </select>
 
     <button class="btn" id="saveProfileBtn">Save</button>
     <button class="btn secondary" id="closeProfileBtn">Close</button>
@@ -151,43 +67,19 @@ const client = window.supabase.createClient(
 let currentUser = null;
 let currentProfile = null;
 
-function safeText(value) {
-  return value && String(value).trim() !== "" ? value : "—";
+function setText(id, value) {
+  document.getElementById(id).innerText = value || "—";
 }
 
-function getRole() {
-  return (currentProfile?.role || "homeowner").toLowerCase();
-}
-
-function updateRoleVisibility() {
-  const isContractor = getRole() === "contractor";
-
-  document.querySelectorAll(".contractor-only").forEach(el => {
-    el.style.display = isContractor ? "block" : "none";
-  });
-
-  document.querySelectorAll(".contractor-display").forEach(el => {
-    el.style.display = isContractor ? "block" : "none";
-  });
-}
-
-function renderProfile() {
-  if (!currentProfile) return;
-
-  document.getElementById("userRole").innerText = "Role: " + safeText(currentProfile.role);
-  document.getElementById("displayName").innerText = safeText(currentProfile.name || currentProfile.full_name);
-  document.getElementById("displayCompany").innerText = safeText(currentProfile.company);
-  document.getElementById("displayTrade").innerText = safeText(currentProfile.trade);
-  updateRoleVisibility();
+function refreshDisplay() {
+  setText("userEmail", currentUser?.email || "Loading...");
+  setText("userRole", "Role: " + (currentProfile?.role || "none"));
+  setText("displayEmail", currentProfile?.email || currentUser?.email || "—");
+  setText("displayRole", currentProfile?.role || "—");
 }
 
 async function loadDashboard() {
-  const { data: { session }, error: sessionError } = await client.auth.getSession();
-
-  if (sessionError) {
-    alert("Session error: " + sessionError.message);
-    return;
-  }
+  const { data: { session } } = await client.auth.getSession();
 
   if (!session) {
     window.location.href = "map.html";
@@ -195,11 +87,10 @@ async function loadDashboard() {
   }
 
   currentUser = session.user;
-  document.getElementById("userEmail").innerText = currentUser.email;
 
   const { data: profile, error } = await client
     .from("profiles")
-    .select("*")
+    .select("id,email,role")
     .eq("id", currentUser.id)
     .maybeSingle();
 
@@ -209,20 +100,20 @@ async function loadDashboard() {
   }
 
   if (!profile) {
-    const savedRole = localStorage.getItem("revamplex_role") || "homeowner";
+    const role = localStorage.getItem("revamplex_role") || "homeowner";
 
-    const { data: newProfile, error: createError } = await client
+    const { data: newProfile, error: insertError } = await client
       .from("profiles")
       .insert({
         id: currentUser.id,
         email: currentUser.email,
-        role: savedRole
+        role: role
       })
-      .select("*")
+      .select("id,email,role")
       .single();
 
-    if (createError) {
-      alert("Could not create profile: " + createError.message);
+    if (insertError) {
+      alert("Could not create profile: " + insertError.message);
       return;
     }
 
@@ -231,19 +122,14 @@ async function loadDashboard() {
     currentProfile = profile;
   }
 
-  renderProfile();
+  refreshDisplay();
 }
 
 function openEditProfile() {
-  if (!currentProfile) {
-    alert("Profile is still loading. Please try again in a second.");
-    return;
-  }
+  if (!currentUser) return;
 
-  document.getElementById("profileName").value = currentProfile.name || currentProfile.full_name || "";
-  document.getElementById("profileCompany").value = currentProfile.company || "";
-  document.getElementById("profileTrade").value = currentProfile.trade || "";
-  updateRoleVisibility();
+  document.getElementById("profileEmail").value = currentProfile?.email || currentUser.email || "";
+  document.getElementById("profileRole").value = currentProfile?.role || "homeowner";
   document.getElementById("profileModal").classList.add("active");
 }
 
@@ -252,29 +138,18 @@ function closeEditProfile() {
 }
 
 async function saveProfile() {
-  if (!currentUser || !currentProfile) {
-    alert("Profile is not ready yet.");
-    return;
-  }
+  if (!currentUser) return;
 
-  const isContractor = getRole() === "contractor";
-
-  const updatedProfile = {
-    id: currentUser.id,
-    email: currentUser.email,
-    role: currentProfile.role || "homeowner",
-    name: document.getElementById("profileName").value.trim()
-  };
-
-  if (isContractor) {
-    updatedProfile.company = document.getElementById("profileCompany").value.trim();
-    updatedProfile.trade = document.getElementById("profileTrade").value.trim();
-  }
+  const selectedRole = document.getElementById("profileRole").value || "homeowner";
 
   const { data, error } = await client
     .from("profiles")
-    .upsert(updatedProfile)
-    .select("*")
+    .upsert({
+      id: currentUser.id,
+      email: currentUser.email,
+      role: selectedRole
+    })
+    .select("id,email,role")
     .single();
 
   if (error) {
@@ -283,9 +158,10 @@ async function saveProfile() {
   }
 
   currentProfile = data;
-  renderProfile();
+  localStorage.setItem("revamplex_role", selectedRole);
+  refreshDisplay();
   closeEditProfile();
-  alert("Profile saved");
+  alert("Saved");
 }
 
 window.onload = function () {
@@ -294,6 +170,5 @@ window.onload = function () {
   loadDashboard();
 };
 </script>
-
 </body>
 </html>
