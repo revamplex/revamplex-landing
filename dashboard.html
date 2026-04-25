@@ -392,6 +392,17 @@ function getContractorImage(tradesText) {
   return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
 }
 
+
+function compactTradeForCard(tradesText) {
+  const trades = (tradesText || "")
+    .split(",")
+    .map(t => t.trim())
+    .filter(Boolean);
+
+  if (trades.length <= 3) return trades.join(", ");
+  return trades.slice(0, 3).join(", ") + "...";
+}
+
 async function saveProfile() {
   if (!currentUser || !currentProfile) {
     alert("Profile is not ready yet. Refresh and try again.");
@@ -446,7 +457,9 @@ async function saveProfile() {
         id: currentUser.id,
         name: profileName,
         company: profileCompany,
-        trade: selectedTrades,
+        trade: compactTradeForCard(selectedTrades),
+        trades_full: selectedTrades,
+        city: profileLocation,
         location: profileLocation,
         bio: profileBio,
         image: cardImage,
