@@ -1976,6 +1976,10 @@ function getJobImage(trade) {
     
     function contractorCardHtml(item) {
       return `
+              <img src="${getJobImage(item.trade)}" 
+             onerror="this.src='images/jobs/default.jpg'"
+             style="width:100%; height:116px; object-fit:cover; display:block;">
+             
         <div class="card-top">
           <div class="card-title-wrap">
             <h3 class="card-title">${anonymizeContractorName(item)}</h3>
