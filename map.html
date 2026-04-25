@@ -1,3 +1,5 @@
+Map.html
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1748,9 +1750,7 @@ if (profile.role === 'contractor') {
     let uiCollapsed = false;
     let selectedWelcomeRole = null;
     let currentMode = 'homeowner';
-const { data: contractors } = await client
-  .from("contractors")
-  .select("*");
+
     const app = document.getElementById('app');
     const cardsRow = document.getElementById('cardsRow');
     const resultsCount = document.getElementById('resultsCount');
@@ -1845,10 +1845,9 @@ async function getCurrentDataset() {
 
   let dataset = [];
 
-return [
-  ...jobs.map(j => ({ ...j, type: "job" })),
-  ...contractors.map(c => ({ ...c, type: "contractor" }))
-];
+  if (mode === 'contractor') {
+    dataset = jobs.map(i => ({ ...i, type: 'job' }));
+  }
 
   if (mode === 'homeowner') {
     dataset = contractors.map(i => ({ ...i, type: 'contractor' }));
