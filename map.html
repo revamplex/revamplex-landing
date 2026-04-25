@@ -170,14 +170,18 @@
   margin-bottom: 10px; 
   flex-wrap: wrap; 
 }
-    .mode-row { margin-bottom: 10px; }
+.mode-row {
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: center; /* 🔥 centers buttons */
+}
 
     .logo-wrap {
       display:flex;
       align-items:center;
       justify-content:center;
-      min-width:120px;
-      height:48px;
+      min-width:160px;
+      height:72px;
       padding:0 16px;
       border-radius:18px;
       background:white;
@@ -186,7 +190,7 @@
       overflow:hidden;
     }
     .logo-wrap img {
-      max-height: 40px;
+      max-height: 72px;
       width: auto;
       display: block;
     }
