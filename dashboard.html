@@ -180,14 +180,13 @@ async function loadDashboard() {
   }
 
   document.getElementById("userRole").innerText =
-    "Role: " + (currentProfile.role || "none");
-}
-
-  document.getElementById("displayName").innerText = currentProfile.name || currentProfile.full_name || "—";
+    document.getElementById("displayName").innerText = currentProfile.name || currentProfile.full_name || "—";
 document.getElementById("displayCompany").innerText = currentProfile.company || "—";
 document.getElementById("displayTrade").innerText = currentProfile.trade || "—";
 document.getElementById("displayLocation").innerText = currentProfile.location || currentProfile.address || "—";
 document.getElementById("displayBio").innerText = currentProfile.bio || "—";
+    "Role: " + (currentProfile.role || "none");
+}
   
 async function openEditProfile() {
 
