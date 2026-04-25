@@ -348,6 +348,50 @@ function closeEditProfile() {
   document.getElementById("profileModal").classList.remove("active");
 }
 
+function getContractorImage(tradesText) {
+  const trades = (tradesText || "").split(",").map(t => t.trim()).filter(Boolean);
+
+  let label = "Revamp Pro";
+  let icon = "🛠️";
+
+  if (trades.length > 1) {
+    label = "Multi-Trade Pro";
+    icon = "🏗️";
+  } else {
+    const trade = (trades[0] || "").toLowerCase();
+    if (trade.includes("kitchen")) { label = "Kitchen Renovation"; icon = "🍳"; }
+    else if (trade.includes("bathroom")) { label = "Bathroom Renovation"; icon = "🚿"; }
+    else if (trade.includes("roof")) { label = "Roofing"; icon = "🏠"; }
+    else if (trade.includes("siding")) { label = "Siding"; icon = "🏡"; }
+    else if (trade.includes("tile")) { label = "Tile"; icon = "▦"; }
+    else if (trade.includes("drywall")) { label = "Drywall"; icon = "⬜"; }
+    else if (trade.includes("paint")) { label = "Painting"; icon = "🎨"; }
+    else if (trade.includes("floor")) { label = "Flooring"; icon = "🪵"; }
+    else if (trade.includes("plumb")) { label = "Plumbing"; icon = "🔧"; }
+    else if (trade.includes("electric")) { label = "Electrical"; icon = "⚡"; }
+    else if (trade.includes("masonry") || trade.includes("concrete")) { label = "Masonry / Concrete"; icon = "🧱"; }
+  }
+
+  const svg = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520">
+    <defs>
+      <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+        <stop offset="0%" stop-color="#111111"/>
+        <stop offset="55%" stop-color="#2b2b2b"/>
+        <stop offset="100%" stop-color="#f97316"/>
+      </linearGradient>
+    </defs>
+    <rect width="900" height="520" rx="38" fill="url(#g)"/>
+    <circle cx="730" cy="110" r="150" fill="rgba(255,255,255,.10)"/>
+    <circle cx="135" cy="430" r="190" fill="rgba(255,255,255,.08)"/>
+    <text x="450" y="220" text-anchor="middle" font-size="104" font-family="Arial, sans-serif">${icon}</text>
+    <text x="450" y="315" text-anchor="middle" font-size="46" font-weight="700" fill="#ffffff" font-family="Arial, sans-serif">${label}</text>
+    <text x="450" y="368" text-anchor="middle" font-size="26" fill="rgba(255,255,255,.82)" font-family="Arial, sans-serif">RevampLEX Contractor</text>
+  </svg>`;
+
+  return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+}
+
 async function saveProfile() {
   if (!currentUser || !currentProfile) {
     alert("Profile is not ready yet. Refresh and try again.");
@@ -394,12 +438,19 @@ async function saveProfile() {
   }
 
   if (isContractor) {
+    const cardImage = getContractorImage(selectedTrades);
+
     const { error: contractorError } = await client
       .from("contractors")
       .upsert({
         id: currentUser.id,
         name: profileName,
+        company: profileCompany,
         trade: selectedTrades,
+        location: profileLocation,
+        bio: profileBio,
+        image: cardImage,
+        image_url: cardImage,
         lat: 40.9,
         lng: -74.1,
         rating: 5,
@@ -407,7 +458,7 @@ async function saveProfile() {
       });
 
     if (contractorError) {
-      alert("Profile saved, but contractor map card was NOT saved: " + contractorError.message);
+      alert("Profile saved, but contractor map card was NOT saved. You probably need to add the missing contractors columns in Supabase SQL. Error: " + contractorError.message);
       currentProfile = data;
       refreshDisplay();
       closeEditProfile();
