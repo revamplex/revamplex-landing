@@ -986,13 +986,16 @@
 }
 
 .mode-row {
-  margin-bottom: 3px !important;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 4px;
 }
-  .search-row {
-    margin-bottom: 6px !important;
-    flex-wrap: nowrap !important;
-    align-items: center !important;
-  }
+
+/* 🔥 AUTO-COLLAPSE WHEN EMPTY */
+.mode-row:empty {
+  display: none;
+}
 
   .logo-wrap {
     height: 54px !important;
@@ -1396,7 +1399,6 @@ async function checkUserSession() {
 
     homeownerModeBtn.style.display = '';
     contractorModeBtn.style.display = '';
-    document.querySelector('.mode-row').style.display = 'flex';
     homeownerModeBtn.disabled = false;
     contractorModeBtn.disabled = false;
 
@@ -1455,7 +1457,6 @@ authContainer.innerHTML = `
 // 🔒 FULL LOCK UI
 homeownerModeBtn.style.display = 'none';
 contractorModeBtn.style.display = 'none';
-document.querySelector('.mode-row').style.display = 'none';
   
 authContainer.innerHTML = `
   <div style="display:flex; align-items:center; gap:10px;">
