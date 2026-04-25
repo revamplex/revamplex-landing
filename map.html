@@ -971,53 +971,55 @@
       color:var(--text);
       border:1px solid var(--line);
     }
-/* 🔥 FIXED SLIM HEADER — NO OVERLAP */
+/* 🔥 FINAL COMPACT HEADER — NO LOGO CLIP */
 @media (min-width: 641px) {
   .topbar {
-    padding: 6px 8px !important;
+    padding: 4px 8px !important;
   }
 
   .topbar-inner {
-    padding: 8px 10px !important;
+    padding: 6px 10px !important;
     border-radius: 14px !important;
   }
 
   .search-row {
-    margin-bottom: 6px !important;
+    margin-bottom: 4px !important;
     flex-wrap: nowrap !important;
     align-items: center !important;
   }
 
   .logo-wrap {
-    height: 58px !important;
-    min-width: 170px !important;
-    flex: 0 0 170px !important;
-    padding: 0 10px !important;
+    height: 56px !important;
+    min-width: 250px !important;
+    flex: 0 0 250px !important;
+    padding: 0 12px !important;
+    overflow: visible !important;
   }
 
   .logo-wrap img {
-    max-height: 56px !important;
+    max-height: 52px !important;
+    max-width: 230px !important;
   }
 
   .search-box {
-    height: 42px !important;
+    height: 40px !important;
     border-radius: 16px !important;
   }
 
   .mode-row {
     justify-content: flex-end !important;
-    margin: 0 0 6px 0 !important;
+    margin: 0 0 4px 0 !important;
   }
 
   .filter-row {
-    margin-top: 0 !important;
+    margin-top: -40px !important;
+    padding-right: 520px !important;
     gap: 6px !important;
-    padding-right: 0 !important;
   }
 
   .filter-select,
   .filter-pill {
-    height: 36px !important;
+    height: 34px !important;
     padding: 0 12px !important;
     font-size: 13px !important;
     border-radius: 12px !important;
@@ -1031,7 +1033,7 @@
   }
 
   .count-pill {
-    top: 165px !important;
+    top: 135px !important;
   }
 }
     /* 🔥 SHORTER CARDS WITHOUT SHRINKING IMAGE OR TEXT */
