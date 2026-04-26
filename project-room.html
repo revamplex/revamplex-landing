@@ -1262,116 +1262,8 @@ Back to Project Feed
 
     <p class="footer-note">Revamp Project Room prototype • Private homeowner + contractor workspace • Ready to connect to Supabase / auth / database next</p>
   </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js">
-/* ---------- REAL AI ESTIMATE ---------- */
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
-async function runAIEstimate(){
-
-  const job = window.currentJob;
-
-  if(!job){
-    alert("No job loaded yet. Refresh the Project Room and try again.");
-    return;
-  }
-
-  const estimateNotes = document.getElementById("estimateNotes");
-  const aiButton = document.querySelector('[onclick="runAIEstimate()"]');
-
-  if (aiButton) {
-    aiButton.disabled = true;
-    aiButton.innerText = "Building AI estimate...";
-  }
-
-  try {
-    const res = await fetch("https://revamplex-landing.vercel.app/api/generate-estimate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        description: [
-          "Project title: " + (job.title || "Untitled Job"),
-          "Trade: " + (job.trade || "General renovation"),
-          "Budget: " + (job.budget || "Not provided"),
-          "City: " + (job.city || "Not provided"),
-          "Description: " + (job.description || "General renovation")
-        ].join("\\n")
-      })
-    });
-
-    console.log("FETCH STATUS:", res.status);
-
-    const data = await res.json();
-
-    console.log("AI RESPONSE:", data);
-
-    if (!res.ok || data.error) {
-      alert("AI error: " + (data.error || "Request failed"));
-      return;
-    }
-
-    const result = data.result || "No estimate returned.";
-
-    if (estimateNotes) {
-      estimateNotes.value = result;
-      estimateNotes.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-
-    alert("AI estimate finished and was added to Estimate Notes.");
-
-  } catch (err) {
-    console.error("AI FETCH ERROR:", err);
-    alert("AI connection failed. Check Console for details.");
-  } finally {
-    if (aiButton) {
-      aiButton.disabled = false;
-      aiButton.innerText = "✨ Build AI Estimate";
-    }
-  }
-}
-
-/* ---------- FILE UPLOAD ---------- */
-
-async function uploadProjectFiles(){
-
-  const photoInput = document.getElementById("photoUpload");
-  const videoInput = document.getElementById("videoUpload");
-  const status = document.getElementById("uploadStatus");
-
-  if (!photoInput || !videoInput || !status) {
-    alert("Upload fields not found.");
-    return;
-  }
-
-  const files = [...photoInput.files, ...videoInput.files];
-
-  if (!files.length) {
-    alert("Choose at least one photo or video first.");
-    return;
-  }
-
-  status.innerText = "Uploading...";
-
-  for(const file of files){
-
-    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
-    const fileName = `${Date.now()}-${safeName}`;
-
-    const { error } = await supabaseClient.storage
-      .from("project-files")
-      .upload(fileName, file);
-
-    if(error){
-      console.error("UPLOAD ERROR:", error);
-      status.innerText = "Upload failed: " + error.message;
-      return;
-    }
-  }
-
-  status.innerText = "Upload complete ✔";
-}
-
-</script>
 
 <script>
 const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
@@ -1827,6 +1719,115 @@ function acceptBid(index){
   alert("Contractor accepted. Contract generation coming next.");
 
 }
+/* ---------- REAL AI ESTIMATE ---------- */
+
+async function runAIEstimate(){
+
+  const job = window.currentJob;
+
+  if(!job){
+    alert("No job loaded yet. Refresh the Project Room and try again.");
+    return;
+  }
+
+  const estimateNotes = document.getElementById("estimateNotes");
+  const aiButton = document.querySelector('[onclick="runAIEstimate()"]');
+
+  if (aiButton) {
+    aiButton.disabled = true;
+    aiButton.innerText = "Building AI estimate...";
+  }
+
+  try {
+    const res = await fetch("https://revamplex-landing.vercel.app/api/generate-estimate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        description: [
+          "Project title: " + (job.title || "Untitled Job"),
+          "Trade: " + (job.trade || "General renovation"),
+          "Budget: " + (job.budget || "Not provided"),
+          "City: " + (job.city || "Not provided"),
+          "Description: " + (job.description || "General renovation")
+        ].join("\\n")
+      })
+    });
+
+    console.log("FETCH STATUS:", res.status);
+
+    const data = await res.json();
+
+    console.log("AI RESPONSE:", data);
+
+    if (!res.ok || data.error) {
+      alert("AI error: " + (data.error || "Request failed"));
+      return;
+    }
+
+    const result = data.result || "No estimate returned.";
+
+    if (estimateNotes) {
+      estimateNotes.value = result;
+      estimateNotes.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    alert("AI estimate finished and was added to Estimate Notes.");
+
+  } catch (err) {
+    console.error("AI FETCH ERROR:", err);
+    alert("AI connection failed. Check Console for details.");
+  } finally {
+    if (aiButton) {
+      aiButton.disabled = false;
+      aiButton.innerText = "✨ Build AI Estimate";
+    }
+  }
+}
+
+/* ---------- FILE UPLOAD ---------- */
+
+async function uploadProjectFiles(){
+
+  const photoInput = document.getElementById("photoUpload");
+  const videoInput = document.getElementById("videoUpload");
+  const status = document.getElementById("uploadStatus");
+
+  if (!photoInput || !videoInput || !status) {
+    alert("Upload fields not found.");
+    return;
+  }
+
+  const files = [...photoInput.files, ...videoInput.files];
+
+  if (!files.length) {
+    alert("Choose at least one photo or video first.");
+    return;
+  }
+
+  status.innerText = "Uploading...";
+
+  for(const file of files){
+
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+    const fileName = `${Date.now()}-${safeName}`;
+
+    const { error } = await supabaseClient.storage
+      .from("project-files")
+      .upload(fileName, file);
+
+    if(error){
+      console.error("UPLOAD ERROR:", error);
+      status.innerText = "Upload failed: " + error.message;
+      return;
+    }
+  }
+
+  status.innerText = "Upload complete ✔";
+}
+
+
 </script>
   <script src="https://meet.jit.si/external_api.js"></script>
   <script>
