@@ -1299,23 +1299,23 @@ Back to Project Feed
             <div class="contractor-info-grid">
               <div>
                 <label>Company Name</label>
-                <input id="contractorCompany" type="text" placeholder="Example: Impact Construction DBA">
+                <input id="contractorCompany" type="text" placeholder="Company name">
               </div>
               <div>
                 <label>Contact Name</label>
-                <input id="contractorName" type="text" placeholder="Example: Dimitris Fostinis">
+                <input id="contractorName" type="text" placeholder="Contact name">
               </div>
               <div>
                 <label>Email</label>
-                <input id="contractorEmail" type="email" placeholder="Example: revamplex@gmail.com">
+                <input id="contractorEmail" type="email" placeholder="Email address">
               </div>
               <div>
                 <label>Phone</label>
-                <input id="contractorPhone" type="text" placeholder="Example: (201) 555-1234">
+                <input id="contractorPhone" type="text" placeholder="Phone number">
               </div>
               <div class="full">
                 <label>Business Address</label>
-                <input id="contractorAddress" type="text" placeholder="Example: 202 Lee St, Elmwood Park, NJ 07407">
+                <input id="contractorAddress" type="text" placeholder="Business address">
               </div>
             </div>
           </div>
@@ -1627,6 +1627,14 @@ document.addEventListener("DOMContentLoaded", function(){
         sendAIMessage(false);
       }
     });
+  }
+
+
+  const micBtn = document.getElementById("micDictateBtn");
+  if (micBtn) {
+    micBtn.onclick = function(){
+      toggleDictation();
+    };
   }
 
   const estimateBtn = document.getElementById("aiEstimateBtn");
@@ -2322,18 +2330,39 @@ function runAIEstimate(){
 
 let recognition = null;
 let isDictating = false;
+let baseDictationText = "";
+
+function getSpeechRecognitionConstructor(){
+  return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+}
+
+function updateMicButton(){
+  const btn = document.getElementById("micDictateBtn");
+  if (!btn) return;
+
+  btn.innerText = isDictating ? "⏹ Stop Dictation" : "🎙️ Dictate Job Notes";
+}
 
 function setupSpeechRecognition(){
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const SpeechRecognition = getSpeechRecognitionConstructor();
 
   if (!SpeechRecognition) {
     return null;
   }
 
   const rec = new SpeechRecognition();
+
   rec.continuous = true;
   rec.interimResults = true;
   rec.lang = "en-US";
+
+  rec.onstart = function(){
+    const status = document.getElementById("micStatus");
+    if (status) {
+      status.innerText = "Listening... speak now";
+      status.className = "mic-listening";
+    }
+  };
 
   rec.onresult = function(event){
     const input = document.getElementById("aiChatInput");
@@ -2352,8 +2381,10 @@ function setupSpeechRecognition(){
     }
 
     if (finalText) {
-      input.value = (input.value + " " + finalText).replace(/\\s+/g, " ").trim();
+      baseDictationText = (baseDictationText + " " + finalText).replace(/\s+/g, " ").trim();
     }
+
+    input.value = (baseDictationText + (interimText ? " " + interimText : "")).trim();
 
     const status = document.getElementById("micStatus");
     if (status) {
@@ -2363,23 +2394,40 @@ function setupSpeechRecognition(){
   };
 
   rec.onerror = function(event){
+    console.error("SPEECH RECOGNITION ERROR:", event);
+
     const status = document.getElementById("micStatus");
+    let msg = "Mic error: " + event.error;
+
+    if (event.error === "not-allowed") {
+      msg = "Microphone blocked. Click the lock icon in the browser address bar and allow microphone.";
+    }
+
+    if (event.error === "no-speech") {
+      msg = "No speech heard. Try again.";
+    }
+
     if (status) {
-      status.innerText = "Mic error: " + event.error;
+      status.innerText = msg;
       status.className = "";
     }
+
     isDictating = false;
     updateMicButton();
   };
 
   rec.onend = function(){
-    if (isDictating && recognition) {
-      recognition.start();
+    if (isDictating) {
+      try {
+        rec.start();
+      } catch (e) {
+        console.warn("Speech restart blocked:", e);
+      }
       return;
     }
 
     const status = document.getElementById("micStatus");
-    if (status && !isDictating) {
+    if (status) {
       status.innerText = "";
       status.className = "";
     }
@@ -2390,35 +2438,58 @@ function setupSpeechRecognition(){
   return rec;
 }
 
-function updateMicButton(){
-  const btn = document.getElementById("micDictateBtn");
-  if (!btn) return;
-
-  btn.innerText = isDictating ? "⏹ Stop Dictation" : "🎙️ Dictate Job Notes";
-}
-
-function toggleDictation(){
+async function toggleDictation(){
   const status = document.getElementById("micStatus");
+  const input = document.getElementById("aiChatInput");
+
+  if (!window.isSecureContext) {
+    alert("Microphone dictation only works on HTTPS. Use your live Vercel/Revamp site, not a local file.");
+    return;
+  }
+
+  const SpeechRecognition = getSpeechRecognitionConstructor();
+
+  if (!SpeechRecognition) {
+    alert("Voice dictation is not supported in this browser. Use Google Chrome on desktop.");
+    return;
+  }
 
   if (!recognition) {
     recognition = setupSpeechRecognition();
   }
 
   if (!recognition) {
-    alert("Voice dictation is not supported in this browser. Try Chrome on desktop.");
+    alert("Voice dictation could not start. Use Google Chrome and allow microphone access.");
     return;
   }
 
   if (!isDictating) {
-    isDictating = true;
-    recognition.start();
-    if (status) {
-      status.innerText = "Listening...";
-      status.className = "mic-listening";
+    try {
+      baseDictationText = input ? input.value.trim() : "";
+      isDictating = true;
+      recognition.start();
+
+      if (status) {
+        status.innerText = "Listening... speak now";
+        status.className = "mic-listening";
+      }
+
+    } catch (err) {
+      console.error("MIC START ERROR:", err);
+      isDictating = false;
+      if (status) {
+        status.innerText = "Mic could not start. Refresh and try again.";
+        status.className = "";
+      }
     }
   } else {
     isDictating = false;
-    recognition.stop();
+    try {
+      recognition.stop();
+    } catch (err) {
+      console.warn("MIC STOP ERROR:", err);
+    }
+
     if (status) {
       status.innerText = "";
       status.className = "";
@@ -2427,7 +2498,6 @@ function toggleDictation(){
 
   updateMicButton();
 }
-
 
 /* ---------- PROPOSAL PDF ---------- */
 
