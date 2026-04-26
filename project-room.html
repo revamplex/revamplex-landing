@@ -1709,7 +1709,7 @@ function acceptBid(index){
 
   alert("AI is building the estimate...");
 
-  const res = await fetch("/api/generate-estimate", {
+  const res = await fetch("https://revamplex-landing.vercel.app/api/generate-estimate", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
