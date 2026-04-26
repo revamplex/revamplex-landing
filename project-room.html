@@ -1067,6 +1067,13 @@ Back to Project Feed
           <div class="estimate-summary">
             <div class="summary-box">
               <h4>Estimate Notes</h4>
+              <div style="margin-bottom:15px;">
+  <label style="font-weight:700;">AI Job Scope Input</label>
+  <textarea id="aiJobInput"
+    placeholder="Describe the job here... Example: Demo bathroom, install tile, vanity, paint, etc."
+    style="width:100%;height:100px;margin-top:5px;">
+  </textarea>
+</div>
               <textarea id="estimateNotes" placeholder="Add scope notes, exclusions, allowances, permit language, or fixture substitutions here...">Includes labor, material, disposal, and standard site protection. Permit costs are included in the contract price where required. Fixtures and finish materials may be specified by owner selection or contractor-approved equivalent of similar quality and cost.</textarea>
             </div>
 
@@ -1750,6 +1757,10 @@ description: `
 Create a detailed contractor estimate.
 
 PROJECT DETAILS:
+const manualScope = document.getElementById("aiJobInput")?.value.trim();
+
+body: JSON.stringify({
+  description: manualScope || `
 Title: ${job.title || "Unknown"}
 Trade: ${job.trade || "General renovation"}
 Location: ${job.city || "Unknown"}
