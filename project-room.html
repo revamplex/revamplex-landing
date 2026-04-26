@@ -1695,7 +1695,7 @@ function acceptBid(index){
   alert("Contractor accepted. Contract generation coming next.");
 
 }
-  async function runAIEstimate(){
+ async function runAIEstimate(){
 
   const job = window.currentJob;
 
@@ -1718,13 +1718,16 @@ function acceptBid(index){
 
   const data = await res.json();
 
-  if(data.error){
+  console.log("AI RESPONSE:", data);
+
+  if (data.error) {
     alert("AI error: " + data.error);
     return;
   }
 
   alert(data.result);
 }
+  
 </script>
   <script src="https://meet.jit.si/external_api.js"></script>
   <script>
