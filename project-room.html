@@ -1,1814 +1,1524 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="icon" href="data:,">
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Revamp Project Room</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>RevampLEX Map v9</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+
+<!-- 🔥 ADD THIS INSIDE YOUR TOP NAV / HEADER AREA -->
+
+<style>
+.auth-btn {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: white;
+  border: none;
+  padding: 0 10px; /* ⬅️ smaller */
+  border-radius: 10px; /* ⬅️ tighter */
+  font-weight: 600;
+  font-size: 12px; /* ⬅️ smaller text */
+  height: 32px; /* ⬅️ controls size */
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+  transition: 0.2s;
+}
+.cluster-bubble {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: white;
+  font-weight: bold;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cluster-bubble:hover {
+  transform: scale(1.15);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+}
+.submit-bid-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 48px;
+  min-height: 42px;
+
+  font-size: 13px;
+  font-weight: 900;
+
+  border-radius: 12px;
+
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  color: white;
+
+  box-shadow: 0 10px 20px rgba(249,115,22,0.25);
+
+  padding: 0 12px;
+}
+
+</style>
   <style>
     :root {
       --brand: #f97316;
       --brand-dark: #ea580c;
       --brand-soft: rgba(249, 115, 22, 0.12);
       --bg: #f8fafc;
-      --card: rgba(255, 255, 255, 0.98);
+      --card: rgba(255, 255, 255, 0.97);
       --text: #0f172a;
       --muted: #64748b;
-      --line: #e2e8f0;
-      --success: #16a34a;
-      --danger: #dc2626;
-      --shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
-      --radius: 20px;
+      --line: rgba(15, 23, 42, 0.08);
+      --shadow: 0 18px 42px rgba(15, 23, 42, 0.16);
+      --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.10);
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
       margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
       font-family: Inter, Arial, Helvetica, sans-serif;
-      background: linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px);
+      background: var(--bg);
       color: var(--text);
     }
+    button, input, select, textarea { font: inherit; }
 
-    .app-shell {
-      max-width: 1600px;
-      margin: 0 auto;
-      padding: 20px;
-    }
+#app {
+  position: relative;
+  width: 100%;
+  height: 100vh; /* 🔥 THIS FIXES EVERYTHING */
+  overflow: hidden;
+}
 
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 18px;
-      flex-wrap: wrap;
-    }
+#map {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  filter: saturate(0.9) contrast(0.95);
+}
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .brand-badge {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
-      color: #fff;
-      display: grid;
-      place-items: center;
-      font-weight: 800;
-      box-shadow: 0 10px 30px rgba(249, 115, 22, 0.25);
-    }
-
-    .brand h1 {
-      margin: 0;
-      font-size: 1.4rem;
-      line-height: 1.15;
-    }
-
-    .brand p {
-      margin: 4px 0 0;
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-
-    .top-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      border: none;
-      border-radius: 14px;
-      padding: 12px 16px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-    }
-
-    .btn:hover {
-      transform: translateY(-1px);
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
-      color: #fff;
-      box-shadow: 0 12px 24px rgba(249, 115, 22, 0.25);
-    }
-
-    .btn-soft {
-      background: var(--brand-soft);
-      color: var(--brand-dark);
-    }
-
-    .btn-dark {
-      background: #0f172a;
-      color: #fff;
-    }
-
-    .hero {
-      background: var(--card);
-      border: 1px solid rgba(255,255,255,0.8);
-      box-shadow: var(--shadow);
-      border-radius: 28px;
-      padding: 22px;
-      margin-bottom: 18px;
-    }
-
-    .hero-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 18px;
-    }
-
-    .project-title {
-      display: flex;
-      justify-content: space-between;
-      gap: 18px;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-    }
-
-    .project-title h2 {
-      margin: 0;
-      font-size: 1.6rem;
-    }
-
-    .project-title p {
-      margin: 6px 0 0;
-      color: var(--muted);
-    }
-
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #ecfdf5;
-      color: #15803d;
-      padding: 10px 14px;
-      border-radius: 999px;
-      font-weight: 700;
-      align-self: start;
-      border: 1px solid #bbf7d0;
-    }
-
-    .mini-stats {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .stat {
-      border: 1px solid var(--line);
-      background: #fff;
-      border-radius: 18px;
-      padding: 14px;
-    }
-
-    .stat .label {
-      font-size: 0.82rem;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-
-    .stat .value {
-      font-size: 1.05rem;
-      font-weight: 800;
-    }
-
-    .side-summary {
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      background: linear-gradient(180deg, #fff, #fff7ed);
-      padding: 18px;
-    }
-
-    .side-summary h3 {
-      margin-top: 0;
-      margin-bottom: 14px;
-      font-size: 1rem;
-    }
-
-    .summary-line {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 10px 0;
-      border-bottom: 1px dashed var(--line);
-      font-size: 0.95rem;
-    }
-
-    .summary-line:last-child {
-      border-bottom: none;
-    }
-
-    .dashboard {
-      display: grid;
-      grid-template-columns: 280px minmax(0, 1fr);
-      gap: 18px;
-      align-items: start;
-    }
-
-    .sidebar,
-    .panel {
-      background: var(--card);
-      border: 1px solid rgba(255,255,255,0.85);
-      box-shadow: var(--shadow);
-      border-radius: 24px;
-    }
-
-    .sidebar {
-      padding: 16px;
-      position: sticky;
-      top: 20px;
-    }
-
-    .nav-title {
-      margin: 0 0 12px;
-      font-size: 0.88rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .nav-list {
-      display: grid;
-      gap: 10px;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 12px 14px;
-      background: #fff;
-      font-weight: 700;
-      color: var(--text);
-      cursor: pointer;
-    }
-
-    .nav-item.active {
-      background: linear-gradient(135deg, var(--brand-soft), rgba(255,255,255,1));
-      border-color: rgba(249, 115, 22, 0.3);
-      color: var(--brand-dark);
-    }
-
-    .nav-item span:last-child {
-      color: var(--muted);
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
-
-    .workspace {
-      display: grid;
-      gap: 18px;
-    }
-
-    .panel {
-      padding: 20px;
-    }
-
-    .panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
-    }
-
-    .panel-header h3 {
-      margin: 0;
-      font-size: 1.15rem;
-    }
-
-    .panel-header p {
-      margin: 4px 0 0;
-      color: var(--muted);
-      font-size: 0.94rem;
-    }
-
-    .two-col {
-      display: grid;
-      grid-template-columns: 1.25fr 0.95fr;
-      gap: 18px;
-    }
-
-    .video-stage {
-      background: linear-gradient(160deg, #111827, #1e293b);
-      border-radius: 22px;
-      min-height: 340px;
-      padding: 18px;
-      color: #fff;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .video-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      background: rgba(255,255,255,0.12);
-      border-radius: 999px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      backdrop-filter: blur(8px);
-    }
-
-    .video-main {
-      position: absolute;
-      inset: 60px 18px 72px 18px;
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 18px;
-      display: grid;
-      place-items: center;
-      background: radial-gradient(circle at top right, rgba(249,115,22,0.18), transparent 35%), rgba(255,255,255,0.03);
-      text-align: center;
-      padding: 18px;
-    }
-
-    .video-main h4 {
-      margin: 0 0 8px;
-      font-size: 1.15rem;
-    }
-
-    .video-thumb {
-      position: absolute;
-      right: 18px;
-      bottom: 18px;
-      width: 170px;
-      height: 96px;
-      border-radius: 16px;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.1);
-      display: grid;
-      place-items: center;
-      text-align: center;
-      font-size: 0.9rem;
-    }
-
-    .video-controls {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .video-controls .btn {
-      padding: 11px 14px;
-      border-radius: 12px;
-    }
-
-    .chat-box {
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      padding: 14px;
-      background: #fff;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-      min-height: 340px;
-    }
-
-    .messages {
-      display: grid;
-      gap: 12px;
-      align-content: start;
-      padding: 8px 0 16px;
-    }
-
-    .message {
-      max-width: 88%;
-      padding: 12px 14px;
-      border-radius: 16px;
-      line-height: 1.45;
-      font-size: 0.95rem;
-    }
-
-    .message.contractor {
-      background: var(--brand-soft);
-      justify-self: start;
-    }
-
-    .message.customer {
-      background: #eff6ff;
-      justify-self: end;
-    }
-
-    .message strong {
-      display: block;
-      font-size: 0.82rem;
-      margin-bottom: 4px;
-    }
-
-    .chat-compose {
-      display: flex;
-      gap: 10px;
-      margin-top: 8px;
-    }
-
-    input, select, textarea {
+    .leaflet-container {
       width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 12px 14px;
-      font: inherit;
-      color: var(--text);
-      background: #fff;
+      height: 100%;
+      background: #dbeafe;
     }
 
-    textarea {
-      resize: vertical;
-      min-height: 88px;
-    }
+.topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  padding: 8px;
+  z-index: 1000;
+}
 
-    .chat-compose input {
-      flex: 1;
-    }
+.topbar-inner {
+  pointer-events: auto;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  border-radius: 16px;
+  padding: 8px;
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid rgba(255,255,255,.78);
+}
 
-    .tool-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .tool-card {
-      border: 1px solid var(--line);
-      background: #fff;
-      border-radius: 18px;
-      padding: 14px;
-      cursor: pointer;
-      transition: border-color 0.18s ease, transform 0.18s ease;
-    }
-
-    .tool-card:hover,
-    .tool-card.active {
-      border-color: rgba(249, 115, 22, 0.35);
-      transform: translateY(-1px);
-    }
-
-    .tool-card.active {
-      background: linear-gradient(135deg, var(--brand-soft), #fff);
-    }
-
-    .tool-card h4 {
-      margin: 0 0 8px;
-      font-size: 1rem;
-    }
-
-    .tool-card p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.9rem;
-      line-height: 1.4;
-    }
-
-    .calc-layout {
-      display: grid;
-      grid-template-columns: 1.2fr 0.85fr;
-      gap: 18px;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .full {
-      grid-column: 1 / -1;
-    }
-
-    .result-card {
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      background: linear-gradient(180deg, #fff, #fff7ed);
-      padding: 16px;
-    }
-
-    .result-metric {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 10px 0;
-      border-bottom: 1px dashed var(--line);
-      font-size: 0.95rem;
-    }
-
-    .result-metric:last-child {
-      border-bottom: none;
-    }
-
-    .estimate-toolbar {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 14px;
-    }
-
-    .estimate-table-wrap {
-      overflow-x: auto;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: #fff;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 780px;
-    }
-
-    th, td {
-      padding: 14px 12px;
-      border-bottom: 1px solid var(--line);
-      text-align: left;
-      font-size: 0.95rem;
-      vertical-align: middle;
-    }
-
-    th {
-      background: #fff7ed;
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: #9a3412;
-    }
-
-    .table-input {
-      min-width: 86px;
-      padding: 10px 12px;
-      border-radius: 12px;
-    }
-
-    .estimate-summary {
-      margin-top: 16px;
-      display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: 18px;
-    }
-
-    .summary-box {
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      padding: 16px;
-      background: #fff;
-    }
-
-    .summary-box h4 {
-      margin-top: 0;
-      margin-bottom: 14px;
-    }
-
-    .money-line {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 10px 0;
-      border-bottom: 1px dashed var(--line);
-      font-size: 0.95rem;
-    }
-
-    .money-line:last-child {
-      border-bottom: none;
-      font-size: 1.05rem;
-      font-weight: 800;
-    }
-
-    .schedule-layout {
-      display: grid;
-      grid-template-columns: 1.05fr 0.95fr;
-      gap: 18px;
-    }
-
-    .calendar-box,
-    .schedule-list,
-    .signature-box {
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      background: #fff;
-      padding: 16px;
-    }
-
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .cal-day,
-    .cal-date {
-      text-align: center;
-      padding: 10px 8px;
-      border-radius: 12px;
-      font-size: 0.9rem;
-    }
-
-    .cal-day {
-      font-weight: 800;
-      color: var(--muted);
-      background: #f8fafc;
-    }
-
-    .cal-date {
-      background: #fff7ed;
-      border: 1px solid #fed7aa;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .cal-date.active {
-      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
-      color: #fff;
-      border-color: transparent;
-    }
-
-    .task-item {
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 14px;
-      margin-bottom: 10px;
-    }
-
-    .task-item:last-child {
-      margin-bottom: 0;
-    }
-
-    .task-item strong {
-      display: block;
-      margin-bottom: 6px;
-    }
-
-    .task-item span {
-      color: var(--muted);
-      font-size: 0.92rem;
-      display: block;
-    }
-
-    .signature-layout {
-      display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 18px;
-    }
-
-    .signature-pad {
-      height: 180px;
-      border: 2px dashed #fdba74;
-      border-radius: 18px;
-      background: linear-gradient(180deg, #fff, #fff7ed);
-      display: grid;
-      place-items: center;
-      color: #9a3412;
-      font-weight: 700;
-      margin: 12px 0;
-      text-align: center;
-      padding: 18px;
-    }
-
-    .approval-checklist {
-      display: grid;
-      gap: 10px;
-      margin-top: 12px;
-    }
-
-    .check-row {
+    .search-row,.mode-row,.filter-row {
       display: flex;
       gap: 10px;
-      align-items: flex-start;
-      font-size: 0.95rem;
-      color: var(--text);
+      align-items: center;
     }
+    .filter-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap; /* 🔥 prevents breaking on smaller screens */
+}
+    .mode-btn {
+  height: 34px !important;
+  font-size: 13px !important;
+  padding: 0 10px !important;
+  border-radius: 10px !important;
+}
+    /* 🔥 COMPACT FILTER DROPDOWNS */
+.topbar-inner select,
+.topbar-inner button {
+  height: 34px;
+  padding: 4px 10px;
+  font-size: 13px;
+  border-radius: 10px;
+}
 
-    .check-row input {
+/* tighten spacing */
+.filter-row {
+  gap: 6px;
+}
+
+/* optional: limit width so they don't stretch */
+.filter-row select {
+  max-width: 140px;
+}
+
+/* shrink search box */
+.search-box input {
+  height: 34px;
+  font-size: 13px;
+  padding: 4px 10px;
+}
+    
+    .search-row { 
+  margin-bottom: 10px; 
+  flex-wrap: wrap; 
+}
+.mode-row {
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: right; /* 🔥 centers buttons */
+}
+
+    .logo-wrap {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-width:160px;
+      height:72px;
+      padding:0 16px;
+      border-radius:18px;
+      background:white;
+      border:1px solid var(--line);
+      box-shadow: 0 2px 6px rgba(15,23,42,.04);
+      overflow:hidden;
+    }
+    .logo-wrap img {
+      max-height: 72px;
       width: auto;
-      margin-top: 3px;
-    }
-
-    .photo-strip {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 14px;
-    }
-
-    .photo-card {
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: linear-gradient(135deg, #fff7ed, #ffffff);
-      padding: 14px;
-      min-height: 120px;
-    }
-
-    .photo-card strong {
       display: block;
-      margin-bottom: 8px;
+    }
+    .logo-fallback {
+      display:none;
+      font-weight:900;
+      font-size:28px;
+      letter-spacing:-.02em;
+    }
+    .logo-fallback .revamp { color:#0f172a; }
+    .logo-fallback .lex { color:var(--brand); }
+
+    .search-box {
+      flex:1;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      height: 48px;
+      border-radius:20px;
+      padding:0 18px;
+      background:#fff;
+      border:1px solid var(--line);
+      box-shadow: 0 4px 10px rgba(15,23,42,.04);
+    }
+    .search-box input {
+      width:100%;
+      border:0;
+      outline:0;
+      background:transparent;
+      color:var(--text);
+      font-size:17px;
     }
 
-    .photo-placeholder {
-      min-height: 70px;
-      border-radius: 14px;
-      background: rgba(249, 115, 22, 0.10);
-      display: grid;
-      place-items: center;
-      color: var(--brand-dark);
-      font-weight: 700;
-      text-align: center;
-      padding: 12px;
+    .search-btn,.mode-btn,.filter-pill,.filter-select,.action-btn,.mini-btn,.fab,.modal-btn,.close-btn,.favorite-btn,.restore-ui-btn,.welcome-role-btn,.welcome-submit-btn,.welcome-back-btn {
+      border:0;
+      cursor:pointer;
     }
 
-    .footer-note {
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.9rem;
-      margin: 18px 0 8px;
+    .search-btn {
+      height:62px;
+      padding:0 26px;
+      border-radius:20px;
+      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+      color:white;
+      font-weight:900;
+      font-size:17px;
+      box-shadow:0 10px 22px rgba(249,115,22,.28);
     }
 
-    @media (max-width: 1220px) {
-      .hero-grid,
-      .dashboard,
-      .two-col,
-      .calc-layout,
-      .estimate-summary,
-      .schedule-layout,
-      .signature-layout {
-        grid-template-columns: 1fr;
-      }
+.mode-btn {
+  flex: 0 0 auto !important;   /* 🔥 THIS IS THE KEY FIX */
+  height: 32px !important;
+  padding: 0 10px !important;
+  font-size: 12px !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  white-space: nowrap;         /* keeps text tight */
+}
+.mode-btn.active {
+  background: linear-gradient(135deg,var(--brand),var(--brand-dark));
+  color: white;
+  box-shadow: 0 4px 10px rgba(249,115,22,.18);
+}
+    .filter-row { overflow-x:auto; scrollbar-width:none; }
+    .filter-row::-webkit-scrollbar { display:none; }
 
-      .mini-stats,
-      .tool-grid,
-      .photo-strip {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .sidebar {
-        position: static;
-      }
+    .filter-select,.filter-pill {
+      flex:0 0 auto;
+      height:50px;
+      border-radius:999px;
+      padding:0 18px;
+      background:#fff;
+      border:1px solid var(--line);
+      color:var(--text);
+      font-weight:800;
+      font-size:15px;
+      white-space:nowrap;
+      box-shadow:0 2px 6px rgba(15,23,42,.04);
     }
 
-    @media (max-width: 760px) {
-      .app-shell {
-        padding: 14px;
+    .filter-pill.active {
+      background:var(--brand-soft);
+      color:var(--brand-dark);
+      border-color:rgba(249,115,22,.28);
+    }
+
+    .count-pill,.status-pill {
+      position:absolute;
+      z-index:6000;
+      left:50%;
+      transform:translateX(-50%);
+      border-radius:999px;
+      padding:10px 15px;
+      background:rgba(15,23,42,.82);
+      color:white;
+      font-size:13px;
+      font-weight:800;
+      backdrop-filter:blur(10px);
+      box-shadow:var(--shadow-soft);
+      pointer-events:none;
+      transition:opacity .25s ease, transform .25s ease;
+    }
+    .count-pill { top:194px; }
+.status-pill {
+  top:236px;
+  background: rgba(249,115,22,.92);
+  display:none;
+  z-index: 6000 !important;
+}
+    .status-pill.show { display:block; }
+
+  .results-shell {
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:900;
+
+  padding:40px 0 16px; /* ⬅️ THIS IS THE FIX */
+
+  pointer-events:auto;
+  transition:transform .25s ease;
+  overflow: visible;
+}
+    .results-shell-inner {
+      max-width:1600px;
+      margin:0 auto;
+      padding:0 12px;
+    }
+    .results-header {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      padding:0 0 8px;
+      pointer-events:auto;
+    }
+    .results-title {
+      pointer-events:auto;
+      border-radius:999px;
+      background:rgba(255,255,255,.94);
+      border:1px solid rgba(255,255,255,.82);
+      padding:8px 14px;
+      font-size:13px;
+      font-weight:800;
+      box-shadow:var(--shadow-soft);
+      backdrop-filter:blur(10px);
+    }
+    .results-actions {
+      display:flex;
+      gap:8px;
+      pointer-events:auto;
+    }
+    .action-btn {
+      width:42px;
+      height:42px;
+      border-radius:999px;
+      background:rgba(255,255,255,.96);
+      box-shadow:var(--shadow-soft);
+      color:var(--text);
+      font-size:18px;
+      font-weight:900;
+    }
+
+    .cards-row {
+  display:flex;
+  gap:12px;
+  overflow-x:auto;
+  overflow-y:visible; /* ⬅️ allow upward growth */
+      padding-top: 12px; /* ⬅️ gives room for lift */
+      padding:0 0 6px;
+      scroll-snap-type:x mandatory;
+      scroll-behavior:smooth;
+      scrollbar-width:none;
+      pointer-events:auto;
+    }
+    .cards-row::-webkit-scrollbar { display:none; }
+.cards-row {
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; /* 🔥 iOS smoothness */
+}
+.listing-card {
+  flex: 0 0 240px;
+  max-width: 240px;
+
+  background: transparent;
+  border: none;
+
+  scroll-snap-align: center;
+  overflow: visible;
+  cursor: pointer;
+
+  opacity: 0.85;
+  transform: scale(0.94);
+
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease,
+    opacity 0.25s ease;
+}
+    .listing-card:hover {
+  z-index: 20;
+}
+
+.listing-card:hover .card-inner {
+  transform: scale(1.05);
+  box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+}
+.card-inner {
+  border-radius: 22px;
+  overflow: hidden;
+  background: #ffffff; /* ⬅️ SOLID */
+  box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+}
+.listing-card.near {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.listing-card.far {
+  transform: scale(0.92);
+  opacity: 0.65;
+}
+
+.listing-card.active {
+  opacity: 1;
+}
+
+.listing-card.active .card-inner {
+  transform: scale(1.04);
+  box-shadow: 0 30px 60px rgba(249,115,22,0.35);
+}
+.card-inner {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transform-origin: center;
+}
+    .listing-card.active .card-inner {
+  border: 2px solid rgba(249,115,22,0.5);
+  box-shadow: 0 20px 40px rgba(249,115,22,0.25);
+}
+    .listing-card.hovered {
+  transform: scale(1.03);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  border: 2px solid #f97316;
+}
+    .card-top {
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      padding:12px 12px 8px;
+    }
+    .card-title-wrap { min-width:0; }
+    .card-title {
+      margin:0 0 4px;
+      font-size:15px;
+      line-height:1.2;
+      font-weight:900;
+    }
+    .card-sub {
+      margin:0;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.25;
+    }
+    .rating-pill {
+      border-radius:999px;
+      padding:8px 9px;
+      background:rgba(15,23,42,.06);
+      font-size:12px;
+      font-weight:900;
+      white-space:nowrap;
+      height:fit-content;
+    }
+
+    .card-body {
+      padding:0 12px 12px;
+      display:flex;
+      flex-direction:column;
+    }
+    .meta-grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      margin-bottom:8px;
+    }
+    .meta-box {
+      border-radius:12px;
+      background:#f8fafc;
+      border:1px solid var(--line);
+      padding:8px 10px;
+      min-height:58px;
+    }
+    .meta-label {
+      margin-bottom:4px;
+      color:var(--muted);
+      font-size:10px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+    .meta-value {
+      font-size:14px;
+      font-weight:900;
+    }
+    .info-row {
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:10px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.3;
+    }
+    .info-row strong { color:var(--text); }
+
+    .card-actions {
+      display:flex;
+      gap:8px;
+      align-items:center;
+      margin-top:auto;
+    }
+.card-actions .mini-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 42px;
+  min-height: 42px;
+
+  flex: 1;
+
+  white-space: nowrap;
+}
+    .card-actions {
+  display: flex;
+  gap: 8px;
+  align-items: stretch; /* 🔥 THIS IS KEY */
+}
+    .mini-btn {
+      flex:1;
+      height:38px;
+      border-radius:12px;
+      font-size:13px;
+      font-weight:900;
+    }
+    .mini-btn.primary {
+      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+      color:white;
+      box-shadow:0 8px 16px rgba(249,115,22,.2);
+    }
+    .mini-btn.secondary {
+      background:white;
+      color:var(--text);
+      border:1px solid var(--line);
+    }
+
+    .favorite-btn {
+      flex:0 0 38px;
+      width:38px;
+      height:38px;
+      border-radius:12px;
+      background:white;
+      color:var(--text);
+      border:1px solid var(--line);
+      font-size:16px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .fab-wrap {
+      position:absolute;
+      right:16px;
+      bottom:225px;
+      z-index:980;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .fab {
+      height:50px;
+      border-radius:999px;
+      padding:0 18px;
+      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+      color:white;
+      font-weight:900;
+      box-shadow:0 14px 28px rgba(249,115,22,.28);
+    }
+    .fab.secondary {
+      background:rgba(15,23,42,.88);
+      box-shadow:0 12px 26px rgba(15,23,42,.22);
+    }
+
+    .restore-ui-btn {
+      position:absolute;
+      top:18px;
+      left:50%;
+      transform:translateX(-50%);
+      z-index:1100;
+      height:42px;
+      padding:0 16px;
+      border-radius:999px;
+      background:rgba(255,255,255,.96);
+      color:var(--text);
+      font-size:13px;
+      font-weight:900;
+      box-shadow:var(--shadow-soft);
+      border:1px solid rgba(255,255,255,.85);
+      backdrop-filter:blur(10px);
+      display:none;
+    }
+    .restore-ui-btn.show { display:block; }
+
+    .modal {
+      position:fixed;
+      inset:0;
+      z-index:2000;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      background:rgba(15,23,42,.56);
+      backdrop-filter:blur(6px);
+    }
+    .modal.show { display:flex; }
+
+    .modal-card {
+     width:min(560px,100%);
+     max-height:min(88vh,820px);
+     overflow: visible;
+      border-radius:24px;
+      background:white;
+      box-shadow:0 26px 60px rgba(15,23,42,.28);
+      padding:40px;
+    }
+    .modal-head {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:14px;
+    }
+    .modal-title {
+      margin:0;
+      font-size:24px;
+      font-weight:900;
+    }
+    .close-btn {
+      width:38px;
+      height:38px;
+      border-radius:999px;
+      background:#f1f5f9;
+      color:var(--text);
+      font-size:20px;
+      font-weight:900;
+    }
+
+    .modal-grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .field {
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin-bottom:12px;
+    }
+    .field.full { grid-column:1 / -1; }
+
+    .label {
+      font-size:13px;
+      font-weight:800;
+      color:var(--text);
+    }
+    .input,.textarea,.select {
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px 13px;
+      background:white;
+      color:var(--text);
+      outline:none;
+    }
+    .textarea {
+      min-height:110px;
+      resize:vertical;
+    }
+
+    .modal-actions {
+      display:flex;
+      gap:10px;
+      margin-top:8px;
+    }
+    .modal-btn {
+      flex:1;
+      height:46px;
+      border-radius:14px;
+      font-weight:900;
+    }
+    .modal-btn.primary {
+      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+      color:white;
+    }
+    .modal-btn.secondary {
+      background:white;
+      border:1px solid var(--line);
+      color:var(--text);
+    }
+.modal .mini-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 48px;
+  min-height: 48px;
+
+  font-size: 15px;
+  font-weight: 900;
+
+  border-radius: 12px;
+
+  padding: 0 16px;
+}
+    .modal .card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+    .detail-stack { display:grid; gap:12px; }
+    .detail-panel {
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+      background:#f8fafc;
+    }
+    .detail-panel h4 {
+      margin:0 0 8px;
+      font-size:14px;
+      font-weight:900;
+    }
+    .detail-panel p {
+      margin:0;
+      color:var(--muted);
+      line-height:1.5;
+      font-size:14px;
+    }
+    .detail-tags {
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:6px;
+    }
+    .tag {
+      border-radius:999px;
+      padding:7px 10px;
+      background:var(--brand-soft);
+      color:var(--brand-dark);
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .map-pin {
+      width:18px;
+      height:18px;
+      border-radius:50%;
+      border:3px solid white;
+      box-shadow:0 8px 18px rgba(15,23,42,.18);
+      background:var(--brand);
+    }
+    .map-pin.job { background:#0f172a; }
+    .map-pin.contractor { background:var(--brand); }
+    .map-pin.active {
+      width:24px;
+      height:24px;
+      border-width:4px;
+    }
+
+        .job-pulse-core {
+      pointer-events: none;
+    }
+
+    .job-pulse-halo {
+      pointer-events: none;
+      filter: blur(2px);
+    }
+
+    .custom-cluster {
+      width:42px;
+      height:42px;
+      border-radius:50%;
+      background:rgba(249,115,22,.92);
+      color:white;
+      border:4px solid rgba(255,255,255,.95);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      box-shadow:0 10px 20px rgba(249,115,22,.28);
+    }
+
+    .leaflet-popup-content-wrapper {
+      border-radius:16px;
+      box-shadow:var(--shadow-soft);
+    }
+    .leaflet-popup-content {
+      margin:14px 16px;
+      font-family:Inter, Arial, Helvetica, sans-serif;
+    }
+
+    .ui-collapsed .topbar { transform: translateY(-115%); }
+    .ui-collapsed .results-shell { transform: translateY(115%); }
+    .ui-collapsed .count-pill {
+      opacity:0;
+      transform:translateX(-50%) translateY(-12px);
+    }
+
+  #welcomeOverlay {
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,.65);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:5000;
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  transition:opacity .2s ease, visibility .2s ease;
+}
+
+#welcomeOverlay.hidden {
+  display: none !important;
+  pointer-events: none;
+}
+    .welcomeCard {
+      width:min(520px, calc(100vw - 24px));
+      max-height:calc(100vh - 24px);
+      overflow:auto;
+      background:white;
+      border-radius:22px;
+      padding:28px;
+      text-align:center;
+      box-shadow:0 26px 60px rgba(15,23,42,.28);
+      border:1px solid rgba(255,255,255,.8);
+    }
+    .welcomeLogo {
+      width:180px;
+      max-width:70%;
+      margin-bottom:14px;
+    }
+    .welcomeTitle {
+      margin:0 0 8px;
+      font-size:28px;
+      font-weight:900;
+      color:var(--text);
+    }
+    .welcomeSub {
+      margin:0 0 18px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.5;
+    }
+    .welcomeRoleGrid {
+      display:grid;
+      gap:12px;
+      margin-bottom:14px;
+    }
+    .welcome-role-btn {
+      width:100%;
+      min-height:58px;
+      padding:14px 16px;
+      border-radius:16px;
+      font-weight:900;
+      font-size:15px;
+    }
+    .welcome-role-btn.homeowner {
+      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+      color:white;
+      box-shadow:0 10px 22px rgba(249,115,22,.22);
+    }
+    .welcome-role-btn.contractor {
+      background:#0f172a;
+      color:white;
+      box-shadow:0 10px 22px rgba(15,23,42,.18);
+    }
+    .demoBtn {
+      margin-top:2px;
+      background:none;
+      color:var(--muted);
+      font-weight:700;
+      padding:4px 0;
+      border:0;
+      cursor:pointer;
+    }
+    .welcomeFormWrap {
+      display:none;
+      text-align:left;
+      margin-top:14px;
+      border-top:1px solid var(--line);
+      padding-top:16px;
+    }
+    .welcomeFormWrap.show { display:block; }
+    .welcomeRolePill {
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:999px;
+      padding:8px 12px;
+      background:var(--brand-soft);
+      color:var(--brand-dark);
+      font-size:12px;
+      font-weight:800;
+      margin-bottom:12px;
+    }
+    .welcomeGrid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .welcomeField {
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin-bottom:12px;
+    }
+    .welcomeField.full { grid-column:1 / -1; }
+    .welcomeLabel {
+      font-size:13px;
+      font-weight:800;
+      color:var(--text);
+    }
+    .welcomeInput,.welcomeSelect,.welcomeTextarea {
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px 13px;
+      background:white;
+      color:var(--text);
+      outline:none;
+    }
+    .welcomeTextarea {
+      min-height:88px;
+      resize:vertical;
+    }
+    .welcomeNote {
+      margin:0 0 12px;
+      padding:12px 14px;
+      border-radius:14px;
+      background:#fff7ed;
+      color:#9a3412;
+      font-size:13px;
+      line-height:1.45;
+      display:none;
+    }
+    .welcomeNote.show { display:block; }
+    .contractorFields,.homeownerFields { display:none; }
+    .contractorFields.show,.homeownerFields.show { display:contents; }
+    .welcomeActions {
+      display:flex;
+      gap:10px;
+      margin-top:6px;
+    }
+    .welcome-submit-btn,.welcome-back-btn {
+      flex:1;
+      height:46px;
+      border-radius:14px;
+      font-weight:900;
+    }
+    .welcome-submit-btn {
+      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+      color:white;
+    }
+    .welcome-back-btn {
+      background:white;
+      color:var(--text);
+      border:1px solid var(--line);
+    }
+/* 🔥 STABLE COMPACT HEADER — WORKS LOGGED IN + LOGGED OUT */
+@media (min-width: 641px) {
+  .topbar {
+    padding: 4px 8px !important;
+  }
+
+.topbar-inner {
+  padding: 3px 10px !important; /* 🔥 cuts white space */
+  border-radius: 14px !important;
+}
+.search-row {
+  margin-bottom: 3px !important;
+}
+
+.mode-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+
+  .logo-wrap {
+    height: 54px !important;
+    min-width: 245px !important;
+    flex: 0 0 245px !important;
+    padding: 0 12px !important;
+    overflow: visible !important;
+  }
+
+  .logo-wrap img {
+    max-height: 50px !important;
+    max-width: 225px !important;
+  }
+
+  .search-box {
+    height: 40px !important;
+    border-radius: 16px !important;
+  }
+
+  .mode-row {
+    justify-content: flex-end !important;
+    margin: 0 0 6px 0 !important;
+    min-height: 34px !important;
+  }
+
+  .filter-row {
+    margin-top: 0 !important;   /* 🔥 THIS FIXES LOGGED-IN OVERLAP */
+    gap: 6px !important;
+    padding-right: 0 !important;
+  }
+
+  .filter-select,
+  .filter-pill {
+    height: 34px !important;
+    padding: 0 12px !important;
+    font-size: 13px !important;
+    border-radius: 12px !important;
+  }
+
+  .mode-btn {
+    height: 34px !important;
+    padding: 0 12px !important;
+    font-size: 13px !important;
+    border-radius: 12px !important;
+  }
+
+  .count-pill {
+    top: 150px !important;
+  }
+}
+    /* 🔥 SHORTER CARDS WITHOUT SHRINKING IMAGE OR TEXT */
+.card-top {
+  padding-top: 6px !important;
+  padding-bottom: 4px !important;
+}
+
+.card-body {
+  padding-top: 0 !important;
+  padding-bottom: 6px !important;
+}
+
+.meta-grid {
+  gap: 6px !important;
+  margin-bottom: 5px !important;
+}
+
+.meta-box {
+  min-height: 42px !important;
+  padding-top: 5px !important;
+  padding-bottom: 5px !important;
+}
+
+.info-row {
+  margin-bottom: 5px !important;
+  gap: 5px !important;
+}
+
+.card-actions {
+  gap: 6px !important;
+  margin-top: 0 !important;
+}
+
+.card-actions .mini-btn {
+  min-height: 36px !important;
+  height: 36px !important;
+}
+
+.mini-btn {
+  height: 36px !important;
+}
+    /* 🔥 MODE BUTTONS FLOATING ON MAP */
+.mode-fab {
+  display: flex;
+  flex-direction: row; /* 🔥 THIS MAKES THEM SIDE BY SIDE */
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.mode-fab .mode-btn {
+  width: 50px !important;
+  height: 44px !important;
+  border-radius: 12px !important;
+  background: white;
+  border: 1px solid rgba(15,23,42,0.1);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+  font-size: 18px !important;
+}
+
+.mode-fab .mode-btn.active {
+  background: linear-gradient(135deg,var(--brand),var(--brand-dark));
+  color: white;
+}
+    /* 🔥 PUSH MODE BUTTONS TO RIGHT SIDE */
+.mode-inline {
+  margin-left: auto; /* 🔥 pushes to far right */
+  display: flex;
+  gap: 6px;
+}
+
+/* match filter style */
+.mode-inline .mode-btn {
+  height: 34px !important;
+  padding: 0 12px !important;
+  font-size: 13px !important;
+  border-radius: 12px !important;
+}
+    
+    @media (max-width: 640px) {
+      .topbar { padding:10px; }
+      .topbar-inner { border-radius:22px; padding:10px; }
+      .search-box, .search-btn { height:50px; }
+      .logo-wrap { min-width:102px; height:50px; padding:0 10px; }
+      .logo-wrap img { max-height:28px; }
+      .logo-fallback { font-size:20px; }
+      .mode-btn {
+        height: 32px !important;
+        font-size: 12px !important;
       }
 
-      .mini-stats,
-      .tool-grid,
-      .form-grid,
-      .photo-strip {
-        grid-template-columns: 1fr;
+      #authContainer {
+        gap: 4px !important;
       }
 
-      .project-title h2 {
-        font-size: 1.28rem;
+      #authContainer button {
+        padding: 0 8px !important;
+        font-size: 11px !important;
       }
 
-      .video-thumb {
-        position: static;
-        width: 100%;
-        margin-top: 14px;
-        height: 90px;
+      #authContainer span {
+        font-size: 10px !important;
+        padding: 2px 6px !important;
       }
-
-      .video-main {
-        position: static;
-        margin-top: 16px;
-        min-height: 190px;
-      }
+      .filter-select,.filter-pill { height:44px; font-size:14px; padding:0 14px; }
+      .count-pill { top:198px; font-size:12px; }
+      .status-pill { top:238px; font-size:12px; }
+      .listing-card { flex:0 0 74vw; max-width:74vw; min-height:172px; }
+      .fab-wrap { right:12px; bottom:205px; }
+      .fab { height:46px; padding:0 15px; font-size:13px; }
+      .modal-card { padding:16px; border-radius:20px; }
+      .modal-grid,.welcomeGrid { grid-template-columns:1fr; }
+      .welcomeCard { padding:20px; border-radius:20px; }
+      .welcomeTitle { font-size:24px; }
+      .welcomeActions { flex-direction:column; }
     }
   </style>
 </head>
 <body>
-  <div style="padding:20px;">
-
-  <h2 id="jobTitle">Loading...</h2>
-
-  <p id="jobDescription"></p>
-
-  <div><strong>Budget:</strong> <span id="jobBudget"></span></div>
-
-</div>
-  <div class="app-shell">
+  <div id="app">
     <div class="topbar">
-      <div class="brand">
-        <div class="brand-badge">R</div>
-        <div>
-          <h1>Revamp Project Room™</h1>
-          <p>Private contractor workspace for real jobs, real estimates, and real customer approvals.</p>
-        </div>
-      </div>
-      <div class="top-actions">
-        <button id="backToFeed" class="btn btn-soft">
-Back to Project Feed
-</button>
-        <button id="inviteBtn" class="btn btn-primary">Invite Customer</button>
+      <div class="topbar-inner">
+        <div class="search-row">
+
+  <div class="logo-wrap">
+    <img src="revamplex-logo.png" alt="RevampLEX Logo" id="logoImg">
+    <div class="logo-fallback" id="logoFallback">
+      <span class="revamp">Revamp</span><span class="lex">LEX</span>
+    </div>
+  </div>
+
+  <div class="search-box">
+    <span>🔍</span>
+    <input id="searchInput" type="text" placeholder="Search..." />
+  </div>
+
+  <!-- 🔥 AUTH NOW LIVES HERE -->
+  <!-- 🔥 AUTH NOW LIVES HERE -->
+  <div id="authContainer" style="display:flex; gap:8px; align-items:center;"></div>
+</div>
+
+
+<div class="filter-row">
+  <select id="tradeFilter" class="filter-select">
+    <option value="all">All Trades</option>
+  </select>
+  <select id="distanceFilter" class="filter-select">
+    <option value="100">Any Distance</option>
+    <option value="5">Within 5 miles</option>
+    <option value="10">Within 10 miles</option>
+    <option value="25">Within 25 miles</option>
+    <option value="50">Within 50 miles</option>
+  </select>
+  <select id="ratingFilter" class="filter-select">
+    <option value="0">Any Rating</option>
+    <option value="4.5">4.5+ stars</option>
+    <option value="4.0">4.0+ stars</option>
+    <option value="3.5">3.5+ stars</option>
+  </select>
+  <div class="mode-inline">
+  <button class="mode-btn active" id="homeownerMode">🏠 Homeowner</button>
+  <button class="mode-btn" id="contractorMode">🛠 Contractor</button>
+</div>
+</div>
       </div>
     </div>
 
-    <section class="hero">
-      <div class="hero-grid">
-        <div>
-          <div class="project-title">
-            <div>
-              <h2 id="jobTitle">Loading...</h2>
-              <p id="jobMeta">Loading job details...</p>
-            </div>
-            <div class="status-pill">● In Estimate Review</div>
-          </div>
+    <div id="map"></div>
 
-          <div class="mini-stats">
-            <div class="stat">
-              <div class="label">Estimate Total</div>
-              <div class="value" id="jobBudget">$0</div>
-            </div>
-            <div class="stat">
-              <div class="label">Next Appointment</div>
-              <div class="value">Mar 14 • 10:00 AM</div>
-            </div>
-            <div class="stat">
-              <div class="label">Approval Status</div>
-              <div class="value">Pending Signature</div>
-            </div>
-            <div class="stat">
-              <div class="label">Room Size</div>
-              <div class="value" id="jobRoomSize">Loading...</div>
-            </div>
+    <button class="restore-ui-btn" id="restoreUiBtn">▲ Show filters & results</button>
+
+    <div class="count-pill" id="resultsCount">0 results</div>
+    <div class="status-pill" id="statusPill"></div>
+
+<div class="fab-wrap" id="fabWrap">
+  
+  <!-- 🔥 MODE TOGGLE -->
+
+  <button class="fab" id="postJobBtn">➕ Post a Job</button>
+  <button class="fab secondary" id="locateBtn">📍 Center Map</button>
+
+</div>
+
+    <div class="results-shell">
+      <div class="results-shell-inner">
+        <div class="results-header">
+          <div class="results-title" id="resultsTitle">Swipe left ↔ right to browse contractors</div>
+          <div class="results-actions">
+            <button class="action-btn" id="scrollLeftBtn">‹</button>
+            <button class="action-btn" id="scrollRightBtn">›</button>
           </div>
         </div>
-
-        <aside class="side-summary">
-          <h3>Quick Project Summary</h3>
-          <div class="summary-line"><span>Trade Type</span><strong id="jobTrade">Loading...</strong></div>
-          <div class="summary-line"><span>Start Goal</span><strong id="jobStartGoal">Loading...</strong></div>
-          <div class="summary-line"><span>Deposit Requested</span><strong id="jobDeposit">Loading...</strong></div>
-          <div class="summary-line"><span>Proposal Version</span><strong>v3.2</strong></div>
-          <div class="summary-line"><span>Private Bid Visibility</span><strong>Customer + Assigned Contractor Only</strong></div>
-        </aside>
+        <div class="cards-row" id="cardsRow"></div>
       </div>
-    </section>
+    </div>
+  </div>
 
-    <div class="dashboard">
-      <aside class="sidebar">
-        <h3 class="nav-title">Workspace Sections</h3>
-        <div class="nav-list">
-          <div class="nav-item active"><span>Project Overview</span><span>Live</span></div>
-          <div class="nav-item"><span>Video + Chat</span><span>2 alerts</span></div>
-          <div class="nav-item"><span>Material Calculator</span><span>Tile</span></div>
-          <div class="nav-item"><span>Estimate Spreadsheet</span><span>v3.2</span></div>
-          <div class="nav-item"><span>Schedule Calendar</span><span>4 items</span></div>
-          <div class="nav-item"><span>Customer Signature</span><span>Pending</span></div>
-          <div class="nav-item"><span>Photos + Docs</span><span>12 files</span></div>
-          <div class="nav-item"><span>Payments</span><span>$5,500 due</span></div>
+  <div class="modal" id="jobModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 class="modal-title">Post a Job</h2>
+        <button class="close-btn" id="closeJobModal">×</button>
+      </div>
+      <div class="modal-grid">
+        <div class="field full">
+          <label class="label" for="jobTitle">Project title</label>
+          <input class="input" id="jobTitle" placeholder="Kitchen Renovation" />
         </div>
-      </aside>
 
-      <main class="workspace">
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <h3>Video Call + Job Chat</h3>
-              <p>Use this area for live walkthroughs, screen-sharing plans, field notes, and private project communication.</p>
-            </div>
-            <div class="video-controls">
-              <button class="btn btn-primary">Start Video Call</button>
-              <button class="btn btn-soft">Share Screen</button>
-              <button class="btn btn-soft">Capture Photo</button>
-              <button class="btn btn-dark">Record Session</button>
-            </div>
-          </div>
-<div style="background:white; border-radius:18px; padding:16px; box-shadow:0 8px 22px rgba(0,0,0,.12); margin-bottom:18px;">
-  <h2 style="margin-top:0;">Video Call</h2>
+        <div class="field">
+          <label class="label" for="jobTrade">Trade</label>
+          <select class="select" id="jobTrade"></select>
+        </div>
 
-  <button id="startVideoCallBtn" style="
-    width:100%;
-    height:48px;
-    border:0;
-    border-radius:14px;
-    background:#f97316;
-    color:white;
-    font-weight:900;
-    cursor:pointer;
-  ">
-    Start Video Call
+        <div class="field">
+          <label class="label" for="jobBudget">Budget</label>
+          <input class="input" id="jobBudget" placeholder="$12,000" />
+        </div>
+
+
+        <div class="field">
+          <label class="label" for="jobCity">City</label>
+          <input class="input" id="jobCity" placeholder="Hackensack, NJ" />
+        </div>
+
+        <div class="field full">
+          <label class="label" for="jobDescription">Project description</label>
+          <textarea class="textarea" id="jobDescription" placeholder="Describe the project scope, materials, timing, and any special details..."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="modal-btn primary" id="submitJobBtn">Post Job</button>
+        <button class="modal-btn secondary" id="cancelJobBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="detailModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 class="modal-title" id="detailTitle">Details</h2>
+        <button class="close-btn" id="closeDetailModal">×</button>
+      </div>
+      <div class="detail-stack" id="detailContent"></div>
+    </div>
+  </div>
+
+  <div id="welcomeOverlay">
+    <div class="welcomeCard" id="welcomeCard">
+      <img src="revamplex-logo.png" class="welcomeLogo" alt="RevampLEX Logo" id="welcomeLogoImg">
+      <div class="logo-fallback" id="welcomeLogoFallback" style="display:none; justify-content:center; margin-bottom:12px;">
+        <span class="revamp">Revamp</span><span class="lex">LEX</span>
+      </div>
+
+      <h2 class="welcomeTitle">Welcome to RevampLEX</h2>
+      <p class="welcomeSub">
+        Choose your role to get started. Homeowners use RevampLEX for free.
+        Contractors can explore, bid, and manage jobs from one map.
+      </p>
+
+      <div id="welcomeRoleChooser">
+       <div class="welcomeRoleGrid">
+  <button class="welcome-role-btn homeowner" id="welcomeHomeownerBtn">
+    I’m a Homeowner
   </button>
 
-  <div id="videoCallBox" style="
-    display:none;
-    margin-top:14px;
-    height:520px;
-    border-radius:16px;
-    overflow:hidden;
-    background:#0f172a;
-  "></div>
+  <button class="welcome-role-btn contractor" id="welcomeContractorBtn">
+    I’m a Contractor
+  </button>
 </div>
-
-            <div class="chat-box">
-              <div class="panel-header" style="margin-bottom:0;">
-                <div>
-                  <h3 style="font-size:1rem;">Project Chat</h3>
-                  <p>Private thread</p>
-                </div>
-              </div>
-              <div class="messages">
-                <div class="message contractor">
-                  <strong>Verified Contractor</strong>
-                  I uploaded the revised tile layout and added the material quantities to the estimate.
-                </div>
-                <div class="message customer">
-                  <strong>Homeowner</strong>
-                  Looks good. Can we move the walkthrough to Saturday morning?
-                </div>
-                <div class="message contractor">
-                  <strong>Verified Contractor</strong>
-                  Yes. I added 10:00 AM on the calendar below and the estimate is ready for signature.
-                </div>
-              </div>
-              <div class="chat-compose">
-                <input type="text" placeholder="Type a project message..." />
-                <button class="btn btn-primary">Send</button>
-              </div>
-            </div>
-          </div>
-        </section>
-<div class="contractor-tools">
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <h3>Smart Material Calculator</h3>
-              <p>Switch between trades and turn measurements into material counts that feed the estimate sheet.</p>
-            </div>
-            <button class="btn btn-soft">Push Results to Estimate</button>
-          </div>
-
-          <div class="tool-grid">
-            <div class="tool-card active">
-              <h4>Tile Calculator</h4>
-              <p>Square footage, waste factor, grout, thinset, and box count.</p>
-            </div>
-            <div class="tool-card">
-              <h4>Drywall Calculator</h4>
-              <p>Sheet count, tape, screws, and compound based on room dimensions.</p>
-            </div>
-            <div class="tool-card">
-              <h4>Framing Calculator</h4>
-              <p>Stud count, top plates, bottom plates, headers, and spacing logic.</p>
-            </div>
-          </div>
-
-          <div class="calc-layout">
-            <div>
-              <div class="form-grid">
-                <div>
-                  <label>Room Length (ft)</label>
-                  <input id="length" type="number" value="12" step="0.1" />
-                </div>
-                <div>
-                  <label>Room Width (ft)</label>
-                  <input id="width" type="number" value="10" step="0.1" />
-                </div>
-                <div>
-                  <label>Tile Length (in)</label>
-                  <input id="tileLength" type="number" value="24" step="1" />
-                </div>
-                <div>
-                  <label>Tile Width (in)</label>
-                  <input id="tileWidth" type="number" value="12" step="1" />
-                </div>
-                <div>
-                  <label>Waste Percentage</label>
-                  <input id="waste" type="number" value="10" step="1" />
-                </div>
-                <div>
-                  <label>Sq Ft per Box</label>
-                  <input id="perBox" type="number" value="12" step="0.1" />
-                </div>
-                <div class="full">
-                  <button class="btn btn-primary" onclick="calculateTile()">Calculate Tile Materials</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="result-card">
-              <h4 style="margin-top:0;">Calculated Results</h4>
-              <div class="result-metric"><span>Floor Area</span><strong id="areaOut">120 sqft</strong></div>
-              <div class="result-metric"><span>With Waste</span><strong id="wasteOut">132 sqft</strong></div>
-              <div class="result-metric"><span>Boxes Needed</span><strong id="boxesOut">11 boxes</strong></div>
-              <div class="result-metric"><span>Estimated Tile Count</span><strong id="tileCountOut">60 tiles</strong></div>
-              <div class="result-metric"><span>Suggested Thinset</span><strong id="thinsetOut">3 bags</strong></div>
-              <div class="result-metric"><span>Suggested Grout</span><strong id="groutOut">2 bags</strong></div>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <h3>Real Estimate Spreadsheet</h3>
-              <p>Editable line items, live math, markup control, and customer-ready totals.</p>
-            </div>
-            <div class="estimate-toolbar">
-              <button class="btn btn-primary" onclick="runAIEstimate()">
-✨ Build AI Estimate
+        <button class="demoBtn" id="exploreDemoBtn">Explore Map Demo</button>
+      </div>
+<button class="demoBtn" id="loginInsteadBtn">
+  Already have an account? Login
 </button>
-              <button class="btn btn-soft" onclick="addRow()">Add Line Item</button>
-              <button class="btn btn-soft">Save Version</button>
-              <button class="btn btn-primary">Generate Proposal PDF</button>
-              <button class="btn btn-primary" onclick="submitBid()">Submit Bid to Customer</button>
+      <div class="welcomeFormWrap" id="welcomeFormWrap">
+        <div class="welcomeRolePill" id="welcomeRolePill">Homeowner Registration</div>
+
+        <p class="welcomeNote" id="contractorTrialNote">
+          Pro Contractors can browse and bid after signup. Billing and locking can be connected later.
+        </p>
+
+        <div class="welcomeGrid">
+          <div class="welcomeField">
+            <label class="welcomeLabel" for="welcomeFullName">Full Name</label>
+            <input class="welcomeInput" id="welcomeFullName" type="text" placeholder="John Smith">
+          </div>
+          <div class="welcomeField">
+            <label class="welcomeLabel" for="welcomeEmail">Email</label>
+            <input class="welcomeInput" id="welcomeEmail" type="email" placeholder="name@email.com">
+          </div>
+          <div class="welcomeField">
+            <label class="welcomeLabel" for="welcomePhone">Phone</label>
+            <input class="welcomeInput" id="welcomePhone" type="tel" placeholder="(555) 555-5555">
+          </div>
+          <div class="welcomeField">
+            <label class="welcomeLabel" for="welcomePassword">Password</label>
+            <input class="welcomeInput" id="welcomePassword" type="password" placeholder="Create password">
+          </div>
+          <div class="welcomeField full">
+            <label class="welcomeLabel" for="welcomeAddress">Address / City / State</label>
+            <input class="welcomeInput" id="welcomeAddress" type="text" placeholder="Hackensack, NJ">
+          </div>
+
+          <div class="homeownerFields" id="homeownerFields">
+            <div class="welcomeField full">
+              <label class="welcomeLabel" for="welcomeProjectType">Project Type</label>
+              <select class="welcomeSelect" id="welcomeProjectType">
+                <option value="">Select project type</option>
+              </select>
+            </div>
+
+            <div class="welcomeField full">
+              <label class="welcomeLabel" for="welcomeProjectNotes">Project Notes</label>
+              <textarea class="welcomeTextarea" id="welcomeProjectNotes" placeholder="Tell us what kind of project you need help with..."></textarea>
             </div>
           </div>
 
-          <div class="estimate-table-wrap">
-            <table id="estimateTable">
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th>Qty</th>
-                  <th>Unit</th>
-                  <th>Unit Cost</th>
-                  <th>Labor</th>
-                  <th>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><input class="table-input" value="Demo" /></td>
-                  <td><input class="table-input qty" type="number" value="1" step="0.01" /></td>
-                  <td><input class="table-input" value="lot" /></td>
-                  <td><input class="table-input unitCost" type="number" value="800" step="0.01" /></td>
-                  <td><input class="table-input laborCost" type="number" value="0" step="0.01" /></td>
-                  <td class="lineTotal">$800.00</td>
-                </tr>
-                <tr>
-                  <td><input class="table-input" value="Framing" /></td>
-                  <td><input class="table-input qty" type="number" value="1" step="0.01" /></td>
-                  <td><input class="table-input" value="lot" /></td>
-                  <td><input class="table-input unitCost" type="number" value="750" step="0.01" /></td>
-                  <td><input class="table-input laborCost" type="number" value="450" step="0.01" /></td>
-                  <td class="lineTotal">$1200.00</td>
-                </tr>
-                <tr>
-                  <td><input class="table-input" value="Drywall" /></td>
-                  <td><input class="table-input qty" type="number" value="1" step="0.01" /></td>
-                  <td><input class="table-input" value="lot" /></td>
-                  <td><input class="table-input unitCost" type="number" value="550" step="0.01" /></td>
-                  <td><input class="table-input laborCost" type="number" value="400" step="0.01" /></td>
-                  <td class="lineTotal">$950.00</td>
-                </tr>
-                <tr>
-                  <td><input class="table-input" value="Tile Install" /></td>
-                  <td><input class="table-input qty" type="number" value="132" step="0.01" /></td>
-                  <td><input class="table-input" value="sqft" /></td>
-                  <td><input class="table-input unitCost" type="number" value="3.25" step="0.01" /></td>
-                  <td><input class="table-input laborCost" type="number" value="4.75" step="0.01" /></td>
-                  <td class="lineTotal">$1056.00</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="estimate-summary">
-            <div class="summary-box">
-              <h4>Estimate Notes</h4>
-              <textarea placeholder="Add scope notes, exclusions, allowances, permit language, or fixture substitutions here...">Includes labor, material, disposal, and standard site protection. Permit costs are included in the contract price where required. Fixtures and finish materials may be specified by owner selection or contractor-approved equivalent of similar quality and cost.</textarea>
+          <div class="contractorFields" id="contractorFields">
+            <div class="welcomeField">
+              <label class="welcomeLabel" for="welcomeCompany">Company Name</label>
+              <input class="welcomeInput" id="welcomeCompany" type="text" placeholder="ABC Contracting LLC">
             </div>
 
-            <div class="summary-box">
-              <h4>Totals</h4>
-              <div class="money-line"><span>Subtotal</span><strong id="subtotalOut">$4,006.00</strong></div>
-              <div class="money-line"><span>Markup (15%)</span><strong id="markupOut">$600.90</strong></div>
-              <div class="money-line"><span>Tax (6.625%)</span><strong id="taxOut">$305.16</strong></div>
-              <div class="money-line"><span>Grand Total</span><strong id="grandOut">$4,912.06</strong></div>
+            <div class="welcomeField">
+              <label class="welcomeLabel" for="welcomeTrade">Primary Trade</label>
+              <select class="welcomeSelect" id="welcomeTrade">
+                <option value="">Select trade</option>
+              </select>
+            </div>
+
+            <div class="welcomeField">
+              <label class="welcomeLabel" for="welcomeLicense">License Number</label>
+              <input class="welcomeInput" id="welcomeLicense" type="text" placeholder="License #">
+            </div>
+
+            <div class="welcomeField">
+              <label class="welcomeLabel" for="welcomeCoverage">Service Radius</label>
+              <select class="welcomeSelect" id="welcomeCoverage">
+                <option value="">Select radius</option>
+                <option>5 miles</option>
+                <option>10 miles</option>
+                <option>25 miles</option>
+                <option>50 miles</option>
+                <option>100+ miles</option>
+              </select>
+            </div>
+
+            <div class="welcomeField full">
+              <label class="welcomeLabel" for="welcomeBio">Company Bio</label>
+              <textarea class="welcomeTextarea" id="welcomeBio" placeholder="Briefly describe your company and specialties..."></textarea>
             </div>
           </div>
-        </section>
+        </div>
 
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <h3>Appointment Scheduling Calendar</h3>
-              <p>Set walkthroughs, install dates, inspections, and customer appointments without endless texting.</p>
-            </div>
-            <button class="btn btn-primary">Send Appointment Invite</button>
-          </div>
-
-          <div class="schedule-layout">
-            <div class="calendar-box">
-              <h4 style="margin-top:0;">March 2026</h4>
-              <div class="calendar-grid">
-                <div class="cal-day">Sun</div>
-                <div class="cal-day">Mon</div>
-                <div class="cal-day">Tue</div>
-                <div class="cal-day">Wed</div>
-                <div class="cal-day">Thu</div>
-                <div class="cal-day">Fri</div>
-                <div class="cal-day">Sat</div>
-
-                <div class="cal-date">1</div>
-                <div class="cal-date">2</div>
-                <div class="cal-date">3</div>
-                <div class="cal-date">4</div>
-                <div class="cal-date">5</div>
-                <div class="cal-date">6</div>
-                <div class="cal-date">7</div>
-                <div class="cal-date">8</div>
-                <div class="cal-date">9</div>
-                <div class="cal-date">10</div>
-                <div class="cal-date">11</div>
-                <div class="cal-date">12</div>
-                <div class="cal-date">13</div>
-                <div class="cal-date active">14</div>
-                <div class="cal-date">15</div>
-                <div class="cal-date">16</div>
-                <div class="cal-date">17</div>
-                <div class="cal-date">18</div>
-                <div class="cal-date">19</div>
-                <div class="cal-date">20</div>
-                <div class="cal-date">21</div>
-                <div class="cal-date">22</div>
-                <div class="cal-date">23</div>
-                <div class="cal-date">24</div>
-                <div class="cal-date">25</div>
-                <div class="cal-date">26</div>
-                <div class="cal-date">27</div>
-                <div class="cal-date">28</div>
-                <div class="cal-date">29</div>
-                <div class="cal-date">30</div>
-                <div class="cal-date">31</div>
-              </div>
-            </div>
-
-            <div class="schedule-list">
-              <h4 style="margin-top:0;">Upcoming Appointments</h4>
-              <div class="task-item">
-                <strong>Site Walkthrough</strong>
-                <span>Saturday, March 14, 2026 • 10:00 AM</span>
-                <span>At property • Customer + Contractor</span>
-              </div>
-              <div class="task-item">
-                <strong>Estimate Review Call</strong>
-                <span>Monday, March 16, 2026 • 7:00 PM</span>
-                <span>Video meeting</span>
-              </div>
-              <div class="task-item">
-                <strong>Projected Start Date</strong>
-                <span>Sunday, March 22, 2026 • 8:00 AM</span>
-                <span>Pending signed approval + deposit</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <h3>Customer Approval Signature</h3>
-              <p>Customer reviews the estimate, checks the approval boxes, signs, and the system can generate the contract PDF.</p>
-            </div>
-            <button class="btn btn-primary">Finalize for Signature</button>
-          </div>
-
-          <div class="signature-layout">
-            <div class="signature-box">
-              <label>Customer Full Name</label>
-              <input type="text" value="Approved Homeowner" />
-
-              <div class="approval-checklist">
-                <label class="check-row"><input type="checkbox" checked /> <span>I approve the estimate amount and scope of work shown in this Project Room.</span></label>
-                <label class="check-row"><input type="checkbox" checked /> <span>I understand any change orders will be documented separately.</span></label>
-                <label class="check-row"><input type="checkbox" /> <span>I authorize the contractor to begin on the scheduled start date once deposit is received.</span></label>
-              </div>
-
-              <div class="signature-pad">Customer Signature Area<br />Tap / sign here on mobile or desktop signature pad</div>
-
-              <div class="form-grid">
-                <div>
-                  <label>Date</label>
-                  <input type="text" value="March 11, 2026" />
-                </div>
-                <div>
-                  <label>Deposit Amount</label>
-                  <input type="text" value="$5,500" />
-                </div>
-              </div>
-            </div>
-
-            <div class="signature-box">
-              <h4 style="margin-top:0;">After Approval</h4>
-              <div class="result-metric"><span>Signed Contract PDF</span><strong>Generate</strong></div>
-              <div class="result-metric"><span>Deposit Invoice</span><strong>Generate</strong></div>
-              <div class="result-metric"><span>Payment Schedule</span><strong>Create</strong></div>
-              <div class="result-metric"><span>Customer Copy Email</span><strong>Send</strong></div>
-              <div class="result-metric"><span>Internal Job Folder</span><strong>Open</strong></div>
-            </div>
-          </div>
-        </section>
-<section class="panel">
-  <div class="panel-header">
-    <div>
-      <h3>Contractor Bids</h3>
-      <p>Homeowner can review all submitted contractor bids and select one.</p>
+        <div class="welcomeActions">
+          <button class="welcome-back-btn" type="button" id="welcomeBackBtn">Back</button>
+          <button class="welcome-submit-btn" type="button" id="welcomeSubmitBtn">Create Account</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="estimate-table-wrap">
-    <table id="bidTable">
-      <thead>
-        <tr>
-          <th>Contractor</th>
-          <th>Bid Amount</th>
-          <th>Start Date</th>
-          <th>Message</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="bidTableBody">
-      </tbody>
-    </table>
-  </div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+/* ---------- REAL AI ESTIMATE ---------- */
 
-</section>
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <h3>Photos + Documentation</h3>
-              </div>
-              <p>Organize before, during, and after images plus plans, permits, and marked-up screenshots from calls.</p>
-            </div>
-            <input type="file" id="photoUpload" accept="image/*" multiple>
-<input type="file" id="videoUpload" accept="video/*">
-
-<button class="btn btn-primary" onclick="uploadProjectFiles()">
-Upload Files
-</button>
-
-<div id="uploadStatus" style="margin-top:10px;font-weight:700;"></div>
-          </div>
-
-          <div class="photo-strip">
-            <div class="photo-card">
-              <strong>Before Photos</strong>
-              <div class="photo-placeholder">Kitchen existing condition photos</div>
-            </div>
-            <div class="photo-card">
-              <strong>Work in Progress</strong>
-              <div class="photo-placeholder">Demo / framing / rough-in uploads</div>
-            </div>
-            <div class="photo-card">
-              <strong>Plans + Approvals</strong>
-              <div class="photo-placeholder">Estimate PDF, permit, signed contract</div>
-            </div>
-          </div>
-        </section>
-      </main>
-    </div>
-
-    <p class="footer-note">Revamp Project Room prototype • Private homeowner + contractor workspace • Ready to connect to Supabase / auth / database next</p>
-  </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
-<script>
-const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
-
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  checkAuth();
-const urlParams = new URLSearchParams(window.location.search);
-const jobId = urlParams.get('job');
-async function checkAuth(){
-
-  const { data } = await supabaseClient.auth.getUser();
-
-  if(!data.user){
-    alert("You must log in first");
-    window.location.href = "map.html";
-    return;
-  }
-
-}
-console.log("PROJECT ROOM JOB ID:", jobId);
-  async function loadJob() {
-
-  const params = new URLSearchParams(window.location.search);
-  const jobId = Number(params.get('job'));
-
-  console.log("LOADING JOB ID:", jobId);
-
-  const { data, error } = await supabaseClient
-  .from('jobs')
-  .select('*')
-  .eq('id', jobId);
-
-  if (error) {
-    console.error("SUPABASE ERROR:", error);
-    alert("Error loading job. Check console.");
-    return;
-  }
-
-  console.log("LOADED JOB:", data);
-
-  window.currentJob = data;
-
-  console.log("RAW DATA:", data);
-
-if (!data || data.length === 0) {
-  console.warn("NO JOB FOUND FOR ID:", jobId);
-  alert("No job found in database");
-  return;
-}
-
-window.currentJob = data[0];
-
-renderJob(data[0]);
-}
-  function renderJob(job){
-
-  console.log("RENDERING JOB:", job);
-
-  document.getElementById("jobTitle").innerText = job.title || "Untitled Job";
-
-  document.getElementById("jobMeta").innerText =
-    `Project ID: ${job.id} • ${job.city || "NJ Area"} • Homeowner: Anonymous • Contractor: Verified Contractor`;
-
-  document.getElementById("jobBudget").innerText = job.budget || "$0";
-
-  document.getElementById("jobTrade").innerText = job.trade || "General";
-
-  document.getElementById("jobRoomSize").innerText = job.room_size || "N/A";
-
-  document.getElementById("jobStartGoal").innerText = job.start_goal || "TBD";
-
-  document.getElementById("jobDeposit").innerText = job.deposit || "$0";
-
-}
-  loadJob();
-  
-/* ---------- MODE DETECTION ---------- */
-
-const params = new URLSearchParams(window.location.search);
-
-let mode = params.get("mode") || "contractor";
-
-console.log("ACTIVE JOB ID:", jobId);
-  
-/* ---------- HELPERS ---------- */
-
-function currency(value){
-  return new Intl.NumberFormat('en-US',{
-    style:'currency',
-    currency:'USD'
-  }).format(value||0);
-}
-
-/* ---------- LOAD JOB ---------- */
-
-const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null");
-
-/* ---------- MODE SWITCH ---------- */
-
-function applyWorkspaceMode() {
-  const inviteBtn = document.getElementById("inviteBtn");
-
-  if (mode === "homeowner") {
-    document.querySelectorAll(".contractor-tools").forEach(el => {
-      el.style.display = "none";
-    });
-
-    const title = document.querySelector(".brand h1");
-    if (title) {
-      title.textContent = "Revamp Project Room™ — Homeowner Workspace";
-    }
-
-    if (inviteBtn) {
-      inviteBtn.textContent = "Invite Contractor";
-    }
-
-  } else {
-    document.querySelectorAll(".contractor-tools").forEach(el => {
-      el.style.display = "";
-    });
-
-    const title = document.querySelector(".brand h1");
-    if (title) {
-      title.textContent = "Revamp Project Room™ — Contractor Workspace";
-    }
-
-    if (inviteBtn) {
-      inviteBtn.textContent = "Invite Customer";
-    }
-  }
-}
-
-/* ---------- BACK BUTTON ---------- */
-
-function setupBackButton(){
-
-  const backBtn=document.getElementById("backToFeed");
-
-  if(!backBtn) return;
-
-  backBtn.addEventListener("click",()=>{
-
-    const params=new URLSearchParams(window.location.search);
-
-    const role=params.get("mode") || "contractor";
-
-    window.location.href=`map.html?view=${role}`;
-
-  });
-
-}
-
-/* ---------- TILE CALCULATOR ---------- */
-
-function calculateTile(){
-
-  const length=parseFloat(document.getElementById('length').value)||0;
-  const width=parseFloat(document.getElementById('width').value)||0;
-  const tileLength=parseFloat(document.getElementById('tileLength').value)||0;
-  const tileWidth=parseFloat(document.getElementById('tileWidth').value)||0;
-  const waste=parseFloat(document.getElementById('waste').value)||0;
-  const perBox=parseFloat(document.getElementById('perBox').value)||1;
-
-  const area=length*width;
-  const withWaste=area*(1+waste/100);
-  const boxCount=Math.ceil(withWaste/perBox);
-
-  const tileSqFt=(tileLength*tileWidth)/144;
-  const tileCount=tileSqFt>0 ? Math.ceil(withWaste/tileSqFt):0;
-
-  const thinset=Math.max(1,Math.ceil(withWaste/50));
-  const grout=Math.max(1,Math.ceil(withWaste/90));
-
-  document.getElementById('areaOut').textContent=area.toFixed(2)+" sqft";
-  document.getElementById('wasteOut').textContent=withWaste.toFixed(2)+" sqft";
-  document.getElementById('boxesOut').textContent=boxCount+" boxes";
-  document.getElementById('tileCountOut').textContent=tileCount+" tiles";
-  document.getElementById('thinsetOut').textContent=thinset+" bags";
-  document.getElementById('groutOut').textContent=grout+" bags";
-
-}
-
-/* ---------- ESTIMATE ---------- */
-
-function recalcEstimate(){
-
-  const rows=document.querySelectorAll('#estimateTable tbody tr');
-
-  let subtotal=0;
-
-  rows.forEach(row=>{
-
-    const qty=parseFloat(row.querySelector('.qty')?.value)||0;
-    const unitCost=parseFloat(row.querySelector('.unitCost')?.value)||0;
-    const laborCost=parseFloat(row.querySelector('.laborCost')?.value)||0;
-
-    const total=qty*(unitCost+laborCost);
-
-    row.querySelector('.lineTotal').textContent=currency(total);
-
-    subtotal+=total;
-
-  });
-
-  const markup=subtotal*0.15;
-  const tax=(subtotal+markup)*0.06625;
-  const grand=subtotal+markup+tax;
-
-  document.getElementById('subtotalOut').textContent=currency(subtotal);
-  document.getElementById('markupOut').textContent=currency(markup);
-  document.getElementById('taxOut').textContent=currency(tax);
-  document.getElementById('grandOut').textContent=currency(grand);
-
-}
-
-function addRow(){
-
-  const tbody=document.querySelector('#estimateTable tbody');
-
-  const tr=document.createElement('tr');
-
-  tr.innerHTML=`
-<td><input class="table-input" value="New Item"/></td>
-<td><input class="table-input qty" type="number" value="1"/></td>
-<td><input class="table-input" value="unit"/></td>
-<td><input class="table-input unitCost" type="number" value="0"/></td>
-<td><input class="table-input laborCost" type="number" value="0"/></td>
-<td class="lineTotal">$0.00</td>
-`;
-
-  tbody.appendChild(tr);
-
-  attachEstimateListeners();
-
-  recalcEstimate();
-
-}
-
-function attachEstimateListeners(){
-
-  document.querySelectorAll('.qty,.unitCost,.laborCost').forEach(input=>{
-
-    input.removeEventListener('input',recalcEstimate);
-
-    input.addEventListener('input',recalcEstimate);
-
-  });
-
-}
-
-/* ---------- CHAT ---------- */
-
-function setupChat(){
-
-  const chatInput=document.querySelector('.chat-compose input');
-  const sendBtn=document.querySelector('.chat-compose button');
-  const messages=document.querySelector('.messages');
-
-  if(!chatInput||!sendBtn||!messages) return;
-
-  sendBtn.addEventListener('click',()=>{
-
-    const text=chatInput.value.trim();
-
-    if(!text) return;
-
-    const message=document.createElement('div');
-
-    message.className='message contractor';
-
-    message.innerHTML=`<strong>Verified Contractor</strong>${text}`;
-
-    messages.appendChild(message);
-
-    chatInput.value='';
-
-  });
-
-}
-
-/* ---------- SUBMIT BID ---------- */
-
-function submitBid(){
-
-  const amount=document.getElementById("grandOut").innerText;
+async function runAIEstimate(){
 
   const job = window.currentJob;
 
   if(!job){
-    alert("Job not found");
+    alert("No job loaded yet. Refresh the Project Room and try again.");
     return;
   }
 
-  if(!job.bids){
-    job.bids=[];
+  const estimateNotes = document.getElementById("estimateNotes");
+  const originalButton = document.querySelector('[onclick="runAIEstimate()"]');
+
+  if (originalButton) {
+    originalButton.disabled = true;
+    originalButton.innerText = "Building AI estimate...";
   }
 
-  const plan=getPlan();
-  const limit=BID_PLANS[plan];
+  try {
+    const res = await fetch("https://revamplex-landing.vercel.app/api/generate-estimate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        description: [
+          "Project title: " + (job.title || "Untitled Job"),
+          "Trade: " + (job.trade || "General renovation"),
+          "Budget: " + (job.budget || "Not provided"),
+          "City: " + (job.city || "Not provided"),
+          "Description: " + (job.description || "General renovation")
+        ].join("\\n")
+      })
+    });
 
-  if(getBidCount()>=limit){
-    alert("You reached your monthly bid limit.");
-    return;
-  }
+    console.log("FETCH STATUS:", res.status);
 
-  const maxBids=job.maxBids || 5;
+    const data = await res.json();
 
-  if(job.bids.length>=maxBids){
-    alert("This job already received the maximum number of bids.");
-    return;
-  }
+    console.log("AI RESPONSE:", data);
 
-  const bid={
-    contractor:"Verified Contractor",
-    amount:amount,
-    message:"Estimate generated through Revamp Project Room",
-    startDate:"TBD",
-    timestamp:Date.now()
-  };
-
-  job.bids.push(bid);
-
-  incrementBid();
-
-  /* AUTO CLOSE JOB */
-
-  if(job.bids.length>=maxBids){
-    job.status="closed";
-  }
-
-
-  alert("Bid submitted privately to homeowner.");
-
-}
-
-/* ---------- INIT ---------- */
-
-applyWorkspaceMode();
-
-calculateTile();
-
-attachEstimateListeners();
-
-recalcEstimate();
-
-setupChat();
-
-setupBackButton();
-  
-loadBidDashboard();
-/* ---------- BID SYSTEM ---------- */
-
-const BID_PLANS = {
-  trial:5,
-  bronze:5,
-  silver:10,
-  gold:15
-};
-
-function getPlan(){
-  return localStorage.getItem("revamp_plan") || "trial";
-}
-
-function getBidCount(){
-  return Number(localStorage.getItem("revamp_bid_count") || 0);
-}
-
-function incrementBid(){
-  const count=getBidCount()+1;
-  localStorage.setItem("revamp_bid_count",count);
-}
-
-
-function saveJobs(jobs){
-  localStorage.setItem("revampJobs",JSON.stringify(jobs));
-}
-
-  /* ---------- LOAD BIDS ---------- */
-
-function loadBidDashboard(){
-
-  if(mode!=="homeowner") return;
-
-
-  const job = window.currentJob;
-
-  if(!job || !job.bids) return;
-
-  const tbody=document.getElementById("bidTableBody");
-
-  if(!tbody) return;
-
-  tbody.innerHTML="";
-
-  job.bids.forEach((bid,i)=>{
-
-    const tr=document.createElement("tr");
-
-    tr.innerHTML=`
-<td>Verified Contractor</td>
-<td>${bid.amount}</td>
-<td>${bid.startDate}</td>
-<td>${bid.message}</td>
-<td>
-<button class="btn btn-primary" onclick="acceptBid(${i})">
-Accept
-</button>
-</td>
-`;
-
-    tbody.appendChild(tr);
-
-  });
-
-}
-
-function acceptBid(index){
-
-  alert("Contractor accepted. Contract generation coming next.");
-
-}
- async function runAIEstimate(){
-
-  const job = window.currentJob;
-
-  if(!job){
-    alert("No job loaded");
-    return;
-  }
-
-  alert("AI is building the estimate...");
-
-  const res = await fetch("https://revamplex-landing.vercel.app/api/generate-estimate", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      description: job.description || "General renovation"
-    })
-  });
-
-  console.log("FETCH STATUS:", res.status);
-
-  const data = await res.json();
-
-  console.log("AI RESPONSE:", data);
-
-  if (data.error) {
-    alert("AI error: " + data.error);
-    return;
-  }
-
-  alert(data.result);
-}
-  
-</script>
-  <script src="https://meet.jit.si/external_api.js"></script>
-  <script>
-let jitsiApi = null;
-
-function getProjectRoomName() {
-  const params = new URLSearchParams(window.location.search);
-
-  const jobId = params.get("job") || "no-job";
-  const contractorId = params.get("contractor") || "no-contractor";
-
-  return `revamplex-${jobId}-${contractorId}`.replace(/[^a-zA-Z0-9-_]/g, "");
-}
-
-document.getElementById("startVideoCallBtn").addEventListener("click", () => {
-  const box = document.getElementById("videoCallBox");
-  box.style.display = "block";
-
-  if (jitsiApi) return;
-
-  const roomName = getProjectRoomName();
-
-  jitsiApi = new JitsiMeetExternalAPI("meet.jit.si", {
-    roomName: roomName,
-    parentNode: box,
-    width: "100%",
-    height: "100%",
-    configOverwrite: {
-      startWithAudioMuted: true,
-      startWithVideoMuted: false
-    },
-    interfaceConfigOverwrite: {
-      SHOW_JITSI_WATERMARK: false,
-      SHOW_WATERMARK_FOR_GUESTS: false
+    if (!res.ok || data.error) {
+      alert("AI error: " + (data.error || "Request failed"));
+      return;
     }
-  });
-});
-    const inviteBtnSafe = document.getElementById("inviteBtn") || document.getElementById("inviteContractorBtn");
 
-if (inviteBtnSafe) {
-  inviteBtnSafe.addEventListener("click", async () => {
-    const params = new URLSearchParams(window.location.search);
+    const result = data.result || "No estimate returned.";
 
-    const jobId = params.get("job") || "no-job";
-    const contractorId = params.get("contractor") || "no-contractor";
-    const currentRoomMode = params.get("mode") || "homeowner";
-    const inviteMode = currentRoomMode === "homeowner" ? "contractor" : "homeowner";
-
-    const inviteLink = `${window.location.origin}/project-room.html?mode=${inviteMode}&job=${jobId}&contractor=${contractorId}`;
-
-    try {
-      await navigator.clipboard.writeText(inviteLink);
-      alert("Invite link copied:\n\n" + inviteLink);
-    } catch (err) {
-      alert("Copy this invite link:\n\n" + inviteLink);
+    if (estimateNotes) {
+      estimateNotes.value = result;
+      estimateNotes.scrollIntoView({ behavior: "smooth", block: "center" });
     }
-  });
+
+    alert("AI estimate finished and was added to Estimate Notes.");
+
+  } catch (err) {
+    console.error("AI FETCH ERROR:", err);
+    alert("AI connection failed. Check Console for details.");
+  } finally {
+    if (originalButton) {
+      originalButton.disabled = false;
+      originalButton.innerText = "✨ Build AI Estimate";
+    }
+  }
 }
-    /* ---------- FILE UPLOAD ---------- */
+
+/* ---------- FILE UPLOAD ---------- */
 
 async function uploadProjectFiles(){
 
-  const photoFiles = document.getElementById("photoUpload").files;
-  const videoFiles = document.getElementById("videoUpload").files;
-
+  const photoInput = document.getElementById("photoUpload");
+  const videoInput = document.getElementById("videoUpload");
   const status = document.getElementById("uploadStatus");
+
+  if (!photoInput || !videoInput || !status) {
+    alert("Upload fields not found.");
+    return;
+  }
+
+  const files = [...photoInput.files, ...videoInput.files];
+
+  if (!files.length) {
+    alert("Choose at least one photo or video first.");
+    return;
+  }
+
   status.innerText = "Uploading...";
 
-  for(const file of [...photoFiles, ...videoFiles]){
+  for(const file of files){
 
-    const fileName = `${Date.now()}-${file.name}`;
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+    const fileName = `${Date.now()}-${safeName}`;
 
     const { error } = await supabaseClient.storage
       .from("project-files")
       .upload(fileName, file);
 
     if(error){
-      console.error(error);
-      status.innerText = "Upload failed";
+      console.error("UPLOAD ERROR:", error);
+      status.innerText = "Upload failed: " + error.message;
       return;
     }
   }
@@ -1816,7 +1526,1932 @@ async function uploadProjectFiles(){
   status.innerText = "Upload complete ✔";
 }
 
-
 </script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+  <script>
+    const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let lockedRole = null;
+
+async function checkUserSession() {
+  const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+  if (sessionError) console.error('session error', sessionError);
+
+  const authContainer = document.getElementById('authContainer');
+  if (!authContainer) return;
+
+  // not logged in
+  if (!session || !session.user) {
+    lockedRole = null;
+
+    authContainer.innerHTML = `
+      <button onclick="openWelcomeAuth('login')" class="auth-btn">Login</button>
+<button onclick="openWelcomeAuth('register')" class="auth-btn">Register</button>
+    `;
+
+// NOT LOGGED IN
+homeownerModeBtn.style.display = '';
+contractorModeBtn.style.display = '';
+    
+homeownerModeBtn.disabled = false;
+contractorModeBtn.disabled = false;
+
+    return;
+  }
+
+  const user = session.user;
+window.__currentUserId = user.id;
+  const { data: profile, error: profileError } = await supabaseClient
+    .from('profiles')
+    .select('role,email')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (profileError) {
+    console.error('profile load error', profileError);
+  }
+let role = profile?.role;
+
+// 🔧 fallback if profile missing
+if (!role) {
+  console.warn("No profile found — using stored role");
+
+  role = localStorage.getItem('revamplex_role');
+
+  // if STILL no role → do NOT force homeowner
+  if (!role) {
+    console.warn("No role anywhere — showing login state only");
+
+authContainer.innerHTML = `
+  <div style="display:flex; align-items:center; gap:8px;">
+    
+    <button onclick="openDashboard()" class="auth-btn">
+      ${role === 'contractor' ? '🛠 Dash' : '👤 Account'}
+    </button>
+
+    <span style="font-weight:600; font-size:12px; color:white; background:#0f172a; padding:6px 10px; border-radius:8px; line-height:1;">
+      ${role.charAt(0).toUpperCase() + role.slice(1)}
+    </span>
+
+    <button onclick="logout()" class="auth-btn">Out</button>
+    <a href="dashboard.html" class="auth-btn">Dashboard</a>
+  </div>
+`;
+
+    return;
+  }
+}
+
+  // lock correct mode only
+  lockedRole = role;
+  setMode(role);
+  syncModeUI();
+  applyFilters();
+
+// 🔒 FULL LOCK UI
+// LOGGED IN
+homeownerModeBtn.style.display = 'none';
+contractorModeBtn.style.display = 'none';
+
+homeownerModeBtn.disabled = false;
+contractorModeBtn.disabled = false;
+  
+authContainer.innerHTML = `
+  <div style="display:flex; align-items:center; gap:10px;">
+    
+    <button onclick="openDashboard()" class="auth-btn">
+     ${role === 'contractor' ? '🛠 Dash' : '👤 Account'}
+    </button>
+
+   <span style="font-weight:600; font-size:11px; color:white; background:#0f172a; padding:3px 7px; border-radius:6px; line-height:1;">
+      ${role.charAt(0).toUpperCase() + role.slice(1)}
+    </span>
+
+   <button onclick="logout()" class="auth-btn">Out</button>
+  </div>
+`;
+}
+
+    async function openDashboard() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) return;
+
+  expandUI();
+  detailModal.classList.add('show');
+
+if (lockedRole === 'homeowner') {
+
+  const myJobs = jobs.filter(j => String(j.user_id) === String(user.id));
+
+  detailTitle.textContent = "My Jobs";
+
+  detailContent.innerHTML = `
+    <div style="margin-bottom:12px;">
+      <button onclick="goToDashboard()" class="mini-btn secondary">Edit Profile</button>
+    </div>
+
+    <div class="detail-panel">
+      <h4>My Posted Jobs</h4>
+
+      ${
+        myJobs.length
+          ? myJobs.map(j => `
+              <div style="padding:12px 0; border-bottom:1px solid #e2e8f0;">
+                <strong>${j.title || 'Untitled Job'}</strong><br>
+                <span>${j.trade || 'Trade'} • ${j.city || 'Location'} • ${j.budget || '$0'}</span><br><br>
+
+                <button class="mini-btn secondary" onclick="openProjectRoom(${j.id})">
+                  Open Project Room
+                </button>
+
+                <button class="mini-btn secondary" onclick="openEditModal('${j.id}')">
+                  Edit
+                </button>
+
+                <button class="mini-btn primary" style="background:#dc2626;" data-action="delete-my-job" data-id="${j.id}">
+  Delete
+</button>
+              </div>
+            `).join('')
+          : '<p>No jobs posted yet.</p>'
+      }
+    </div>
+  `;
+
+  return;
+}
+      
+  if (lockedRole === 'contractor') {
+
+
+  detailTitle.textContent = "Dashboard";
+
+  detailContent.innerHTML = `
+    <div>
+      <p>${user.email}</p>
+      <button onclick="goToDashboard()" class="mini-btn secondary">Edit Profile</button>
+    </div>
+
+    <div class="detail-panel">
+      <h4>Active Bids</h4>
+      <p>Coming next</p>
+    </div>
+
+    <div class="detail-panel">
+      <h4>Completed Jobs</h4>
+      <p>Coming next</p>
+    </div>
+  `;
+}
+  }
+async function logout() {
+  await supabaseClient.auth.signOut();
+  localStorage.removeItem('revamplex_registered');
+  lockedRole = null;
+  window.location.href = 'map.html';
+}
+let authMode = 'login';
+
+function openAuth(mode) {
+  authMode = mode;
+  document.getElementById('authTitle').innerText = mode === 'login' ? 'Login' : 'Register';
+  document.getElementById('authModal').style.display = 'flex';
+}
+
+function closeAuth() {
+  document.getElementById('authModal').style.display = 'none';
+}
+
+function toggleAuth() {
+  authMode = authMode === 'login' ? 'register' : 'login';
+  document.getElementById('authTitle').innerText = authMode === 'login' ? 'Login' : 'Register';
+}
+
+async function handleAuth() {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
+
+  if (!email || !password) {
+    alert("Enter email & password");
+    return;
+  }
+
+  try {
+    if (authMode === 'register') {
+
+      // 🔥 ask user role
+      const role = prompt("Enter role: contractor or homeowner");
+
+      if (!role || !['contractor','homeowner'].includes(role.toLowerCase())) {
+        alert("Must be 'contractor' or 'homeowner'");
+        return;
+      }
+
+     const { data, error } = await supabaseClient.auth.signUp({
+  email,
+  password,
+  options: {
+    emailRedirectTo: window.location.origin + '/map.html'
+  }
+});
+
+if (error) throw error;
+
+// immediately log them in after signup
+alert("Check your email to confirm your account before logging in.");
+return;
+
+if (loginError) throw loginError;
+
+      if (error) throw error;
+
+      const userId = data.user?.id;
+
+if (!userId) {
+  alert("Signup worked, but user not returned. Try logging in.");
+  return;
+}
+
+      // 🔥 insert into profiles
+
+
+      alert("Account created!");
+      closeAuth();
+    }
+
+    if (authMode === 'login') {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) throw error;
+
+      const userId = data.user?.id;
+
+if (!userId) {
+  alert("Signup worked, try logging in.");
+  return;
+}
+
+      // 🔥 get role
+      const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (!profile) {
+        alert("No role found");
+        return;
+      }
+
+      // 🔥 redirect based on role
+     localStorage.setItem('revamplex_registered', 'true');
+localStorage.setItem('revamplex_role', profile.role);
+
+if (profile.role === 'contractor') {
+  window.location.href = "map.html?view=contractor";
+} else {
+  window.location.href = "map.html?view=homeowner";
+}
+
+    }
+
+  } catch (err) {
+    alert(err.message);
+    console.error(err);
+  }
+}
+
+
+
+
+    const TRADE_OPTIONS = [
+      'Kitchen Renovation','Bathroom Renovation','Additions & Remodeling','General Contractors','Carpentry',
+      'Concrete & Masonry','Decks & Porches','Doors','Drywall & Insulation','Electrical','Fencing','Flooring',
+      'Garage Doors','Glass & Mirrors','Gutters','Handyman Services','HVAC','Junk Removal','Land Surveying',
+      'Landscaping','Lawn Care','Locksmith','Painting','Patios','Pest Control','Plumbing','Pools & Spas',
+      'Pressure Washing','Roofing','Septic Systems','Siding','Solar','Sunrooms','Tile & Stone','Tree Services',
+      'Water Damage Restoration','Windows'
+    ];
+    
+    let map;
+    let contractors = [];
+    let jobs = [];
+    let activeSort = 'distance';
+    let activeId = null;
+    let filteredItems = [];
+    let __lastRenderKey = '';
+    let markerIndex = new Map();
+    let isLoadingData = false;
+    let activeCircles = [];
+    let activeHighlight = null;
+    let hoveredId = null;
+    let selectedId = null;
+    // ===== ACTIVE EXPANDED CLUSTERS =====
+    let activePulseAnimations = [];
+    let uiCollapsed = false;
+    let selectedWelcomeRole = null;
+    let currentMode = 'homeowner';
+
+    const app = document.getElementById('app');
+    const cardsRow = document.getElementById('cardsRow');
+    const resultsCount = document.getElementById('resultsCount');
+    const resultsTitle = document.getElementById('resultsTitle');
+    const statusPill = document.getElementById('statusPill');
+    const restoreUiBtn = document.getElementById('restoreUiBtn');
+
+    const logoImg = document.getElementById('logoImg');
+    const logoFallback = document.getElementById('logoFallback');
+    const welcomeLogoImg = document.getElementById('welcomeLogoImg');
+    const welcomeLogoFallback = document.getElementById('welcomeLogoFallback');
+
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn') || null;
+    const tradeFilter = document.getElementById('tradeFilter');
+    const distanceFilter = document.getElementById('distanceFilter');
+    const ratingFilter = document.getElementById('ratingFilter');
+    const sortDistanceBtn = document.getElementById('sortDistance');
+    const sortRatingBtn = document.getElementById('sortRating');
+    const resetFiltersBtn = document.getElementById('resetFilters');
+    const homeownerModeBtn = document.getElementById('homeownerMode');
+    const contractorModeBtn = document.getElementById('contractorMode');
+    const scrollLeftBtn = document.getElementById('scrollLeftBtn');
+    const scrollRightBtn = document.getElementById('scrollRightBtn');
+    const locateBtn = document.getElementById('locateBtn');
+
+    const postJobBtn = document.getElementById('postJobBtn');
+    const jobModal = document.getElementById('jobModal');
+    const closeJobModal = document.getElementById('closeJobModal');
+    const cancelJobBtn = document.getElementById('cancelJobBtn');
+    const submitJobBtn = document.getElementById('submitJobBtn');
+    const jobTradeSelect = document.getElementById('jobTrade');
+
+    const detailModal = document.getElementById('detailModal');
+    const detailTitle = document.getElementById('detailTitle');
+    const detailContent = document.getElementById('detailContent');
+    const closeDetailModal = document.getElementById('closeDetailModal');
+
+    const welcomeOverlay = document.getElementById('welcomeOverlay');
+    const welcomeCard = document.getElementById('welcomeCard');
+    const welcomeRoleChooser = document.getElementById('welcomeRoleChooser');
+    const welcomeFormWrap = document.getElementById('welcomeFormWrap');
+    const welcomeRolePill = document.getElementById('welcomeRolePill');
+    const contractorTrialNote = document.getElementById('contractorTrialNote');
+    const contractorFields = document.getElementById('contractorFields');
+    const homeownerFields = document.getElementById('homeownerFields');
+    const welcomeProjectType = document.getElementById('welcomeProjectType');
+    const welcomeTrade = document.getElementById('welcomeTrade');
+    const welcomeHomeownerBtn = document.getElementById('welcomeHomeownerBtn');
+    const welcomeContractorBtn = document.getElementById('welcomeContractorBtn');
+    const exploreDemoBtn = document.getElementById('exploreDemoBtn');
+    const welcomeBackBtn = document.getElementById('welcomeBackBtn');
+    const welcomeSubmitBtn = document.getElementById('welcomeSubmitBtn');
+
+map = L.map('map', { zoomControl: false, attributionControl: true }).setView([40.8859, -74.0435], 11);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+// 🔥 CLICK MAP TO CLOSE CLUSTERS
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; OpenStreetMap &copy; CARTO',
+  subdomains: 'abcd',
+  maxZoom: 20
+}).addTo(map);
+
+    function showLogoFallback() {
+      if (logoImg) logoImg.style.display = 'none';
+      if (logoFallback) logoFallback.style.display = 'block';
+      if (welcomeLogoImg) welcomeLogoImg.style.display = 'none';
+      if (welcomeLogoFallback) welcomeLogoFallback.style.display = 'flex';
+    }
+
+    if (logoImg) logoImg.addEventListener('error', showLogoFallback);
+    if (welcomeLogoImg) welcomeLogoImg.addEventListener('error', showLogoFallback);
+
+    function populateTradeSelect() {
+      const options = TRADE_OPTIONS.map(trade => `<option>${trade}</option>`).join('');
+      tradeFilter.innerHTML = `<option value="all">All Trades</option>` + options;
+      jobTradeSelect.innerHTML = options;
+      welcomeProjectType.innerHTML = `<option value="">Select project type</option>` + options;
+      welcomeTrade.innerHTML = `<option value="">Select trade</option>` + options;
+    }
+
+    function showStatus(message) {
+      statusPill.textContent = message;
+      statusPill.classList.add('show');
+      clearTimeout(showStatus._timer);
+      showStatus._timer = setTimeout(() => statusPill.classList.remove('show'), 2200);
+    }
+
+async function getCurrentDataset() {
+  const mode = lockedRole || currentMode;
+
+  let dataset = [];
+
+  if (mode === 'contractor') {
+    dataset = jobs.map(i => ({ ...i, type: 'job' }));
+  }
+
+  if (mode === 'homeowner') {
+    dataset = contractors.map(i => ({ ...i, type: 'contractor' }));
+  }
+
+  const seen = new Map();
+
+  dataset.forEach(item => {
+    const key = item.type === 'contractor'
+      ? [
+          item.type,
+          String(item.trade || '').toLowerCase().trim(),
+          String(item.city || '').toLowerCase().trim(),
+          String(item.rating || ''),
+          String(item.distance || ''),
+          String(item.projects_completed || '')
+        ].join('|')
+      : [
+          item.type,
+          String(item.title || '').toLowerCase().trim(),
+          String(item.trade || '').toLowerCase().trim(),
+          String(item.city || '').toLowerCase().trim(),
+          String(item.budget || '')
+        ].join('|');
+
+    if (!seen.has(key)) {
+      seen.set(key, item);
+    }
+  });
+
+  return Array.from(seen.values());
+}
+
+    function syncModeUI() {
+      homeownerModeBtn.classList.toggle('active', currentMode === 'homeowner');
+      contractorModeBtn.classList.toggle('active', currentMode === 'contractor');
+      resultsTitle.textContent = currentMode === 'homeowner'
+        ? 'Swipe left ↔ right to browse contractors'
+        : 'Swipe left ↔ right to browse customer jobs';
+      postJobBtn.style.display = currentMode === 'homeowner' ? 'inline-flex' : 'none';
+    }
+
+    function collapseUI() {
+      uiCollapsed = true;
+      app.classList.add('ui-collapsed');
+      restoreUiBtn.classList.add('show');
+    }
+
+    function expandUI() {
+      uiCollapsed = false;
+      app.classList.remove('ui-collapsed');
+      restoreUiBtn.classList.remove('show');
+    }
+
+    function maskLocation(lat, lng, radiusMiles = 0.25) {
+      const radiusInDegrees = radiusMiles / 69;
+      const u = Math.random();
+      const v = Math.random();
+      const w = radiusInDegrees * Math.sqrt(u);
+      const t = 2 * Math.PI * v;
+      return [lat + w * Math.cos(t), lng + w * Math.sin(t)];
+    }
+
+    function anonymizeContractorName(item) {
+      return 'Verified Contractor';
+    }
+
+    function anonymizeCustomerName(item) {
+      return 'Customer';
+    }
+
+    function getDisplayCoords(item) {
+  if (typeof item.lat !== 'number' || typeof item.lng !== 'number') return [40.8859, -74.0435];
+
+  if (item.type === 'job' || currentMode === 'homeowner') {
+    if (typeof item._maskedLat !== 'number' || typeof item._maskedLng !== 'number') {
+      const [maskedLat, maskedLng] = maskLocation(Number(item.lat), Number(item.lng), 0.25);
+      item._maskedLat = maskedLat;
+      item._maskedLng = maskedLng;
+    }
+    return [item._maskedLat, item._maskedLng];
+  }
+
+  return [Number(item.lat), Number(item.lng)];
+}
+// 🔥 SPREAD OVERLAPPING POINTS
+function offsetCoords(coords, index) {
+  const angle = (index * 45) * (Math.PI / 180);
+  const offset = 0.0015;
+
+  return [
+    coords[0] + Math.cos(angle) * offset,
+    coords[1] + Math.sin(angle) * offset
+  ];
+}
+    function getSafeContractorSessionItem(item) {
+      return {
+        ...item,
+        name: anonymizeContractorName(item)
+      };
+    }
+
+    function getSafeJobSessionItem(item) {
+      return {
+        ...item,
+        customer_name: anonymizeCustomerName(item),
+        bids: (item.bids || []).map(bid => ({
+          ...bid,
+          contractor_name: 'Verified Contractor'
+        }))
+      };
+    }
+
+    function makeIcon(item, isActive) {
+      const kind = item.type === 'job' ? 'job' : 'contractor';
+      const size = isActive ? 24 : 18;
+      const anchor = isActive ? 12 : 9;
+      return L.divIcon({
+        className: '',
+        html: `<div class="map-pin ${kind} ${isActive ? 'active' : ''}"></div>`,
+        iconSize: [size, size],
+        iconAnchor: [anchor, anchor]
+      });
+    }
+
+
+function clearMarkers() {
+
+
+  // stop animations
+  activePulseAnimations.forEach(anim => {
+    if (anim.timer) clearInterval(anim.timer);
+
+    if (anim.rings) {
+      anim.rings.forEach(r => {
+        if (map.hasLayer(r.ring)) map.removeLayer(r.ring);
+      });
+    }
+
+    if (anim.ring && map.hasLayer(anim.ring)) {
+      map.removeLayer(anim.ring);
+    }
+  });
+
+  activePulseAnimations = [];
+
+  // remove ALL circles (core + glow)
+  activeCircles.forEach(c => {
+    if (map.hasLayer(c)) map.removeLayer(c);
+  });
+
+  activeCircles = [];
+
+  markerIndex.clear();
+}
+
+    function getPopupHtml(item) {
+      if (item.type === 'contractor') {
+        return `
+          <div>
+            <div style="font-size:15px;font-weight:900;margin-bottom:6px;">${anonymizeContractorName(item)}</div>
+            <div style="font-size:13px;color:#64748b;margin-bottom:4px;">${item.trade} • ${item.city || ''}</div>
+            <div style="font-size:13px;color:#64748b;">⭐ ${Number(item.rating || 0).toFixed(1)} • ${Number(item.distance || 0).toFixed(1)} mi</div>
+          </div>
+        `;
+      }
+      return `
+        <div>
+          <div style="font-size:15px;font-weight:900;margin-bottom:6px;">${item.title}</div>
+          <div style="font-size:13px;color:#64748b;margin-bottom:4px;">${item.city || ''} • ${item.trade}</div>
+          <div style="font-size:13px;color:#64748b;">Posted by ${anonymizeCustomerName(item)} • Bids ${(item.bids || []).length}/${item.max_bids || 5}</div>
+        </div>
+      `;
+    }
+
+// ===== PREMIUM GLOW MAP (FINAL CLEAN VERSION) =====
+function renderMarkers(items) {
+
+  clearMarkers();
+
+  items.forEach((item, index) => {
+    const baseCoords = getDisplayCoords(item);
+    const coords = offsetCoords(baseCoords, index);
+
+    const core = L.circle(coords, {
+      radius: 400,
+      color: '#f97316',
+      fillColor: '#f97316',
+      fillOpacity: 0.35,
+      weight: 0
+    }).addTo(map);
+
+    const glow = L.circle(coords, {
+      radius: 900,
+      color: '#f97316',
+      fillColor: '#f97316',
+      fillOpacity: 0.18,
+      weight: 0
+    }).addTo(map);
+
+    const interactionLayer = L.circle(coords, {
+      radius: 2000,
+      opacity: 0,
+      fillOpacity: 0,
+      interactive: true
+    }).addTo(map);
+
+    setTimeout(() => interactionLayer.bringToFront(), 0);
+
+    activeCircles.push(core, glow, interactionLayer);
+    markerIndex.set(`${item.type}-${item.id}`, interactionLayer);
+
+    interactionLayer.on('mouseover', () => {
+      if (selectedId === item.id) return;
+
+      core.setStyle({ fillOpacity: 0.6 });
+      glow.setStyle({ fillOpacity: 0.3 });
+
+      document.querySelectorAll('.listing-card').forEach(c => c.classList.remove('hovered'));
+      const card = document.querySelector(`.listing-card[data-id="${item.id}"]`);
+      if (card) card.classList.add('hovered');
+
+      setActive(item.id, false);
+      scrollCardIntoView(item.id);
+    });
+
+    interactionLayer.on('mouseout', () => {
+      if (selectedId === item.id) return;
+
+      core.setStyle({ fillOpacity: 0.35 });
+      glow.setStyle({ fillOpacity: 0.18 });
+      document.querySelectorAll('.listing-card').forEach(c => c.classList.remove('hovered'));
+    });
+
+    interactionLayer.on('click', () => {
+      selectedId = item.id;
+      setActive(item.id, true);
+      scrollCardIntoView(item.id);
+
+      activeCircles.forEach(c => {
+        if (c.setStyle) c.setStyle({ fillOpacity: 0.18 });
+      });
+
+      core.setStyle({ fillOpacity: 0.75 });
+      glow.setStyle({ fillOpacity: 0.45 });
+      core.bringToFront();
+      glow.bringToFront();
+    });
+  });
+
+  fitMapToItems(items);
+}
+
+// ===== END: TRUE ZILLOW MAP ENGINE =====
+
+    function fitMapToItems(items) {
+      if (!items.length) return;
+      const bounds = L.latLngBounds(items.map(item => getDisplayCoords(item)));
+      map.fitBounds(bounds, {
+        paddingTopLeft: [30, 210],
+        paddingBottomRight: [30, 220],
+        maxZoom: 12
+      });
+    }
+
+function updateMarkerStates() {
+  // 🔥 CLEAN — no icon logic anymore
+}
+
+function formatCount() {
+
+  const visibleCards = document.querySelectorAll('.listing-card').length;
+
+  const label = lockedRole === 'homeowner'
+    ? 'contractors'
+    : 'jobs';
+
+  document.getElementById('resultsCount').innerText =
+    `${visibleCards} ${label} found`;
+}
+
+function getJobImage(trade) {
+  const map = {
+    'Kitchen Renovation': 'images/jobs/kitchen.jpg',
+    'Bathroom Renovation': 'images/jobs/bathroom.jpg',
+    'Additions & Remodeling': 'images/jobs/additions-remodeling.jpg',
+    'General Contractors': 'images/jobs/general-contractors.jpg',
+    'Carpentry': 'images/jobs/carpentry.jpg',
+    'Concrete & Masonry': 'images/jobs/concrete-masonry.jpg',
+    'Decks & Porches': 'images/jobs/decks-porches.jpg',
+    'Doors': 'images/jobs/doors.jpg',
+    'Drywall & Insulation': 'images/jobs/drywall-insulation.jpg',
+    'Electrical': 'images/jobs/electrical.jpg',
+    'Fencing': 'images/jobs/fencing.jpg',
+    'Flooring': 'images/jobs/flooring.jpg',
+    'Garage Doors': 'images/jobs/garage-doors.jpg',
+    'Glass & Mirrors': 'images/jobs/glass-mirrors.jpg',
+    'Gutters': 'images/jobs/gutters.jpg',
+    'Handyman Services': 'images/jobs/handyman-services.jpg',
+    'HVAC': 'images/jobs/hvac.jpg',
+    'Junk Removal': 'images/jobs/junk-removal.jpg',
+    'Land Surveying': 'images/jobs/land-surveying.jpg',
+    'Landscaping': 'images/jobs/landscaping.jpg',
+    'Lawn Care': 'images/jobs/lawn-care.jpg',
+    'Locksmith': 'images/jobs/locksmith.jpg',
+    'Painting': 'images/jobs/painting.jpg',
+    'Patios': 'images/jobs/patios.jpg',
+    'Pest Control': 'images/jobs/pest-control.jpg',
+    'Plumbing': 'images/jobs/plumbing.jpg',
+    'Pools & Spas': 'images/jobs/pools-spas.jpg',
+    'Pressure Washing': 'images/jobs/pressure-washing.jpg',
+    'Roofing': 'images/jobs/roofing.jpg',
+    'Septic Systems': 'images/jobs/septic-systems.jpg',
+    'Siding': 'images/jobs/siding.jpg',
+    'Solar': 'images/jobs/solar.jpg',
+    'Sunrooms': 'images/jobs/sunrooms.jpg',
+    'Tile & Stone': 'images/jobs/tile-stone.jpg',
+    'Tree Services': 'images/jobs/tree-services.jpg',
+    'Water Damage Restoration': 'images/jobs/water-damage-restoration.jpg',
+    'Windows': 'images/jobs/windows.jpg'
+  };
+
+  return map[trade] || 'images/jobs/default.jpg';
+}
+    
+    function contractorCardHtml(item) {
+      return `
+              <img src="${getJobImage(item.trade)}" 
+             onerror="this.src='images/jobs/default.jpg'"
+             style="width:100%; height:116px; object-fit:cover; display:block;">
+             
+        <div class="card-top">
+          <div class="card-title-wrap">
+            <h3 class="card-title">${anonymizeContractorName(item)}</h3>
+            <p class="card-sub">${item.trade} • ${item.city || ''}</p>
+          </div>
+          <div class="rating-pill">⭐ ${Number(item.rating || 0).toFixed(1)}</div>
+        </div>
+        <div class="card-body">
+          <div class="meta-grid">
+            <div class="meta-box">
+              <div class="meta-label">Projects</div>
+              <div class="meta-value">${item.projects_completed || 0}</div>
+            </div>
+            <div class="meta-box">
+              <div class="meta-label">Distance</div>
+              <div class="meta-value">${Number(item.distance || 0).toFixed(1)} mi</div>
+            </div>
+          </div>
+          <div class="info-row">
+            <span><strong>Response:</strong> ${item.response_time || '—'}</span>
+            <span><strong>Reviews:</strong> ${item.reviews || 0}</span>
+          </div>
+          <div class="card-actions">
+            <button class="mini-btn secondary" data-action="view" data-id="${item.id}">View</button>
+            <button class="mini-btn primary" data-action="message" data-id="${item.id}">Message</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function jobCardHtml(item) {
+      return `
+              <img src="${getJobImage(item.trade)}" 
+             onerror="this.src='images/jobs/default.jpg'"
+             style="width:100%; height:116px; object-fit:cover; display:block;">
+             
+        <div class="card-top">
+          <div class="card-title-wrap">
+            <h3 class="card-title">${item.title}</h3>
+            <p class="card-sub">${item.trade} • ${item.city || ''}</p>
+          </div>
+          <div class="rating-pill">⭐ ${Number(item.rating || 0).toFixed(1)}</div>
+        </div>
+        <div class="card-body">
+          <div class="meta-grid">
+            <div class="meta-box">
+              <div class="meta-label">Budget</div>
+              <div class="meta-value">${item.budget || '$0'}</div>
+            </div>
+            <div class="meta-box">
+              <div class="meta-label">Bids</div>
+              <div class="meta-value">${(item.bids || []).length} / ${item.max_bids || 5}</div>
+            </div>
+          </div>
+          <div class="info-row">
+            <span><strong>By:</strong> ${anonymizeCustomerName(item)}</span>
+            <span><strong>Posted:</strong> ${item.posted_ago || 'Live'}</span>
+          </div>
+          <div class="card-actions">
+            <button class="mini-btn secondary" data-action="job-details" data-id="${item.id}">View</button>
+            <button class="mini-btn primary submit-bid-btn" onclick="openProjectRoom(${item.id})">Submit Bid</button>
+          </div>
+        </div>
+      `;
+    }
+
+function renderCards(items) {
+  cardsRow.replaceChildren();
+
+  items = items.filter(item => {
+    if (lockedRole === 'homeowner') return item.type === 'contractor';
+    if (lockedRole === 'contractor') return item.type === 'job';
+    return true;
+  });
+
+  if (!items.length) {
+    cardsRow.innerHTML = `
+      <div class="listing-card">
+        <div style="padding:22px;text-align:center;">
+          <div style="font-size:17px;font-weight:900;margin-bottom:8px;">No results found</div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  cardsRow.innerHTML = items.map(item => `
+    <div class="listing-card ${`${item.type}-${item.id}` === activeId ? 'active' : ''}" 
+         data-id="${item.type}-${item.id}">
+      <div class="card-inner">
+        ${item.type === 'contractor' ? contractorCardHtml(item) : jobCardHtml(item)}
+      </div>
+    </div>
+  `).join('');
+
+  document.querySelectorAll('.listing-card[data-id]').forEach(card => {
+    const id = card.dataset.id;
+
+    card.onmouseenter = () => {
+      if (selectedId === id) return;
+
+      setActive(id, false);
+      scrollCardIntoView(id);
+
+      const marker = markerIndex.get(id);
+      if (marker) {
+        const coords = marker.getLatLng();
+        map.flyTo(coords, 13, { duration: 0.4 });
+      }
+    };
+
+    card.onclick = (e) => {
+  if (e.target.closest('button')) return;
+
+  selectedId = id;
+  setActive(id, true);
+  scrollCardIntoView(id);
+};
+  });
+}
+
+function setActive(id, fromMap = false) {
+  activeId = id;
+  if (fromMap) selectedId = Number(id);
+
+  document.querySelectorAll('.listing-card[data-id]').forEach(card => {
+    card.classList.toggle('active', String(card.dataset.id) === String(id));
+  });
+
+  const item = filteredItems.find(entry => `${entry.type}-${entry.id}` === id);
+  if (!item) return;
+
+  const [displayLat, displayLng] = getDisplayCoords(item);
+
+  map.flyTo([displayLat, displayLng], 14, {
+    duration: 0.6,
+    easeLinearity: 0.25
+  });
+
+
+    if (activeHighlight) {
+      map.removeLayer(activeHighlight);
+    }
+
+    const coords = [displayLat, displayLng];
+
+if (activeHighlight) {
+  map.removeLayer(activeHighlight);
+}
+
+activeHighlight = L.circle(coords, {
+  radius: 1600,
+  color: '#f97316',
+  fillColor: '#f97316',
+  fillOpacity: 0.15,
+  weight: 0
+}).addTo(map);
+
+activeHighlight.bringToFront();
+  }
+    function scrollCardIntoView(id) {
+      const target = [...document.querySelectorAll('.listing-card[data-id]')].find(card => card.dataset.id === id);
+      if (!target) return;
+      const left = target.offsetLeft - (cardsRow.clientWidth / 2) + (target.clientWidth / 2);
+      cardsRow.scrollTo({ left, behavior: 'smooth' });
+    }
+
+    function sortItems(items) {
+      if (activeSort === 'distance') items.sort((a, b) => Number(a.distance || 999) - Number(b.distance || 999));
+      else items.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
+    }
+
+async function applyFilters() {
+  if (window.__applyingFilters) return;
+  window.__applyingFilters = true;
+
+  try {
+const source = await getCurrentDataset();
+if (!Array.isArray(source)) return;
+
+    // 🔥 SINGLE DEDUPE (ONLY ONCE — SOURCE OF TRUTH)
+const cleanSource = Object.values(
+  source.reduce((acc, item) => {
+    const key = `${item.type}-${item.id}`;
+    acc[key] = item;
+    return acc;
+  }, {})
+);
+
+filteredItems = cleanSource;
+
+    const query = searchInput.value.trim().toLowerCase();
+    const selectedTrade = tradeFilter.value;
+    const maxDistance = Number(distanceFilter.value);
+    const minRating = Number(ratingFilter.value);
+    const mode = lockedRole || currentMode;
+
+    // 🔥 FILTER CLEAN DATA (NOT BEFORE DEDUPE)
+    filteredItems = filteredItems.filter(item => {
+      if (mode === 'homeowner' && item.type !== 'contractor') return false;
+      if (mode === 'contractor' && item.type !== 'job') return false;
+
+      if (mode === 'contractor' && (item.max_bids || 5) <= ((item.bids || []).length)) {
+        return false;
+      }
+
+      const haystack = item.type === 'contractor'
+        ? [item.name, item.trade, item.city, item.bio].join(' ').toLowerCase()
+        : [item.title, item.trade, item.city, item.customer_name, item.description].join(' ').toLowerCase();
+
+      const matchesQuery = !query || haystack.includes(query);
+      const matchesTrade =
+        selectedTrade === 'all' ||
+        String(item.trade || '').toLowerCase().includes(selectedTrade.toLowerCase());
+      const matchesDistance = !item.distance || Number(item.distance) <= maxDistance;
+      const matchesRating = Number(item.rating || 0) >= minRating;
+
+      return matchesQuery && matchesTrade && matchesDistance && matchesRating;
+    });
+
+    sortItems(filteredItems);
+    syncModeUI();
+
+    if (!filteredItems.some(item => String(item.id) === String(activeId))) {
+      activeId = filteredItems[0] ? `${filteredItems[0].type}-${filteredItems[0].id}` : null;
+    }
+
+    // 🔥 FINAL SAFETY DEDUPE (guaranteed clean)
+const finalItems = Object.values(
+  filteredItems.reduce((acc, item) => {
+    acc[`${item.type}-${item.id}`] = item;
+    return acc;
+  }, {})
+);
+
+// 🔥 HARD RENDER LOCK (PREVENT DUPLICATES)
+const renderKey = JSON.stringify(filteredItems.map(i => `${i.type}-${i.id}`));
+
+if (__lastRenderKey === renderKey) return;
+__lastRenderKey = renderKey;
+
+renderCards(filteredItems);
+renderMarkers(filteredItems);
+formatCount();
+
+    if (filteredItems.length > 0) {
+      const firstId = `${filteredItems[0].type}-${filteredItems[0].id}`;
+
+      requestAnimationFrame(() => {
+        setActive(firstId, false);
+        scrollCardIntoView(firstId);
+        cardsRow.dispatchEvent(new Event('scroll'));
+      });
+    }
+
+  } finally {
+    window.__applyingFilters = false;
+  }
+}
+function setSort(type) {
+      activeSort = type;
+      sortDistanceBtn.classList.toggle('active', type === 'distance');
+      sortRatingBtn.classList.toggle('active', type === 'rating');
+      applyFilters();
+    }
+
+    function getFormattedBudget(value) {
+      const trimmed = String(value || '').trim();
+      if (!trimmed) return '$0';
+      return trimmed.startsWith('$') ? trimmed : `$${trimmed}`;
+    }
+
+    function openJobModal() { expandUI(); jobModal.classList.add('show'); }
+    function closeJobForm() { jobModal.classList.remove('show'); }
+    function clearJobForm() {
+      document.getElementById('jobTitle').value = '';
+      document.getElementById('jobBudget').value = '';
+      document.getElementById('jobCity').value = '';
+      document.getElementById('jobDescription').value = '';
+      document.getElementById('jobTrade').selectedIndex = 0;
+    }
+
+async function createJobFromForm() {
+  const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+
+  if (userError || !user) {
+    alert("You must be logged in to post a job.");
+    return;
+  }
+
+  const title = document.getElementById('jobTitle').value.trim() || 'New Job';
+  const trade = document.getElementById('jobTrade').value || 'General Contractors';
+  const budget = getFormattedBudget(document.getElementById('jobBudget').value);
+  const city = document.getElementById('jobCity').value.trim() || 'North Jersey, NJ';
+  const description = document.getElementById('jobDescription').value.trim() || 'Customer posted a new project on Revamp.';
+  const center = map.getCenter();
+
+  const payload = {
+    user_id: user.id,
+    title,
+    trade,
+    budget,
+    customer_name: 'Customer',
+    city,
+    description,
+    lat: Number(center.lat.toFixed(6)),
+    lng: Number(center.lng.toFixed(6)),
+    rating: 5.0,
+    reviews: 1,
+    distance: 1.0,
+    verified: true,
+    posted_ago: 'Just now',
+    max_bids: 5,
+    type: 'job'
+  };
+
+  const { error } = await supabaseClient.from('jobs').insert([payload]);
+
+  if (error) {
+    console.error("JOB POST ERROR:", error);
+    alert(error.message);
+    return;
+  }
+
+  closeJobForm();
+  clearJobForm();
+  showStatus('Job posted');
+  await loadLiveData();
+  setMode('homeowner');
+}
+
+    function openContractorProjectRoom(contractorId) {
+  const contractor = contractors.find(c => String(c.id) === String(contractorId));
+
+  if (contractor) {
+    sessionStorage.setItem(
+      'revampSelectedContractor',
+      JSON.stringify(getSafeContractorSessionItem(contractor))
+    );
+  }
+
+  window.location.href = `project-room.html?mode=homeowner&contractor=${contractorId}`;
+}
+
+    function openProjectRoom(jobId) {
+  const job = jobs.find(entry => String(entry.id) === String(jobId));
+
+  if (!job) {
+    alert("Job not found");
+    return;
+  }
+
+  window.location.href = `project-room.html?mode=contractor&job=${jobId}`;
+}
+    
+    async function submitBid(jobId) {
+      try {
+        const amount = prompt("Enter your bid amount:");
+        if (!amount) return;
+        const message = prompt("Add a message (optional):") || "";
+
+        const { error } = await supabaseClient.from('bids').insert([{
+          job_id: jobId,
+contractor_id: 'demo-contractor',
+contractor_name: 'Verified Contractor',
+          amount: amount,
+          message: message,
+          eta: 'TBD'
+        }]);
+
+        if (error) {
+          console.error(error);
+          alert('Error submitting bid');
+          return;
+        }
+
+        showStatus('Bid submitted');
+        await loadLiveData();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+function canEditItem(item) {
+  const currentUserId = window.__currentUserId || null;
+  if (!currentUserId || !item) return false;
+
+  return String(item.user_id || item.owner_id || item.profile_id || item.contractor_id || '') === String(currentUserId);
+}
+   function openDetailModal(item) {
+  if (!item) return;
+      expandUI();
+      detailModal.classList.add('show');
+
+      if (item.type === 'contractor') {
+        detailTitle.textContent = anonymizeContractorName(item);
+        detailContent.innerHTML = `
+          <div class="detail-panel">
+            <h4>${item.trade} • ${item.city || ''}</h4>
+            <p>${item.bio || ''}</p>
+          </div>
+          <div class="modal-grid">
+            <div class="detail-panel">
+              <h4>Reputation</h4>
+              <p>⭐ ${Number(item.rating || 0).toFixed(1)} rating with ${item.reviews || 0} reviews.</p>
+            </div>
+            <div class="detail-panel">
+              <h4>Performance</h4>
+              <p>${item.projects_completed || 0} completed projects and average response time of ${item.response_time || '—'}.</p>
+            </div>
+          </div>
+          <div class="detail-panel">
+            <h4>Qualifications</h4>
+            <p>${item.licensed ? 'Licensed' : 'Unlicensed'} • ${item.insured ? 'Insured' : 'Not insured'} • Budget tier ${item.price || '$$'}</p>
+          </div>
+          <div class="detail-panel">
+            <h4>Specialties</h4>
+            <div class="detail-tags">${(item.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
+          </div>
+          <div class="card-actions">
+  ${canEditItem(item) ? `<button class="mini-btn secondary" data-action="edit" data-id="${item.id}">Edit</button>` : ''}
+  <button class="mini-btn primary" data-action="message" data-id="${item.id}">Message</button>
+</div>
+        `;
+      } else {
+        const visibleBids = (item.bids || []).filter(bid => {
+  if (currentMode === 'contractor' && bid.contractor_id !== 'demo-contractor') {
+    return false;
+  }
+  return true;
+});
+
+const bidsHtml = visibleBids.length
+  ? visibleBids.map((bid, index) => `
+      <div style="border-top:1px solid #e2e8f0;padding-top:10px;margin-top:10px;">
+        <strong>Verified Contractor</strong><br>
+        Bid: ${bid.amount}<br>
+        Start: ${bid.eta || 'TBD'}<br>
+        ${bid.message ? `Message: ${bid.message}<br>` : ''}
+        <button class="mini-btn primary" style="margin-top:8px;" data-action="accept-bid" data-job="${item.id}" data-bid="${index}">Accept Bid</button>
+      </div>
+    `).join('')
+  : '<p>No bids yet.</p>';
+
+        detailTitle.textContent = item.title;
+        detailContent.innerHTML = `
+          <div class="detail-panel">
+            <h4>${item.trade} • ${item.city || ''}</h4>
+            <p>${item.description || ''}</p>
+          </div>
+          <div class="modal-grid">
+            <div class="detail-panel">
+              <h4>Customer</h4>
+              <p>${anonymizeCustomerName(item)} • ⭐ ${Number(item.rating || 0).toFixed(1)} (${item.reviews || 0} reviews) • ${item.verified ? 'Verified customer' : 'Unverified customer'}</p>
+            </div>
+            <div class="detail-panel">
+              <h4>Budget & Bids</h4>
+              <p>${item.budget || '$0'} • Posted ${item.posted_ago || 'Live'} • Bids ${(item.bids || []).length}/${item.max_bids || 5}</p>
+            </div>
+          </div>
+          <div class="detail-panel">
+            <h4>Bids (${(item.bids || []).length}/${item.max_bids || 5})</h4>
+            ${bidsHtml}
+          </div>
+         <div class="card-actions">
+ ${canEditItem(item) ? `<button class="mini-btn secondary" data-action="edit" data-id="${item.id}">Edit</button>` : ''}
+<button class="mini-btn primary" data-action="project-room" data-id="${item.id}">
+  Submit Bid
+</button>
+</div>
+        `;
+      }
+    }
+
+    function closeDetails() {
+      detailModal.classList.remove('show');
+    }
+
+   function handleCardAction(action, id) {
+  const cleanId = String(id).replace('contractor-', '').replace('job-', '');
+
+  if (action === 'edit') {
+    openEditModal(cleanId);
+    return;
+  }
+
+  if (action === 'view' || action === 'job-details') {
+    const item = [...contractors, ...jobs].find(entry => String(entry.id) === cleanId);
+    if (item) openDetailModal(item);
+    return;
+  }
+
+  if (action === 'message') {
+    const contractor = contractors.find(c => String(c.id) === cleanId);
+
+    if (!contractor) {
+      showStatus("Contractor not found");
+      return;
+    }
+
+    const userId = window.__currentUserId;
+
+    if (!userId) {
+      showStatus("Login required to message contractor");
+      return;
+    }
+
+    const matchingJob = jobs.find(job =>
+      String(job.user_id) === String(userId) &&
+      String(job.trade || '').toLowerCase().trim() === String(contractor.trade || '').toLowerCase().trim()
+    );
+
+    if (!matchingJob) {
+      showStatus("Post a matching job first before messaging this contractor");
+      return;
+    }
+
+    sessionStorage.setItem(
+      'revampSelectedContractor',
+      JSON.stringify(getSafeContractorSessionItem(contractor))
+    );
+
+    sessionStorage.setItem(
+      'revampSelectedJob',
+      JSON.stringify(getSafeJobSessionItem(matchingJob))
+    );
+
+    window.location.assign(
+      `project-room.html?mode=homeowner&contractor=${contractor.id}&job=${matchingJob.id}`
+    );
+
+    return;
+  }
+
+  if (action === 'project-room') {
+    openProjectRoom(cleanId);
+    return;
+  }
+
+  if (action === 'bid') {
+    submitBid(cleanId);
+    return;
+  }
+
+  if (action === 'accept-bid') {
+    showStatus('Bid accepted');
+    return;
+  }
+}
+async function openEditModal(id) {
+  const item = [...contractors, ...jobs].find(i => String(i.id) === String(id));
+  if (!item) return;
+  if (!canEditItem(item)) {
+    showStatus("You can only edit your own posts");
+    return;
+  }
+  expandUI();
+  detailModal.classList.add('show');
+
+  if (item.type === 'contractor') {
+
+    detailTitle.textContent = "Edit Profile";
+
+    detailContent.innerHTML = `
+      <div class="field">
+        <label class="label">Trade</label>
+        <input class="input" id="editTrade" value="${item.trade || ''}">
+      </div>
+
+      <div class="field">
+        <label class="label">Bio</label>
+        <textarea class="textarea" id="editBio">${item.bio || ''}</textarea>
+      </div>
+
+      <div class="field">
+        <label class="label">Specialties</label>
+        <input class="input" id="editTags" value="${(item.tags || []).join(', ')}">
+      </div>
+
+      <div class="modal-actions">
+        <button class="modal-btn primary" onclick="saveEdit('${id}', 'contractor')">Save</button>
+      </div>
+    `;
+  }
+
+  if (item.type === 'job') {
+
+    detailTitle.textContent = "Edit Job";
+
+    detailContent.innerHTML = `
+      <div class="field">
+        <label class="label">Title</label>
+        <input class="input" id="editTitle" value="${item.title || ''}">
+      </div>
+
+      <div class="field">
+        <label class="label">Budget</label>
+        <input class="input" id="editBudget" value="${item.budget || ''}">
+      </div>
+
+      <div class="field">
+        <label class="label">Description</label>
+        <textarea class="textarea" id="editDescription">${item.description || ''}</textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="modal-btn primary" onclick="saveEdit('${id}', 'job')">Save</button>
+      </div>
+    `;
+  }
+}
+async function setMode(mode) {
+  // 🔒 ABSOLUTE LOCK
+  if (lockedRole) {
+    if (mode !== lockedRole) {
+      showStatus(`Locked as ${lockedRole}`);
+    }
+    mode = lockedRole; // 🔥 FORCE it no matter what
+  }
+
+  currentMode = mode;
+  localStorage.setItem('revamplex_role', mode);
+
+  const url = new URL(window.location);
+  url.searchParams.set('view', mode);
+  window.history.replaceState({}, '', url);
+
+  syncModeUI();
+  const dataset = await getCurrentDataset();
+  activeId = dataset[0] ? dataset[0].id : null;
+  applyFilters();
+  expandUI();
+}
+
+    function clearWelcomeForm() {
+      [
+        'welcomeFullName','welcomeEmail','welcomePhone','welcomePassword','welcomeAddress',
+        'welcomeCompany','welcomeLicense','welcomeBio','welcomeProjectNotes'
+      ].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+
+      ['welcomeProjectType','welcomeTrade','welcomeCoverage'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.selectedIndex = 0;
+      });
+    }
+
+    function startSignup(role) {
+      localStorage.setItem('revamplex_role', role);
+      selectedWelcomeRole = role;
+
+      welcomeRoleChooser.style.display = 'none';
+      welcomeFormWrap.classList.add('show');
+
+      const isContractor = role === 'contractor';
+      welcomeRolePill.textContent = isContractor ? 'Pro Contractor Registration' : 'Homeowner Registration';
+      contractorTrialNote.classList.toggle('show', isContractor);
+      contractorFields.classList.toggle('show', isContractor);
+      homeownerFields.classList.toggle('show', !isContractor);
+    }
+
+    function backToRoleChooser() {
+      selectedWelcomeRole = null;
+      welcomeRoleChooser.style.display = '';
+      welcomeFormWrap.classList.remove('show');
+      contractorTrialNote.classList.remove('show');
+      contractorFields.classList.remove('show');
+      homeownerFields.classList.remove('show');
+    }
+
+   async function submitWelcomeRegistration() {
+  const email = document.getElementById('welcomeEmail').value.trim();
+  const password = document.getElementById('welcomePassword').value.trim();
+
+  if (!selectedWelcomeRole) {
+    alert('Choose Homeowner or Contractor');
+    return;
+  }
+
+  if (!email || !password) {
+    alert('Enter email & password');
+    return;
+  }
+
+  try {
+    // 🔥 SIGN UP USER
+    const { data, error } = await supabaseClient.auth.signUp({
+      email,
+      password
+    });
+
+    if (error) throw error;
+
+    const userId = data.user?.id;
+
+    if (!userId) {
+      alert("Signup issue — try again");
+      return;
+    }
+
+    // 🔥 SAVE FULL PROFILE (THIS WAS MISSING)
+    const profilePayload = {
+      id: userId,
+      email: email,
+      role: selectedWelcomeRole,
+      full_name: document.getElementById('welcomeFullName').value.trim(),
+      phone: document.getElementById('welcomePhone').value.trim(),
+      address: document.getElementById('welcomeAddress').value.trim(),
+
+      // homeowner fields
+      project_type: document.getElementById('welcomeProjectType').value,
+      project_notes: document.getElementById('welcomeProjectNotes').value.trim(),
+
+      // contractor fields
+      company: document.getElementById('welcomeCompany').value.trim(),
+      trade: document.getElementById('welcomeTrade').value,
+      license: document.getElementById('welcomeLicense').value.trim(),
+      service_radius: document.getElementById('welcomeCoverage').value,
+      bio: document.getElementById('welcomeBio').value.trim()
+    };
+
+    const { error: profileError } = await supabaseClient
+      .from('profiles')
+      .insert([profilePayload]);
+
+      if (profileError) {
+      console.error("PROFILE ERROR:", profileError);
+      alert(profileError.message);
+      return;
+    }
+
+    // 🔥 FORCE LOGIN AFTER SIGNUP
+    const { error: loginError } = await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (loginError) throw loginError;
+
+    localStorage.setItem('revamplex_registered', 'true');
+    localStorage.setItem('revamplex_role', selectedWelcomeRole);
+
+    window.location.href = `map.html?view=${selectedWelcomeRole}`;
+
+  } catch (err) {
+    alert(err.message);
+    console.error(err);
+  }
+}
+
+async function saveEdit(id, type) {
+
+  try {
+
+    if (type === 'contractor') {
+
+      const payload = {
+        trade: document.getElementById('editTrade').value,
+        bio: document.getElementById('editBio').value,
+        tags: document.getElementById('editTags').value.split(',').map(t => t.trim())
+      };
+
+      const { error } = await supabaseClient
+        .from('contractors')
+        .update(payload)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      showStatus("Profile updated");
+
+    }
+
+    if (type === 'job') {
+
+      const payload = {
+        title: document.getElementById('editTitle').value,
+        budget: document.getElementById('editBudget').value,
+        description: document.getElementById('editDescription').value
+      };
+
+      const { error } = await supabaseClient
+        .from('jobs')
+        .update(payload)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      showStatus("Job updated");
+    }
+
+    closeDetails();
+    await loadLiveData();
+
+  } catch (err) {
+    alert(err.message);
+    console.error(err);
+  }
+}
+
+    async function loadJobs() {
+      const { data, error } = await supabaseClient
+        .from('jobs')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('jobs load error', error);
+        return [];
+      }
+
+      const rows = data || [];
+      const ids = rows.map(r => r.id);
+      let bidsByJob = {};
+
+      if (ids.length) {
+        const { data: bidRows, error: bidError } = await supabaseClient
+          .from('bids')
+          .select('*')
+          .in('job_id', ids)
+          .order('created_at', { ascending: true });
+
+        if (!bidError && bidRows) {
+          bidsByJob = bidRows.reduce((acc, bid) => {
+            if (!acc[bid.job_id]) acc[bid.job_id] = [];
+            acc[bid.job_id].push(bid);
+            return acc;
+          }, {});
+        }
+      }
+
+      return rows.map(item => ({
+        ...item,
+        bids: bidsByJob[item.id] || [],
+        type: 'job'
+      }));
+    }
+async function loadContractors() {
+  const { data, error } = await supabaseClient
+    .from('contractors')
+    .select('*');
+
+  if (error) {
+    console.error('contractors load error', error);
+    return [];
+  }
+
+  return (data || []).map(item => ({
+    ...item,
+    type: 'contractor'
+  }));
+}
+async function loadLiveData() {
+
+  if (isLoadingData) return; // 🚫 prevents duplicate calls
+  isLoadingData = true;
+
+  try {
+    const freshContractors = await loadContractors();
+    const freshJobs = await loadJobs();
+
+    // 🔥 CLEAN ASSIGN (NO STACKING)
+contractors = Array.from(new Map(
+  freshContractors.map(i => [i.id, { ...i, type: 'contractor' }])
+).values());
+
+jobs = Array.from(new Map(
+  freshJobs.map(i => [i.id, { ...i, type: 'job' }])
+).values());
+
+    const dataset = await getCurrentDataset();
+    activeId = dataset[0] ? dataset[0].id : null;
+
+// 🔥 ONLY ONE RENDER TRIGGER
+applyFilters();
+
+ } catch (err) {
+  console.error("LOAD ERROR:", err);
+} finally {
+  isLoadingData = false;
+}
+}
+
+let liveSubscribed = false;
+
+function subscribeLive() {
+
+  if (liveSubscribed) return; // 🔥 PREVENT MULTIPLE SUBSCRIPTIONS
+  liveSubscribed = true;
+
+  supabaseClient
+    .channel('revamplex-live')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, () => loadLiveData())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'bids' }, () => loadLiveData())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'contractors' }, () => loadLiveData())
+    .subscribe(status => {
+      console.log("LIVE STATUS:", status);
+    });
+}
+
+    welcomeHomeownerBtn.addEventListener('click', () => startSignup('homeowner'));
+    welcomeContractorBtn.addEventListener('click', () => startSignup('contractor'));
+    exploreDemoBtn.addEventListener('click', exploreDemo);
+    welcomeBackBtn.addEventListener('click', backToRoleChooser);
+    document.getElementById('loginInsteadBtn').addEventListener('click', async () => {
+  const email = prompt("Enter your email");
+  const password = prompt("Enter your password");
+
+  if (!email || !password) return;
+
+  const { error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  location.reload();
+});
+function exploreDemo() {
+  welcomeOverlay.classList.add('hidden');
+  welcomeOverlay.style.display = 'none'; // 🔥 force remove from DOM flow
+
+  localStorage.setItem('revamplex_demo', 'true');
+
+  setMode('homeowner');
+  showStatus('Demo mode');
+}
+    welcomeSubmitBtn.addEventListener('click', submitWelcomeRegistration);
+
+    if (searchBtn) {
+  searchBtn.addEventListener('click', applyFilters);
+}
+searchInput.addEventListener('keydown', async (e) => {
+  if (e.key === 'Enter') applyFilters();
+});
+    tradeFilter.addEventListener('change', applyFilters);
+    distanceFilter.addEventListener('change', applyFilters);
+    ratingFilter.addEventListener('change', applyFilters);
+if (sortDistanceBtn) {
+  sortDistanceBtn.addEventListener('click', () => setSort('distance'));
+}
+
+if (sortRatingBtn) {
+  sortRatingBtn.addEventListener('click', () => setSort('rating'));
+}
+
+if (resetFiltersBtn) {
+  resetFiltersBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    tradeFilter.value = 'all';
+    distanceFilter.value = '100';
+    ratingFilter.value = '0';
+    setSort('distance');
+  });
+}
+
+homeownerModeBtn.addEventListener('click', () => {
+  if (lockedRole) return;
+  setMode('homeowner');
+});
+
+contractorModeBtn.addEventListener('click', () => {
+  if (lockedRole) return;
+  setMode('contractor');
+});
+
+    scrollLeftBtn.addEventListener('click', () => cardsRow.scrollBy({ left: -280, behavior: 'smooth' }));
+    scrollRightBtn.addEventListener('click', () => cardsRow.scrollBy({ left: 280, behavior: 'smooth' }));
+
+    locateBtn.addEventListener('click', () => {
+      fitMapToItems(filteredItems);
+      expandUI();
+      showStatus('Map recentered');
+    });
+
+    postJobBtn.addEventListener('click', openJobModal);
+    closeJobModal.addEventListener('click', closeJobForm);
+    cancelJobBtn.addEventListener('click', closeJobForm);
+    submitJobBtn.addEventListener('click', createJobFromForm);
+    restoreUiBtn.addEventListener('click', expandUI);
+    closeDetailModal.addEventListener('click', closeDetails);
+
+    detailModal.addEventListener('click', e => { if (e.target === detailModal) closeDetails(); });
+    jobModal.addEventListener('click', e => { if (e.target === jobModal) closeJobForm(); });
+
+cardsRow.addEventListener('click', e => {
+  const button = e.target.closest('[data-action]');
+  if (button) {
+    e.preventDefault();
+    e.stopPropagation();
+    handleCardAction(button.dataset.action, button.dataset.id);
+    return;
+  }
+
+  const card = e.target.closest('.listing-card[data-id]');
+  if (card) setActive(card.dataset.id, true);
+});
+    
+
+detailContent.addEventListener('click', e => {
+  const modalMessageBtn = e.target.closest('.modal-message-btn');
+  if (modalMessageBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+    handleCardAction('message', modalMessageBtn.dataset.contractorId);
+    return;
+  }
+
+  const button = e.target.closest('[data-action]');
+  if (!button) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (button.dataset.action === 'delete-my-job') {
+    deleteMyJob(button.dataset.id);
+    return;
+  }
+
+  if (button.dataset.action === 'accept-bid') {
+    showStatus('Bid accepted');
+    return;
+  }
+
+  handleCardAction(button.dataset.action, button.dataset.id);
+});
+
+    let scrollTimer = null;
+
+cardsRow.addEventListener('scroll', () => {
+  clearTimeout(scrollTimer);
+
+  const cards = [...document.querySelectorAll('.listing-card[data-id]')];
+  if (!cards.length) return;
+
+  const rowRect = cardsRow.getBoundingClientRect();
+  const rowCenter = rowRect.left + rowRect.width / 2;
+
+  let closestId = null;
+  let closestDiff = Infinity;
+
+  cards.forEach(card => {
+    const rect = card.getBoundingClientRect();
+    const center = rect.left + rect.width / 2;
+    const diff = Math.abs(center - rowCenter);
+
+    const id = card.dataset.id;
+
+    // 🔥 CLEAN STATE
+    card.classList.remove('near', 'far');
+
+    if (id === activeId) return;
+
+    if (diff < 120) {
+      card.classList.add('near');
+    } else {
+      card.classList.add('far');
+    }
+
+    if (diff < closestDiff) {
+      closestDiff = diff;
+      closestId = id;
+    }
+  });
+
+  scrollTimer = setTimeout(() => {
+    if (closestId !== null) {
+      setActive(closestId, false);
+    }
+  }, 70);
+});
+    map.on('click', () => {
+      if (!uiCollapsed) collapseUI();
+      else expandUI();
+    });
+
+    window.addEventListener('resize', () => {
+      setTimeout(() => {
+        map.invalidateSize();
+        if (filteredItems.length) {
+          fitMapToItems(filteredItems);
+          if (activeId) scrollCardIntoView(activeId);
+        }
+      }, 120);
+    });
+    
+async function deleteMyJob(jobId) {
+  const confirmed = confirm("Delete this job? This cannot be undone.");
+  if (!confirmed) return;
+
+  const { data: { user } } = await supabaseClient.auth.getUser();
+
+  if (!user) {
+    showStatus("You must be logged in");
+    return;
+  }
+
+const { data, error } = await supabaseClient
+  .from('jobs')
+  .delete()
+  .eq('id', jobId)
+  .eq('user_id', user.id)
+  .select();
+
+  if (error) {
+    console.error("DELETE JOB ERROR:", error);
+    alert(error.message);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    alert("No job was deleted. This usually means the job does not belong to this account or Supabase RLS is blocking delete.");
+    return;
+  }
+
+  showStatus("Job deleted");
+  await loadLiveData();
+  openDashboard();
+}
+    
+function openWelcomeAuth(mode = 'register') {
+  // 🔥 EXIT DEMO MODE
+  localStorage.removeItem('revamplex_demo');
+
+  // 🔥 FORCE OVERLAY VISIBLE (THIS IS THE FIX)
+  welcomeOverlay.classList.remove('hidden');
+  welcomeOverlay.style.display = 'flex';
+
+  // 🔥 RESET UI STATE
+  backToRoleChooser();
+
+  if (mode === 'login') {
+    const loginBtn = document.getElementById('loginInsteadBtn');
+    if (loginBtn) {
+      setTimeout(() => loginBtn.click(), 100);
+    }
+  }
+}
+
+async function initAuthGate() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  const isDemo = localStorage.getItem('revamplex_demo');
+
+  if (!session && !isDemo) {
+    welcomeOverlay.style.display = 'flex';
+  } else {
+    welcomeOverlay.style.display = 'none';
+  }
+}
+  populateTradeSelect();
+  syncModeUI();
+  loadLiveData();
+  subscribeLive();
+  checkUserSession();
+  initAuthGate();
+
+function goToDashboard() {
+  window.location.href = "dashboard.html";
+}
+</script>
+  
+
 </body>
 </html>
