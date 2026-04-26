@@ -1716,6 +1716,8 @@ function acceptBid(index){
     })
   });
 
+  console.log("FETCH STATUS:", res.status);
+
   const data = await res.json();
 
   console.log("AI RESPONSE:", data);
