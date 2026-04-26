@@ -816,6 +816,142 @@
       line-height: 1.45;
     }
 
+
+    .ai-chat-card {
+      border: 1px solid rgba(249, 115, 22, 0.22);
+      background: linear-gradient(180deg, #fff7ed, #ffffff);
+      border-radius: 22px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .ai-chat-card h4 {
+      margin: 0 0 6px;
+      font-size: 1.05rem;
+    }
+
+    .ai-chat-card p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .ai-chat-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 260px;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .ai-chat-window {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 18px;
+      padding: 14px;
+      min-height: 260px;
+      max-height: 420px;
+      overflow-y: auto;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .ai-msg {
+      padding: 12px 14px;
+      border-radius: 16px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      font-size: 0.94rem;
+      max-width: 92%;
+    }
+
+    .ai-msg.user {
+      background: #eff6ff;
+      justify-self: end;
+    }
+
+    .ai-msg.assistant {
+      background: var(--brand-soft);
+      justify-self: start;
+    }
+
+    .ai-compose {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    #aiChatInput {
+      min-height: 84px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    .ai-side-tools {
+      display: grid;
+      gap: 10px;
+    }
+
+    .ai-status {
+      min-height: 22px;
+      color: var(--brand-dark);
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .estimate-output-card {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: #fff;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .estimate-output-card h4 {
+      margin-top: 0;
+    }
+
+    .proposal-preview-card {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: #fff;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .proposal-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    #proposalPreview {
+      white-space: pre-wrap;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      min-height: 120px;
+      max-height: 360px;
+      overflow: auto;
+      color: var(--text);
+      font-size: 0.94rem;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 900px) {
+      .ai-chat-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .ai-compose {
+        grid-template-columns: 1fr;
+      }
+    }
+
     @media (max-width: 1220px) {
       .hero-grid,
       .dashboard,
@@ -1095,31 +1231,38 @@ Back to Project Feed
             </div>
           </div>
 
-          <div class="ai-estimate-card">
-            <h4>✨ AI Estimate Builder</h4>
-            <p>Type the job details below, including measurements, demo, materials, fixtures, timeline, and anything the homeowner said. The AI will create a professional draft and place it into Estimate Notes.</p>
+                    <div class="ai-chat-card">
+            <h4>✨ AI Estimate Chat</h4>
+            <p>Chat back and forth with AI to build the estimate. Ask for changes, materials, Home Depot-style lists, labor breakdowns, exclusions, timelines, or a cleaner customer proposal.</p>
 
-            <div class="ai-input-row">
-              <textarea id="aiJobInput" placeholder="Example: Bathroom remodel. Demo existing tile floor and shower walls. Room is 8x10. Install new tile floor, tile shower walls, vanity, toilet, fixtures, paint walls and ceiling. Include disposal, materials, labor, timeline, exclusions, and payment schedule."></textarea>
+            <div class="ai-chat-shell">
+              <div>
+                <div class="ai-chat-window" id="aiChatWindow">
+                  <div class="ai-msg assistant">Tell me the job details and I’ll build a professional estimate. Example: “Bathroom remodel, 8x10, demo tile, install new floor tile, tile shower walls, new vanity, toilet, fixtures, paint.”</div>
+                </div>
 
-              <div class="ai-action-stack">
-                <button class="btn btn-primary" id="aiEstimateBtn" type="button">
-                  ✨ Build AI Estimate
-                </button>
-                <button class="btn btn-soft" id="useJobInfoBtn" type="button">
-                  Use Job Info
-                </button>
+                <div class="ai-compose">
+                  <textarea id="aiChatInput" placeholder="Type job details or reply to the AI here..."></textarea>
+                  <button class="btn btn-primary" id="aiSendBtn" type="button">Send</button>
+                </div>
+              </div>
+
+              <div class="ai-side-tools">
+                <button class="btn btn-primary" id="aiEstimateBtn" type="button">✨ Build AI Estimate</button>
+                <button class="btn btn-soft" id="useJobInfoBtn" type="button">Use Job Info</button>
+                <button class="btn btn-soft" id="copyAIToNotesBtn" type="button">Copy Last AI Reply to Notes</button>
                 <div class="ai-status" id="aiStatus"></div>
               </div>
             </div>
           </div>
 
-          <div class="summary-box" style="margin-bottom:16px;">
-            <h4 style="margin-top:0;">Estimate Notes</h4>
+          <div class="estimate-output-card">
+            <h4>Estimate Notes / Proposal Draft</h4>
+            <p style="color:var(--muted);margin-top:0;">AI replies can be copied here. Edit this section before generating the customer PDF.</p>
             <textarea id="estimateNotes" placeholder="AI estimate and proposal notes will appear here. You can edit before generating the PDF.">Includes labor, material, disposal, and standard site protection. Permit costs are included in the contract price where required. Fixtures and finish materials may be specified by owner selection or contractor-approved equivalent of similar quality and cost.</textarea>
           </div>
 
-          <div class="estimate-table-wrap">
+<div class="estimate-table-wrap">
             <table id="estimateTable">
               <thead>
                 <tr>
@@ -1758,31 +1901,7 @@ setupChat();
 setupBackButton();
   
 
-const aiEstimateBtn = document.getElementById("aiEstimateBtn");
-if (aiEstimateBtn) {
-  aiEstimateBtn.addEventListener("click", runAIEstimate);
-}
 
-
-const generateProposalBtn = document.getElementById("generateProposalBtn");
-if (generateProposalBtn) {
-  generateProposalBtn.addEventListener("click", generateProposalPDF);
-}
-
-const downloadProposalBtn = document.getElementById("downloadProposalBtn");
-if (downloadProposalBtn) {
-  downloadProposalBtn.addEventListener("click", downloadProposalPDF);
-}
-
-const printProposalBtn = document.getElementById("printProposalBtn");
-if (printProposalBtn) {
-  printProposalBtn.addEventListener("click", openProposalPDF);
-}
-
-const useJobInfoBtn = document.getElementById("useJobInfoBtn");
-if (useJobInfoBtn) {
-  useJobInfoBtn.addEventListener("click", fillAIInputFromJob);
-}
 
   
 loadBidDashboard();
@@ -1858,7 +1977,11 @@ function acceptBid(index){
 
 }
 
-/* ---------- REAL AI ESTIMATE ---------- */
+
+/* ---------- REAL AI CHAT + ESTIMATE ---------- */
+
+let aiConversation = [];
+let lastAIReply = "";
 
 function getFallbackJobPrompt(){
   const job = window.currentJob || {};
@@ -1887,50 +2010,85 @@ function getFallbackJobPrompt(){
   ].join("\n");
 }
 
+function addAIMessage(role, text){
+  const chatWindow = document.getElementById("aiChatWindow");
+  if (!chatWindow) return;
+
+  const msg = document.createElement("div");
+  msg.className = "ai-msg " + (role === "user" ? "user" : "assistant");
+  msg.innerText = text;
+
+  chatWindow.appendChild(msg);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
 function fillAIInputFromJob(){
-  const input = document.getElementById("aiJobInput");
+  const input = document.getElementById("aiChatInput");
   if (!input) return;
 
   input.value = getFallbackJobPrompt();
   input.focus();
 }
 
-async function runAIEstimate(){
+function copyLastAIReplyToNotes(){
+  const notes = document.getElementById("estimateNotes");
+  if (!notes) return;
 
-  const input = document.getElementById("aiJobInput");
-  const estimateNotes = document.getElementById("estimateNotes");
-  const aiButton = document.getElementById("aiEstimateBtn");
-  const aiStatus = document.getElementById("aiStatus");
-
-  const typedScope = input ? input.value.trim() : "";
-  const prompt = typedScope || getFallbackJobPrompt();
-
-  if (!prompt.trim()) {
-    alert("Type the job details first.");
+  if (!lastAIReply) {
+    alert("No AI reply to copy yet.");
     return;
   }
 
-  if (aiButton) {
-    aiButton.disabled = true;
-    aiButton.innerText = "Building...";
+  notes.value = lastAIReply;
+  notes.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+async function sendAIMessage(forceEstimatePrompt=false){
+
+  const input = document.getElementById("aiChatInput");
+  const aiStatus = document.getElementById("aiStatus");
+  const aiSendBtn = document.getElementById("aiSendBtn");
+  const aiEstimateBtn = document.getElementById("aiEstimateBtn");
+
+  let userText = input ? input.value.trim() : "";
+
+  if (forceEstimatePrompt && !userText) {
+    userText = getFallbackJobPrompt();
   }
 
-  if (aiStatus) {
-    aiStatus.innerText = "AI is building the estimate...";
+  if (!userText) {
+    alert("Type job details or click Use Job Info first.");
+    return;
   }
+
+  addAIMessage("user", userText);
+  aiConversation.push({ role: "user", content: userText });
+
+  if (input) input.value = "";
+
+  if (aiStatus) aiStatus.innerText = "AI is thinking...";
+  if (aiSendBtn) aiSendBtn.disabled = true;
+  if (aiEstimateBtn) aiEstimateBtn.disabled = true;
 
   try {
+    const contextPrompt = [
+      "You are Revamp Project Room AI, helping a contractor create a professional construction estimate.",
+      "Keep answers practical, organized, and customer-ready.",
+      "If the user asks a question, answer it and continue helping refine the estimate.",
+      "",
+      "Conversation:",
+      ...aiConversation.map(m => (m.role === "user" ? "Contractor: " : "AI: ") + m.content)
+    ].join("\n");
+
     const res = await fetch("/api/generate-estimate", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        description: prompt
+        description: contextPrompt
       })
     });
-
-    console.log("FETCH STATUS:", res.status);
 
     const data = await res.json();
 
@@ -1943,29 +2101,32 @@ async function runAIEstimate(){
       return;
     }
 
-    const result = data.result || "No estimate returned.";
+    const reply = data.result || "No estimate returned.";
+    lastAIReply = reply;
+    aiConversation.push({ role: "assistant", content: reply });
 
-    if (estimateNotes) {
-      estimateNotes.value = result;
-      estimateNotes.scrollIntoView({ behavior: "smooth", block: "center" });
+    addAIMessage("assistant", reply);
+
+    const notes = document.getElementById("estimateNotes");
+    if (notes && (!notes.value.trim() || notes.value.includes("Includes labor, material, disposal"))) {
+      notes.value = reply;
     }
 
-    if (aiStatus) {
-      aiStatus.innerText = "Estimate added to notes ✔";
-    }
+    if (aiStatus) aiStatus.innerText = "Ready ✔";
 
   } catch (err) {
     console.error("AI FETCH ERROR:", err);
     if (aiStatus) aiStatus.innerText = "Connection failed";
     alert("AI connection failed. Check Console for details.");
   } finally {
-    if (aiButton) {
-      aiButton.disabled = false;
-      aiButton.innerText = "✨ Build AI Estimate";
-    }
+    if (aiSendBtn) aiSendBtn.disabled = false;
+    if (aiEstimateBtn) aiEstimateBtn.disabled = false;
   }
 }
 
+function runAIEstimate(){
+  sendAIMessage(true);
+}
 
 /* ---------- PROPOSAL PDF ---------- */
 
@@ -1995,7 +2156,7 @@ function buildProposalText(){
 
   const lineItems = rows.map((row, index) => {
     return `${index + 1}. ${row.item} — Qty: ${row.qty} ${row.unit} | Material: $${row.unitCost} | Labor: $${row.labor} | Total: ${row.total}`;
-  }).join("\\n");
+  }).join("\n");
 
   return [
     "REVAMP PROJECT ROOM PROPOSAL",
@@ -2021,7 +2182,7 @@ function buildProposalText(){
     "This proposal is subject to final contractor review, customer approval, signed agreement, and any change orders required after field verification.",
     "",
     "Generated by Revamp Project Room"
-  ].join("\\n");
+  ].join("\n");
 }
 
 function generateProposalPDF(){
