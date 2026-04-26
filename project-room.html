@@ -1814,41 +1814,7 @@ async function uploadProjectFiles(){
   status.innerText = "Upload complete ✔";
 }
 
-/* ---------- AI ESTIMATE ---------- */
 
-function runAIEstimate(){
-
-  const aiItems = [
-    { item: "Demo", qty: 1, unit: "lot", cost: 800, labor: 0 },
-    { item: "Framing", qty: 1, unit: "lot", cost: 700, labor: 400 },
-    { item: "Drywall", qty: 1, unit: "lot", cost: 500, labor: 350 },
-    { item: "Paint", qty: 1, unit: "lot", cost: 300, labor: 250 }
-  ];
-
-  const tbody = document.querySelector("#estimateTable tbody");
-  tbody.innerHTML = "";
-
-  aiItems.forEach(row => {
-
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-<td><input class="table-input" value="${row.item}"/></td>
-<td><input class="table-input qty" value="${row.qty}"/></td>
-<td><input class="table-input" value="${row.unit}"/></td>
-<td><input class="table-input unitCost" value="${row.cost}"/></td>
-<td><input class="table-input laborCost" value="${row.labor}"/></td>
-<td class="lineTotal">$0.00</td>
-`;
-
-    tbody.appendChild(tr);
-  });
-
-  attachEstimateListeners();
-  recalcEstimate();
-
-  alert("AI estimate generated ✔");
-}
 </script>
 </body>
 </html>
