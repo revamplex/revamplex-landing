@@ -1243,14 +1243,14 @@ Back to Project Feed
 
                 <div class="ai-compose">
                   <textarea id="aiChatInput" placeholder="Type job details or reply to the AI here..."></textarea>
-                  <button class="btn btn-primary" id="aiSendBtn" type="button">Send</button>
+                  <button class="btn btn-primary" id="aiSendBtn" type="button" onclick="sendAIMessage(false)">Send</button>
                 </div>
               </div>
 
               <div class="ai-side-tools">
-                <button class="btn btn-primary" id="aiEstimateBtn" type="button">✨ Build AI Estimate</button>
-                <button class="btn btn-soft" id="useJobInfoBtn" type="button">Use Job Info</button>
-                <button class="btn btn-soft" id="copyAIToNotesBtn" type="button">Copy Last AI Reply to Notes</button>
+                <button class="btn btn-primary" id="aiEstimateBtn" type="button" onclick="runAIEstimate()">✨ Build AI Estimate</button>
+                <button class="btn btn-soft" id="useJobInfoBtn" type="button" onclick="fillAIInputFromJob()">Use Job Info</button>
+                <button class="btn btn-soft" id="copyAIToNotesBtn" type="button" onclick="copyLastAIReplyToNotes()">Copy Last AI Reply to Notes</button>
                 <div class="ai-status" id="aiStatus"></div>
               </div>
             </div>
@@ -1514,7 +1514,51 @@ Back to Project Feed
 
     <p class="footer-note">Revamp Project Room prototype • Private homeowner + contractor workspace • Ready to connect to Supabase / auth / database next</p>
   </div>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js">
+/* ---------- AI BUTTON BACKUP WIRING ---------- */
+
+document.addEventListener("DOMContentLoaded", function(){
+  const sendBtn = document.getElementById("aiSendBtn");
+  const chatInput = document.getElementById("aiChatInput");
+
+  if (sendBtn) {
+    sendBtn.onclick = function(){
+      sendAIMessage(false);
+    };
+  }
+
+  if (chatInput) {
+    chatInput.addEventListener("keydown", function(e){
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault();
+        sendAIMessage(false);
+      }
+    });
+  }
+
+  const estimateBtn = document.getElementById("aiEstimateBtn");
+  if (estimateBtn) {
+    estimateBtn.onclick = function(){
+      runAIEstimate();
+    };
+  }
+
+  const useJobBtn = document.getElementById("useJobInfoBtn");
+  if (useJobBtn) {
+    useJobBtn.onclick = function(){
+      fillAIInputFromJob();
+    };
+  }
+
+  const copyBtn = document.getElementById("copyAIToNotesBtn");
+  if (copyBtn) {
+    copyBtn.onclick = function(){
+      copyLastAIReplyToNotes();
+    };
+  }
+});
+
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 
