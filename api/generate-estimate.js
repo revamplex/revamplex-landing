@@ -1,11 +1,19 @@
 export default async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { description } = req.body;
-
   try {
+    const { description } = req.body || {};
+
     const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
@@ -13,19 +21,26 @@ export default async function handler(req, res) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "gpt-4.1",
-        input: `Create a detailed construction estimate with line items, labor, and materials based on this job:\n${description}`
+        model: "gpt-4.1-mini",
+        input: `Create a professional construction estimate with line items, materials, labor, timeline, and notes for this project:\n\n${description || "General renovation"}`
       })
     });
 
-const data = await response.json();
+    const data = await response.json();
 
-const output = data.output_text || "No response";
+    if (!response.ok) {
+      return res.status(500).json({
+        error: data.error?.message || "OpenAI request failed"
+      });
+    }
 
-    res.status(200).json({ result: output });
+    return res.status(200).json({
+      result: data.output_text || "No estimate returned."
+    });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "AI failed" });
+    return res.status(500).json({
+      error: err.message || "AI failed"
+    });
   }
 }
