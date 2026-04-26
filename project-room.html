@@ -952,6 +952,69 @@
       }
     }
 
+
+    .contractor-info-card {
+      border: 1px solid rgba(249, 115, 22, 0.22);
+      background: linear-gradient(180deg, #ffffff, #fff7ed);
+      border-radius: 22px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .contractor-info-card h4 {
+      margin: 0 0 10px;
+      font-size: 1.05rem;
+    }
+
+    .contractor-info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .ai-msg {
+      font-family: Inter, Arial, Helvetica, sans-serif;
+    }
+
+    .ai-msg strong {
+      font-weight: 900;
+    }
+
+    .ai-msg ul {
+      margin: 8px 0 0 18px;
+      padding: 0;
+    }
+
+    .ai-msg li {
+      margin: 4px 0;
+    }
+
+    .ai-msg .ai-heading {
+      display: block;
+      font-size: 1rem;
+      font-weight: 900;
+      margin: 10px 0 6px;
+      color: #9a3412;
+    }
+
+    .mic-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .mic-listening {
+      color: #dc2626;
+      font-weight: 900;
+    }
+
+    @media (max-width: 760px) {
+      .contractor-info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     @media (max-width: 1220px) {
       .hero-grid,
       .dashboard,
@@ -1231,7 +1294,33 @@ Back to Project Feed
             </div>
           </div>
 
-                    <div class="ai-chat-card">
+                              <div class="contractor-info-card">
+            <h4>Contractor Info for Proposal</h4>
+            <div class="contractor-info-grid">
+              <div>
+                <label>Company Name</label>
+                <input id="contractorCompany" type="text" placeholder="Example: Impact Construction DBA">
+              </div>
+              <div>
+                <label>Contact Name</label>
+                <input id="contractorName" type="text" placeholder="Example: Dimitris Fostinis">
+              </div>
+              <div>
+                <label>Email</label>
+                <input id="contractorEmail" type="email" placeholder="Example: revamplex@gmail.com">
+              </div>
+              <div>
+                <label>Phone</label>
+                <input id="contractorPhone" type="text" placeholder="Example: (201) 555-1234">
+              </div>
+              <div class="full">
+                <label>Business Address</label>
+                <input id="contractorAddress" type="text" placeholder="Example: 202 Lee St, Elmwood Park, NJ 07407">
+              </div>
+            </div>
+          </div>
+
+<div class="ai-chat-card">
             <h4>✨ AI Estimate Chat</h4>
             <p>Chat back and forth with AI to build the estimate. Ask for changes, materials, Home Depot-style lists, labor breakdowns, exclusions, timelines, or a cleaner customer proposal.</p>
 
@@ -1244,6 +1333,10 @@ Back to Project Feed
                 <div class="ai-compose">
                   <textarea id="aiChatInput" placeholder="Type job details or reply to the AI here..."></textarea>
                   <button class="btn btn-primary" id="aiSendBtn" type="button" onclick="sendAIMessage(false)">Send</button>
+                </div>
+                <div class="mic-row">
+                  <button class="btn btn-soft" id="micDictateBtn" type="button" onclick="toggleDictation()">🎙️ Dictate Job Notes</button>
+                  <span id="micStatus"></span>
                 </div>
               </div>
 
@@ -2054,13 +2147,64 @@ function getFallbackJobPrompt(){
   ].join("\n");
 }
 
+
+function escapeHTML(str){
+  return String(str || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+function formatAIText(text){
+  let safe = escapeHTML(text);
+
+  safe = safe.replace(/^#{1,6}\s*(.+)$/gm, '<span class="ai-heading">$1</span>');
+  safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+  const lines = safe.split("\\n");
+  let html = "";
+  let inList = false;
+
+  lines.forEach(line => {
+    const trimmed = line.trim();
+
+    if (/^[-•]\\s+/.test(trimmed)) {
+      if (!inList) {
+        html += "<ul>";
+        inList = true;
+      }
+      html += "<li>" + trimmed.replace(/^[-•]\\s+/, "") + "</li>";
+    } else {
+      if (inList) {
+        html += "</ul>";
+        inList = false;
+      }
+
+      if (trimmed === "") {
+        html += "<br>";
+      } else {
+        html += trimmed + "<br>";
+      }
+    }
+  });
+
+  if (inList) html += "</ul>";
+
+  return html;
+}
+
 function addAIMessage(role, text){
   const chatWindow = document.getElementById("aiChatWindow");
   if (!chatWindow) return;
 
   const msg = document.createElement("div");
   msg.className = "ai-msg " + (role === "user" ? "user" : "assistant");
-  msg.innerText = text;
+
+  if (role === "assistant") {
+    msg.innerHTML = formatAIText(text);
+  } else {
+    msg.innerText = text;
+  }
 
   chatWindow.appendChild(msg);
   chatWindow.scrollTop = chatWindow.scrollHeight;
@@ -2173,6 +2317,118 @@ function runAIEstimate(){
 }
 
 
+
+/* ---------- VOICE DICTATION ---------- */
+
+let recognition = null;
+let isDictating = false;
+
+function setupSpeechRecognition(){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    return null;
+  }
+
+  const rec = new SpeechRecognition();
+  rec.continuous = true;
+  rec.interimResults = true;
+  rec.lang = "en-US";
+
+  rec.onresult = function(event){
+    const input = document.getElementById("aiChatInput");
+    if (!input) return;
+
+    let finalText = "";
+    let interimText = "";
+
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        finalText += transcript + " ";
+      } else {
+        interimText += transcript;
+      }
+    }
+
+    if (finalText) {
+      input.value = (input.value + " " + finalText).replace(/\\s+/g, " ").trim();
+    }
+
+    const status = document.getElementById("micStatus");
+    if (status) {
+      status.innerText = interimText ? "Listening: " + interimText : "Listening...";
+      status.className = "mic-listening";
+    }
+  };
+
+  rec.onerror = function(event){
+    const status = document.getElementById("micStatus");
+    if (status) {
+      status.innerText = "Mic error: " + event.error;
+      status.className = "";
+    }
+    isDictating = false;
+    updateMicButton();
+  };
+
+  rec.onend = function(){
+    if (isDictating && recognition) {
+      recognition.start();
+      return;
+    }
+
+    const status = document.getElementById("micStatus");
+    if (status && !isDictating) {
+      status.innerText = "";
+      status.className = "";
+    }
+
+    updateMicButton();
+  };
+
+  return rec;
+}
+
+function updateMicButton(){
+  const btn = document.getElementById("micDictateBtn");
+  if (!btn) return;
+
+  btn.innerText = isDictating ? "⏹ Stop Dictation" : "🎙️ Dictate Job Notes";
+}
+
+function toggleDictation(){
+  const status = document.getElementById("micStatus");
+
+  if (!recognition) {
+    recognition = setupSpeechRecognition();
+  }
+
+  if (!recognition) {
+    alert("Voice dictation is not supported in this browser. Try Chrome on desktop.");
+    return;
+  }
+
+  if (!isDictating) {
+    isDictating = true;
+    recognition.start();
+    if (status) {
+      status.innerText = "Listening...";
+      status.className = "mic-listening";
+    }
+  } else {
+    isDictating = false;
+    recognition.stop();
+    if (status) {
+      status.innerText = "";
+      status.className = "";
+    }
+  }
+
+  updateMicButton();
+}
+
+
 /* ---------- PROPOSAL PDF ---------- */
 
 let lastProposalPdfBlob = null;
@@ -2194,8 +2450,21 @@ function getEstimateRowsForProposal(){
   }).filter(row => row.item.trim());
 }
 
+
+function getContractorInfoForProposal(){
+  return {
+    company: document.getElementById("contractorCompany")?.value || "",
+    name: document.getElementById("contractorName")?.value || "",
+    email: document.getElementById("contractorEmail")?.value || "",
+    phone: document.getElementById("contractorPhone")?.value || "",
+    address: document.getElementById("contractorAddress")?.value || ""
+  };
+}
+
+
 function buildProposalText(){
   const job = window.currentJob || {};
+  const contractor = getContractorInfoForProposal();
   const notes = document.getElementById("estimateNotes")?.value || "";
   const rows = getEstimateRowsForProposal();
 
@@ -2207,6 +2476,14 @@ function buildProposalText(){
   return [
     "REVAMP PROJECT ROOM PROPOSAL",
     "",
+    "CONTRACTOR:",
+    "Company: " + (contractor.company || "Not provided"),
+    "Contact: " + (contractor.name || "Not provided"),
+    "Email: " + (contractor.email || "Not provided"),
+    "Phone: " + (contractor.phone || "Not provided"),
+    "Address: " + (contractor.address || "Not provided"),
+    "",
+    "PROJECT:",
     "Project: " + (job.title || "Untitled Project"),
     "Trade: " + (job.trade || "General Renovation"),
     "Location: " + (job.city || "NJ Area"),
