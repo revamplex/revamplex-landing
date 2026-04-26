@@ -1737,7 +1737,7 @@ async function runAIEstimate(){
     aiButton.disabled = true;
     aiButton.innerText = "Building AI estimate...";
   }
-
+console.log("JOB BEING SENT TO AI:", job);
   try {
     const res = await fetch("/api/generate-estimate", {
       method: "POST",
@@ -1745,13 +1745,26 @@ async function runAIEstimate(){
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        description: [
-          "Project title: " + (job.title || "Untitled Job"),
-          "Trade: " + (job.trade || "General renovation"),
-          "Budget: " + (job.budget || "Not provided"),
-          "City: " + (job.city || "Not provided"),
-          "Description: " + (job.description || "General renovation")
-        ].join("\\n")
+description: `
+Create a detailed contractor estimate.
+
+PROJECT DETAILS:
+Title: ${job.title || "Unknown"}
+Trade: ${job.trade || "General renovation"}
+Location: ${job.city || "Unknown"}
+Budget: ${job.budget || "Not provided"}
+
+SCOPE OF WORK:
+${job.description || "General renovation work needed"}
+
+INCLUDE:
+- Line items
+- Materials
+- Labor
+- Estimated costs
+- Timeline
+- Notes
+`
       })
     });
 
