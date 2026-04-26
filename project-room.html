@@ -786,6 +786,36 @@
       }
     }
 
+
+    .proposal-preview-card {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: #fff;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .proposal-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    #proposalPreview {
+      white-space: pre-wrap;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      min-height: 120px;
+      max-height: 360px;
+      overflow: auto;
+      color: var(--text);
+      font-size: 0.94rem;
+      line-height: 1.45;
+    }
+
     @media (max-width: 1220px) {
       .hero-grid,
       .dashboard,
@@ -1060,7 +1090,7 @@ Back to Project Feed
             <div class="estimate-toolbar">
 <button class="btn btn-soft" onclick="addRow()">Add Line Item</button>
               <button class="btn btn-soft">Save Version</button>
-              <button class="btn btn-primary">Generate Proposal PDF</button>
+              <button class="btn btn-primary" id="generateProposalBtn" type="button">Generate Proposal PDF</button>
               <button class="btn btn-primary" onclick="submitBid()">Submit Bid to Customer</button>
             </div>
           </div>
@@ -1082,6 +1112,11 @@ Back to Project Feed
                 <div class="ai-status" id="aiStatus"></div>
               </div>
             </div>
+          </div>
+
+          <div class="summary-box" style="margin-bottom:16px;">
+            <h4 style="margin-top:0;">Estimate Notes</h4>
+            <textarea id="estimateNotes" placeholder="AI estimate and proposal notes will appear here. You can edit before generating the PDF.">Includes labor, material, disposal, and standard site protection. Permit costs are included in the contract price where required. Fixtures and finish materials may be specified by owner selection or contractor-approved equivalent of similar quality and cost.</textarea>
           </div>
 
           <div class="estimate-table-wrap">
@@ -1135,16 +1170,20 @@ Back to Project Feed
 
           <div class="estimate-summary">
             <div class="summary-box">
-              <h4>Estimate Notes</h4>
-<textarea id="estimateNotes" placeholder="Add scope notes, exclusions, allowances, permit language, or fixture substitutions here...">Includes labor, material, disposal, and standard site protection. Permit costs are included in the contract price where required. Fixtures and finish materials may be specified by owner selection or contractor-approved equivalent of similar quality and cost.</textarea>
-            </div>
-
-            <div class="summary-box">
               <h4>Totals</h4>
               <div class="money-line"><span>Subtotal</span><strong id="subtotalOut">$4,006.00</strong></div>
               <div class="money-line"><span>Markup (15%)</span><strong id="markupOut">$600.90</strong></div>
               <div class="money-line"><span>Tax (6.625%)</span><strong id="taxOut">$305.16</strong></div>
               <div class="money-line"><span>Grand Total</span><strong id="grandOut">$4,912.06</strong></div>
+            </div>
+          </div>
+          <div class="proposal-preview-card">
+            <h4 style="margin-top:0;">Proposal Preview</h4>
+            <p style="color:var(--muted);margin-top:0;">Click Generate Proposal PDF to preview the customer-ready proposal here, then download or print/send it.</p>
+            <div id="proposalPreview">No proposal generated yet.</div>
+            <div class="proposal-actions">
+              <button class="btn btn-primary" id="downloadProposalBtn" type="button" disabled>Download PDF</button>
+              <button class="btn btn-soft" id="printProposalBtn" type="button" disabled>Open / Print Proposal</button>
             </div>
           </div>
         </section>
@@ -1332,6 +1371,7 @@ Back to Project Feed
 
     <p class="footer-note">Revamp Project Room prototype • Private homeowner + contractor workspace • Ready to connect to Supabase / auth / database next</p>
   </div>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 
@@ -1723,6 +1763,22 @@ if (aiEstimateBtn) {
   aiEstimateBtn.addEventListener("click", runAIEstimate);
 }
 
+
+const generateProposalBtn = document.getElementById("generateProposalBtn");
+if (generateProposalBtn) {
+  generateProposalBtn.addEventListener("click", generateProposalPDF);
+}
+
+const downloadProposalBtn = document.getElementById("downloadProposalBtn");
+if (downloadProposalBtn) {
+  downloadProposalBtn.addEventListener("click", downloadProposalPDF);
+}
+
+const printProposalBtn = document.getElementById("printProposalBtn");
+if (printProposalBtn) {
+  printProposalBtn.addEventListener("click", openProposalPDF);
+}
+
 const useJobInfoBtn = document.getElementById("useJobInfoBtn");
 if (useJobInfoBtn) {
   useJobInfoBtn.addEventListener("click", fillAIInputFromJob);
@@ -1909,6 +1965,152 @@ async function runAIEstimate(){
     }
   }
 }
+
+
+/* ---------- PROPOSAL PDF ---------- */
+
+let lastProposalPdfBlob = null;
+let lastProposalPdfUrl = null;
+
+function getEstimateRowsForProposal(){
+  const rows = Array.from(document.querySelectorAll("#estimateTable tbody tr"));
+
+  return rows.map(row => {
+    const inputs = row.querySelectorAll("input");
+    const item = inputs[0]?.value || "";
+    const qty = inputs[1]?.value || "";
+    const unit = inputs[2]?.value || "";
+    const unitCost = inputs[3]?.value || "0";
+    const labor = inputs[4]?.value || "0";
+    const total = row.querySelector(".lineTotal")?.innerText || "$0.00";
+
+    return { item, qty, unit, unitCost, labor, total };
+  }).filter(row => row.item.trim());
+}
+
+function buildProposalText(){
+  const job = window.currentJob || {};
+  const notes = document.getElementById("estimateNotes")?.value || "";
+  const rows = getEstimateRowsForProposal();
+
+  const lineItems = rows.map((row, index) => {
+    return `${index + 1}. ${row.item} — Qty: ${row.qty} ${row.unit} | Material: $${row.unitCost} | Labor: $${row.labor} | Total: ${row.total}`;
+  }).join("\\n");
+
+  return [
+    "REVAMP PROJECT ROOM PROPOSAL",
+    "",
+    "Project: " + (job.title || "Untitled Project"),
+    "Trade: " + (job.trade || "General Renovation"),
+    "Location: " + (job.city || "NJ Area"),
+    "Project ID: " + (job.id || "Preview"),
+    "",
+    "SCOPE / ESTIMATE NOTES:",
+    notes || "No notes provided.",
+    "",
+    "LINE ITEMS:",
+    lineItems || "No line items provided.",
+    "",
+    "TOTALS:",
+    "Subtotal: " + (document.getElementById("subtotalOut")?.innerText || "$0.00"),
+    "Markup: " + (document.getElementById("markupOut")?.innerText || "$0.00"),
+    "Tax: " + (document.getElementById("taxOut")?.innerText || "$0.00"),
+    "Grand Total: " + (document.getElementById("grandOut")?.innerText || "$0.00"),
+    "",
+    "PAYMENT / APPROVAL:",
+    "This proposal is subject to final contractor review, customer approval, signed agreement, and any change orders required after field verification.",
+    "",
+    "Generated by Revamp Project Room"
+  ].join("\\n");
+}
+
+function generateProposalPDF(){
+  const preview = document.getElementById("proposalPreview");
+  const downloadBtn = document.getElementById("downloadProposalBtn");
+  const printBtn = document.getElementById("printProposalBtn");
+
+  const proposalText = buildProposalText();
+
+  if (preview) {
+    preview.innerText = proposalText;
+  }
+
+  const jsPDF = window.jspdf?.jsPDF;
+
+  if (!jsPDF) {
+    alert("PDF library is still loading. Wait a second and try again.");
+    return;
+  }
+
+  const doc = new jsPDF({ unit: "pt", format: "letter" });
+  const margin = 42;
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const maxWidth = pageWidth - margin * 2;
+
+  let y = margin;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
+  doc.text("Revamp Project Room Proposal", margin, y);
+  y += 26;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+
+  const lines = doc.splitTextToSize(proposalText, maxWidth);
+
+  lines.forEach(line => {
+    if (y > pageHeight - margin) {
+      doc.addPage();
+      y = margin;
+    }
+    doc.text(line, margin, y);
+    y += 14;
+  });
+
+  lastProposalPdfBlob = doc.output("blob");
+
+  if (lastProposalPdfUrl) {
+    URL.revokeObjectURL(lastProposalPdfUrl);
+  }
+
+  lastProposalPdfUrl = URL.createObjectURL(lastProposalPdfBlob);
+
+  if (downloadBtn) downloadBtn.disabled = false;
+  if (printBtn) printBtn.disabled = false;
+
+  alert("Proposal PDF generated. You can preview it below or download it.");
+}
+
+function downloadProposalPDF(){
+  if (!lastProposalPdfUrl) {
+    generateProposalPDF();
+  }
+
+  if (!lastProposalPdfUrl) return;
+
+  const job = window.currentJob || {};
+  const safeTitle = String(job.title || "revamp-proposal").replace(/[^a-zA-Z0-9-_]/g, "-").toLowerCase();
+
+  const a = document.createElement("a");
+  a.href = lastProposalPdfUrl;
+  a.download = `${safeTitle}-proposal.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+function openProposalPDF(){
+  if (!lastProposalPdfUrl) {
+    generateProposalPDF();
+  }
+
+  if (!lastProposalPdfUrl) return;
+
+  window.open(lastProposalPdfUrl, "_blank");
+}
+
 
 /* ---------- FILE UPLOAD ---------- */
 
