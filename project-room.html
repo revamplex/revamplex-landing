@@ -2326,178 +2326,148 @@ function runAIEstimate(){
 
 
 
+
 /* ---------- VOICE DICTATION ---------- */
 
 let recognition = null;
 let isDictating = false;
-let baseDictationText = "";
-
-function getSpeechRecognitionConstructor(){
-  return window.SpeechRecognition || window.webkitSpeechRecognition || null;
-}
+let dictatedBaseText = "";
 
 function updateMicButton(){
   const btn = document.getElementById("micDictateBtn");
   if (!btn) return;
-
   btn.innerText = isDictating ? "⏹ Stop Dictation" : "🎙️ Dictate Job Notes";
 }
 
-function setupSpeechRecognition(){
-  const SpeechRecognition = getSpeechRecognitionConstructor();
-
-  if (!SpeechRecognition) {
-    return null;
-  }
-
-  const rec = new SpeechRecognition();
-
-  rec.continuous = true;
-  rec.interimResults = true;
-  rec.lang = "en-US";
-
-  rec.onstart = function(){
-    const status = document.getElementById("micStatus");
-    if (status) {
-      status.innerText = "Listening... speak now";
-      status.className = "mic-listening";
-    }
-  };
-
-  rec.onresult = function(event){
-    const input = document.getElementById("aiChatInput");
-    if (!input) return;
-
-    let finalText = "";
-    let interimText = "";
-
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      const transcript = event.results[i][0].transcript;
-      if (event.results[i].isFinal) {
-        finalText += transcript + " ";
-      } else {
-        interimText += transcript;
-      }
-    }
-
-    if (finalText) {
-      baseDictationText = (baseDictationText + " " + finalText).replace(/\s+/g, " ").trim();
-    }
-
-    input.value = (baseDictationText + (interimText ? " " + interimText : "")).trim();
-
-    const status = document.getElementById("micStatus");
-    if (status) {
-      status.innerText = interimText ? "Listening: " + interimText : "Listening...";
-      status.className = "mic-listening";
-    }
-  };
-
-  rec.onerror = function(event){
-    console.error("SPEECH RECOGNITION ERROR:", event);
-
-    const status = document.getElementById("micStatus");
-    let msg = "Mic error: " + event.error;
-
-    if (event.error === "not-allowed") {
-      msg = "Microphone blocked. Click the lock icon in the browser address bar and allow microphone.";
-    }
-
-    if (event.error === "no-speech") {
-      msg = "No speech heard. Try again.";
-    }
-
-    if (status) {
-      status.innerText = msg;
-      status.className = "";
-    }
-
-    isDictating = false;
-    updateMicButton();
-  };
-
-  rec.onend = function(){
-    if (isDictating) {
-      try {
-        rec.start();
-      } catch (e) {
-        console.warn("Speech restart blocked:", e);
-      }
-      return;
-    }
-
-    const status = document.getElementById("micStatus");
-    if (status) {
-      status.innerText = "";
-      status.className = "";
-    }
-
-    updateMicButton();
-  };
-
-  return rec;
-}
-
-async function toggleDictation(){
-  const status = document.getElementById("micStatus");
+function toggleDictation(){
   const input = document.getElementById("aiChatInput");
+  const status = document.getElementById("micStatus");
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   if (!window.isSecureContext) {
-    alert("Microphone dictation only works on HTTPS. Use your live Vercel/Revamp site, not a local file.");
+    alert("Microphone only works on HTTPS. Open your live Revamp/Vercel site.");
     return;
   }
-
-  const SpeechRecognition = getSpeechRecognitionConstructor();
 
   if (!SpeechRecognition) {
-    alert("Voice dictation is not supported in this browser. Use Google Chrome on desktop.");
+    alert("Voice dictation only works reliably in Google Chrome desktop.");
     return;
   }
 
-  if (!recognition) {
-    recognition = setupSpeechRecognition();
-  }
-
-  if (!recognition) {
-    alert("Voice dictation could not start. Use Google Chrome and allow microphone access.");
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    alert("This browser does not allow microphone access here.");
     return;
   }
 
-  if (!isDictating) {
-    try {
-      baseDictationText = input ? input.value.trim() : "";
-      isDictating = true;
-      recognition.start();
-
-      if (status) {
-        status.innerText = "Listening... speak now";
-        status.className = "mic-listening";
-      }
-
-    } catch (err) {
-      console.error("MIC START ERROR:", err);
-      isDictating = false;
-      if (status) {
-        status.innerText = "Mic could not start. Refresh and try again.";
-        status.className = "";
-      }
-    }
-  } else {
-    isDictating = false;
-    try {
-      recognition.stop();
-    } catch (err) {
-      console.warn("MIC STOP ERROR:", err);
-    }
-
-    if (status) {
-      status.innerText = "";
-      status.className = "";
-    }
+  if (!input) {
+    alert("AI chat input was not found.");
+    return;
   }
 
-  updateMicButton();
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(function(stream){
+      stream.getTracks().forEach(function(track){ track.stop(); });
+
+      if (!recognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = "en-US";
+
+        recognition.onstart = function(){
+          if (status) {
+            status.innerText = "Listening... speak now";
+            status.className = "mic-listening";
+          }
+        };
+
+        recognition.onresult = function(event){
+          let finalText = "";
+          let interimText = "";
+
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+
+            if (event.results[i].isFinal) {
+              finalText += transcript + " ";
+            } else {
+              interimText += transcript;
+            }
+          }
+
+          if (finalText) {
+            dictatedBaseText = (dictatedBaseText + " " + finalText).replace(/\s+/g, " ").trim();
+          }
+
+          input.value = (dictatedBaseText + (interimText ? " " + interimText : "")).trim();
+
+          if (status) {
+            status.innerText = interimText ? "Listening: " + interimText : "Listening...";
+            status.className = "mic-listening";
+          }
+        };
+
+        recognition.onerror = function(event){
+          console.error("MIC ERROR:", event);
+          isDictating = false;
+          updateMicButton();
+
+          if (status) {
+            status.className = "";
+            status.innerText = "Mic error: " + event.error;
+          }
+
+          if (event.error === "not-allowed") {
+            alert("Microphone is blocked. Click the lock icon near the address bar and allow microphone.");
+          }
+        };
+
+        recognition.onend = function(){
+          if (isDictating && recognition) {
+            try {
+              recognition.start();
+            } catch (err) {
+              console.warn("Mic restart warning:", err);
+            }
+            return;
+          }
+
+          if (status) {
+            status.innerText = "";
+            status.className = "";
+          }
+
+          updateMicButton();
+        };
+      }
+
+      if (!isDictating) {
+        dictatedBaseText = input.value.trim();
+        isDictating = true;
+
+        try {
+          recognition.start();
+        } catch (err) {
+          console.warn("Mic start warning:", err);
+        }
+      } else {
+        isDictating = false;
+
+        try {
+          recognition.stop();
+        } catch (err) {
+          console.warn("Mic stop warning:", err);
+        }
+      }
+
+      updateMicButton();
+    })
+    .catch(function(err){
+      console.error("MIC PERMISSION ERROR:", err);
+      alert("Microphone access is blocked. Click the lock icon in Chrome and allow microphone.");
+    });
 }
+
 
 /* ---------- PROPOSAL PDF ---------- */
 
