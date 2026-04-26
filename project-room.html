@@ -1015,6 +1015,9 @@ Back to Project Feed
               <p>Editable line items, live math, markup control, and customer-ready totals.</p>
             </div>
             <div class="estimate-toolbar">
+              <button class="btn btn-primary" onclick="runAIEstimate()">
+✨ Build AI Estimate
+</button>
               <button class="btn btn-soft" onclick="addRow()">Add Line Item</button>
               <button class="btn btn-soft">Save Version</button>
               <button class="btn btn-primary">Generate Proposal PDF</button>
@@ -1239,7 +1242,14 @@ Back to Project Feed
               </div>
               <p>Organize before, during, and after images plus plans, permits, and marked-up screenshots from calls.</p>
             </div>
-            <button class="btn btn-soft">Upload Files</button>
+            <input type="file" id="photoUpload" accept="image/*" multiple>
+<input type="file" id="videoUpload" accept="video/*">
+
+<button class="btn btn-primary" onclick="uploadProjectFiles()">
+Upload Files
+</button>
+
+<div id="uploadStatus" style="margin-top:10px;font-weight:700;"></div>
           </div>
 
           <div class="photo-strip">
@@ -1742,6 +1752,69 @@ if (inviteBtnSafe) {
       alert("Copy this invite link:\n\n" + inviteLink);
     }
   });
+}
+    /* ---------- FILE UPLOAD ---------- */
+
+async function uploadProjectFiles(){
+
+  const photoFiles = document.getElementById("photoUpload").files;
+  const videoFiles = document.getElementById("videoUpload").files;
+
+  const status = document.getElementById("uploadStatus");
+  status.innerText = "Uploading...";
+
+  for(const file of [...photoFiles, ...videoFiles]){
+
+    const fileName = `${Date.now()}-${file.name}`;
+
+    const { error } = await supabaseClient.storage
+      .from("project-files")
+      .upload(fileName, file);
+
+    if(error){
+      console.error(error);
+      status.innerText = "Upload failed";
+      return;
+    }
+  }
+
+  status.innerText = "Upload complete ✔";
+}
+
+/* ---------- AI ESTIMATE ---------- */
+
+function runAIEstimate(){
+
+  const aiItems = [
+    { item: "Demo", qty: 1, unit: "lot", cost: 800, labor: 0 },
+    { item: "Framing", qty: 1, unit: "lot", cost: 700, labor: 400 },
+    { item: "Drywall", qty: 1, unit: "lot", cost: 500, labor: 350 },
+    { item: "Paint", qty: 1, unit: "lot", cost: 300, labor: 250 }
+  ];
+
+  const tbody = document.querySelector("#estimateTable tbody");
+  tbody.innerHTML = "";
+
+  aiItems.forEach(row => {
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+<td><input class="table-input" value="${row.item}"/></td>
+<td><input class="table-input qty" value="${row.qty}"/></td>
+<td><input class="table-input" value="${row.unit}"/></td>
+<td><input class="table-input unitCost" value="${row.cost}"/></td>
+<td><input class="table-input laborCost" value="${row.labor}"/></td>
+<td class="lineTotal">$0.00</td>
+`;
+
+    tbody.appendChild(tr);
+  });
+
+  attachEstimateListeners();
+  recalcEstimate();
+
+  alert("AI estimate generated ✔");
 }
 </script>
 </body>
