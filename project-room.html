@@ -276,6 +276,12 @@
       padding: 20px;
     }
 
+    .hero,
+    .panel {
+      scroll-margin-top: 24px;
+    }
+
+
     .panel-header {
       display: flex;
       justify-content: space-between;
@@ -1203,7 +1209,7 @@ Back to Project Feed
       </div>
     </div>
 
-    <section class="hero">
+    <section class="hero" id="projectOverviewPanel">
       <div class="hero-grid">
         <div>
           <div class="project-title">
@@ -1249,19 +1255,19 @@ Back to Project Feed
       <aside class="sidebar">
         <h3 class="nav-title">Workspace Sections</h3>
         <div class="nav-list">
-          <div class="nav-item active"><span>Project Overview</span><span>Live</span></div>
-          <div class="nav-item"><span>Video + Chat</span><span>2 alerts</span></div>
-          <div class="nav-item"><span>Material Calculator</span><span>Tile</span></div>
-          <div class="nav-item"><span>Estimate Spreadsheet</span><span>v3.2</span></div>
-          <div class="nav-item"><span>Schedule Calendar</span><span>4 items</span></div>
-          <div class="nav-item"><span>Customer Signature</span><span>Pending</span></div>
-          <div class="nav-item"><span>Photos + Docs</span><span>12 files</span></div>
-          <div class="nav-item"><span>Payments</span><span>$5,500 due</span></div>
+          <div class="nav-item active" data-target="projectOverviewPanel"><span>Project Overview</span><span>Top</span></div>
+          <div class="nav-item" data-target="schedulePanel"><span>Schedule Calendar</span><span>4 items</span></div>
+          <div class="nav-item" data-target="jobListPanel"><span>Active Job List</span><span>Live</span></div>
+          <div class="nav-item" data-target="videoChatPanel"><span>Video + Chat</span><span>2 alerts</span></div>
+          <div class="nav-item" data-target="smartCalculatorPanel"><span>Trade Calculators</span><span>Tools</span></div>
+          <div class="nav-item" data-target="estimateProposalPanel"><span>Estimate + Proposal</span><span>v3.2</span></div>
+          <div class="nav-item" data-target="photoDocsPanel"><span>Photos + Docs</span><span>Upload</span></div>
+          <div class="nav-item" data-target="signaturePanel"><span>Customer Signature</span><span>Pending</span></div>
         </div>
       </aside>
 
       <main class="workspace">
-<section class="panel">
+<section class="panel" id="schedulePanel">
           <div class="panel-header">
             <div>
               <h3>Appointment Scheduling Calendar</h3>
@@ -1370,7 +1376,7 @@ Back to Project Feed
     </table>
   </div>
 </section>
-<section class="panel">
+<section class="panel" id="videoChatPanel">
           <div class="panel-header">
             <div>
               <h3>Video Call + Job Chat</h3>
@@ -1560,7 +1566,7 @@ Back to Project Feed
           </div>
 
 </section>
-<section class="panel">
+<section class="panel" id="estimateProposalPanel">
   <div class="panel-header">
     <div>
       <h3>Real Estimate Spreadsheet</h3>
@@ -1644,7 +1650,7 @@ Back to Project Feed
             </div>
           </div>
 
-  <section class="panel">
+  <section class="panel" id="photoDocsPanel">
           <div class="panel-header">
             <div>
               <h3>Photos + Documentation</h3>
@@ -1679,7 +1685,7 @@ Back to Project Feed
         </section>
 </section>
 </div>
-<section class="panel">
+<section class="panel" id="signaturePanel">
           <div class="panel-header">
             <div>
               <h3>Customer Approval Signature</h3>
@@ -3256,6 +3262,33 @@ async function uploadProjectFiles(){
   status.innerText = "Upload complete ✔";
 }
 
+
+
+
+/* ---------- WORKSPACE NAV LINKS ---------- */
+
+function setupWorkspaceNav(){
+  const navItems = document.querySelectorAll('.nav-item[data-target]');
+
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const targetId = item.getAttribute('data-target');
+      const target = document.getElementById(targetId);
+
+      if (!target) return;
+
+      navItems.forEach(nav => nav.classList.remove('active'));
+      item.classList.add('active');
+
+      target.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', setupWorkspaceNav);
 
 </script>
   <script src="https://meet.jit.si/external_api.js"></script>
