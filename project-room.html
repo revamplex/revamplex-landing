@@ -1335,7 +1335,7 @@ Back to Project Feed
                   <button class="btn btn-primary" id="aiSendBtn" type="button" onclick="sendAIMessage(false)">Send</button>
                 </div>
                 <div class="mic-row">
-                  <button type="button" onclick="toggleDictation()">🎙 Dictate</button>
+                  <button id="micDictateBtn" class="btn btn-soft" type="button" onclick="toggleDictation()">🎙 Dictate</button>
                   <span id="micStatus"></span>
                 </div>
               </div>
@@ -1417,38 +1417,43 @@ Back to Project Feed
             <h4 style="margin-top:0;">Proposal Preview</h4>
             <p style="color:var(--muted);margin-top:0;">Click Generate Proposal PDF to preview the customer-ready proposal here, then download or print/send it.</p>
             <div id="proposalPreview">No proposal generated yet.</div>
+
+<section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Photos + Documentation</h3>
+              <p>Upload before photos, walkthrough videos, plans, permits, and marked-up screenshots.</p>
+            </div>
+          </div>
+
+          <div class="summary-box" style="margin-bottom:16px;">
+            <h4 style="margin-top:0;">Upload Project Files</h4>
+            <input type="file" id="photoUpload" accept="image/*" multiple>
+            <input type="file" id="videoUpload" accept="video/*">
+            <button class="btn btn-primary" onclick="uploadProjectFiles()" style="margin-top:10px;">
+              Upload Files
+            </button>
+            <div id="uploadStatus" style="margin-top:10px;font-weight:700;color:#ea580c;"></div>
+          </div>
+
+          <div class="photo-strip">
+            <div class="photo-card">
+              <strong>Before Photos</strong>
+              <div class="photo-placeholder">Upload existing condition photos</div>
+            </div>
+            <div class="photo-card">
+              <strong>Walkthrough Videos</strong>
+              <div class="photo-placeholder">Upload project walkthrough videos</div>
+            </div>
+            <div class="photo-card">
+              <strong>Plans + Approvals</strong>
+              <div class="photo-placeholder">Estimate PDF, permit, signed contract</div>
+            </div>
+          </div>
+        </section>
             <div class="proposal-actions">
               <button class="btn btn-primary" id="downloadProposalBtn" type="button" onclick="downloadProposalPDF()" disabled>Download PDF</button>
               <button class="btn btn-soft" id="printProposalBtn" type="button" onclick="openProposalPDF()" disabled>Open / Print Proposal</button>
-            </div>
-          </div>
-          <div class="proposal-preview-card photos-doc-card">
-            <h4 style="margin-top:0;">Photos + Documentation</h4>
-            <p style="color:var(--muted);margin-top:0;">Upload before photos, walkthrough videos, plans, permits, and marked-up screenshots.</p>
-
-            <div class="summary-box" style="margin-bottom:16px;">
-              <h4 style="margin-top:0;">Upload Project Files</h4>
-              <input type="file" id="photoUpload" accept="image/*" multiple>
-              <input type="file" id="videoUpload" accept="video/*">
-              <button class="btn btn-primary" onclick="uploadProjectFiles()" style="margin-top:10px;">
-                Upload Files
-              </button>
-              <div id="uploadStatus" style="margin-top:10px;font-weight:700;color:#ea580c;"></div>
-            </div>
-
-            <div class="photo-strip">
-              <div class="photo-card">
-                <strong>Before Photos</strong>
-                <div class="photo-placeholder">Upload existing condition photos</div>
-              </div>
-              <div class="photo-card">
-                <strong>Walkthrough Videos</strong>
-                <div class="photo-placeholder">Upload project walkthrough videos</div>
-              </div>
-              <div class="photo-card">
-                <strong>Plans + Approvals</strong>
-                <div class="photo-placeholder">Estimate PDF, permit, signed contract</div>
-              </div>
             </div>
           </div>
         </section>
@@ -1604,8 +1609,7 @@ Back to Project Feed
 
     <p class="footer-note">Revamp Project Room prototype • Private homeowner + contractor workspace • Ready to connect to Supabase / auth / database next</p>
   </div>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-<script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js">
 /* ---------- AI BUTTON BACKUP WIRING ---------- */
 
 document.addEventListener("DOMContentLoaded", function(){
@@ -2167,19 +2171,19 @@ function formatAIText(text){
   safe = safe.replace(/^#{1,6}\s*(.+)$/gm, '<span class="ai-heading">$1</span>');
   safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
-  const lines = safe.split("\n");
+  const lines = safe.split("\\n");
   let html = "";
   let inList = false;
 
   lines.forEach(line => {
     const trimmed = line.trim();
 
-    if (/^[-•]\s+/.test(trimmed)) {
+    if (/^[-•]\\s+/.test(trimmed)) {
       if (!inList) {
         html += "<ul>";
         inList = true;
       }
-      html += "<li>" + trimmed.replace(/^[-•]\s+/, "") + "</li>";
+      html += "<li>" + trimmed.replace(/^[-•]\\s+/, "") + "</li>";
     } else {
       if (inList) {
         html += "</ul>";
@@ -2436,8 +2440,7 @@ function buildProposalText(){
 
   const lineItems = rows.map((row, index) => {
     return `${index + 1}. ${row.item} — Qty: ${row.qty} ${row.unit} | Material: $${row.unitCost} | Labor: $${row.labor} | Total: ${row.total}`;
-  }).join("
-");
+  }).join("\n");
 
   return [
     "REVAMP PROJECT ROOM PROPOSAL",
@@ -2471,8 +2474,7 @@ function buildProposalText(){
     "This proposal is subject to final contractor review, customer approval, signed agreement, and any change orders required after field verification.",
     "",
     "Generated by Revamp Project Room"
-  ].join("
-");
+  ].join("\n");
 }
 
 function generateProposalPDF(){
