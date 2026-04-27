@@ -1009,6 +1009,22 @@
       font-weight: 900;
     }
 
+
+
+    .top-workspace-note {
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    button.tool-card {
+      text-align: left;
+      font: inherit;
+    }
+
+    #calcResults .result-metric strong {
+      text-align: right;
+    }
+
     @media (max-width: 760px) {
       .contractor-info-grid {
         grid-template-columns: 1fr;
@@ -1144,289 +1160,7 @@ Back to Project Feed
       </aside>
 
       <main class="workspace">
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <h3>Video Call + Job Chat</h3>
-              <p>Use this area for live walkthroughs, screen-sharing plans, field notes, and private project communication.</p>
-            </div>
-            <div class="video-controls">
-              <button class="btn btn-primary">Start Video Call</button>
-              <button class="btn btn-soft">Share Screen</button>
-              <button class="btn btn-soft">Capture Photo</button>
-              <button class="btn btn-dark">Record Session</button>
-            </div>
-          </div>
-<div style="background:white; border-radius:18px; padding:16px; box-shadow:0 8px 22px rgba(0,0,0,.12); margin-bottom:18px;">
-  <h2 style="margin-top:0;">Video Call</h2>
-
-  <button id="startVideoCallBtn" style="
-    width:100%;
-    height:48px;
-    border:0;
-    border-radius:14px;
-    background:#f97316;
-    color:white;
-    font-weight:900;
-    cursor:pointer;
-  ">
-    Start Video Call
-  </button>
-
-  <div id="videoCallBox" style="
-    display:none;
-    margin-top:14px;
-    height:520px;
-    border-radius:16px;
-    overflow:hidden;
-    background:#0f172a;
-  "></div>
-</div>
-
-            <div class="chat-box">
-              <div class="panel-header" style="margin-bottom:0;">
-                <div>
-                  <h3 style="font-size:1rem;">Project Chat</h3>
-                  <p>Private thread</p>
-                </div>
-              </div>
-              <div class="messages">
-                <div class="message contractor">
-                  <strong>Verified Contractor</strong>
-                  I uploaded the revised tile layout and added the material quantities to the estimate.
-                </div>
-                <div class="message customer">
-                  <strong>Homeowner</strong>
-                  Looks good. Can we move the walkthrough to Saturday morning?
-                </div>
-                <div class="message contractor">
-                  <strong>Verified Contractor</strong>
-                  Yes. I added 10:00 AM on the calendar below and the estimate is ready for signature.
-                </div>
-              </div>
-              <div class="chat-compose">
-                <input type="text" placeholder="Type a project message..." />
-                <button class="btn btn-primary">Send</button>
-              </div>
-            </div>
-          </div>
-        </section>
-<div class="contractor-tools">
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <h3>Smart Material Calculator</h3>
-              <p>Switch between trades and turn measurements into material counts that feed the estimate sheet.</p>
-            </div>
-            <button class="btn btn-soft">Push Results to Estimate</button>
-          </div>
-
-          <div class="tool-grid">
-            <div class="tool-card active">
-              <h4>Tile Calculator</h4>
-              <p>Square footage, waste factor, grout, thinset, and box count.</p>
-            </div>
-            <div class="tool-card">
-              <h4>Drywall Calculator</h4>
-              <p>Sheet count, tape, screws, and compound based on room dimensions.</p>
-            </div>
-            <div class="tool-card">
-              <h4>Framing Calculator</h4>
-              <p>Stud count, top plates, bottom plates, headers, and spacing logic.</p>
-            </div>
-          </div>
-
-          <div class="calc-layout">
-            <div>
-              <div class="form-grid">
-                <div>
-                  <label>Room Length (ft)</label>
-                  <input id="length" type="number" value="12" step="0.1" />
-                </div>
-                <div>
-                  <label>Room Width (ft)</label>
-                  <input id="width" type="number" value="10" step="0.1" />
-                </div>
-                <div>
-                  <label>Tile Length (in)</label>
-                  <input id="tileLength" type="number" value="24" step="1" />
-                </div>
-                <div>
-                  <label>Tile Width (in)</label>
-                  <input id="tileWidth" type="number" value="12" step="1" />
-                </div>
-                <div>
-                  <label>Waste Percentage</label>
-                  <input id="waste" type="number" value="10" step="1" />
-                </div>
-                <div>
-                  <label>Sq Ft per Box</label>
-                  <input id="perBox" type="number" value="12" step="0.1" />
-                </div>
-                <div class="full">
-                  <button class="btn btn-primary" onclick="calculateTile()">Calculate Tile Materials</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="result-card">
-              <h4 style="margin-top:0;">Calculated Results</h4>
-              <div class="result-metric"><span>Floor Area</span><strong id="areaOut">120 sqft</strong></div>
-              <div class="result-metric"><span>With Waste</span><strong id="wasteOut">132 sqft</strong></div>
-              <div class="result-metric"><span>Boxes Needed</span><strong id="boxesOut">11 boxes</strong></div>
-              <div class="result-metric"><span>Estimated Tile Count</span><strong id="tileCountOut">60 tiles</strong></div>
-              <div class="result-metric"><span>Suggested Thinset</span><strong id="thinsetOut">3 bags</strong></div>
-              <div class="result-metric"><span>Suggested Grout</span><strong id="groutOut">2 bags</strong></div>
-            </div>
-          </div>
-        </section>
-<div class="estimate-table-wrap">
-            <table id="estimateTable">
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th>Qty</th>
-                  <th>Unit</th>
-                  <th>Unit Cost</th>
-                  <th>Labor</th>
-                  <th>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><input class="table-input" value="Demo" /></td>
-                  <td><input class="table-input qty" type="number" value="1" step="0.01" /></td>
-                  <td><input class="table-input" value="lot" /></td>
-                  <td><input class="table-input unitCost" type="number" value="800" step="0.01" /></td>
-                  <td><input class="table-input laborCost" type="number" value="0" step="0.01" /></td>
-                  <td class="lineTotal">$800.00</td>
-                </tr>
-                <tr>
-                  <td><input class="table-input" value="Framing" /></td>
-                  <td><input class="table-input qty" type="number" value="1" step="0.01" /></td>
-                  <td><input class="table-input" value="lot" /></td>
-                  <td><input class="table-input unitCost" type="number" value="750" step="0.01" /></td>
-                  <td><input class="table-input laborCost" type="number" value="450" step="0.01" /></td>
-                  <td class="lineTotal">$1200.00</td>
-                </tr>
-                <tr>
-                  <td><input class="table-input" value="Drywall" /></td>
-                  <td><input class="table-input qty" type="number" value="1" step="0.01" /></td>
-                  <td><input class="table-input" value="lot" /></td>
-                  <td><input class="table-input unitCost" type="number" value="550" step="0.01" /></td>
-                  <td><input class="table-input laborCost" type="number" value="400" step="0.01" /></td>
-                  <td class="lineTotal">$950.00</td>
-                </tr>
-                <tr>
-                  <td><input class="table-input" value="Tile Install" /></td>
-                  <td><input class="table-input qty" type="number" value="132" step="0.01" /></td>
-                  <td><input class="table-input" value="sqft" /></td>
-                  <td><input class="table-input unitCost" type="number" value="3.25" step="0.01" /></td>
-                  <td><input class="table-input laborCost" type="number" value="4.75" step="0.01" /></td>
-                  <td class="lineTotal">$1056.00</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="estimate-summary">
-            <div class="summary-box">
-              <h4>Totals</h4>
-              <div class="money-line"><span>Subtotal</span><strong id="subtotalOut">$4,006.00</strong></div>
-              <div class="money-line"><span>Markup (15%)</span><strong id="markupOut">$600.90</strong></div>
-              <div class="money-line"><span>Tax (6.625%)</span><strong id="taxOut">$305.16</strong></div>
-              <div class="money-line"><span>Grand Total</span><strong id="grandOut">$4,912.06</strong></div>
-            </div>
-
 <section class="panel">
-          <div class="panel-header">
-            <div>
-              <h3>Real Estimate Spreadsheet</h3>
-              <p>Editable line items, live math, markup control, and customer-ready totals.</p>
-            </div>
-            <div class="estimate-toolbar">
-<button class="btn btn-soft" onclick="addRow()">Add Line Item</button>
-              <button class="btn btn-soft">Save Version</button>
-              <button class="btn btn-primary" id="generateProposalBtn" type="button" onclick="generateProposalPDF()">Generate Proposal PDF</button>
-              <button class="btn btn-primary" onclick="submitBid()">Submit Bid to Customer</button>
-            </div>
-          </div>
-
-                              <div class="contractor-info-card">
-            <h4>Contractor Info for Proposal</h4>
-            <div class="contractor-info-grid">
-              <div>
-                <label>Company Name</label>
-                <input id="contractorCompany" type="text" placeholder="Company name">
-              </div>
-              <div>
-                <label>Contact Name</label>
-                <input id="contractorName" type="text" placeholder="Contact name">
-              </div>
-              <div>
-                <label>Email</label>
-                <input id="contractorEmail" type="email" placeholder="Email address">
-              </div>
-              <div>
-                <label>Phone</label>
-                <input id="contractorPhone" type="text" placeholder="Phone number">
-              </div>
-              <div class="full">
-                <label>Business Address</label>
-                <input id="contractorAddress" type="text" placeholder="Business address">
-              </div>
-            </div>
-          </div>
-
-<div class="ai-chat-card">
-            <h4>✨ AI Estimate Chat</h4>
-            <p>Chat back and forth with AI to build the estimate. Ask for changes, materials, Home Depot-style lists, labor breakdowns, exclusions, timelines, or a cleaner customer proposal.</p>
-
-            <div class="ai-chat-shell">
-              <div>
-                <div class="ai-chat-window" id="aiChatWindow">
-                  <div class="ai-msg assistant">Tell me the job details and I’ll build a professional estimate. Example: “Bathroom remodel, 8x10, demo tile, install new floor tile, tile shower walls, new vanity, toilet, fixtures, paint.”</div>
-                </div>
-
-                <div class="ai-compose">
-                  <textarea id="aiChatInput" placeholder="Type job details or reply to the AI here..."></textarea>
-                  <button class="btn btn-primary" id="aiSendBtn" type="button" onclick="sendAIMessage(false)">Send</button>
-                </div>
-                <div class="mic-row">
-                  <button type="button" onclick="toggleDictation()">🎙 Dictate</button>
-                  <span id="micStatus"></span>
-                </div>
-              </div>
-
-              <div class="ai-side-tools">
-                <button class="btn btn-primary" id="aiEstimateBtn" type="button" onclick="runAIEstimate()">✨ Build AI Estimate</button>
-                <button class="btn btn-soft" id="useJobInfoBtn" type="button" onclick="fillAIInputFromJob()">Use Job Info</button>
-                <button class="btn btn-soft" id="copyAIToNotesBtn" type="button" onclick="copyLastAIReplyToNotes()">Copy Last AI Reply to Notes</button>
-                <div class="ai-status" id="aiStatus"></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="estimate-output-card">
-            <h4>Estimate Notes / Proposal Draft</h4>
-            <p style="color:var(--muted);margin-top:0;">AI replies can be copied here. Edit this section before generating the customer PDF.</p>
-            <textarea id="estimateNotes" placeholder="AI estimate and proposal notes will appear here. You can edit before generating the PDF.">Includes labor, material, disposal, and standard site protection. Permit costs are included in the contract price where required. Fixtures and finish materials may be specified by owner selection or contractor-approved equivalent of similar quality and cost.</textarea>
-          </div>
-
-
-          </div>
-          <div class="proposal-preview-card">
-            <h4 style="margin-top:0;">Proposal Preview</h4>
-            <p style="color:var(--muted);margin-top:0;">Click Generate Proposal PDF to preview the customer-ready proposal here, then download or print/send it.</p>
-            <div id="proposalPreview">No proposal generated yet.</div>
-            <div class="proposal-actions">
-              <button class="btn btn-primary" id="downloadProposalBtn" type="button" onclick="downloadProposalPDF()" disabled>Download PDF</button>
-              <button class="btn btn-soft" id="printProposalBtn" type="button" onclick="openProposalPDF()" disabled>Open / Print Proposal</button>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel">
           <div class="panel-header">
             <div>
               <h3>Appointment Scheduling Calendar</h3>
@@ -1501,8 +1235,330 @@ Back to Project Feed
             </div>
           </div>
         </section>
+<section class="panel" id="jobListPanel">
+  <div class="panel-header">
+    <div>
+      <h3>Active Job List</h3>
+      <p>Keep the current job, budget, trade, and next action visible while you build the estimate.</p>
+    </div>
+    <button class="btn btn-soft" type="button" onclick="window.scrollTo({top:0,behavior:'smooth'})">Back to Top</button>
+  </div>
 
-        <section class="panel">
+  <div class="estimate-table-wrap">
+    <table id="topJobTable">
+      <thead>
+        <tr>
+          <th>Job</th>
+          <th>Trade</th>
+          <th>Location</th>
+          <th>Budget</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td id="topJobTitle">Loading...</td>
+          <td id="topJobTrade">Loading...</td>
+          <td id="topJobCity">NJ Area</td>
+          <td id="topJobBudget">$0</td>
+          <td>Estimate Review</td>
+          <td><button class="btn btn-primary" type="button" onclick="document.getElementById('smartCalculatorPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Build Estimate</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Video Call + Job Chat</h3>
+              <p>Use this area for live walkthroughs, screen-sharing plans, field notes, and private project communication.</p>
+            </div>
+            <div class="video-controls">
+              <button class="btn btn-primary">Start Video Call</button>
+              <button class="btn btn-soft">Share Screen</button>
+              <button class="btn btn-soft">Capture Photo</button>
+              <button class="btn btn-dark">Record Session</button>
+            </div>
+          </div>
+<div style="background:white; border-radius:18px; padding:16px; box-shadow:0 8px 22px rgba(0,0,0,.12); margin-bottom:18px;">
+  <h2 style="margin-top:0;">Video Call</h2>
+
+  <button id="startVideoCallBtn" style="
+    width:100%;
+    height:48px;
+    border:0;
+    border-radius:14px;
+    background:#f97316;
+    color:white;
+    font-weight:900;
+    cursor:pointer;
+  ">
+    Start Video Call
+  </button>
+
+  <div id="videoCallBox" style="
+    display:none;
+    margin-top:14px;
+    height:520px;
+    border-radius:16px;
+    overflow:hidden;
+    background:#0f172a;
+  "></div>
+</div>
+
+            <div class="chat-box">
+              <div class="panel-header" style="margin-bottom:0;">
+                <div>
+                  <h3 style="font-size:1rem;">Project Chat</h3>
+                  <p>Private thread</p>
+                </div>
+              </div>
+              <div class="messages">
+                <div class="message contractor">
+                  <strong>Verified Contractor</strong>
+                  I uploaded the revised tile layout and added the material quantities to the estimate.
+                </div>
+                <div class="message customer">
+                  <strong>Homeowner</strong>
+                  Looks good. Can we move the walkthrough to Saturday morning?
+                </div>
+                <div class="message contractor">
+                  <strong>Verified Contractor</strong>
+                  Yes. I added 10:00 AM on the calendar below and the estimate is ready for signature.
+                </div>
+              </div>
+              <div class="chat-compose">
+                <input type="text" placeholder="Type a project message..." />
+                <button class="btn btn-primary">Send</button>
+              </div>
+            </div>
+          </div>
+        </section>
+<div class="contractor-tools">
+<section class="panel" id="smartCalculatorPanel">
+  <div class="panel-header">
+    <div>
+      <h3>Smart Material Calculator</h3>
+      <p>Choose Tile, Drywall, or Framing. Each calculator uses its own fields and can push results into the estimate table below.</p>
+    </div>
+    <button class="btn btn-soft" type="button" onclick="pushCalcResultsToEstimate()">Push Results to Estimate</button>
+  </div>
+
+  <div class="tool-grid">
+    <button class="tool-card active" type="button" data-tool="tile" onclick="selectCalculator('tile')">
+      <h4>Tile Calculator</h4>
+      <p>Square footage, waste factor, grout, thinset, and box count.</p>
+    </button>
+    <button class="tool-card" type="button" data-tool="drywall" onclick="selectCalculator('drywall')">
+      <h4>Drywall Calculator</h4>
+      <p>Sheet count, tape, screws, compound, and waste based on walls and ceiling.</p>
+    </button>
+    <button class="tool-card" type="button" data-tool="framing" onclick="selectCalculator('framing')">
+      <h4>Framing Calculator</h4>
+      <p>Studs, plates, spacing, blocking, and waste for wall framing.</p>
+    </button>
+  </div>
+
+  <div class="calc-layout">
+    <div>
+      <div class="form-grid" id="calculatorFields"></div>
+    </div>
+
+    <div class="result-card">
+      <h4 style="margin-top:0;" id="calcResultTitle">Calculated Results</h4>
+      <div id="calcResults"></div>
+    </div>
+  </div>
+
+  <div class="panel-header" style="margin-top:22px;margin-bottom:12px;">
+    <div>
+      <h3 style="font-size:1.05rem;">Estimate Line Items</h3>
+      <p>Live editable table connected to your calculator, AI proposal, and PDF totals.</p>
+    </div>
+    <button class="btn btn-soft" type="button" onclick="addRow()">Add Line Item</button>
+  </div>
+
+  <div class="estimate-table-wrap">
+            <table id="estimateTable">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Qty</th>
+                  <th>Unit</th>
+                  <th>Unit Cost</th>
+                  <th>Labor</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><input class="table-input" value="Demo" /></td>
+                  <td><input class="table-input qty" type="number" value="1" step="0.01" /></td>
+                  <td><input class="table-input" value="lot" /></td>
+                  <td><input class="table-input unitCost" type="number" value="800" step="0.01" /></td>
+                  <td><input class="table-input laborCost" type="number" value="0" step="0.01" /></td>
+                  <td class="lineTotal">$800.00</td>
+                </tr>
+                <tr>
+                  <td><input class="table-input" value="Framing" /></td>
+                  <td><input class="table-input qty" type="number" value="1" step="0.01" /></td>
+                  <td><input class="table-input" value="lot" /></td>
+                  <td><input class="table-input unitCost" type="number" value="750" step="0.01" /></td>
+                  <td><input class="table-input laborCost" type="number" value="450" step="0.01" /></td>
+                  <td class="lineTotal">$1200.00</td>
+                </tr>
+                <tr>
+                  <td><input class="table-input" value="Drywall" /></td>
+                  <td><input class="table-input qty" type="number" value="1" step="0.01" /></td>
+                  <td><input class="table-input" value="lot" /></td>
+                  <td><input class="table-input unitCost" type="number" value="550" step="0.01" /></td>
+                  <td><input class="table-input laborCost" type="number" value="400" step="0.01" /></td>
+                  <td class="lineTotal">$950.00</td>
+                </tr>
+                <tr>
+                  <td><input class="table-input" value="Tile Install" /></td>
+                  <td><input class="table-input qty" type="number" value="132" step="0.01" /></td>
+                  <td><input class="table-input" value="sqft" /></td>
+                  <td><input class="table-input unitCost" type="number" value="3.25" step="0.01" /></td>
+                  <td><input class="table-input laborCost" type="number" value="4.75" step="0.01" /></td>
+                  <td class="lineTotal">$1056.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+  <div class="estimate-summary">
+            <div class="summary-box">
+              <h4>Totals</h4>
+              <div class="money-line"><span>Subtotal</span><strong id="subtotalOut">$4,006.00</strong></div>
+              <div class="money-line"><span>Markup (15%)</span><strong id="markupOut">$600.90</strong></div>
+              <div class="money-line"><span>Tax (6.625%)</span><strong id="taxOut">$305.16</strong></div>
+              <div class="money-line"><span>Grand Total</span><strong id="grandOut">$4,912.06</strong></div>
+            </div>
+          </div>
+</section>
+<section class="panel">
+  <div class="panel-header">
+    <div>
+      <h3>Real Estimate Spreadsheet</h3>
+      <p>Build the scope, generate a customer-ready proposal, and submit the bid privately.</p>
+    </div>
+    <div class="estimate-toolbar">
+      <button class="btn btn-soft" type="button">Save Version</button>
+      <button class="btn btn-primary" id="generateProposalBtn" type="button" onclick="generateProposalPDF()">Generate Proposal PDF</button>
+      <button class="btn btn-primary" type="button" onclick="submitBid()">Submit Bid to Customer</button>
+    </div>
+  </div>
+
+  <div class="contractor-info-card">
+            <h4>Contractor Info for Proposal</h4>
+            <div class="contractor-info-grid">
+              <div>
+                <label>Company Name</label>
+                <input id="contractorCompany" type="text" placeholder="Company name">
+              </div>
+              <div>
+                <label>Contact Name</label>
+                <input id="contractorName" type="text" placeholder="Contact name">
+              </div>
+              <div>
+                <label>Email</label>
+                <input id="contractorEmail" type="email" placeholder="Email address">
+              </div>
+              <div>
+                <label>Phone</label>
+                <input id="contractorPhone" type="text" placeholder="Phone number">
+              </div>
+              <div class="full">
+                <label>Business Address</label>
+                <input id="contractorAddress" type="text" placeholder="Business address">
+              </div>
+            </div>
+          </div>
+
+  <div class="ai-chat-card">
+            <h4>✨ AI Estimate Chat</h4>
+            <p>Chat back and forth with AI to build the estimate. Ask for changes, materials, Home Depot-style lists, labor breakdowns, exclusions, timelines, or a cleaner customer proposal.</p>
+
+            <div class="ai-chat-shell">
+              <div>
+                <div class="ai-chat-window" id="aiChatWindow">
+                  <div class="ai-msg assistant">Tell me the job details and I’ll build a professional estimate. Example: “Bathroom remodel, 8x10, demo tile, install new floor tile, tile shower walls, new vanity, toilet, fixtures, paint.”</div>
+                </div>
+
+                <div class="ai-compose">
+                  <textarea id="aiChatInput" placeholder="Type job details or reply to the AI here..."></textarea>
+                  <button class="btn btn-primary" id="aiSendBtn" type="button" onclick="sendAIMessage(false)">Send</button>
+                </div>
+                <div class="mic-row">
+                  <button id="micDictateBtn" class="btn btn-soft" type="button" onclick="toggleDictation()">🎙 Dictate</button>
+                  <span id="micStatus"></span>
+                </div>
+              </div>
+
+              <div class="ai-side-tools">
+                <button class="btn btn-primary" id="aiEstimateBtn" type="button" onclick="runAIEstimate()">✨ Build AI Estimate</button>
+                <button class="btn btn-soft" id="useJobInfoBtn" type="button" onclick="fillAIInputFromJob()">Use Job Info</button>
+                <button class="btn btn-soft" id="copyAIToNotesBtn" type="button" onclick="copyLastAIReplyToNotes()">Copy Last AI Reply to Notes</button>
+                <div class="ai-status" id="aiStatus"></div>
+              </div>
+            </div>
+          </div>
+
+  <div class="estimate-output-card">
+            <h4>Estimate Notes / Proposal Draft</h4>
+            <p style="color:var(--muted);margin-top:0;">AI replies can be copied here. Edit this section before generating the customer PDF.</p>
+            <textarea id="estimateNotes" placeholder="AI estimate and proposal notes will appear here. You can edit before generating the PDF.">Includes labor, material, disposal, and standard site protection. Permit costs are included in the contract price where required. Fixtures and finish materials may be specified by owner selection or contractor-approved equivalent of similar quality and cost.</textarea>
+          </div>
+
+  <div class="proposal-preview-card">
+            <h4 style="margin-top:0;">Proposal Preview</h4>
+            <p style="color:var(--muted);margin-top:0;">Click Generate Proposal PDF to preview the customer-ready proposal here, then download or print/send it.</p>
+            <div id="proposalPreview">No proposal generated yet.</div>
+            <div class="proposal-actions">
+              <button class="btn btn-primary" id="downloadProposalBtn" type="button" onclick="downloadProposalPDF()" disabled>Download PDF</button>
+              <button class="btn btn-soft" id="printProposalBtn" type="button" onclick="openProposalPDF()" disabled>Open / Print Proposal</button>
+            </div>
+          </div>
+
+  <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Photos + Documentation</h3>
+              <p>Upload before photos, walkthrough videos, plans, permits, and marked-up screenshots.</p>
+            </div>
+          </div>
+
+          <div class="summary-box" style="margin-bottom:16px;">
+            <h4 style="margin-top:0;">Upload Project Files</h4>
+            <input type="file" id="photoUpload" accept="image/*" multiple>
+            <input type="file" id="videoUpload" accept="video/*">
+            <button class="btn btn-primary" onclick="uploadProjectFiles()" style="margin-top:10px;">
+              Upload Files
+            </button>
+            <div id="uploadStatus" style="margin-top:10px;font-weight:700;color:#ea580c;"></div>
+          </div>
+
+          <div class="photo-strip">
+            <div class="photo-card">
+              <strong>Before Photos</strong>
+              <div class="photo-placeholder">Upload existing condition photos</div>
+            </div>
+            <div class="photo-card">
+              <strong>Walkthrough Videos</strong>
+              <div class="photo-placeholder">Upload project walkthrough videos</div>
+            </div>
+            <div class="photo-card">
+              <strong>Plans + Approvals</strong>
+              <div class="photo-placeholder">Estimate PDF, permit, signed contract</div>
+            </div>
+          </div>
+        </section>
+</section>
+</div>
+<section class="panel">
           <div class="panel-header">
             <div>
               <h3>Customer Approval Signature</h3>
@@ -1546,70 +1602,13 @@ Back to Project Feed
             </div>
           </div>
         </section>
-<section class="panel">
-  <div class="panel-header">
-    <div>
-      <h3>Contractor Bids</h3>
-      <p>Homeowner can review all submitted contractor bids and select one.</p>
-    </div>
-  </div>
-
-  <div class="estimate-table-wrap">
-    <table id="bidTable">
-      <thead>
-        <tr>
-          <th>Contractor</th>
-          <th>Bid Amount</th>
-          <th>Start Date</th>
-          <th>Message</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="bidTableBody">
-      </tbody>
-    </table>
-  </div>
-
-</section>
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <h3>Photos + Documentation</h3>
-              <p>Upload before photos, walkthrough videos, plans, permits, and marked-up screenshots.</p>
-            </div>
-          </div>
-
-          <div class="summary-box" style="margin-bottom:16px;">
-            <h4 style="margin-top:0;">Upload Project Files</h4>
-            <input type="file" id="photoUpload" accept="image/*" multiple>
-            <input type="file" id="videoUpload" accept="video/*">
-            <button class="btn btn-primary" onclick="uploadProjectFiles()" style="margin-top:10px;">
-              Upload Files
-            </button>
-            <div id="uploadStatus" style="margin-top:10px;font-weight:700;color:#ea580c;"></div>
-          </div>
-
-          <div class="photo-strip">
-            <div class="photo-card">
-              <strong>Before Photos</strong>
-              <div class="photo-placeholder">Upload existing condition photos</div>
-            </div>
-            <div class="photo-card">
-              <strong>Walkthrough Videos</strong>
-              <div class="photo-placeholder">Upload project walkthrough videos</div>
-            </div>
-            <div class="photo-card">
-              <strong>Plans + Approvals</strong>
-              <div class="photo-placeholder">Estimate PDF, permit, signed contract</div>
-            </div>
-          </div>
-        </section>
-      </main>
+</main>
     </div>
 
     <p class="footer-note">Revamp Project Room prototype • Private homeowner + contractor workspace • Ready to connect to Supabase / auth / database next</p>
   </div>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js">
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script>
 /* ---------- AI BUTTON BACKUP WIRING ---------- */
 
 document.addEventListener("DOMContentLoaded", function(){
@@ -1771,6 +1770,16 @@ console.log("PROJECT ROOM JOB ID:", jobId);
 
   document.getElementById("jobDeposit").innerText = job.deposit || "$0";
 
+  const topJobTitle = document.getElementById("topJobTitle");
+  const topJobTrade = document.getElementById("topJobTrade");
+  const topJobCity = document.getElementById("topJobCity");
+  const topJobBudget = document.getElementById("topJobBudget");
+
+  if (topJobTitle) topJobTitle.innerText = job.title || "Untitled Job";
+  if (topJobTrade) topJobTrade.innerText = job.trade || "General";
+  if (topJobCity) topJobCity.innerText = job.city || "NJ Area";
+  if (topJobBudget) topJobBudget.innerText = job.budget || "$0";
+
 }
   loadJob();
   
@@ -1850,34 +1859,237 @@ function setupBackButton(){
 
 }
 
-/* ---------- TILE CALCULATOR ---------- */
+/* ---------- SMART MATERIAL CALCULATORS ---------- */
+
+let activeCalculator = "tile";
+let lastCalcLineItem = null;
+
+const calculatorConfigs = {
+  tile: {
+    title: "Tile Calculator Results",
+    button: "Calculate Tile Materials",
+    fields: [
+      ["length", "Room Length (ft)", 12, "0.1"],
+      ["width", "Room Width (ft)", 10, "0.1"],
+      ["tileLength", "Tile Length (in)", 24, "1"],
+      ["tileWidth", "Tile Width (in)", 12, "1"],
+      ["waste", "Waste Percentage", 10, "1"],
+      ["perBox", "Sq Ft per Box", 12, "0.1"]
+    ]
+  },
+  drywall: {
+    title: "Drywall Calculator Results",
+    button: "Calculate Drywall Materials",
+    fields: [
+      ["roomLength", "Room Length (ft)", 12, "0.1"],
+      ["roomWidth", "Room Width (ft)", 10, "0.1"],
+      ["wallHeight", "Wall Height (ft)", 8, "0.1"],
+      ["drywallOpenings", "Doors / Windows Area (sqft)", 40, "1"],
+      ["sheetSize", "Sheet Size", 32, "1"],
+      ["drywallWaste", "Waste Percentage", 10, "1"]
+    ]
+  },
+  framing: {
+    title: "Framing Calculator Results",
+    button: "Calculate Framing Materials",
+    fields: [
+      ["wallLength", "Total Wall Length (ft)", 24, "0.1"],
+      ["studSpacing", "Stud Spacing (in)", 16, "1"],
+      ["wallHeightFraming", "Wall Height (ft)", 8, "0.1"],
+      ["openings", "Door / Window Openings", 2, "1"],
+      ["plateLayers", "Top Plate Layers", 2, "1"],
+      ["framingWaste", "Waste Percentage", 10, "1"]
+    ]
+  }
+};
+
+function getNumber(id){
+  return parseFloat(document.getElementById(id)?.value) || 0;
+}
+
+function selectCalculator(type){
+  activeCalculator = type || "tile";
+
+  document.querySelectorAll(".tool-card[data-tool]").forEach(card => {
+    card.classList.toggle("active", card.dataset.tool === activeCalculator);
+  });
+
+  const config = calculatorConfigs[activeCalculator];
+  const fields = document.getElementById("calculatorFields");
+  const title = document.getElementById("calcResultTitle");
+
+  if (title) title.textContent = config.title;
+
+  if (fields) {
+    fields.innerHTML = config.fields.map(([id, label, value, step]) => `
+      <div>
+        <label>${label}</label>
+        <input id="${id}" type="number" value="${value}" step="${step}" oninput="calculateMaterials()" />
+      </div>
+    `).join("") + `
+      <div class="full">
+        <button class="btn btn-primary" type="button" onclick="calculateMaterials()">${config.button}</button>
+      </div>
+    `;
+  }
+
+  calculateMaterials();
+}
+
+function setCalcResults(metrics){
+  const out = document.getElementById("calcResults");
+  if (!out) return;
+
+  out.innerHTML = metrics.map(item => `
+    <div class="result-metric"><span>${item.label}</span><strong>${item.value}</strong></div>
+  `).join("");
+}
 
 function calculateTile(){
+  const length = getNumber("length");
+  const width = getNumber("width");
+  const tileLength = getNumber("tileLength");
+  const tileWidth = getNumber("tileWidth");
+  const waste = getNumber("waste");
+  const perBox = getNumber("perBox") || 1;
 
-  const length=parseFloat(document.getElementById('length').value)||0;
-  const width=parseFloat(document.getElementById('width').value)||0;
-  const tileLength=parseFloat(document.getElementById('tileLength').value)||0;
-  const tileWidth=parseFloat(document.getElementById('tileWidth').value)||0;
-  const waste=parseFloat(document.getElementById('waste').value)||0;
-  const perBox=parseFloat(document.getElementById('perBox').value)||1;
+  const area = length * width;
+  const withWaste = area * (1 + waste / 100);
+  const boxes = Math.ceil(withWaste / perBox);
+  const tileSqFt = (tileLength * tileWidth) / 144;
+  const tiles = tileSqFt > 0 ? Math.ceil(withWaste / tileSqFt) : 0;
+  const thinset = Math.max(1, Math.ceil(withWaste / 50));
+  const grout = Math.max(1, Math.ceil(withWaste / 90));
 
-  const area=length*width;
-  const withWaste=area*(1+waste/100);
-  const boxCount=Math.ceil(withWaste/perBox);
+  lastCalcLineItem = {
+    item: "Tile Install Materials",
+    qty: withWaste.toFixed(2),
+    unit: "sqft",
+    unitCost: 3.25,
+    labor: 4.75
+  };
 
-  const tileSqFt=(tileLength*tileWidth)/144;
-  const tileCount=tileSqFt>0 ? Math.ceil(withWaste/tileSqFt):0;
+  setCalcResults([
+    { label: "Floor Area", value: area.toFixed(2) + " sqft" },
+    { label: "With Waste", value: withWaste.toFixed(2) + " sqft" },
+    { label: "Boxes Needed", value: boxes + " boxes" },
+    { label: "Estimated Tile Count", value: tiles + " tiles" },
+    { label: "Suggested Thinset", value: thinset + " bags" },
+    { label: "Suggested Grout", value: grout + " bags" }
+  ]);
+}
 
-  const thinset=Math.max(1,Math.ceil(withWaste/50));
-  const grout=Math.max(1,Math.ceil(withWaste/90));
+function calculateDrywall(){
+  const length = getNumber("roomLength");
+  const width = getNumber("roomWidth");
+  const height = getNumber("wallHeight");
+  const openings = getNumber("drywallOpenings");
+  const sheetSize = getNumber("sheetSize") || 32;
+  const waste = getNumber("drywallWaste");
 
-  document.getElementById('areaOut').textContent=area.toFixed(2)+" sqft";
-  document.getElementById('wasteOut').textContent=withWaste.toFixed(2)+" sqft";
-  document.getElementById('boxesOut').textContent=boxCount+" boxes";
-  document.getElementById('tileCountOut').textContent=tileCount+" tiles";
-  document.getElementById('thinsetOut').textContent=thinset+" bags";
-  document.getElementById('groutOut').textContent=grout+" bags";
+  const wallArea = Math.max(0, ((length + width) * 2 * height) - openings);
+  const ceilingArea = length * width;
+  const totalArea = wallArea + ceilingArea;
+  const withWaste = totalArea * (1 + waste / 100);
+  const sheets = Math.ceil(withWaste / sheetSize);
+  const screws = Math.max(1, Math.ceil(sheets / 10));
+  const tape = Math.max(1, Math.ceil(sheets / 12));
+  const compound = Math.max(1, Math.ceil(sheets / 8));
 
+  lastCalcLineItem = {
+    item: "Drywall Hang / Finish",
+    qty: sheets,
+    unit: "sheets",
+    unitCost: 18,
+    labor: 55
+  };
+
+  setCalcResults([
+    { label: "Wall Area", value: wallArea.toFixed(2) + " sqft" },
+    { label: "Ceiling Area", value: ceilingArea.toFixed(2) + " sqft" },
+    { label: "Total With Waste", value: withWaste.toFixed(2) + " sqft" },
+    { label: "Drywall Sheets", value: sheets + " sheets" },
+    { label: "Drywall Screws", value: screws + " boxes" },
+    { label: "Tape / Compound", value: tape + " rolls / " + compound + " buckets" }
+  ]);
+}
+
+function calculateFraming(){
+  const wallLength = getNumber("wallLength");
+  const spacing = getNumber("studSpacing") || 16;
+  const height = getNumber("wallHeightFraming");
+  const openings = getNumber("openings");
+  const plateLayers = getNumber("plateLayers") || 2;
+  const waste = getNumber("framingWaste");
+
+  const studCount = Math.ceil((wallLength * 12) / spacing) + 1 + Math.ceil(openings * 2);
+  const studsWithWaste = Math.ceil(studCount * (1 + waste / 100));
+  const plateLinearFt = wallLength * (plateLayers + 1);
+  const plateBoards = Math.ceil(plateLinearFt / 8);
+  const blocking = Math.max(0, Math.ceil(wallLength / 8));
+
+  lastCalcLineItem = {
+    item: "Wall Framing",
+    qty: wallLength.toFixed(2),
+    unit: "linear ft",
+    unitCost: 12,
+    labor: 18
+  };
+
+  setCalcResults([
+    { label: "Wall Length", value: wallLength.toFixed(2) + " linear ft" },
+    { label: "Wall Height", value: height.toFixed(2) + " ft" },
+    { label: "Studs With Waste", value: studsWithWaste + " studs" },
+    { label: "Plate Lumber", value: plateBoards + " boards @ 8 ft" },
+    { label: "Blocking", value: blocking + " pieces" },
+    { label: "Recommended Fasteners", value: Math.max(1, Math.ceil(studsWithWaste / 20)) + " box(es)" }
+  ]);
+}
+
+function calculateMaterials(){
+  if (activeCalculator === "drywall") {
+    calculateDrywall();
+  } else if (activeCalculator === "framing") {
+    calculateFraming();
+  } else {
+    calculateTile();
+  }
+}
+
+function addEstimateLine(item, qty, unit, unitCost, labor){
+  const tbody = document.querySelector("#estimateTable tbody");
+  if (!tbody) return;
+
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td><input class="table-input" value="${item || "New Item"}" /></td>
+    <td><input class="table-input qty" type="number" value="${qty || 1}" step="0.01" /></td>
+    <td><input class="table-input" value="${unit || "unit"}" /></td>
+    <td><input class="table-input unitCost" type="number" value="${unitCost || 0}" step="0.01" /></td>
+    <td><input class="table-input laborCost" type="number" value="${labor || 0}" step="0.01" /></td>
+    <td class="lineTotal">$0.00</td>
+  `;
+
+  tbody.appendChild(tr);
+  attachEstimateListeners();
+  recalcEstimate();
+}
+
+function pushCalcResultsToEstimate(){
+  calculateMaterials();
+
+  if (!lastCalcLineItem) {
+    alert("Calculate materials first.");
+    return;
+  }
+
+  addEstimateLine(
+    lastCalcLineItem.item,
+    lastCalcLineItem.qty,
+    lastCalcLineItem.unit,
+    lastCalcLineItem.unitCost,
+    lastCalcLineItem.labor
+  );
 }
 
 /* ---------- ESTIMATE ---------- */
@@ -2037,7 +2249,9 @@ function submitBid(){
 
 applyWorkspaceMode();
 
-calculateTile();
+selectCalculator("tile");
+
+calculateMaterials();
 
 attachEstimateListeners();
 
@@ -2171,19 +2385,19 @@ function formatAIText(text){
   safe = safe.replace(/^#{1,6}\s*(.+)$/gm, '<span class="ai-heading">$1</span>');
   safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
-  const lines = safe.split("\\n");
+  const lines = safe.split("\n");
   let html = "";
   let inList = false;
 
   lines.forEach(line => {
     const trimmed = line.trim();
 
-    if (/^[-•]\\s+/.test(trimmed)) {
+    if (/^[-•]\s+/.test(trimmed)) {
       if (!inList) {
         html += "<ul>";
         inList = true;
       }
-      html += "<li>" + trimmed.replace(/^[-•]\\s+/, "") + "</li>";
+      html += "<li>" + trimmed.replace(/^[-•]\s+/, "") + "</li>";
     } else {
       if (inList) {
         html += "</ul>";
@@ -2440,8 +2654,7 @@ function buildProposalText(){
 
   const lineItems = rows.map((row, index) => {
     return `${index + 1}. ${row.item} — Qty: ${row.qty} ${row.unit} | Material: $${row.unitCost} | Labor: $${row.labor} | Total: ${row.total}`;
-  }).join("
-");
+  }).join("\n");
 
   return [
     "REVAMP PROJECT ROOM PROPOSAL",
@@ -2475,8 +2688,7 @@ function buildProposalText(){
     "This proposal is subject to final contractor review, customer approval, signed agreement, and any change orders required after field verification.",
     "",
     "Generated by Revamp Project Room"
-  ].join("
-");
+  ].join("\n");
 }
 
 function generateProposalPDF(){
