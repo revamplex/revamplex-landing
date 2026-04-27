@@ -942,6 +942,99 @@
       line-height: 1.45;
     }
 
+
+    .trade-tool-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 0.65fr);
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .trade-select-card,
+    .trade-current-card,
+    .trade-menu-details {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+      padding: 14px;
+    }
+
+    .trade-select-card label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .trade-select-card select {
+      font-weight: 800;
+      border-color: rgba(249, 115, 22, 0.28);
+      background: linear-gradient(180deg, #fff, #fff7ed);
+    }
+
+    .trade-current-card .label {
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .trade-current-card strong {
+      display: block;
+      font-size: 1.08rem;
+      margin-bottom: 6px;
+    }
+
+    .trade-current-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.4;
+      font-size: 0.92rem;
+    }
+
+    .trade-menu-details {
+      margin-bottom: 16px;
+    }
+
+    .trade-menu-details summary {
+      cursor: pointer;
+      font-weight: 900;
+      color: var(--brand-dark);
+    }
+
+    .trade-chip-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .trade-chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      padding: 10px 12px;
+      font-weight: 800;
+      color: var(--text);
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .trade-chip.active {
+      background: var(--brand-soft);
+      color: var(--brand-dark);
+      border-color: rgba(249, 115, 22, 0.35);
+    }
+
+    .compact-calculator-layout {
+      margin-top: 8px;
+    }
+
     @media (max-width: 900px) {
       .ai-chat-shell {
         grid-template-columns: 1fr;
@@ -949,6 +1042,14 @@
 
       .ai-compose {
         grid-template-columns: 1fr;
+      }
+
+      .trade-tool-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .trade-chip-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
@@ -1340,28 +1441,48 @@ Back to Project Feed
 <section class="panel" id="smartCalculatorPanel">
   <div class="panel-header">
     <div>
-      <h3>Smart Material Calculator</h3>
-      <p>Choose Tile, Drywall, or Framing. Each calculator uses its own fields and can push results into the estimate table below.</p>
+      <h3>Smart Trade Calculator Center</h3>
+      <p>Choose a trade from the dropdown. Each trade opens only the fields it needs, so the page stays clean while every major trade has its own calculator.</p>
     </div>
     <button class="btn btn-soft" type="button" onclick="pushCalcResultsToEstimate()">Push Results to Estimate</button>
   </div>
 
-  <div class="tool-grid">
-    <button class="tool-card active" type="button" data-tool="tile" onclick="selectCalculator('tile')">
-      <h4>Tile Calculator</h4>
-      <p>Square footage, waste factor, grout, thinset, and box count.</p>
-    </button>
-    <button class="tool-card" type="button" data-tool="drywall" onclick="selectCalculator('drywall')">
-      <h4>Drywall Calculator</h4>
-      <p>Sheet count, tape, screws, compound, and waste based on walls and ceiling.</p>
-    </button>
-    <button class="tool-card" type="button" data-tool="framing" onclick="selectCalculator('framing')">
-      <h4>Framing Calculator</h4>
-      <p>Studs, plates, spacing, blocking, and waste for wall framing.</p>
-    </button>
+  <div class="trade-tool-shell">
+    <div class="trade-select-card">
+      <label for="tradeToolSelect">Select Trade Calculator</label>
+      <select id="tradeToolSelect" onchange="selectCalculator(this.value)">
+        <option value="tile">Tile</option>
+        <option value="drywall">Drywall</option>
+        <option value="framing">Framing</option>
+        <option value="roofing">Roofing</option>
+        <option value="siding">Siding</option>
+        <option value="flooring">Flooring</option>
+        <option value="painting">Painting</option>
+        <option value="plumbing">Plumbing</option>
+        <option value="electrical">Electrical</option>
+        <option value="concrete">Concrete</option>
+        <option value="doorsWindows">Doors + Windows</option>
+        <option value="insulation">Insulation</option>
+        <option value="decking">Decking</option>
+        <option value="masonry">Masonry / Block</option>
+        <option value="hvac">HVAC Basic</option>
+        <option value="generalLabor">General Labor</option>
+      </select>
+    </div>
+
+    <div class="trade-current-card">
+      <div class="label">Active Tool</div>
+      <strong id="activeToolName">Tile Calculator</strong>
+      <p id="activeToolDesc">Floor area, waste, tile count, boxes, thinset, and grout.</p>
+    </div>
   </div>
 
-  <div class="calc-layout">
+  <details class="trade-menu-details">
+    <summary>Open quick trade menu</summary>
+    <div class="trade-chip-grid" id="tradeQuickMenu"></div>
+  </details>
+
+  <div class="calc-layout compact-calculator-layout">
     <div>
       <div class="form-grid" id="calculatorFields"></div>
     </div>
@@ -1371,8 +1492,7 @@ Back to Project Feed
       <div id="calcResults"></div>
     </div>
   </div>
-
-  <div class="panel-header" style="margin-top:22px;margin-bottom:12px;">
+<div class="panel-header" style="margin-top:22px;margin-bottom:12px;">
     <div>
       <h3 style="font-size:1.05rem;">Estimate Line Items</h3>
       <p>Live editable table connected to your calculator, AI proposal, and PDF totals.</p>
@@ -1438,6 +1558,7 @@ Back to Project Feed
               <div class="money-line"><span>Grand Total</span><strong id="grandOut">$4,912.06</strong></div>
             </div>
           </div>
+
 </section>
 <section class="panel">
   <div class="panel-header">
@@ -1859,14 +1980,15 @@ function setupBackButton(){
 
 }
 
-/* ---------- SMART MATERIAL CALCULATORS ---------- */
+/* ---------- SMART TRADE CALCULATORS ---------- */
 
 let activeCalculator = "tile";
 let lastCalcLineItem = null;
 
 const calculatorConfigs = {
   tile: {
-    title: "Tile Calculator Results",
+    name: "Tile Calculator",
+    desc: "Floor area, waste, tile count, boxes, thinset, and grout.",
     button: "Calculate Tile Materials",
     fields: [
       ["length", "Room Length (ft)", 12, "0.1"],
@@ -1875,22 +1997,55 @@ const calculatorConfigs = {
       ["tileWidth", "Tile Width (in)", 12, "1"],
       ["waste", "Waste Percentage", 10, "1"],
       ["perBox", "Sq Ft per Box", 12, "0.1"]
-    ]
+    ],
+    calculate: function(){
+      const area = getNumber("length") * getNumber("width");
+      const withWaste = area * (1 + getNumber("waste") / 100);
+      const perBox = getNumber("perBox") || 1;
+      const tileSqFt = (getNumber("tileLength") * getNumber("tileWidth")) / 144;
+      const tiles = tileSqFt > 0 ? Math.ceil(withWaste / tileSqFt) : 0;
+      lastCalcLineItem = { item:"Tile Install Materials", qty:withWaste.toFixed(2), unit:"sqft", unitCost:3.25, labor:4.75 };
+      return [
+        ["Floor Area", area.toFixed(2) + " sqft"],
+        ["With Waste", withWaste.toFixed(2) + " sqft"],
+        ["Boxes Needed", Math.ceil(withWaste / perBox) + " boxes"],
+        ["Estimated Tile Count", tiles + " tiles"],
+        ["Suggested Thinset", Math.max(1, Math.ceil(withWaste / 50)) + " bags"],
+        ["Suggested Grout", Math.max(1, Math.ceil(withWaste / 90)) + " bags"]
+      ];
+    }
   },
   drywall: {
-    title: "Drywall Calculator Results",
+    name: "Drywall Calculator",
+    desc: "Sheets, screws, tape, compound, wall area, ceiling area, and waste.",
     button: "Calculate Drywall Materials",
     fields: [
       ["roomLength", "Room Length (ft)", 12, "0.1"],
       ["roomWidth", "Room Width (ft)", 10, "0.1"],
       ["wallHeight", "Wall Height (ft)", 8, "0.1"],
-      ["drywallOpenings", "Doors / Windows Area (sqft)", 40, "1"],
-      ["sheetSize", "Sheet Size", 32, "1"],
+      ["drywallOpenings", "Door / Window Area (sqft)", 40, "1"],
+      ["sheetSize", "Sheet Size (sqft)", 32, "1"],
       ["drywallWaste", "Waste Percentage", 10, "1"]
-    ]
+    ],
+    calculate: function(){
+      const wallArea = Math.max(0, ((getNumber("roomLength") + getNumber("roomWidth")) * 2 * getNumber("wallHeight")) - getNumber("drywallOpenings"));
+      const ceilingArea = getNumber("roomLength") * getNumber("roomWidth");
+      const total = (wallArea + ceilingArea) * (1 + getNumber("drywallWaste") / 100);
+      const sheets = Math.ceil(total / (getNumber("sheetSize") || 32));
+      lastCalcLineItem = { item:"Drywall Hang / Finish", qty:sheets, unit:"sheets", unitCost:18, labor:55 };
+      return [
+        ["Wall Area", wallArea.toFixed(2) + " sqft"],
+        ["Ceiling Area", ceilingArea.toFixed(2) + " sqft"],
+        ["Total With Waste", total.toFixed(2) + " sqft"],
+        ["Drywall Sheets", sheets + " sheets"],
+        ["Screws", Math.max(1, Math.ceil(sheets / 10)) + " boxes"],
+        ["Tape / Compound", Math.max(1, Math.ceil(sheets / 12)) + " rolls / " + Math.max(1, Math.ceil(sheets / 8)) + " buckets"]
+      ];
+    }
   },
   framing: {
-    title: "Framing Calculator Results",
+    name: "Framing Calculator",
+    desc: "Studs, plates, blocking, fasteners, and wall framing line item.",
     button: "Calculate Framing Materials",
     fields: [
       ["wallLength", "Total Wall Length (ft)", 24, "0.1"],
@@ -1899,7 +2054,367 @@ const calculatorConfigs = {
       ["openings", "Door / Window Openings", 2, "1"],
       ["plateLayers", "Top Plate Layers", 2, "1"],
       ["framingWaste", "Waste Percentage", 10, "1"]
-    ]
+    ],
+    calculate: function(){
+      const wallLength = getNumber("wallLength");
+      const studs = Math.ceil(((wallLength * 12) / (getNumber("studSpacing") || 16)) + 1 + (getNumber("openings") * 2));
+      const studsWaste = Math.ceil(studs * (1 + getNumber("framingWaste") / 100));
+      const plateFt = wallLength * ((getNumber("plateLayers") || 2) + 1);
+      lastCalcLineItem = { item:"Wall Framing", qty:wallLength.toFixed(2), unit:"linear ft", unitCost:12, labor:18 };
+      return [
+        ["Wall Length", wallLength.toFixed(2) + " linear ft"],
+        ["Wall Height", getNumber("wallHeightFraming").toFixed(2) + " ft"],
+        ["Studs With Waste", studsWaste + " studs"],
+        ["Plate Lumber", Math.ceil(plateFt / 8) + " boards @ 8 ft"],
+        ["Blocking", Math.max(0, Math.ceil(wallLength / 8)) + " pieces"],
+        ["Fasteners", Math.max(1, Math.ceil(studsWaste / 20)) + " box(es)"]
+      ];
+    }
+  },
+  roofing: {
+    name: "Roofing Calculator",
+    desc: "Roof area, waste, roofing squares, shingle bundles, underlayment, drip edge, and nails.",
+    button: "Calculate Roofing Materials",
+    fields: [
+      ["roofLength", "Roof Length (ft)", 40, "0.1"],
+      ["roofWidth", "Roof Width (ft)", 24, "0.1"],
+      ["roofPitchFactor", "Pitch Factor", 1.12, "0.01"],
+      ["roofWaste", "Waste Percentage", 10, "1"],
+      ["ridgeLength", "Ridge / Hip Length (ft)", 40, "1"],
+      ["eaveLength", "Drip Edge Length (ft)", 80, "1"]
+    ],
+    calculate: function(){
+      const area = getNumber("roofLength") * getNumber("roofWidth") * (getNumber("roofPitchFactor") || 1);
+      const withWaste = area * (1 + getNumber("roofWaste") / 100);
+      const squares = withWaste / 100;
+      lastCalcLineItem = { item:"Roofing Install", qty:squares.toFixed(2), unit:"squares", unitCost:145, labor:250 };
+      return [
+        ["Roof Area", area.toFixed(2) + " sqft"],
+        ["With Waste", withWaste.toFixed(2) + " sqft"],
+        ["Roofing Squares", Math.ceil(squares) + " squares"],
+        ["Shingle Bundles", Math.ceil(squares * 3) + " bundles"],
+        ["Underlayment", Math.ceil(withWaste / 400) + " rolls"],
+        ["Ridge Cap / Drip Edge", Math.ceil(getNumber("ridgeLength") / 25) + " bundles / " + Math.ceil(getNumber("eaveLength") / 10) + " pieces"]
+      ];
+    }
+  },
+  siding: {
+    name: "Siding Calculator",
+    desc: "Wall area, siding squares, starter strip, J-channel, corners, and trim allowance.",
+    button: "Calculate Siding Materials",
+    fields: [
+      ["sidingWallLength", "Total Wall Length (ft)", 120, "1"],
+      ["sidingHeight", "Wall Height (ft)", 9, "0.1"],
+      ["sidingOpenings", "Openings Area (sqft)", 180, "1"],
+      ["sidingWaste", "Waste Percentage", 10, "1"],
+      ["cornerCount", "Outside Corners", 6, "1"],
+      ["jChannelLength", "J-Channel Length (ft)", 150, "1"]
+    ],
+    calculate: function(){
+      const area = Math.max(0, getNumber("sidingWallLength") * getNumber("sidingHeight") - getNumber("sidingOpenings"));
+      const withWaste = area * (1 + getNumber("sidingWaste") / 100);
+      lastCalcLineItem = { item:"Vinyl Siding Install", qty:(withWaste/100).toFixed(2), unit:"squares", unitCost:125, labor:275 };
+      return [
+        ["Net Wall Area", area.toFixed(2) + " sqft"],
+        ["With Waste", withWaste.toFixed(2) + " sqft"],
+        ["Siding Squares", Math.ceil(withWaste / 100) + " squares"],
+        ["Starter Strip", Math.ceil(getNumber("sidingWallLength") / 10) + " pieces"],
+        ["Outside Corners", Math.ceil(getNumber("cornerCount")) + " pieces"],
+        ["J-Channel", Math.ceil(getNumber("jChannelLength") / 12) + " pieces"]
+      ];
+    }
+  },
+  flooring: {
+    name: "Flooring Calculator",
+    desc: "Floor square footage, waste, cartons, underlayment, transition strips, and labor line item.",
+    button: "Calculate Flooring Materials",
+    fields: [
+      ["floorLength", "Room Length (ft)", 16, "0.1"],
+      ["floorWidth", "Room Width (ft)", 14, "0.1"],
+      ["floorWaste", "Waste Percentage", 10, "1"],
+      ["cartonCoverage", "Sq Ft per Carton", 22, "0.1"],
+      ["underlaymentRoll", "Underlayment Roll Coverage", 100, "1"],
+      ["transitions", "Transition Pieces", 2, "1"]
+    ],
+    calculate: function(){
+      const area = getNumber("floorLength") * getNumber("floorWidth");
+      const withWaste = area * (1 + getNumber("floorWaste") / 100);
+      lastCalcLineItem = { item:"Flooring Install", qty:withWaste.toFixed(2), unit:"sqft", unitCost:4.25, labor:4.75 };
+      return [
+        ["Floor Area", area.toFixed(2) + " sqft"],
+        ["With Waste", withWaste.toFixed(2) + " sqft"],
+        ["Cartons Needed", Math.ceil(withWaste / (getNumber("cartonCoverage") || 1)) + " cartons"],
+        ["Underlayment", Math.ceil(withWaste / (getNumber("underlaymentRoll") || 100)) + " rolls"],
+        ["Transitions", Math.ceil(getNumber("transitions")) + " pieces"],
+        ["Base Shoe Allowance", Math.ceil((getNumber("floorLength") + getNumber("floorWidth")) * 2) + " linear ft"]
+      ];
+    }
+  },
+  painting: {
+    name: "Painting Calculator",
+    desc: "Walls, ceiling, primer, paint gallons, coats, and labor square footage.",
+    button: "Calculate Paint Materials",
+    fields: [
+      ["paintLength", "Room Length (ft)", 14, "0.1"],
+      ["paintWidth", "Room Width (ft)", 12, "0.1"],
+      ["paintHeight", "Wall Height (ft)", 8, "0.1"],
+      ["paintOpenings", "Openings Area (sqft)", 45, "1"],
+      ["paintCoats", "Finish Coats", 2, "1"],
+      ["paintCoverage", "Coverage per Gallon", 350, "1"]
+    ],
+    calculate: function(){
+      const wallArea = Math.max(0, ((getNumber("paintLength") + getNumber("paintWidth")) * 2 * getNumber("paintHeight")) - getNumber("paintOpenings"));
+      const ceiling = getNumber("paintLength") * getNumber("paintWidth");
+      const finishArea = (wallArea + ceiling) * (getNumber("paintCoats") || 1);
+      lastCalcLineItem = { item:"Interior Painting", qty:(wallArea + ceiling).toFixed(2), unit:"sqft", unitCost:0.65, labor:1.85 };
+      return [
+        ["Wall Area", wallArea.toFixed(2) + " sqft"],
+        ["Ceiling Area", ceiling.toFixed(2) + " sqft"],
+        ["Paintable Area", (wallArea + ceiling).toFixed(2) + " sqft"],
+        ["Finish Paint", Math.ceil(finishArea / (getNumber("paintCoverage") || 350)) + " gallons"],
+        ["Primer", Math.ceil((wallArea + ceiling) / (getNumber("paintCoverage") || 350)) + " gallons"],
+        ["Tape / Plastic", Math.max(1, Math.ceil((wallArea + ceiling) / 500)) + " allowance"]
+      ];
+    }
+  },
+  plumbing: {
+    name: "Plumbing Calculator",
+    desc: "Fixtures, supply lines, drain lines, shutoff valves, fittings, and rough plumbing allowance.",
+    button: "Calculate Plumbing Materials",
+    fields: [
+      ["fixtureCount", "Fixture Count", 4, "1"],
+      ["supplyRun", "Total Supply Line (ft)", 80, "1"],
+      ["drainRun", "Total Drain Line (ft)", 35, "1"],
+      ["valvesPerFixture", "Valves per Fixture", 2, "1"],
+      ["plumbingFittingFactor", "Fittings per 10 ft", 3, "1"],
+      ["plumbingWaste", "Waste Percentage", 10, "1"]
+    ],
+    calculate: function(){
+      const supply = getNumber("supplyRun") * (1 + getNumber("plumbingWaste") / 100);
+      const drain = getNumber("drainRun") * (1 + getNumber("plumbingWaste") / 100);
+      const fixtures = getNumber("fixtureCount");
+      lastCalcLineItem = { item:"Plumbing Rough-In", qty:fixtures || 1, unit:"fixtures", unitCost:220, labor:475 };
+      return [
+        ["Fixtures", Math.ceil(fixtures) + " fixtures"],
+        ["Supply Line", Math.ceil(supply) + " linear ft"],
+        ["Drain Line", Math.ceil(drain) + " linear ft"],
+        ["Shutoff Valves", Math.ceil(fixtures * (getNumber("valvesPerFixture") || 2)) + " valves"],
+        ["Fittings", Math.ceil(((supply + drain) / 10) * (getNumber("plumbingFittingFactor") || 3)) + " fittings"],
+        ["Trap / Connector Allowance", Math.ceil(fixtures) + " sets"]
+      ];
+    }
+  },
+  electrical: {
+    name: "Electrical Calculator",
+    desc: "Outlets, switches, lights, boxes, wire rolls, breakers, and device allowance.",
+    button: "Calculate Electrical Materials",
+    fields: [
+      ["outletCount", "Outlets", 8, "1"],
+      ["switchCount", "Switches", 4, "1"],
+      ["lightCount", "Light Fixtures", 6, "1"],
+      ["wireRun", "Estimated Wire Run (ft)", 250, "1"],
+      ["breakerCount", "New Breakers", 2, "1"],
+      ["electricalWaste", "Waste Percentage", 10, "1"]
+    ],
+    calculate: function(){
+      const devices = getNumber("outletCount") + getNumber("switchCount") + getNumber("lightCount");
+      const wire = getNumber("wireRun") * (1 + getNumber("electricalWaste") / 100);
+      lastCalcLineItem = { item:"Electrical Rough-In", qty:devices || 1, unit:"devices", unitCost:32, labor:95 };
+      return [
+        ["Total Devices", Math.ceil(devices) + " devices"],
+        ["Device Boxes", Math.ceil(devices) + " boxes"],
+        ["Wire Needed", Math.ceil(wire) + " linear ft"],
+        ["Wire Rolls", Math.ceil(wire / 250) + " rolls"],
+        ["Breakers", Math.ceil(getNumber("breakerCount")) + " breakers"],
+        ["Plates / Connectors", Math.ceil(devices) + " plates + allowance"]
+      ];
+    }
+  },
+  concrete: {
+    name: "Concrete Calculator",
+    desc: "Slab volume, cubic yards, bags, wire mesh, gravel base, and form boards.",
+    button: "Calculate Concrete Materials",
+    fields: [
+      ["slabLength", "Slab Length (ft)", 12, "0.1"],
+      ["slabWidth", "Slab Width (ft)", 10, "0.1"],
+      ["slabDepth", "Slab Depth (in)", 4, "0.5"],
+      ["concreteWaste", "Waste Percentage", 10, "1"],
+      ["bagYield", "Bag Yield (cu ft)", 0.6, "0.1"],
+      ["gravelDepth", "Gravel Base Depth (in)", 4, "0.5"]
+    ],
+    calculate: function(){
+      const area = getNumber("slabLength") * getNumber("slabWidth");
+      const cuFt = area * (getNumber("slabDepth") / 12) * (1 + getNumber("concreteWaste") / 100);
+      const yards = cuFt / 27;
+      const gravelCuFt = area * (getNumber("gravelDepth") / 12);
+      lastCalcLineItem = { item:"Concrete Slab", qty:yards.toFixed(2), unit:"cubic yd", unitCost:185, labor:450 };
+      return [
+        ["Slab Area", area.toFixed(2) + " sqft"],
+        ["Concrete Volume", cuFt.toFixed(2) + " cu ft"],
+        ["Concrete Yards", yards.toFixed(2) + " yd³"],
+        ["Concrete Bags", Math.ceil(cuFt / (getNumber("bagYield") || 0.6)) + " bags"],
+        ["Gravel Base", (gravelCuFt / 27).toFixed(2) + " yd³"],
+        ["Wire Mesh", Math.ceil(area / 150) + " sheets/rolls"]
+      ];
+    }
+  },
+  doorsWindows: {
+    name: "Doors + Windows Calculator",
+    desc: "Openings, casing, jamb extension, shims, foam, caulk, and install line item.",
+    button: "Calculate Doors + Windows",
+    fields: [
+      ["doorCount", "Doors", 2, "1"],
+      ["windowCount", "Windows", 4, "1"],
+      ["avgDoorTrim", "Trim per Door (linear ft)", 17, "1"],
+      ["avgWindowTrim", "Trim per Window (linear ft)", 16, "1"],
+      ["caulkPerOpening", "Caulk Tubes per Opening", 1, "1"],
+      ["foamPerOpening", "Foam Cans per Opening", 0.5, "0.5"]
+    ],
+    calculate: function(){
+      const openings = getNumber("doorCount") + getNumber("windowCount");
+      const trim = getNumber("doorCount") * getNumber("avgDoorTrim") + getNumber("windowCount") * getNumber("avgWindowTrim");
+      lastCalcLineItem = { item:"Door / Window Install", qty:openings || 1, unit:"openings", unitCost:95, labor:275 };
+      return [
+        ["Total Openings", Math.ceil(openings) + " openings"],
+        ["Casing / Trim", Math.ceil(trim) + " linear ft"],
+        ["Trim Boards", Math.ceil(trim / 16) + " boards @ 16 ft"],
+        ["Caulk", Math.ceil(openings * (getNumber("caulkPerOpening") || 1)) + " tubes"],
+        ["Foam", Math.ceil(openings * (getNumber("foamPerOpening") || 0.5)) + " cans"],
+        ["Shim Packs", Math.max(1, Math.ceil(openings / 3)) + " packs"]
+      ];
+    }
+  },
+  insulation: {
+    name: "Insulation Calculator",
+    desc: "Wall/ceiling area, batt count, rolls, foam cans, and insulation labor line item.",
+    button: "Calculate Insulation",
+    fields: [
+      ["insulLength", "Total Wall Length (ft)", 80, "1"],
+      ["insulHeight", "Wall Height (ft)", 8, "0.1"],
+      ["insulCeilingArea", "Ceiling Area (sqft)", 0, "1"],
+      ["battCoverage", "Coverage per Bag/Roll", 75, "1"],
+      ["insulWaste", "Waste Percentage", 10, "1"],
+      ["foamGaps", "Foam / Air Seal Cans", 2, "1"]
+    ],
+    calculate: function(){
+      const area = (getNumber("insulLength") * getNumber("insulHeight") + getNumber("insulCeilingArea")) * (1 + getNumber("insulWaste") / 100);
+      lastCalcLineItem = { item:"Insulation Install", qty:area.toFixed(2), unit:"sqft", unitCost:1.15, labor:1.25 };
+      return [
+        ["Insulation Area", area.toFixed(2) + " sqft"],
+        ["Bags / Rolls", Math.ceil(area / (getNumber("battCoverage") || 75)) + " bags/rolls"],
+        ["Foam Cans", Math.ceil(getNumber("foamGaps")) + " cans"],
+        ["Staples / Fasteners", Math.max(1, Math.ceil(area / 500)) + " allowance"],
+        ["Vapor Barrier", Math.ceil(area / 500) + " rolls"],
+        ["Labor Area", area.toFixed(2) + " sqft"]
+      ];
+    }
+  },
+  decking: {
+    name: "Decking Calculator",
+    desc: "Deck boards, joists, beams, posts, concrete footings, and railing allowance.",
+    button: "Calculate Deck Materials",
+    fields: [
+      ["deckLength", "Deck Length (ft)", 16, "0.1"],
+      ["deckWidth", "Deck Width (ft)", 12, "0.1"],
+      ["deckBoardWidth", "Deck Board Width (in)", 5.5, "0.1"],
+      ["deckBoardLength", "Deck Board Length (ft)", 16, "1"],
+      ["joistSpacing", "Joist Spacing (in)", 16, "1"],
+      ["deckWaste", "Waste Percentage", 10, "1"]
+    ],
+    calculate: function(){
+      const area = getNumber("deckLength") * getNumber("deckWidth");
+      const boards = Math.ceil((getNumber("deckWidth") * 12 / (getNumber("deckBoardWidth") || 5.5)) * (getNumber("deckLength") / (getNumber("deckBoardLength") || 16)) * (1 + getNumber("deckWaste") / 100));
+      const joists = Math.ceil((getNumber("deckLength") * 12) / (getNumber("joistSpacing") || 16)) + 1;
+      lastCalcLineItem = { item:"Deck Framing / Decking", qty:area.toFixed(2), unit:"sqft", unitCost:18, labor:28 };
+      return [
+        ["Deck Area", area.toFixed(2) + " sqft"],
+        ["Deck Boards", boards + " boards"],
+        ["Joists", joists + " joists"],
+        ["Posts / Footings", Math.max(4, Math.ceil(area / 64)) + " posts"],
+        ["Concrete Bags", Math.max(8, Math.ceil(area / 32)) + " bags"],
+        ["Railing Allowance", Math.ceil((getNumber("deckLength") + getNumber("deckWidth")) * 2) + " linear ft"]
+      ];
+    }
+  },
+  masonry: {
+    name: "Masonry / Block Calculator",
+    desc: "Block count, mortar bags, sand, wall area, and masonry labor line item.",
+    button: "Calculate Masonry Materials",
+    fields: [
+      ["blockWallLength", "Wall Length (ft)", 24, "0.1"],
+      ["blockWallHeight", "Wall Height (ft)", 4, "0.1"],
+      ["blockSqft", "Block Face Area (sqft)", 0.89, "0.01"],
+      ["blockWaste", "Waste Percentage", 10, "1"],
+      ["mortarPerBlocks", "Blocks per Mortar Bag", 35, "1"],
+      ["rebarSpacing", "Rebar Spacing (ft)", 4, "1"]
+    ],
+    calculate: function(){
+      const area = getNumber("blockWallLength") * getNumber("blockWallHeight");
+      const blocks = Math.ceil((area / (getNumber("blockSqft") || 0.89)) * (1 + getNumber("blockWaste") / 100));
+      lastCalcLineItem = { item:"Masonry Block Wall", qty:blocks, unit:"blocks", unitCost:3.75, labor:12 };
+      return [
+        ["Wall Area", area.toFixed(2) + " sqft"],
+        ["Blocks", blocks + " blocks"],
+        ["Mortar", Math.ceil(blocks / (getNumber("mortarPerBlocks") || 35)) + " bags"],
+        ["Sand", Math.max(1, Math.ceil(blocks / 100)) + " yards/bags allowance"],
+        ["Rebar", Math.ceil(getNumber("blockWallLength") / (getNumber("rebarSpacing") || 4)) + " pieces"],
+        ["Caps", Math.ceil(getNumber("blockWallLength") / 1.33) + " cap blocks"]
+      ];
+    }
+  },
+  hvac: {
+    name: "HVAC Basic Calculator",
+    desc: "Room load rough estimate, duct runs, registers, line set, and install allowance.",
+    button: "Calculate HVAC Basics",
+    fields: [
+      ["hvacSqft", "Conditioned Area (sqft)", 600, "1"],
+      ["btuPerSqft", "BTU per Sq Ft", 25, "1"],
+      ["ductRuns", "Duct Runs", 6, "1"],
+      ["avgDuctLength", "Avg Duct Length (ft)", 18, "1"],
+      ["registerCount", "Registers / Returns", 8, "1"],
+      ["lineSetLength", "Line Set Length (ft)", 30, "1"]
+    ],
+    calculate: function(){
+      const btu = getNumber("hvacSqft") * getNumber("btuPerSqft");
+      const tons = btu / 12000;
+      const duct = getNumber("ductRuns") * getNumber("avgDuctLength");
+      lastCalcLineItem = { item:"HVAC Basic Install Allowance", qty:getNumber("hvacSqft") || 1, unit:"sqft", unitCost:4, labor:8 };
+      return [
+        ["Estimated BTU", Math.ceil(btu).toLocaleString() + " BTU"],
+        ["Approx Tons", tons.toFixed(2) + " tons"],
+        ["Duct Length", Math.ceil(duct) + " linear ft"],
+        ["Registers / Returns", Math.ceil(getNumber("registerCount")) + " pieces"],
+        ["Line Set", Math.ceil(getNumber("lineSetLength")) + " linear ft"],
+        ["Note", "Use licensed HVAC sizing for final design"]
+      ];
+    }
+  },
+  generalLabor: {
+    name: "General Labor Calculator",
+    desc: "Crew size, days, hours, hourly labor cost, disposal, and project labor line item.",
+    button: "Calculate Labor Cost",
+    fields: [
+      ["crewSize", "Crew Size", 2, "1"],
+      ["workDays", "Work Days", 3, "0.5"],
+      ["hoursPerDay", "Hours per Day", 8, "0.5"],
+      ["laborRate", "Hourly Labor Rate", 65, "1"],
+      ["disposalCost", "Disposal / Dumpster", 350, "1"],
+      ["miscCost", "Misc Allowance", 250, "1"]
+    ],
+    calculate: function(){
+      const hours = getNumber("crewSize") * getNumber("workDays") * getNumber("hoursPerDay");
+      const laborCost = hours * getNumber("laborRate");
+      const total = laborCost + getNumber("disposalCost") + getNumber("miscCost");
+      lastCalcLineItem = { item:"General Labor / Project Allowance", qty:hours.toFixed(2), unit:"hours", unitCost:0, labor:getNumber("laborRate") };
+      return [
+        ["Total Labor Hours", hours.toFixed(2) + " hours"],
+        ["Labor Cost", currency(laborCost)],
+        ["Disposal", currency(getNumber("disposalCost"))],
+        ["Misc Allowance", currency(getNumber("miscCost"))],
+        ["Projected Total", currency(total)],
+        ["Crew Days", getNumber("crewSize") + " people × " + getNumber("workDays") + " days"]
+      ];
+    }
   }
 };
 
@@ -1907,18 +2422,35 @@ function getNumber(id){
   return parseFloat(document.getElementById(id)?.value) || 0;
 }
 
-function selectCalculator(type){
-  activeCalculator = type || "tile";
+function buildTradeQuickMenu(){
+  const menu = document.getElementById("tradeQuickMenu");
+  if (!menu) return;
 
-  document.querySelectorAll(".tool-card[data-tool]").forEach(card => {
-    card.classList.toggle("active", card.dataset.tool === activeCalculator);
+  menu.innerHTML = Object.keys(calculatorConfigs).map(key => {
+    const config = calculatorConfigs[key];
+    return `<button class="trade-chip" type="button" data-tool="${key}" onclick="selectCalculator('${key}')">${config.name.replace(' Calculator','')}</button>`;
+  }).join("");
+}
+
+function selectCalculator(type){
+  activeCalculator = calculatorConfigs[type] ? type : "tile";
+  const config = calculatorConfigs[activeCalculator];
+
+  const select = document.getElementById("tradeToolSelect");
+  if (select) select.value = activeCalculator;
+
+  document.querySelectorAll(".trade-chip[data-tool]").forEach(chip => {
+    chip.classList.toggle("active", chip.dataset.tool === activeCalculator);
   });
 
-  const config = calculatorConfigs[activeCalculator];
+  const activeName = document.getElementById("activeToolName");
+  const activeDesc = document.getElementById("activeToolDesc");
   const fields = document.getElementById("calculatorFields");
   const title = document.getElementById("calcResultTitle");
 
-  if (title) title.textContent = config.title;
+  if (activeName) activeName.textContent = config.name;
+  if (activeDesc) activeDesc.textContent = config.desc;
+  if (title) title.textContent = config.name + " Results";
 
   if (fields) {
     fields.innerHTML = config.fields.map(([id, label, value, step]) => `
@@ -1941,119 +2473,17 @@ function setCalcResults(metrics){
   if (!out) return;
 
   out.innerHTML = metrics.map(item => `
-    <div class="result-metric"><span>${item.label}</span><strong>${item.value}</strong></div>
+    <div class="result-metric"><span>${item[0]}</span><strong>${item[1]}</strong></div>
   `).join("");
 }
 
-function calculateTile(){
-  const length = getNumber("length");
-  const width = getNumber("width");
-  const tileLength = getNumber("tileLength");
-  const tileWidth = getNumber("tileWidth");
-  const waste = getNumber("waste");
-  const perBox = getNumber("perBox") || 1;
-
-  const area = length * width;
-  const withWaste = area * (1 + waste / 100);
-  const boxes = Math.ceil(withWaste / perBox);
-  const tileSqFt = (tileLength * tileWidth) / 144;
-  const tiles = tileSqFt > 0 ? Math.ceil(withWaste / tileSqFt) : 0;
-  const thinset = Math.max(1, Math.ceil(withWaste / 50));
-  const grout = Math.max(1, Math.ceil(withWaste / 90));
-
-  lastCalcLineItem = {
-    item: "Tile Install Materials",
-    qty: withWaste.toFixed(2),
-    unit: "sqft",
-    unitCost: 3.25,
-    labor: 4.75
-  };
-
-  setCalcResults([
-    { label: "Floor Area", value: area.toFixed(2) + " sqft" },
-    { label: "With Waste", value: withWaste.toFixed(2) + " sqft" },
-    { label: "Boxes Needed", value: boxes + " boxes" },
-    { label: "Estimated Tile Count", value: tiles + " tiles" },
-    { label: "Suggested Thinset", value: thinset + " bags" },
-    { label: "Suggested Grout", value: grout + " bags" }
-  ]);
-}
-
-function calculateDrywall(){
-  const length = getNumber("roomLength");
-  const width = getNumber("roomWidth");
-  const height = getNumber("wallHeight");
-  const openings = getNumber("drywallOpenings");
-  const sheetSize = getNumber("sheetSize") || 32;
-  const waste = getNumber("drywallWaste");
-
-  const wallArea = Math.max(0, ((length + width) * 2 * height) - openings);
-  const ceilingArea = length * width;
-  const totalArea = wallArea + ceilingArea;
-  const withWaste = totalArea * (1 + waste / 100);
-  const sheets = Math.ceil(withWaste / sheetSize);
-  const screws = Math.max(1, Math.ceil(sheets / 10));
-  const tape = Math.max(1, Math.ceil(sheets / 12));
-  const compound = Math.max(1, Math.ceil(sheets / 8));
-
-  lastCalcLineItem = {
-    item: "Drywall Hang / Finish",
-    qty: sheets,
-    unit: "sheets",
-    unitCost: 18,
-    labor: 55
-  };
-
-  setCalcResults([
-    { label: "Wall Area", value: wallArea.toFixed(2) + " sqft" },
-    { label: "Ceiling Area", value: ceilingArea.toFixed(2) + " sqft" },
-    { label: "Total With Waste", value: withWaste.toFixed(2) + " sqft" },
-    { label: "Drywall Sheets", value: sheets + " sheets" },
-    { label: "Drywall Screws", value: screws + " boxes" },
-    { label: "Tape / Compound", value: tape + " rolls / " + compound + " buckets" }
-  ]);
-}
-
-function calculateFraming(){
-  const wallLength = getNumber("wallLength");
-  const spacing = getNumber("studSpacing") || 16;
-  const height = getNumber("wallHeightFraming");
-  const openings = getNumber("openings");
-  const plateLayers = getNumber("plateLayers") || 2;
-  const waste = getNumber("framingWaste");
-
-  const studCount = Math.ceil((wallLength * 12) / spacing) + 1 + Math.ceil(openings * 2);
-  const studsWithWaste = Math.ceil(studCount * (1 + waste / 100));
-  const plateLinearFt = wallLength * (plateLayers + 1);
-  const plateBoards = Math.ceil(plateLinearFt / 8);
-  const blocking = Math.max(0, Math.ceil(wallLength / 8));
-
-  lastCalcLineItem = {
-    item: "Wall Framing",
-    qty: wallLength.toFixed(2),
-    unit: "linear ft",
-    unitCost: 12,
-    labor: 18
-  };
-
-  setCalcResults([
-    { label: "Wall Length", value: wallLength.toFixed(2) + " linear ft" },
-    { label: "Wall Height", value: height.toFixed(2) + " ft" },
-    { label: "Studs With Waste", value: studsWithWaste + " studs" },
-    { label: "Plate Lumber", value: plateBoards + " boards @ 8 ft" },
-    { label: "Blocking", value: blocking + " pieces" },
-    { label: "Recommended Fasteners", value: Math.max(1, Math.ceil(studsWithWaste / 20)) + " box(es)" }
-  ]);
-}
-
 function calculateMaterials(){
-  if (activeCalculator === "drywall") {
-    calculateDrywall();
-  } else if (activeCalculator === "framing") {
-    calculateFraming();
-  } else {
-    calculateTile();
-  }
+  const config = calculatorConfigs[activeCalculator] || calculatorConfigs.tile;
+  setCalcResults(config.calculate());
+}
+
+function calculateTile(){
+  selectCalculator("tile");
 }
 
 function addEstimateLine(item, qty, unit, unitCost, labor){
@@ -2249,6 +2679,7 @@ function submitBid(){
 
 applyWorkspaceMode();
 
+buildTradeQuickMenu();
 selectCalculator("tile");
 
 calculateMaterials();
