@@ -1,29 +1,2673 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Updated Project Room</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Revamp Project Room</title>
+  <style>
+    :root {
+      --brand: #f97316;
+      --brand-dark: #ea580c;
+      --brand-soft: rgba(249, 115, 22, 0.12);
+      --bg: #f8fafc;
+      --card: rgba(255, 255, 255, 0.98);
+      --text: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+      --radius: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px);
+      color: var(--text);
+    }
+
+    .app-shell {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      box-shadow: 0 10px 30px rgba(249, 115, 22, 0.25);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      line-height: 1.15;
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+      color: #fff;
+      box-shadow: 0 12px 24px rgba(249, 115, 22, 0.25);
+    }
+
+    .btn-soft {
+      background: var(--brand-soft);
+      color: var(--brand-dark);
+    }
+
+    .btn-dark {
+      background: #0f172a;
+      color: #fff;
+    }
+
+    .hero {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.8);
+      box-shadow: var(--shadow);
+      border-radius: 28px;
+      padding: 22px;
+      margin-bottom: 18px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 18px;
+    }
+
+    .project-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .project-title h2 {
+      margin: 0;
+      font-size: 1.6rem;
+    }
+
+    .project-title p {
+      margin: 6px 0 0;
+      color: var(--muted);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #ecfdf5;
+      color: #15803d;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      align-self: start;
+      border: 1px solid #bbf7d0;
+    }
+
+    .mini-stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .stat .label {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .stat .value {
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .side-summary {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: linear-gradient(180deg, #fff, #fff7ed);
+      padding: 18px;
+    }
+
+    .side-summary h3 {
+      margin-top: 0;
+      margin-bottom: 14px;
+      font-size: 1rem;
+    }
+
+    .summary-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--line);
+      font-size: 0.95rem;
+    }
+
+    .summary-line:last-child {
+      border-bottom: none;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .sidebar,
+    .panel {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.85);
+      box-shadow: var(--shadow);
+      border-radius: 24px;
+    }
+
+    .sidebar {
+      padding: 16px;
+      position: sticky;
+      top: 20px;
+    }
+
+    .nav-title {
+      margin: 0 0 12px;
+      font-size: 0.88rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .nav-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px 14px;
+      background: #fff;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, var(--brand-soft), rgba(255,255,255,1));
+      border-color: rgba(249, 115, 22, 0.3);
+      color: var(--brand-dark);
+    }
+
+    .nav-item span:last-child {
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .workspace {
+      display: grid;
+      gap: 18px;
+    }
+
+    .panel {
+      padding: 20px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .panel-header h3 {
+      margin: 0;
+      font-size: 1.15rem;
+    }
+
+    .panel-header p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1.25fr 0.95fr;
+      gap: 18px;
+    }
+
+    .video-stage {
+      background: linear-gradient(160deg, #111827, #1e293b);
+      border-radius: 22px;
+      min-height: 340px;
+      padding: 18px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .video-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      backdrop-filter: blur(8px);
+    }
+
+    .video-main {
+      position: absolute;
+      inset: 60px 18px 72px 18px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at top right, rgba(249,115,22,0.18), transparent 35%), rgba(255,255,255,0.03);
+      text-align: center;
+      padding: 18px;
+    }
+
+    .video-main h4 {
+      margin: 0 0 8px;
+      font-size: 1.15rem;
+    }
+
+    .video-thumb {
+      position: absolute;
+      right: 18px;
+      bottom: 18px;
+      width: 170px;
+      height: 96px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.1);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .video-controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .video-controls .btn {
+      padding: 11px 14px;
+      border-radius: 12px;
+    }
+
+    .chat-box {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 14px;
+      background: #fff;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 340px;
+    }
+
+    .messages {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+      padding: 8px 0 16px;
+    }
+
+    .message {
+      max-width: 88%;
+      padding: 12px 14px;
+      border-radius: 16px;
+      line-height: 1.45;
+      font-size: 0.95rem;
+    }
+
+    .message.contractor {
+      background: var(--brand-soft);
+      justify-self: start;
+    }
+
+    .message.customer {
+      background: #eff6ff;
+      justify-self: end;
+    }
+
+    .message strong {
+      display: block;
+      font-size: 0.82rem;
+      margin-bottom: 4px;
+    }
+
+    .chat-compose {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font: inherit;
+      color: var(--text);
+      background: #fff;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 88px;
+    }
+
+    .chat-compose input {
+      flex: 1;
+    }
+
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .tool-card {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 18px;
+      padding: 14px;
+      cursor: pointer;
+      transition: border-color 0.18s ease, transform 0.18s ease;
+    }
+
+    .tool-card:hover,
+    .tool-card.active {
+      border-color: rgba(249, 115, 22, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .tool-card.active {
+      background: linear-gradient(135deg, var(--brand-soft), #fff);
+    }
+
+    .tool-card h4 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }
+
+    .tool-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .calc-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 0.85fr;
+      gap: 18px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    .result-card {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: linear-gradient(180deg, #fff, #fff7ed);
+      padding: 16px;
+    }
+
+    .result-metric {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--line);
+      font-size: 0.95rem;
+    }
+
+    .result-metric:last-child {
+      border-bottom: none;
+    }
+
+    .estimate-toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .estimate-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 780px;
+    }
+
+    th, td {
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      font-size: 0.95rem;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #fff7ed;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #9a3412;
+    }
+
+    .table-input {
+      min-width: 86px;
+      padding: 10px 12px;
+      border-radius: 12px;
+    }
+
+    .estimate-summary {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 18px;
+    }
+
+    .summary-box {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 16px;
+      background: #fff;
+    }
+
+    .summary-box h4 {
+      margin-top: 0;
+      margin-bottom: 14px;
+    }
+
+    .money-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--line);
+      font-size: 0.95rem;
+    }
+
+    .money-line:last-child {
+      border-bottom: none;
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .schedule-layout {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 18px;
+    }
+
+    .calendar-box,
+    .schedule-list,
+    .signature-box {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: #fff;
+      padding: 16px;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .cal-day,
+    .cal-date {
+      text-align: center;
+      padding: 10px 8px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+    }
+
+    .cal-day {
+      font-weight: 800;
+      color: var(--muted);
+      background: #f8fafc;
+    }
+
+    .cal-date {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .cal-date.active {
+      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .task-item {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    .task-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .task-item strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .task-item span {
+      color: var(--muted);
+      font-size: 0.92rem;
+      display: block;
+    }
+
+    .signature-layout {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 18px;
+    }
+
+    .signature-pad {
+      height: 180px;
+      border: 2px dashed #fdba74;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #fff, #fff7ed);
+      display: grid;
+      place-items: center;
+      color: #9a3412;
+      font-weight: 700;
+      margin: 12px 0;
+      text-align: center;
+      padding: 18px;
+    }
+
+    .approval-checklist {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .check-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    .check-row input {
+      width: auto;
+      margin-top: 3px;
+    }
+
+    .photo-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .photo-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: linear-gradient(135deg, #fff7ed, #ffffff);
+      padding: 14px;
+      min-height: 120px;
+    }
+
+    .photo-card strong {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .photo-placeholder {
+      min-height: 70px;
+      border-radius: 14px;
+      background: rgba(249, 115, 22, 0.10);
+      display: grid;
+      place-items: center;
+      color: var(--brand-dark);
+      font-weight: 700;
+      text-align: center;
+      padding: 12px;
+    }
+
+    .footer-note {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin: 18px 0 8px;
+    }
+
+
+    .ai-estimate-card {
+      border: 1px solid rgba(249, 115, 22, 0.22);
+      background: linear-gradient(180deg, #fff7ed, #ffffff);
+      border-radius: 22px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .ai-estimate-card h4 {
+      margin: 0 0 6px;
+      font-size: 1.05rem;
+    }
+
+    .ai-estimate-card p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .ai-input-row {
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    #aiJobInput {
+      min-height: 150px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    .ai-action-stack {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .ai-status {
+      min-height: 22px;
+      color: var(--brand-dark);
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    @media (max-width: 760px) {
+      .ai-input-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+
+    .proposal-preview-card {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: #fff;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .proposal-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    #proposalPreview {
+      white-space: pre-wrap;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      min-height: 120px;
+      max-height: 360px;
+      overflow: auto;
+      color: var(--text);
+      font-size: 0.94rem;
+      line-height: 1.45;
+    }
+
+
+    .ai-chat-card {
+      border: 1px solid rgba(249, 115, 22, 0.22);
+      background: linear-gradient(180deg, #fff7ed, #ffffff);
+      border-radius: 22px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .ai-chat-card h4 {
+      margin: 0 0 6px;
+      font-size: 1.05rem;
+    }
+
+    .ai-chat-card p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .ai-chat-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 260px;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .ai-chat-window {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 18px;
+      padding: 14px;
+      min-height: 260px;
+      max-height: 420px;
+      overflow-y: auto;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .ai-msg {
+      padding: 12px 14px;
+      border-radius: 16px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      font-size: 0.94rem;
+      max-width: 92%;
+    }
+
+    .ai-msg.user {
+      background: #eff6ff;
+      justify-self: end;
+    }
+
+    .ai-msg.assistant {
+      background: var(--brand-soft);
+      justify-self: start;
+    }
+
+    .ai-compose {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    #aiChatInput {
+      min-height: 84px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    .ai-side-tools {
+      display: grid;
+      gap: 10px;
+    }
+
+    .ai-status {
+      min-height: 22px;
+      color: var(--brand-dark);
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .estimate-output-card {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: #fff;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .estimate-output-card h4 {
+      margin-top: 0;
+    }
+
+    .proposal-preview-card {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: #fff;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .proposal-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    #proposalPreview {
+      white-space: pre-wrap;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      min-height: 120px;
+      max-height: 360px;
+      overflow: auto;
+      color: var(--text);
+      font-size: 0.94rem;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 900px) {
+      .ai-chat-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .ai-compose {
+        grid-template-columns: 1fr;
+      }
+    }
+
+
+    .contractor-info-card {
+      border: 1px solid rgba(249, 115, 22, 0.22);
+      background: linear-gradient(180deg, #ffffff, #fff7ed);
+      border-radius: 22px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .contractor-info-card h4 {
+      margin: 0 0 10px;
+      font-size: 1.05rem;
+    }
+
+    .contractor-info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .ai-msg {
+      font-family: Inter, Arial, Helvetica, sans-serif;
+    }
+
+    .ai-msg strong {
+      font-weight: 900;
+    }
+
+    .ai-msg ul {
+      margin: 8px 0 0 18px;
+      padding: 0;
+    }
+
+    .ai-msg li {
+      margin: 4px 0;
+    }
+
+    .ai-msg .ai-heading {
+      display: block;
+      font-size: 1rem;
+      font-weight: 900;
+      margin: 10px 0 6px;
+      color: #9a3412;
+    }
+
+    .mic-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .mic-listening {
+      color: #dc2626;
+      font-weight: 900;
+    }
+
+    @media (max-width: 760px) {
+      .contractor-info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 1220px) {
+      .hero-grid,
+      .dashboard,
+      .two-col,
+      .calc-layout,
+      .estimate-summary,
+      .schedule-layout,
+      .signature-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .mini-stats,
+      .tool-grid,
+      .photo-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .sidebar {
+        position: static;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app-shell {
+        padding: 14px;
+      }
+
+      .mini-stats,
+      .tool-grid,
+      .form-grid,
+      .photo-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .project-title h2 {
+        font-size: 1.28rem;
+      }
+
+      .video-thumb {
+        position: static;
+        width: 100%;
+        margin-top: 14px;
+        height: 90px;
+      }
+
+      .video-main {
+        position: static;
+        margin-top: 16px;
+        min-height: 190px;
+      }
+    }
+  </style>
 </head>
 <body>
+<div class="app-shell">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-badge">R</div>
+        <div>
+          <h1>Revamp Project Room™</h1>
+          <p>Private contractor workspace for real jobs, real estimates, and real customer approvals.</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button id="backToFeed" class="btn btn-soft">
+Back to Project Feed
+</button>
+        <button id="inviteBtn" class="btn btn-primary">Invite Customer</button>
+      </div>
+    </div>
 
-<!-- Simulated minimal version with correct section order -->
+    <section class="hero">
+      <div class="hero-grid">
+        <div>
+          <div class="project-title">
+            <div>
+              <h2 id="jobTitle">Loading...</h2>
+              <p id="jobMeta">Loading job details...</p>
+            </div>
+            <div class="status-pill">● In Estimate Review</div>
+          </div>
 
-<h2>Estimate Notes / Proposal Draft</h2>
-<textarea style="width:100%;height:120px;"></textarea>
+          <div class="mini-stats">
+            <div class="stat">
+              <div class="label">Estimate Total</div>
+              <div class="value" id="jobBudget">$0</div>
+            </div>
+            <div class="stat">
+              <div class="label">Next Appointment</div>
+              <div class="value">Mar 14 • 10:00 AM</div>
+            </div>
+            <div class="stat">
+              <div class="label">Approval Status</div>
+              <div class="value">Pending Signature</div>
+            </div>
+            <div class="stat">
+              <div class="label">Room Size</div>
+              <div class="value" id="jobRoomSize">Loading...</div>
+            </div>
+          </div>
+        </div>
 
-<div class="proposal-preview-card">
-  <h3>Proposal Preview</h3>
-  <div id="proposalPreview">No proposal generated yet.</div>
+        <aside class="side-summary">
+          <h3>Quick Project Summary</h3>
+          <div class="summary-line"><span>Trade Type</span><strong id="jobTrade">Loading...</strong></div>
+          <div class="summary-line"><span>Start Goal</span><strong id="jobStartGoal">Loading...</strong></div>
+          <div class="summary-line"><span>Deposit Requested</span><strong id="jobDeposit">Loading...</strong></div>
+          <div class="summary-line"><span>Proposal Version</span><strong>v3.2</strong></div>
+          <div class="summary-line"><span>Private Bid Visibility</span><strong>Customer + Assigned Contractor Only</strong></div>
+        </aside>
+      </div>
+    </section>
+
+    <div class="dashboard">
+      <aside class="sidebar">
+        <h3 class="nav-title">Workspace Sections</h3>
+        <div class="nav-list">
+          <div class="nav-item active"><span>Project Overview</span><span>Live</span></div>
+          <div class="nav-item"><span>Video + Chat</span><span>2 alerts</span></div>
+          <div class="nav-item"><span>Material Calculator</span><span>Tile</span></div>
+          <div class="nav-item"><span>Estimate Spreadsheet</span><span>v3.2</span></div>
+          <div class="nav-item"><span>Schedule Calendar</span><span>4 items</span></div>
+          <div class="nav-item"><span>Customer Signature</span><span>Pending</span></div>
+          <div class="nav-item"><span>Photos + Docs</span><span>12 files</span></div>
+          <div class="nav-item"><span>Payments</span><span>$5,500 due</span></div>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Video Call + Job Chat</h3>
+              <p>Use this area for live walkthroughs, screen-sharing plans, field notes, and private project communication.</p>
+            </div>
+            <div class="video-controls">
+              <button class="btn btn-primary">Start Video Call</button>
+              <button class="btn btn-soft">Share Screen</button>
+              <button class="btn btn-soft">Capture Photo</button>
+              <button class="btn btn-dark">Record Session</button>
+            </div>
+          </div>
+<div style="background:white; border-radius:18px; padding:16px; box-shadow:0 8px 22px rgba(0,0,0,.12); margin-bottom:18px;">
+  <h2 style="margin-top:0;">Video Call</h2>
+
+  <button id="startVideoCallBtn" style="
+    width:100%;
+    height:48px;
+    border:0;
+    border-radius:14px;
+    background:#f97316;
+    color:white;
+    font-weight:900;
+    cursor:pointer;
+  ">
+    Start Video Call
+  </button>
+
+  <div id="videoCallBox" style="
+    display:none;
+    margin-top:14px;
+    height:520px;
+    border-radius:16px;
+    overflow:hidden;
+    background:#0f172a;
+  "></div>
 </div>
 
-<!-- CORRECTLY MOVED SECTION -->
+            <div class="chat-box">
+              <div class="panel-header" style="margin-bottom:0;">
+                <div>
+                  <h3 style="font-size:1rem;">Project Chat</h3>
+                  <p>Private thread</p>
+                </div>
+              </div>
+              <div class="messages">
+                <div class="message contractor">
+                  <strong>Verified Contractor</strong>
+                  I uploaded the revised tile layout and added the material quantities to the estimate.
+                </div>
+                <div class="message customer">
+                  <strong>Homeowner</strong>
+                  Looks good. Can we move the walkthrough to Saturday morning?
+                </div>
+                <div class="message contractor">
+                  <strong>Verified Contractor</strong>
+                  Yes. I added 10:00 AM on the calendar below and the estimate is ready for signature.
+                </div>
+              </div>
+              <div class="chat-compose">
+                <input type="text" placeholder="Type a project message..." />
+                <button class="btn btn-primary">Send</button>
+              </div>
+            </div>
+          </div>
+        </section>
+<div class="contractor-tools">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Smart Material Calculator</h3>
+              <p>Switch between trades and turn measurements into material counts that feed the estimate sheet.</p>
+            </div>
+            <button class="btn btn-soft">Push Results to Estimate</button>
+          </div>
+
+          <div class="tool-grid">
+            <div class="tool-card active">
+              <h4>Tile Calculator</h4>
+              <p>Square footage, waste factor, grout, thinset, and box count.</p>
+            </div>
+            <div class="tool-card">
+              <h4>Drywall Calculator</h4>
+              <p>Sheet count, tape, screws, and compound based on room dimensions.</p>
+            </div>
+            <div class="tool-card">
+              <h4>Framing Calculator</h4>
+              <p>Stud count, top plates, bottom plates, headers, and spacing logic.</p>
+            </div>
+          </div>
+
+          <div class="calc-layout">
+            <div>
+              <div class="form-grid">
+                <div>
+                  <label>Room Length (ft)</label>
+                  <input id="length" type="number" value="12" step="0.1" />
+                </div>
+                <div>
+                  <label>Room Width (ft)</label>
+                  <input id="width" type="number" value="10" step="0.1" />
+                </div>
+                <div>
+                  <label>Tile Length (in)</label>
+                  <input id="tileLength" type="number" value="24" step="1" />
+                </div>
+                <div>
+                  <label>Tile Width (in)</label>
+                  <input id="tileWidth" type="number" value="12" step="1" />
+                </div>
+                <div>
+                  <label>Waste Percentage</label>
+                  <input id="waste" type="number" value="10" step="1" />
+                </div>
+                <div>
+                  <label>Sq Ft per Box</label>
+                  <input id="perBox" type="number" value="12" step="0.1" />
+                </div>
+                <div class="full">
+                  <button class="btn btn-primary" onclick="calculateTile()">Calculate Tile Materials</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="result-card">
+              <h4 style="margin-top:0;">Calculated Results</h4>
+              <div class="result-metric"><span>Floor Area</span><strong id="areaOut">120 sqft</strong></div>
+              <div class="result-metric"><span>With Waste</span><strong id="wasteOut">132 sqft</strong></div>
+              <div class="result-metric"><span>Boxes Needed</span><strong id="boxesOut">11 boxes</strong></div>
+              <div class="result-metric"><span>Estimated Tile Count</span><strong id="tileCountOut">60 tiles</strong></div>
+              <div class="result-metric"><span>Suggested Thinset</span><strong id="thinsetOut">3 bags</strong></div>
+              <div class="result-metric"><span>Suggested Grout</span><strong id="groutOut">2 bags</strong></div>
+            </div>
+          </div>
+        </section>
 <section class="panel">
-  <h3>Photos + Documentation</h3>
-  <p>Upload before photos, walkthrough videos, plans, permits, and marked-up screenshots.</p>
+          <div class="panel-header">
+            <div>
+              <h3>Real Estimate Spreadsheet</h3>
+              <p>Editable line items, live math, markup control, and customer-ready totals.</p>
+            </div>
+            <div class="estimate-toolbar">
+<button class="btn btn-soft" onclick="addRow()">Add Line Item</button>
+              <button class="btn btn-soft">Save Version</button>
+              <button class="btn btn-primary" id="generateProposalBtn" type="button" onclick="generateProposalPDF()">Generate Proposal PDF</button>
+              <button class="btn btn-primary" onclick="submitBid()">Submit Bid to Customer</button>
+            </div>
+          </div>
 
-  <input type="file" multiple>
-  <button>Upload Files</button>
+                              <div class="contractor-info-card">
+            <h4>Contractor Info for Proposal</h4>
+            <div class="contractor-info-grid">
+              <div>
+                <label>Company Name</label>
+                <input id="contractorCompany" type="text" placeholder="Company name">
+              </div>
+              <div>
+                <label>Contact Name</label>
+                <input id="contractorName" type="text" placeholder="Contact name">
+              </div>
+              <div>
+                <label>Email</label>
+                <input id="contractorEmail" type="email" placeholder="Email address">
+              </div>
+              <div>
+                <label>Phone</label>
+                <input id="contractorPhone" type="text" placeholder="Phone number">
+              </div>
+              <div class="full">
+                <label>Business Address</label>
+                <input id="contractorAddress" type="text" placeholder="Business address">
+              </div>
+            </div>
+          </div>
+
+<div class="ai-chat-card">
+            <h4>✨ AI Estimate Chat</h4>
+            <p>Chat back and forth with AI to build the estimate. Ask for changes, materials, Home Depot-style lists, labor breakdowns, exclusions, timelines, or a cleaner customer proposal.</p>
+
+            <div class="ai-chat-shell">
+              <div>
+                <div class="ai-chat-window" id="aiChatWindow">
+                  <div class="ai-msg assistant">Tell me the job details and I’ll build a professional estimate. Example: “Bathroom remodel, 8x10, demo tile, install new floor tile, tile shower walls, new vanity, toilet, fixtures, paint.”</div>
+                </div>
+
+                <div class="ai-compose">
+                  <textarea id="aiChatInput" placeholder="Type job details or reply to the AI here..."></textarea>
+                  <button class="btn btn-primary" id="aiSendBtn" type="button" onclick="sendAIMessage(false)">Send</button>
+                </div>
+                <div class="mic-row">
+                  <button type="button" onclick="toggleDictation()">🎙 Dictate</button>
+                  <span id="micStatus"></span>
+                </div>
+              </div>
+
+              <div class="ai-side-tools">
+                <button class="btn btn-primary" id="aiEstimateBtn" type="button" onclick="runAIEstimate()">✨ Build AI Estimate</button>
+                <button class="btn btn-soft" id="useJobInfoBtn" type="button" onclick="fillAIInputFromJob()">Use Job Info</button>
+                <button class="btn btn-soft" id="copyAIToNotesBtn" type="button" onclick="copyLastAIReplyToNotes()">Copy Last AI Reply to Notes</button>
+                <div class="ai-status" id="aiStatus"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="estimate-output-card">
+            <h4>Estimate Notes / Proposal Draft</h4>
+            <p style="color:var(--muted);margin-top:0;">AI replies can be copied here. Edit this section before generating the customer PDF.</p>
+            <textarea id="estimateNotes" placeholder="AI estimate and proposal notes will appear here. You can edit before generating the PDF.">Includes labor, material, disposal, and standard site protection. Permit costs are included in the contract price where required. Fixtures and finish materials may be specified by owner selection or contractor-approved equivalent of similar quality and cost.</textarea>
+          </div>
+
+<div class="estimate-table-wrap">
+            <table id="estimateTable">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Qty</th>
+                  <th>Unit</th>
+                  <th>Unit Cost</th>
+                  <th>Labor</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><input class="table-input" value="Demo" /></td>
+                  <td><input class="table-input qty" type="number" value="1" step="0.01" /></td>
+                  <td><input class="table-input" value="lot" /></td>
+                  <td><input class="table-input unitCost" type="number" value="800" step="0.01" /></td>
+                  <td><input class="table-input laborCost" type="number" value="0" step="0.01" /></td>
+                  <td class="lineTotal">$800.00</td>
+                </tr>
+                <tr>
+                  <td><input class="table-input" value="Framing" /></td>
+                  <td><input class="table-input qty" type="number" value="1" step="0.01" /></td>
+                  <td><input class="table-input" value="lot" /></td>
+                  <td><input class="table-input unitCost" type="number" value="750" step="0.01" /></td>
+                  <td><input class="table-input laborCost" type="number" value="450" step="0.01" /></td>
+                  <td class="lineTotal">$1200.00</td>
+                </tr>
+                <tr>
+                  <td><input class="table-input" value="Drywall" /></td>
+                  <td><input class="table-input qty" type="number" value="1" step="0.01" /></td>
+                  <td><input class="table-input" value="lot" /></td>
+                  <td><input class="table-input unitCost" type="number" value="550" step="0.01" /></td>
+                  <td><input class="table-input laborCost" type="number" value="400" step="0.01" /></td>
+                  <td class="lineTotal">$950.00</td>
+                </tr>
+                <tr>
+                  <td><input class="table-input" value="Tile Install" /></td>
+                  <td><input class="table-input qty" type="number" value="132" step="0.01" /></td>
+                  <td><input class="table-input" value="sqft" /></td>
+                  <td><input class="table-input unitCost" type="number" value="3.25" step="0.01" /></td>
+                  <td><input class="table-input laborCost" type="number" value="4.75" step="0.01" /></td>
+                  <td class="lineTotal">$1056.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="estimate-summary">
+            <div class="summary-box">
+              <h4>Totals</h4>
+              <div class="money-line"><span>Subtotal</span><strong id="subtotalOut">$4,006.00</strong></div>
+              <div class="money-line"><span>Markup (15%)</span><strong id="markupOut">$600.90</strong></div>
+              <div class="money-line"><span>Tax (6.625%)</span><strong id="taxOut">$305.16</strong></div>
+              <div class="money-line"><span>Grand Total</span><strong id="grandOut">$4,912.06</strong></div>
+            </div>
+          </div>
+          <div class="proposal-preview-card">
+            <h4 style="margin-top:0;">Proposal Preview</h4>
+            <p style="color:var(--muted);margin-top:0;">Click Generate Proposal PDF to preview the customer-ready proposal here, then download or print/send it.</p>
+            <div id="proposalPreview">No proposal generated yet.</div>
+            <div class="proposal-actions">
+              <button class="btn btn-primary" id="downloadProposalBtn" type="button" onclick="downloadProposalPDF()" disabled>Download PDF</button>
+              <button class="btn btn-soft" id="printProposalBtn" type="button" onclick="openProposalPDF()" disabled>Open / Print Proposal</button>
+            </div>
+          </div>
+          <div class="proposal-preview-card photos-doc-card">
+            <h4 style="margin-top:0;">Photos + Documentation</h4>
+            <p style="color:var(--muted);margin-top:0;">Upload before photos, walkthrough videos, plans, permits, and marked-up screenshots.</p>
+
+            <div class="summary-box" style="margin-bottom:16px;">
+              <h4 style="margin-top:0;">Upload Project Files</h4>
+              <input type="file" id="photoUpload" accept="image/*" multiple>
+              <input type="file" id="videoUpload" accept="video/*">
+              <button class="btn btn-primary" onclick="uploadProjectFiles()" style="margin-top:10px;">
+                Upload Files
+              </button>
+              <div id="uploadStatus" style="margin-top:10px;font-weight:700;color:#ea580c;"></div>
+            </div>
+
+            <div class="photo-strip">
+              <div class="photo-card">
+                <strong>Before Photos</strong>
+                <div class="photo-placeholder">Upload existing condition photos</div>
+              </div>
+              <div class="photo-card">
+                <strong>Walkthrough Videos</strong>
+                <div class="photo-placeholder">Upload project walkthrough videos</div>
+              </div>
+              <div class="photo-card">
+                <strong>Plans + Approvals</strong>
+                <div class="photo-placeholder">Estimate PDF, permit, signed contract</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Appointment Scheduling Calendar</h3>
+              <p>Set walkthroughs, install dates, inspections, and customer appointments without endless texting.</p>
+            </div>
+            <button class="btn btn-primary">Send Appointment Invite</button>
+          </div>
+
+          <div class="schedule-layout">
+            <div class="calendar-box">
+              <h4 style="margin-top:0;">March 2026</h4>
+              <div class="calendar-grid">
+                <div class="cal-day">Sun</div>
+                <div class="cal-day">Mon</div>
+                <div class="cal-day">Tue</div>
+                <div class="cal-day">Wed</div>
+                <div class="cal-day">Thu</div>
+                <div class="cal-day">Fri</div>
+                <div class="cal-day">Sat</div>
+
+                <div class="cal-date">1</div>
+                <div class="cal-date">2</div>
+                <div class="cal-date">3</div>
+                <div class="cal-date">4</div>
+                <div class="cal-date">5</div>
+                <div class="cal-date">6</div>
+                <div class="cal-date">7</div>
+                <div class="cal-date">8</div>
+                <div class="cal-date">9</div>
+                <div class="cal-date">10</div>
+                <div class="cal-date">11</div>
+                <div class="cal-date">12</div>
+                <div class="cal-date">13</div>
+                <div class="cal-date active">14</div>
+                <div class="cal-date">15</div>
+                <div class="cal-date">16</div>
+                <div class="cal-date">17</div>
+                <div class="cal-date">18</div>
+                <div class="cal-date">19</div>
+                <div class="cal-date">20</div>
+                <div class="cal-date">21</div>
+                <div class="cal-date">22</div>
+                <div class="cal-date">23</div>
+                <div class="cal-date">24</div>
+                <div class="cal-date">25</div>
+                <div class="cal-date">26</div>
+                <div class="cal-date">27</div>
+                <div class="cal-date">28</div>
+                <div class="cal-date">29</div>
+                <div class="cal-date">30</div>
+                <div class="cal-date">31</div>
+              </div>
+            </div>
+
+            <div class="schedule-list">
+              <h4 style="margin-top:0;">Upcoming Appointments</h4>
+              <div class="task-item">
+                <strong>Site Walkthrough</strong>
+                <span>Saturday, March 14, 2026 • 10:00 AM</span>
+                <span>At property • Customer + Contractor</span>
+              </div>
+              <div class="task-item">
+                <strong>Estimate Review Call</strong>
+                <span>Monday, March 16, 2026 • 7:00 PM</span>
+                <span>Video meeting</span>
+              </div>
+              <div class="task-item">
+                <strong>Projected Start Date</strong>
+                <span>Sunday, March 22, 2026 • 8:00 AM</span>
+                <span>Pending signed approval + deposit</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Customer Approval Signature</h3>
+              <p>Customer reviews the estimate, checks the approval boxes, signs, and the system can generate the contract PDF.</p>
+            </div>
+            <button class="btn btn-primary">Finalize for Signature</button>
+          </div>
+
+          <div class="signature-layout">
+            <div class="signature-box">
+              <label>Customer Full Name</label>
+              <input type="text" value="Approved Homeowner" />
+
+              <div class="approval-checklist">
+                <label class="check-row"><input type="checkbox" checked /> <span>I approve the estimate amount and scope of work shown in this Project Room.</span></label>
+                <label class="check-row"><input type="checkbox" checked /> <span>I understand any change orders will be documented separately.</span></label>
+                <label class="check-row"><input type="checkbox" /> <span>I authorize the contractor to begin on the scheduled start date once deposit is received.</span></label>
+              </div>
+
+              <div class="signature-pad">Customer Signature Area<br />Tap / sign here on mobile or desktop signature pad</div>
+
+              <div class="form-grid">
+                <div>
+                  <label>Date</label>
+                  <input type="text" value="March 11, 2026" />
+                </div>
+                <div>
+                  <label>Deposit Amount</label>
+                  <input type="text" value="$5,500" />
+                </div>
+              </div>
+            </div>
+
+            <div class="signature-box">
+              <h4 style="margin-top:0;">After Approval</h4>
+              <div class="result-metric"><span>Signed Contract PDF</span><strong>Generate</strong></div>
+              <div class="result-metric"><span>Deposit Invoice</span><strong>Generate</strong></div>
+              <div class="result-metric"><span>Payment Schedule</span><strong>Create</strong></div>
+              <div class="result-metric"><span>Customer Copy Email</span><strong>Send</strong></div>
+              <div class="result-metric"><span>Internal Job Folder</span><strong>Open</strong></div>
+            </div>
+          </div>
+        </section>
+<section class="panel">
+  <div class="panel-header">
+    <div>
+      <h3>Contractor Bids</h3>
+      <p>Homeowner can review all submitted contractor bids and select one.</p>
+    </div>
+  </div>
+
+  <div class="estimate-table-wrap">
+    <table id="bidTable">
+      <thead>
+        <tr>
+          <th>Contractor</th>
+          <th>Bid Amount</th>
+          <th>Start Date</th>
+          <th>Message</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="bidTableBody">
+      </tbody>
+    </table>
+  </div>
+
 </section>
+        
+      </main>
+    </div>
 
+    <p class="footer-note">Revamp Project Room prototype • Private homeowner + contractor workspace • Ready to connect to Supabase / auth / database next</p>
+  </div>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script>
+/* ---------- AI BUTTON BACKUP WIRING ---------- */
+
+document.addEventListener("DOMContentLoaded", function(){
+  const sendBtn = document.getElementById("aiSendBtn");
+  const chatInput = document.getElementById("aiChatInput");
+
+  if (sendBtn) {
+    sendBtn.onclick = function(){
+      sendAIMessage(false);
+    };
+  }
+
+  if (chatInput) {
+    chatInput.addEventListener("keydown", function(e){
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault();
+        sendAIMessage(false);
+      }
+    });
+  }
+
+
+  const micBtn = document.getElementById("micDictateBtn");
+  if (micBtn) {
+    micBtn.onclick = function(){
+      toggleDictation();
+    };
+  }
+
+  const estimateBtn = document.getElementById("aiEstimateBtn");
+  if (estimateBtn) {
+    estimateBtn.onclick = function(){
+      runAIEstimate();
+    };
+  }
+
+  const useJobBtn = document.getElementById("useJobInfoBtn");
+  if (useJobBtn) {
+    useJobBtn.onclick = function(){
+      fillAIInputFromJob();
+    };
+  }
+
+  const copyBtn = document.getElementById("copyAIToNotesBtn");
+  if (copyBtn) {
+    copyBtn.onclick = function(){
+      copyLastAIReplyToNotes();
+    };
+  }
+});
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+
+<script>
+const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
+
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  checkAuth();
+const urlParams = new URLSearchParams(window.location.search);
+const jobId = urlParams.get('job');
+async function checkAuth(){
+
+  const { data, error } = await supabaseClient.auth.getUser();
+
+  if(error){
+    console.warn("AUTH CHECK ERROR:", error);
+  }
+
+  if(!data || !data.user){
+    console.warn("No logged-in user found. Project Room will stay open in preview/demo mode.");
+    window.__currentUserId = null;
+    return;
+  }
+
+  window.__currentUserId = data.user.id;
+  console.log("Project Room user:", data.user.email || data.user.id);
+}
+console.log("PROJECT ROOM JOB ID:", jobId);
+  async function loadJob() {
+
+  const params = new URLSearchParams(window.location.search);
+  const rawJobId = params.get('job');
+
+  console.log("RAW PROJECT ROOM JOB ID:", rawJobId);
+
+  if (!rawJobId) {
+    console.warn("No job ID in URL — staying on Project Room.");
+    renderJob({
+      id: "preview",
+      title: "Project Room Preview",
+      city: "NJ Area",
+      budget: "$0",
+      trade: "General Renovation",
+      room_size: "N/A",
+      start_goal: "TBD",
+      deposit: "$0",
+      description: "No job was passed from the map. This preview mode keeps the Project Room open instead of bouncing back."
+    });
+    return;
+  }
+
+  const jobIdNumber = Number(rawJobId);
+  const jobIdValue = isNaN(jobIdNumber) ? rawJobId : jobIdNumber;
+
+  console.log("LOADING JOB ID:", jobIdValue);
+
+  const { data, error } = await supabaseClient
+    .from('jobs')
+    .select('*')
+    .eq('id', jobIdValue);
+
+  if (error) {
+    console.error("SUPABASE ERROR:", error);
+    alert("Error loading job. Check console.");
+    return;
+  }
+
+  console.log("LOADED JOB:", data);
+
+  if (!data || data.length === 0) {
+    console.warn("NO JOB FOUND FOR ID:", jobIdValue);
+    renderJob({
+      id: rawJobId,
+      title: "Project Not Found",
+      city: "NJ Area",
+      budget: "$0",
+      trade: "General Renovation",
+      room_size: "N/A",
+      start_goal: "TBD",
+      deposit: "$0",
+      description: "This job ID was not found in Supabase. Project Room is staying open so you can debug it."
+    });
+    return;
+  }
+
+  window.currentJob = data[0];
+  renderJob(data[0]);
+}
+  function renderJob(job){
+
+  window.currentJob = job;
+  console.log("RENDERING JOB:", job);
+
+  document.getElementById("jobTitle").innerText = job.title || "Untitled Job";
+
+  document.getElementById("jobMeta").innerText =
+    `Project ID: ${job.id} • ${job.city || "NJ Area"} • Homeowner: Anonymous • Contractor: Verified Contractor`;
+
+  document.getElementById("jobBudget").innerText = job.budget || "$0";
+
+  document.getElementById("jobTrade").innerText = job.trade || "General";
+
+  document.getElementById("jobRoomSize").innerText = job.room_size || "N/A";
+
+  document.getElementById("jobStartGoal").innerText = job.start_goal || "TBD";
+
+  document.getElementById("jobDeposit").innerText = job.deposit || "$0";
+
+}
+  loadJob();
+  
+/* ---------- MODE DETECTION ---------- */
+
+const params = new URLSearchParams(window.location.search);
+
+let mode = params.get("mode") || "contractor";
+
+console.log("ACTIVE JOB ID:", jobId);
+  
+/* ---------- HELPERS ---------- */
+
+function currency(value){
+  return new Intl.NumberFormat('en-US',{
+    style:'currency',
+    currency:'USD'
+  }).format(value||0);
+}
+
+/* ---------- LOAD JOB ---------- */
+
+const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null");
+
+/* ---------- MODE SWITCH ---------- */
+
+function applyWorkspaceMode() {
+  const inviteBtn = document.getElementById("inviteBtn");
+
+  if (mode === "homeowner") {
+    document.querySelectorAll(".contractor-tools").forEach(el => {
+      el.style.display = "none";
+    });
+
+    const title = document.querySelector(".brand h1");
+    if (title) {
+      title.textContent = "Revamp Project Room™ — Homeowner Workspace";
+    }
+
+    if (inviteBtn) {
+      inviteBtn.textContent = "Invite Contractor";
+    }
+
+  } else {
+    document.querySelectorAll(".contractor-tools").forEach(el => {
+      el.style.display = "";
+    });
+
+    const title = document.querySelector(".brand h1");
+    if (title) {
+      title.textContent = "Revamp Project Room™ — Contractor Workspace";
+    }
+
+    if (inviteBtn) {
+      inviteBtn.textContent = "Invite Customer";
+    }
+  }
+}
+
+/* ---------- BACK BUTTON ---------- */
+
+function setupBackButton(){
+
+  const backBtn=document.getElementById("backToFeed");
+
+  if(!backBtn) return;
+
+  backBtn.addEventListener("click",()=>{
+
+    const params=new URLSearchParams(window.location.search);
+
+    const role=params.get("mode") || "contractor";
+
+    window.location.href=`map.html?view=${role}`;
+
+  });
+
+}
+
+/* ---------- TILE CALCULATOR ---------- */
+
+function calculateTile(){
+
+  const length=parseFloat(document.getElementById('length').value)||0;
+  const width=parseFloat(document.getElementById('width').value)||0;
+  const tileLength=parseFloat(document.getElementById('tileLength').value)||0;
+  const tileWidth=parseFloat(document.getElementById('tileWidth').value)||0;
+  const waste=parseFloat(document.getElementById('waste').value)||0;
+  const perBox=parseFloat(document.getElementById('perBox').value)||1;
+
+  const area=length*width;
+  const withWaste=area*(1+waste/100);
+  const boxCount=Math.ceil(withWaste/perBox);
+
+  const tileSqFt=(tileLength*tileWidth)/144;
+  const tileCount=tileSqFt>0 ? Math.ceil(withWaste/tileSqFt):0;
+
+  const thinset=Math.max(1,Math.ceil(withWaste/50));
+  const grout=Math.max(1,Math.ceil(withWaste/90));
+
+  document.getElementById('areaOut').textContent=area.toFixed(2)+" sqft";
+  document.getElementById('wasteOut').textContent=withWaste.toFixed(2)+" sqft";
+  document.getElementById('boxesOut').textContent=boxCount+" boxes";
+  document.getElementById('tileCountOut').textContent=tileCount+" tiles";
+  document.getElementById('thinsetOut').textContent=thinset+" bags";
+  document.getElementById('groutOut').textContent=grout+" bags";
+
+}
+
+/* ---------- ESTIMATE ---------- */
+
+function recalcEstimate(){
+
+  const rows=document.querySelectorAll('#estimateTable tbody tr');
+
+  let subtotal=0;
+
+  rows.forEach(row=>{
+
+    const qty=parseFloat(row.querySelector('.qty')?.value)||0;
+    const unitCost=parseFloat(row.querySelector('.unitCost')?.value)||0;
+    const laborCost=parseFloat(row.querySelector('.laborCost')?.value)||0;
+
+    const total=qty*(unitCost+laborCost);
+
+    row.querySelector('.lineTotal').textContent=currency(total);
+
+    subtotal+=total;
+
+  });
+
+  const markup=subtotal*0.15;
+  const tax=(subtotal+markup)*0.06625;
+  const grand=subtotal+markup+tax;
+
+  document.getElementById('subtotalOut').textContent=currency(subtotal);
+  document.getElementById('markupOut').textContent=currency(markup);
+  document.getElementById('taxOut').textContent=currency(tax);
+  document.getElementById('grandOut').textContent=currency(grand);
+
+}
+
+function addRow(){
+
+  const tbody=document.querySelector('#estimateTable tbody');
+
+  const tr=document.createElement('tr');
+
+  tr.innerHTML=`
+<td><input class="table-input" value="New Item"/></td>
+<td><input class="table-input qty" type="number" value="1"/></td>
+<td><input class="table-input" value="unit"/></td>
+<td><input class="table-input unitCost" type="number" value="0"/></td>
+<td><input class="table-input laborCost" type="number" value="0"/></td>
+<td class="lineTotal">$0.00</td>
+`;
+
+  tbody.appendChild(tr);
+
+  attachEstimateListeners();
+
+  recalcEstimate();
+
+}
+
+function attachEstimateListeners(){
+
+  document.querySelectorAll('.qty,.unitCost,.laborCost').forEach(input=>{
+
+    input.removeEventListener('input',recalcEstimate);
+
+    input.addEventListener('input',recalcEstimate);
+
+  });
+
+}
+
+/* ---------- CHAT ---------- */
+
+function setupChat(){
+
+  const chatInput=document.querySelector('.chat-compose input');
+  const sendBtn=document.querySelector('.chat-compose button');
+  const messages=document.querySelector('.messages');
+
+  if(!chatInput||!sendBtn||!messages) return;
+
+  sendBtn.addEventListener('click',()=>{
+
+    const text=chatInput.value.trim();
+
+    if(!text) return;
+
+    const message=document.createElement('div');
+
+    message.className='message contractor';
+
+    message.innerHTML=`<strong>Verified Contractor</strong>${text}`;
+
+    messages.appendChild(message);
+
+    chatInput.value='';
+
+  });
+
+}
+
+/* ---------- SUBMIT BID ---------- */
+
+function submitBid(){
+
+  const amount=document.getElementById("grandOut").innerText;
+
+  const job = window.currentJob;
+
+  if(!job){
+    alert("Job not found");
+    return;
+  }
+
+  if(!job.bids){
+    job.bids=[];
+  }
+
+  const plan=getPlan();
+  const limit=BID_PLANS[plan];
+
+  if(getBidCount()>=limit){
+    alert("You reached your monthly bid limit.");
+    return;
+  }
+
+  const maxBids=job.maxBids || 5;
+
+  if(job.bids.length>=maxBids){
+    alert("This job already received the maximum number of bids.");
+    return;
+  }
+
+  const bid={
+    contractor:"Verified Contractor",
+    amount:amount,
+    message:"Estimate generated through Revamp Project Room",
+    startDate:"TBD",
+    timestamp:Date.now()
+  };
+
+  job.bids.push(bid);
+
+  incrementBid();
+
+  /* AUTO CLOSE JOB */
+
+  if(job.bids.length>=maxBids){
+    job.status="closed";
+  }
+
+
+  alert("Bid submitted privately to homeowner.");
+
+}
+
+/* ---------- INIT ---------- */
+
+applyWorkspaceMode();
+
+calculateTile();
+
+attachEstimateListeners();
+
+recalcEstimate();
+
+setupChat();
+
+setupBackButton();
+  
+
+
+
+  
+loadBidDashboard();
+/* ---------- BID SYSTEM ---------- */
+
+const BID_PLANS = {
+  trial:5,
+  bronze:5,
+  silver:10,
+  gold:15
+};
+
+function getPlan(){
+  return localStorage.getItem("revamp_plan") || "trial";
+}
+
+function getBidCount(){
+  return Number(localStorage.getItem("revamp_bid_count") || 0);
+}
+
+function incrementBid(){
+  const count=getBidCount()+1;
+  localStorage.setItem("revamp_bid_count",count);
+}
+
+
+function saveJobs(jobs){
+  localStorage.setItem("revampJobs",JSON.stringify(jobs));
+}
+
+  /* ---------- LOAD BIDS ---------- */
+
+function loadBidDashboard(){
+
+  if(mode!=="homeowner") return;
+
+
+  const job = window.currentJob;
+
+  if(!job || !job.bids) return;
+
+  const tbody=document.getElementById("bidTableBody");
+
+  if(!tbody) return;
+
+  tbody.innerHTML="";
+
+  job.bids.forEach((bid,i)=>{
+
+    const tr=document.createElement("tr");
+
+    tr.innerHTML=`
+<td>Verified Contractor</td>
+<td>${bid.amount}</td>
+<td>${bid.startDate}</td>
+<td>${bid.message}</td>
+<td>
+<button class="btn btn-primary" onclick="acceptBid(${i})">
+Accept
+</button>
+</td>
+`;
+
+    tbody.appendChild(tr);
+
+  });
+
+}
+
+function acceptBid(index){
+
+  alert("Contractor accepted. Contract generation coming next.");
+
+}
+
+
+/* ---------- REAL AI CHAT + ESTIMATE ---------- */
+
+let aiConversation = [];
+let lastAIReply = "";
+
+function getFallbackJobPrompt(){
+  const job = window.currentJob || {};
+
+  return [
+    "Create a professional contractor estimate.",
+    "",
+    "PROJECT DETAILS:",
+    "Title: " + (job.title || "Unknown"),
+    "Trade: " + (job.trade || "General renovation"),
+    "Location: " + (job.city || "Unknown"),
+    "Budget: " + (job.budget || "Not provided"),
+    "",
+    "SCOPE OF WORK:",
+    job.description || "General renovation work needed",
+    "",
+    "INCLUDE:",
+    "- Professional scope of work",
+    "- Line items",
+    "- Materials",
+    "- Labor",
+    "- Estimated costs",
+    "- Timeline",
+    "- Exclusions / notes",
+    "- Suggested payment schedule"
+  ].join("\n");
+}
+
+
+function escapeHTML(str){
+  return String(str || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+function formatAIText(text){
+  let safe = escapeHTML(text);
+
+  safe = safe.replace(/^#{1,6}\s*(.+)$/gm, '<span class="ai-heading">$1</span>');
+  safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+  const lines = safe.split("\n");
+  let html = "";
+  let inList = false;
+
+  lines.forEach(line => {
+    const trimmed = line.trim();
+
+    if (/^[-•]\s+/.test(trimmed)) {
+      if (!inList) {
+        html += "<ul>";
+        inList = true;
+      }
+      html += "<li>" + trimmed.replace(/^[-•]\s+/, "") + "</li>";
+    } else {
+      if (inList) {
+        html += "</ul>";
+        inList = false;
+      }
+
+      if (trimmed === "") {
+        html += "<br>";
+      } else {
+        html += trimmed + "<br>";
+      }
+    }
+  });
+
+  if (inList) html += "</ul>";
+
+  return html;
+}
+
+function addAIMessage(role, text){
+  const chatWindow = document.getElementById("aiChatWindow");
+  if (!chatWindow) return;
+
+  const msg = document.createElement("div");
+  msg.className = "ai-msg " + (role === "user" ? "user" : "assistant");
+
+  if (role === "assistant") {
+    msg.innerHTML = formatAIText(text);
+  } else {
+    msg.innerText = text;
+  }
+
+  chatWindow.appendChild(msg);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+function fillAIInputFromJob(){
+  const input = document.getElementById("aiChatInput");
+  if (!input) return;
+
+  input.value = getFallbackJobPrompt();
+  input.focus();
+}
+
+function copyLastAIReplyToNotes(){
+  const notes = document.getElementById("estimateNotes");
+  if (!notes) return;
+
+  if (!lastAIReply) {
+    alert("No AI reply to copy yet.");
+    return;
+  }
+
+  notes.value = lastAIReply;
+  notes.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+async function sendAIMessage(forceEstimatePrompt=false){
+
+  const input = document.getElementById("aiChatInput");
+  const aiStatus = document.getElementById("aiStatus");
+  const aiSendBtn = document.getElementById("aiSendBtn");
+  const aiEstimateBtn = document.getElementById("aiEstimateBtn");
+
+  let userText = input ? input.value.trim() : "";
+
+  if (forceEstimatePrompt && !userText) {
+    userText = getFallbackJobPrompt();
+  }
+
+  if (!userText) {
+    alert("Type job details or click Use Job Info first.");
+    return;
+  }
+
+  addAIMessage("user", userText);
+  aiConversation.push({ role: "user", content: userText });
+
+  if (input) input.value = "";
+
+  if (aiStatus) aiStatus.innerText = "AI is thinking...";
+  if (aiSendBtn) aiSendBtn.disabled = true;
+  if (aiEstimateBtn) aiEstimateBtn.disabled = true;
+
+  try {
+    const contextPrompt = [
+      "You are Revamp Project Room AI, helping a contractor create a professional construction estimate.",
+      "Keep answers practical, organized, and customer-ready.",
+      "If the user asks a question, answer it and continue helping refine the estimate.",
+      "",
+      "Conversation:",
+      ...aiConversation.map(m => (m.role === "user" ? "Contractor: " : "AI: ") + m.content)
+    ].join("\n");
+
+    const res = await fetch("/api/generate-estimate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        description: contextPrompt
+      })
+    });
+
+    const data = await res.json();
+
+    console.log("AI RESPONSE:", data);
+
+    if (!res.ok || data.error) {
+      const msg = data.error || "Request failed";
+      if (aiStatus) aiStatus.innerText = "AI error";
+      alert("AI error: " + msg);
+      return;
+    }
+
+    const reply = data.result || "No estimate returned.";
+    lastAIReply = reply;
+    aiConversation.push({ role: "assistant", content: reply });
+
+    addAIMessage("assistant", reply);
+
+    const notes = document.getElementById("estimateNotes");
+    if (notes && (!notes.value.trim() || notes.value.includes("Includes labor, material, disposal"))) {
+      notes.value = reply;
+    }
+
+    if (aiStatus) aiStatus.innerText = "Ready ✔";
+
+  } catch (err) {
+    console.error("AI FETCH ERROR:", err);
+    if (aiStatus) aiStatus.innerText = "Connection failed";
+    alert("AI connection failed. Check Console for details.");
+  } finally {
+    if (aiSendBtn) aiSendBtn.disabled = false;
+    if (aiEstimateBtn) aiEstimateBtn.disabled = false;
+  }
+}
+
+function runAIEstimate(){
+  sendAIMessage(true);
+}
+
+
+
+
+/* ---------- VOICE DICTATION ---------- */
+
+let recognition = null;
+let isDictating = false;
+
+function toggleDictation(){
+  const input = document.getElementById("aiChatInput");
+  const status = document.getElementById("micStatus");
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!input) {
+    alert("AI chat input box not found.");
+    return;
+  }
+
+  if (!window.isSecureContext) {
+    alert("Microphone only works on HTTPS. Open your live Revamp/Vercel site.");
+    return;
+  }
+
+  if (!SpeechRecognition) {
+    alert("Voice dictation only works reliably in Google Chrome desktop.");
+    return;
+  }
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    alert("This browser does not allow microphone access here.");
+    return;
+  }
+
+  if (!recognition) {
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+
+    recognition.onstart = function(){
+      isDictating = true;
+      if (status) status.textContent = "Listening...";
+    };
+
+    recognition.onresult = function(event){
+      let transcript = "";
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+
+      input.value = (input.value + " " + transcript).trim();
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    };
+
+    recognition.onerror = function(event){
+      console.error("Mic error:", event.error);
+      if (status) status.textContent = "Mic error: " + event.error;
+    };
+
+    recognition.onend = function(){
+      isDictating = false;
+      if (status) status.textContent = "";
+    };
+  }
+
+  if (isDictating) {
+    recognition.stop();
+  } else {
+    recognition.start();
+  }
+}
+
+/* ---------- PROPOSAL PDF ---------- */
+
+let lastProposalPdfBlob = null;
+let lastProposalPdfUrl = null;
+
+function getEstimateRowsForProposal(){
+  const rows = Array.from(document.querySelectorAll("#estimateTable tbody tr"));
+
+  return rows.map(row => {
+    const inputs = row.querySelectorAll("input");
+    const item = inputs[0]?.value || "";
+    const qty = inputs[1]?.value || "";
+    const unit = inputs[2]?.value || "";
+    const unitCost = inputs[3]?.value || "0";
+    const labor = inputs[4]?.value || "0";
+    const total = row.querySelector(".lineTotal")?.innerText || "$0.00";
+
+    return { item, qty, unit, unitCost, labor, total };
+  }).filter(row => row.item.trim());
+}
+
+
+function getContractorInfoForProposal(){
+  return {
+    company: document.getElementById("contractorCompany")?.value || "",
+    name: document.getElementById("contractorName")?.value || "",
+    email: document.getElementById("contractorEmail")?.value || "",
+    phone: document.getElementById("contractorPhone")?.value || "",
+    address: document.getElementById("contractorAddress")?.value || ""
+  };
+}
+
+
+function buildProposalText(){
+  const job = window.currentJob || {};
+  const contractor = getContractorInfoForProposal();
+  const notes = document.getElementById("estimateNotes")?.value || "";
+  const rows = getEstimateRowsForProposal();
+
+  const lineItems = rows.map((row, index) => {
+    return `${index + 1}. ${row.item} — Qty: ${row.qty} ${row.unit} | Material: $${row.unitCost} | Labor: $${row.labor} | Total: ${row.total}`;
+  }).join("
+");
+
+  return [
+    "REVAMP PROJECT ROOM PROPOSAL",
+    "",
+    "CONTRACTOR:",
+    "Company: " + (contractor.company || "Not provided"),
+    "Contact: " + (contractor.name || "Not provided"),
+    "Email: " + (contractor.email || "Not provided"),
+    "Phone: " + (contractor.phone || "Not provided"),
+    "Address: " + (contractor.address || "Not provided"),
+    "",
+    "PROJECT:",
+    "Project: " + (job.title || "Untitled Project"),
+    "Trade: " + (job.trade || "General Renovation"),
+    "Location: " + (job.city || "NJ Area"),
+    "Project ID: " + (job.id || "Preview"),
+    "",
+    "SCOPE / ESTIMATE NOTES:",
+    notes || "No notes provided.",
+    "",
+    "LINE ITEMS:",
+    lineItems || "No line items provided.",
+    "",
+    "TOTALS:",
+    "Subtotal: " + (document.getElementById("subtotalOut")?.innerText || "$0.00"),
+    "Markup: " + (document.getElementById("markupOut")?.innerText || "$0.00"),
+    "Tax: " + (document.getElementById("taxOut")?.innerText || "$0.00"),
+    "Grand Total: " + (document.getElementById("grandOut")?.innerText || "$0.00"),
+    "",
+    "PAYMENT / APPROVAL:",
+    "This proposal is subject to final contractor review, customer approval, signed agreement, and any change orders required after field verification.",
+    "",
+    "Generated by Revamp Project Room"
+  ].join("
+");
+}
+
+function generateProposalPDF(){
+  const preview = document.getElementById("proposalPreview");
+  const downloadBtn = document.getElementById("downloadProposalBtn");
+  const printBtn = document.getElementById("printProposalBtn");
+
+  const proposalText = buildProposalText();
+
+  if (preview) {
+    preview.innerText = proposalText;
+    preview.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  const jsPDFConstructor = window.jspdf && window.jspdf.jsPDF;
+
+  if (!jsPDFConstructor) {
+    alert("PDF library is still loading. Wait a second and click Generate Proposal PDF again.");
+    return;
+  }
+
+  const doc = new jsPDFConstructor({ unit: "pt", format: "letter" });
+  const margin = 42;
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const maxWidth = pageWidth - margin * 2;
+
+  let y = margin;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
+  doc.text("Revamp Project Room Proposal", margin, y);
+  y += 26;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+
+  const lines = doc.splitTextToSize(proposalText, maxWidth);
+
+  lines.forEach(line => {
+    if (y > pageHeight - margin) {
+      doc.addPage();
+      y = margin;
+    }
+    doc.text(line, margin, y);
+    y += 14;
+  });
+
+  lastProposalPdfBlob = doc.output("blob");
+
+  if (lastProposalPdfUrl) {
+    URL.revokeObjectURL(lastProposalPdfUrl);
+  }
+
+  lastProposalPdfUrl = URL.createObjectURL(lastProposalPdfBlob);
+
+  if (downloadBtn) {
+    downloadBtn.disabled = false;
+  }
+
+  if (printBtn) {
+    printBtn.disabled = false;
+  }
+
+  alert("Proposal PDF generated. Use Download PDF or Open / Print Proposal.");
+}
+
+function downloadProposalPDF(){
+  if (!lastProposalPdfUrl) {
+    generateProposalPDF();
+  }
+
+  if (!lastProposalPdfUrl) return;
+
+  const job = window.currentJob || {};
+  const safeTitle = String(job.title || "revamp-proposal").replace(/[^a-zA-Z0-9-_]/g, "-").toLowerCase();
+
+  const a = document.createElement("a");
+  a.href = lastProposalPdfUrl;
+  a.download = `${safeTitle}-proposal.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+function openProposalPDF(){
+  if (!lastProposalPdfUrl) {
+    generateProposalPDF();
+  }
+
+  if (!lastProposalPdfUrl) return;
+
+  window.open(lastProposalPdfUrl, "_blank");
+}
+
+/* ---------- FILE UPLOAD ---------- */
+
+async function uploadProjectFiles(){
+
+  const photoInput = document.getElementById("photoUpload");
+  const videoInput = document.getElementById("videoUpload");
+  const status = document.getElementById("uploadStatus");
+
+  if (!photoInput || !videoInput || !status) {
+    alert("Upload fields not found.");
+    return;
+  }
+
+  const files = [...photoInput.files, ...videoInput.files];
+
+  if (!files.length) {
+    alert("Choose at least one photo or video first.");
+    return;
+  }
+
+  status.innerText = "Uploading...";
+
+  for(const file of files){
+
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+    const fileName = `${Date.now()}-${safeName}`;
+
+    const { error } = await supabaseClient.storage
+      .from("project-files")
+      .upload(fileName, file);
+
+    if(error){
+      console.error("UPLOAD ERROR:", error);
+      status.innerText = "Upload failed: " + error.message;
+      return;
+    }
+  }
+
+  status.innerText = "Upload complete ✔";
+}
+
+
+</script>
+  <script src="https://meet.jit.si/external_api.js"></script>
+  <script>
+let jitsiApi = null;
+
+function getProjectRoomName() {
+  const params = new URLSearchParams(window.location.search);
+
+  const jobId = params.get("job") || "no-job";
+  const contractorId = params.get("contractor") || "no-contractor";
+
+  return `revamplex-${jobId}-${contractorId}`.replace(/[^a-zA-Z0-9-_]/g, "");
+}
+
+document.getElementById("startVideoCallBtn").addEventListener("click", () => {
+  const box = document.getElementById("videoCallBox");
+  box.style.display = "block";
+
+  if (jitsiApi) return;
+
+  const roomName = getProjectRoomName();
+
+  jitsiApi = new JitsiMeetExternalAPI("meet.jit.si", {
+    roomName: roomName,
+    parentNode: box,
+    width: "100%",
+    height: "100%",
+    configOverwrite: {
+      startWithAudioMuted: true,
+      startWithVideoMuted: false
+    },
+    interfaceConfigOverwrite: {
+      SHOW_JITSI_WATERMARK: false,
+      SHOW_WATERMARK_FOR_GUESTS: false
+    }
+  });
+});
+    const inviteBtnSafe = document.getElementById("inviteBtn") || document.getElementById("inviteContractorBtn");
+
+if (inviteBtnSafe) {
+  inviteBtnSafe.addEventListener("click", async () => {
+    const params = new URLSearchParams(window.location.search);
+
+    const jobId = params.get("job") || "no-job";
+    const contractorId = params.get("contractor") || "no-contractor";
+    const currentRoomMode = params.get("mode") || "homeowner";
+    const inviteMode = currentRoomMode === "homeowner" ? "contractor" : "homeowner";
+
+    const inviteLink = `${window.location.origin}/project-room.html?mode=${inviteMode}&job=${jobId}&contractor=${contractorId}`;
+
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      alert("Invite link copied:\n\n" + inviteLink);
+    } catch (err) {
+      alert("Copy this invite link:\n\n" + inviteLink);
+    }
+  });
+}
+</script>
 </body>
 </html>
