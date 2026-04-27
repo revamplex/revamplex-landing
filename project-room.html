@@ -1280,81 +1280,6 @@ Back to Project Feed
             </div>
           </div>
         </section>
-<section class="panel">
-          <div class="panel-header">
-            <div>
-              <h3>Real Estimate Spreadsheet</h3>
-              <p>Editable line items, live math, markup control, and customer-ready totals.</p>
-            </div>
-            <div class="estimate-toolbar">
-<button class="btn btn-soft" onclick="addRow()">Add Line Item</button>
-              <button class="btn btn-soft">Save Version</button>
-              <button class="btn btn-primary" id="generateProposalBtn" type="button" onclick="generateProposalPDF()">Generate Proposal PDF</button>
-              <button class="btn btn-primary" onclick="submitBid()">Submit Bid to Customer</button>
-            </div>
-          </div>
-
-                              <div class="contractor-info-card">
-            <h4>Contractor Info for Proposal</h4>
-            <div class="contractor-info-grid">
-              <div>
-                <label>Company Name</label>
-                <input id="contractorCompany" type="text" placeholder="Company name">
-              </div>
-              <div>
-                <label>Contact Name</label>
-                <input id="contractorName" type="text" placeholder="Contact name">
-              </div>
-              <div>
-                <label>Email</label>
-                <input id="contractorEmail" type="email" placeholder="Email address">
-              </div>
-              <div>
-                <label>Phone</label>
-                <input id="contractorPhone" type="text" placeholder="Phone number">
-              </div>
-              <div class="full">
-                <label>Business Address</label>
-                <input id="contractorAddress" type="text" placeholder="Business address">
-              </div>
-            </div>
-          </div>
-
-<div class="ai-chat-card">
-            <h4>✨ AI Estimate Chat</h4>
-            <p>Chat back and forth with AI to build the estimate. Ask for changes, materials, Home Depot-style lists, labor breakdowns, exclusions, timelines, or a cleaner customer proposal.</p>
-
-            <div class="ai-chat-shell">
-              <div>
-                <div class="ai-chat-window" id="aiChatWindow">
-                  <div class="ai-msg assistant">Tell me the job details and I’ll build a professional estimate. Example: “Bathroom remodel, 8x10, demo tile, install new floor tile, tile shower walls, new vanity, toilet, fixtures, paint.”</div>
-                </div>
-
-                <div class="ai-compose">
-                  <textarea id="aiChatInput" placeholder="Type job details or reply to the AI here..."></textarea>
-                  <button class="btn btn-primary" id="aiSendBtn" type="button" onclick="sendAIMessage(false)">Send</button>
-                </div>
-                <div class="mic-row">
-                  <button id="micDictateBtn" class="btn btn-soft" type="button" onclick="toggleDictation()">🎙 Dictate</button>
-                  <span id="micStatus"></span>
-                </div>
-              </div>
-
-              <div class="ai-side-tools">
-                <button class="btn btn-primary" id="aiEstimateBtn" type="button" onclick="runAIEstimate()">✨ Build AI Estimate</button>
-                <button class="btn btn-soft" id="useJobInfoBtn" type="button" onclick="fillAIInputFromJob()">Use Job Info</button>
-                <button class="btn btn-soft" id="copyAIToNotesBtn" type="button" onclick="copyLastAIReplyToNotes()">Copy Last AI Reply to Notes</button>
-                <div class="ai-status" id="aiStatus"></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="estimate-output-card">
-            <h4>Estimate Notes / Proposal Draft</h4>
-            <p style="color:var(--muted);margin-top:0;">AI replies can be copied here. Edit this section before generating the customer PDF.</p>
-            <textarea id="estimateNotes" placeholder="AI estimate and proposal notes will appear here. You can edit before generating the PDF.">Includes labor, material, disposal, and standard site protection. Permit costs are included in the contract price where required. Fixtures and finish materials may be specified by owner selection or contractor-approved equivalent of similar quality and cost.</textarea>
-          </div>
-
 <div class="estimate-table-wrap">
             <table id="estimateTable">
               <thead>
@@ -1412,45 +1337,88 @@ Back to Project Feed
               <div class="money-line"><span>Tax (6.625%)</span><strong id="taxOut">$305.16</strong></div>
               <div class="money-line"><span>Grand Total</span><strong id="grandOut">$4,912.06</strong></div>
             </div>
+
+<section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Real Estimate Spreadsheet</h3>
+              <p>Editable line items, live math, markup control, and customer-ready totals.</p>
+            </div>
+            <div class="estimate-toolbar">
+<button class="btn btn-soft" onclick="addRow()">Add Line Item</button>
+              <button class="btn btn-soft">Save Version</button>
+              <button class="btn btn-primary" id="generateProposalBtn" type="button" onclick="generateProposalPDF()">Generate Proposal PDF</button>
+              <button class="btn btn-primary" onclick="submitBid()">Submit Bid to Customer</button>
+            </div>
+          </div>
+
+                              <div class="contractor-info-card">
+            <h4>Contractor Info for Proposal</h4>
+            <div class="contractor-info-grid">
+              <div>
+                <label>Company Name</label>
+                <input id="contractorCompany" type="text" placeholder="Company name">
+              </div>
+              <div>
+                <label>Contact Name</label>
+                <input id="contractorName" type="text" placeholder="Contact name">
+              </div>
+              <div>
+                <label>Email</label>
+                <input id="contractorEmail" type="email" placeholder="Email address">
+              </div>
+              <div>
+                <label>Phone</label>
+                <input id="contractorPhone" type="text" placeholder="Phone number">
+              </div>
+              <div class="full">
+                <label>Business Address</label>
+                <input id="contractorAddress" type="text" placeholder="Business address">
+              </div>
+            </div>
+          </div>
+
+<div class="ai-chat-card">
+            <h4>✨ AI Estimate Chat</h4>
+            <p>Chat back and forth with AI to build the estimate. Ask for changes, materials, Home Depot-style lists, labor breakdowns, exclusions, timelines, or a cleaner customer proposal.</p>
+
+            <div class="ai-chat-shell">
+              <div>
+                <div class="ai-chat-window" id="aiChatWindow">
+                  <div class="ai-msg assistant">Tell me the job details and I’ll build a professional estimate. Example: “Bathroom remodel, 8x10, demo tile, install new floor tile, tile shower walls, new vanity, toilet, fixtures, paint.”</div>
+                </div>
+
+                <div class="ai-compose">
+                  <textarea id="aiChatInput" placeholder="Type job details or reply to the AI here..."></textarea>
+                  <button class="btn btn-primary" id="aiSendBtn" type="button" onclick="sendAIMessage(false)">Send</button>
+                </div>
+                <div class="mic-row">
+                  <button type="button" onclick="toggleDictation()">🎙 Dictate</button>
+                  <span id="micStatus"></span>
+                </div>
+              </div>
+
+              <div class="ai-side-tools">
+                <button class="btn btn-primary" id="aiEstimateBtn" type="button" onclick="runAIEstimate()">✨ Build AI Estimate</button>
+                <button class="btn btn-soft" id="useJobInfoBtn" type="button" onclick="fillAIInputFromJob()">Use Job Info</button>
+                <button class="btn btn-soft" id="copyAIToNotesBtn" type="button" onclick="copyLastAIReplyToNotes()">Copy Last AI Reply to Notes</button>
+                <div class="ai-status" id="aiStatus"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="estimate-output-card">
+            <h4>Estimate Notes / Proposal Draft</h4>
+            <p style="color:var(--muted);margin-top:0;">AI replies can be copied here. Edit this section before generating the customer PDF.</p>
+            <textarea id="estimateNotes" placeholder="AI estimate and proposal notes will appear here. You can edit before generating the PDF.">Includes labor, material, disposal, and standard site protection. Permit costs are included in the contract price where required. Fixtures and finish materials may be specified by owner selection or contractor-approved equivalent of similar quality and cost.</textarea>
+          </div>
+
+
           </div>
           <div class="proposal-preview-card">
             <h4 style="margin-top:0;">Proposal Preview</h4>
             <p style="color:var(--muted);margin-top:0;">Click Generate Proposal PDF to preview the customer-ready proposal here, then download or print/send it.</p>
             <div id="proposalPreview">No proposal generated yet.</div>
-
-<section class="panel">
-          <div class="panel-header">
-            <div>
-              <h3>Photos + Documentation</h3>
-              <p>Upload before photos, walkthrough videos, plans, permits, and marked-up screenshots.</p>
-            </div>
-          </div>
-
-          <div class="summary-box" style="margin-bottom:16px;">
-            <h4 style="margin-top:0;">Upload Project Files</h4>
-            <input type="file" id="photoUpload" accept="image/*" multiple>
-            <input type="file" id="videoUpload" accept="video/*">
-            <button class="btn btn-primary" onclick="uploadProjectFiles()" style="margin-top:10px;">
-              Upload Files
-            </button>
-            <div id="uploadStatus" style="margin-top:10px;font-weight:700;color:#ea580c;"></div>
-          </div>
-
-          <div class="photo-strip">
-            <div class="photo-card">
-              <strong>Before Photos</strong>
-              <div class="photo-placeholder">Upload existing condition photos</div>
-            </div>
-            <div class="photo-card">
-              <strong>Walkthrough Videos</strong>
-              <div class="photo-placeholder">Upload project walkthrough videos</div>
-            </div>
-            <div class="photo-card">
-              <strong>Plans + Approvals</strong>
-              <div class="photo-placeholder">Estimate PDF, permit, signed contract</div>
-            </div>
-          </div>
-        </section>
             <div class="proposal-actions">
               <button class="btn btn-primary" id="downloadProposalBtn" type="button" onclick="downloadProposalPDF()" disabled>Download PDF</button>
               <button class="btn btn-soft" id="printProposalBtn" type="button" onclick="openProposalPDF()" disabled>Open / Print Proposal</button>
@@ -1603,7 +1571,39 @@ Back to Project Feed
   </div>
 
 </section>
-        
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Photos + Documentation</h3>
+              <p>Upload before photos, walkthrough videos, plans, permits, and marked-up screenshots.</p>
+            </div>
+          </div>
+
+          <div class="summary-box" style="margin-bottom:16px;">
+            <h4 style="margin-top:0;">Upload Project Files</h4>
+            <input type="file" id="photoUpload" accept="image/*" multiple>
+            <input type="file" id="videoUpload" accept="video/*">
+            <button class="btn btn-primary" onclick="uploadProjectFiles()" style="margin-top:10px;">
+              Upload Files
+            </button>
+            <div id="uploadStatus" style="margin-top:10px;font-weight:700;color:#ea580c;"></div>
+          </div>
+
+          <div class="photo-strip">
+            <div class="photo-card">
+              <strong>Before Photos</strong>
+              <div class="photo-placeholder">Upload existing condition photos</div>
+            </div>
+            <div class="photo-card">
+              <strong>Walkthrough Videos</strong>
+              <div class="photo-placeholder">Upload project walkthrough videos</div>
+            </div>
+            <div class="photo-card">
+              <strong>Plans + Approvals</strong>
+              <div class="photo-placeholder">Estimate PDF, permit, signed contract</div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
 
@@ -2440,7 +2440,8 @@ function buildProposalText(){
 
   const lineItems = rows.map((row, index) => {
     return `${index + 1}. ${row.item} — Qty: ${row.qty} ${row.unit} | Material: $${row.unitCost} | Labor: $${row.labor} | Total: ${row.total}`;
-  }).join("\n");
+  }).join("
+");
 
   return [
     "REVAMP PROJECT ROOM PROPOSAL",
@@ -2474,7 +2475,8 @@ function buildProposalText(){
     "This proposal is subject to final contractor review, customer approval, signed agreement, and any change orders required after field verification.",
     "",
     "Generated by Revamp Project Room"
-  ].join("\n");
+  ].join("
+");
 }
 
 function generateProposalPDF(){
