@@ -1189,6 +1189,431 @@
         min-height: 190px;
       }
     }
+  
+
+    /* ===== MOBILE + COMPACT CLEANUP OVERRIDES ===== */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    section,
+    .panel,
+    .hero {
+      scroll-margin-top: 18px;
+    }
+
+    .panel,
+    .hero,
+    .sidebar {
+      box-shadow: 0 8px 26px rgba(15, 23, 42, 0.06);
+    }
+
+    .panel {
+      padding: 16px;
+    }
+
+    .panel-header {
+      margin-bottom: 12px;
+    }
+
+    .panel-header h3 {
+      font-size: 1.05rem;
+    }
+
+    .panel-header p {
+      font-size: 0.88rem;
+      line-height: 1.35;
+    }
+
+    .btn {
+      padding: 10px 13px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+    }
+
+    .dashboard {
+      gap: 14px;
+    }
+
+    .workspace {
+      gap: 14px;
+    }
+
+    .summary-box,
+    .calendar-box,
+    .schedule-list,
+    .signature-box,
+    .result-card,
+    .trade-select-card,
+    .trade-current-card,
+    .trade-menu-details,
+    .estimate-output-card,
+    .proposal-preview-card,
+    .contractor-info-card {
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .estimate-table-wrap {
+      border-radius: 16px;
+    }
+
+    th, td {
+      padding: 10px 9px;
+      font-size: 0.88rem;
+    }
+
+    .table-input {
+      min-width: 78px;
+      padding: 9px 10px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+    }
+
+    .trade-tool-shell {
+      gap: 12px;
+    }
+
+    .trade-current-card strong {
+      font-size: 1rem;
+    }
+
+    .trade-chip-grid {
+      gap: 8px;
+    }
+
+    .trade-chip {
+      padding: 9px 10px;
+      border-radius: 999px;
+      font-size: 0.86rem;
+    }
+
+    .calendar-grid {
+      gap: 6px;
+    }
+
+    .cal-day,
+    .cal-date {
+      padding: 8px 6px;
+      font-size: 0.82rem;
+    }
+
+    .task-item {
+      padding: 12px;
+      border-radius: 14px;
+      margin-bottom: 8px;
+    }
+
+    .photo-strip,
+    .tool-grid,
+    .mini-stats {
+      gap: 10px;
+    }
+
+    .photo-card,
+    .tool-card,
+    .stat {
+      border-radius: 16px;
+      padding: 12px;
+      min-height: auto;
+    }
+
+    @media (max-width: 900px) {
+      body {
+        background: #f8fafc;
+      }
+
+      .app-shell {
+        padding: 10px;
+      }
+
+      .topbar {
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+
+      .brand {
+        gap: 10px;
+        align-items: flex-start;
+      }
+
+      .brand-badge {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        flex: 0 0 40px;
+      }
+
+      .brand h1 {
+        font-size: 1.08rem;
+      }
+
+      .brand p {
+        font-size: 0.82rem;
+        line-height: 1.3;
+      }
+
+      .top-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .top-actions .btn {
+        width: 100%;
+        padding: 10px 8px;
+      }
+
+      .hero {
+        border-radius: 20px;
+        padding: 14px;
+        margin-bottom: 12px;
+      }
+
+      .project-title {
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .project-title h2 {
+        font-size: 1.1rem;
+      }
+
+      .project-title p {
+        font-size: 0.82rem;
+        line-height: 1.35;
+      }
+
+      .status-pill {
+        padding: 8px 10px;
+        font-size: 0.8rem;
+      }
+
+      .mini-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .stat .label {
+        font-size: 0.72rem;
+      }
+
+      .stat .value {
+        font-size: 0.92rem;
+      }
+
+      .side-summary {
+        padding: 12px;
+        border-radius: 16px;
+      }
+
+      .summary-line {
+        padding: 7px 0;
+        font-size: 0.84rem;
+      }
+
+      .dashboard {
+        display: block;
+      }
+
+      .sidebar {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        padding: 10px;
+        margin-bottom: 12px;
+        border-radius: 0 0 18px 18px;
+        background: rgba(255,255,255,0.96);
+        backdrop-filter: blur(10px);
+        border-left: 0;
+        border-right: 0;
+      }
+
+      .nav-title {
+        font-size: 0.72rem;
+        margin-bottom: 8px;
+      }
+
+      .nav-list {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .nav-list::-webkit-scrollbar {
+        height: 4px;
+      }
+
+      .nav-item {
+        flex: 0 0 auto;
+        min-width: 150px;
+        scroll-snap-align: start;
+        padding: 9px 10px;
+        border-radius: 999px;
+        gap: 8px;
+        font-size: 0.82rem;
+      }
+
+      .nav-item span:last-child {
+        display: none;
+      }
+
+      .panel {
+        padding: 13px;
+        border-radius: 18px;
+        margin-bottom: 12px;
+      }
+
+      .panel-header {
+        display: block;
+      }
+
+      .panel-header .btn,
+      .panel-header button {
+        margin-top: 10px;
+        width: 100%;
+      }
+
+      .video-controls,
+      .estimate-toolbar,
+      .proposal-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        width: 100%;
+      }
+
+      .video-controls .btn,
+      .estimate-toolbar .btn,
+      .proposal-actions .btn {
+        width: 100%;
+        padding: 10px 8px;
+      }
+
+      .trade-tool-shell,
+      .calc-layout,
+      .schedule-layout,
+      .signature-layout,
+      .estimate-summary,
+      .contractor-info-grid,
+      .ai-chat-shell,
+      .ai-compose {
+        grid-template-columns: 1fr !important;
+      }
+
+      .trade-select-card select,
+      input,
+      textarea,
+      select {
+        font-size: 16px;
+        padding: 11px 12px;
+      }
+
+      .trade-menu-details summary {
+        padding: 10px 0;
+        font-size: 0.9rem;
+      }
+
+      .trade-chip-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .trade-chip {
+        width: 100%;
+        text-align: center;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .full {
+        grid-column: 1 / -1;
+      }
+
+      .estimate-table-wrap {
+        margin-left: -2px;
+        margin-right: -2px;
+      }
+
+      table {
+        min-width: 700px;
+      }
+
+      #proposalPreview {
+        min-height: 90px;
+        max-height: 240px;
+        font-size: 0.86rem;
+      }
+
+      .photo-strip,
+      .tool-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .calendar-grid {
+        gap: 4px;
+      }
+
+      .cal-day,
+      .cal-date {
+        padding: 7px 4px;
+        font-size: 0.74rem;
+        border-radius: 9px;
+      }
+
+      #videoCallBox {
+        height: 360px !important;
+      }
+
+      .footer-note {
+        font-size: 0.78rem;
+        margin: 10px 0;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .app-shell {
+        padding: 8px;
+      }
+
+      .top-actions,
+      .video-controls,
+      .estimate-toolbar,
+      .proposal-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .mini-stats {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .trade-chip-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-item {
+        min-width: 132px;
+        font-size: 0.78rem;
+      }
+
+      .panel-header h3 {
+        font-size: 1rem;
+      }
+
+      .btn {
+        font-size: 0.86rem;
+      }
+    }
+
   </style>
 </head>
 <body>
