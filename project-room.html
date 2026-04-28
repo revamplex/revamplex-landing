@@ -3192,8 +3192,7 @@ Back to Project Feed
 
           <div class="summary-box" style="margin-bottom:16px;">
             <h4 style="margin-top:0;">Upload Project Files</h4>
-            <input type="file" id="photoUpload" accept="image/*" multiple>
-            <input type="file" id="videoUpload" accept="video/*">
+            <input type="file" id="projectFileUpload" accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx" multiple>
             <button class="btn btn-primary" onclick="uploadProjectFiles()" style="margin-top:10px;">
               Upload Files
             </button>
@@ -4756,19 +4755,18 @@ function openProposalPDF(){
 
 async function uploadProjectFiles(){
 
-  const photoInput = document.getElementById("photoUpload");
-  const videoInput = document.getElementById("videoUpload");
+  const fileInput = document.getElementById("projectFileUpload");
   const status = document.getElementById("uploadStatus");
 
-  if (!photoInput || !videoInput || !status) {
-    alert("Upload fields not found.");
+  if (!fileInput || !status) {
+    alert("Upload field not found.");
     return;
   }
 
-  const files = [...photoInput.files, ...videoInput.files];
+  const files = [...fileInput.files];
 
   if (!files.length) {
-    alert("Choose at least one photo or video first.");
+    alert("Choose at least one project file first.");
     return;
   }
 
