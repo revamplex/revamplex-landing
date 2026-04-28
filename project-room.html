@@ -2029,6 +2029,19 @@ body {
   }
 }
 
+
+/* ===== ESTIMATE LABOR EXPLAINER ===== */
+.labor-explainer {
+  border: 1px solid rgba(249, 115, 22, 0.28);
+  background: linear-gradient(180deg, #fff7ed, #ffffff);
+  color: #9a3412;
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin: 8px 0 12px;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
 </style>
 </head>
 <body>
@@ -2178,6 +2191,11 @@ body {
     <button class="btn btn-soft" type="button" onclick="window.scrollTo({top:0,behavior:'smooth'})">Back to Top</button>
   </div>
 
+  <div class="labor-explainer">
+    <strong>Labor is calculated as:</strong> Labor Hrs × Rate / Hr. 
+    Example: 8 hrs × $75/hr = $600 labor added to that line item.
+  </div>
+
   <div class="estimate-table-wrap">
     <table id="topJobTable">
       <thead>
@@ -2323,8 +2341,9 @@ body {
                   <th>Item</th>
                   <th>Qty</th>
                   <th>Unit</th>
-                  <th>Unit Cost</th>
-                  <th>Labor</th>
+                  <th>Material / Unit</th>
+                  <th>Labor Hrs</th>
+                  <th>Rate / Hr</th>
                   <th>Total</th>
                 </tr>
               </thead>
@@ -2334,7 +2353,8 @@ body {
                   <td><input class="table-input qty" type="number" value="1" step="0.01" /></td>
                   <td><input class="table-input" value="lot" /></td>
                   <td><input class="table-input unitCost" type="number" value="800" step="0.01" /></td>
-                  <td><input class="table-input laborCost" type="number" value="0" step="0.01" /></td>
+                  <td><input class="table-input laborHours" type="number" value="0" step="0.25" /></td>
+                  <td><input class="table-input laborRate" type="number" value="75" step="0.01" /></td>
                   <td class="lineTotal">$800.00</td>
                 </tr>
                 <tr>
@@ -2342,7 +2362,8 @@ body {
                   <td><input class="table-input qty" type="number" value="1" step="0.01" /></td>
                   <td><input class="table-input" value="lot" /></td>
                   <td><input class="table-input unitCost" type="number" value="750" step="0.01" /></td>
-                  <td><input class="table-input laborCost" type="number" value="450" step="0.01" /></td>
+                  <td><input class="table-input laborHours" type="number" value="1" step="0.25" /></td>
+                  <td><input class="table-input laborRate" type="number" value="450" step="0.01" /></td>
                   <td class="lineTotal">$1200.00</td>
                 </tr>
                 <tr>
@@ -2350,7 +2371,8 @@ body {
                   <td><input class="table-input qty" type="number" value="1" step="0.01" /></td>
                   <td><input class="table-input" value="lot" /></td>
                   <td><input class="table-input unitCost" type="number" value="550" step="0.01" /></td>
-                  <td><input class="table-input laborCost" type="number" value="400" step="0.01" /></td>
+                  <td><input class="table-input laborHours" type="number" value="1" step="0.25" /></td>
+                  <td><input class="table-input laborRate" type="number" value="400" step="0.01" /></td>
                   <td class="lineTotal">$950.00</td>
                 </tr>
                 <tr>
@@ -2358,7 +2380,8 @@ body {
                   <td><input class="table-input qty" type="number" value="132" step="0.01" /></td>
                   <td><input class="table-input" value="sqft" /></td>
                   <td><input class="table-input unitCost" type="number" value="3.25" step="0.01" /></td>
-                  <td><input class="table-input laborCost" type="number" value="4.75" step="0.01" /></td>
+                  <td><input class="table-input laborHours" type="number" value="1" step="0.25" /></td>
+                  <td><input class="table-input laborRate" type="number" value="4.75" step="0.01" /></td>
                   <td class="lineTotal">$1056.00</td>
                 </tr>
               </tbody>
@@ -2818,7 +2841,7 @@ const calculatorConfigs = {
       const perBox = getNumber("perBox") || 1;
       const tileSqFt = (getNumber("tileLength") * getNumber("tileWidth")) / 144;
       const tiles = tileSqFt > 0 ? Math.ceil(withWaste / tileSqFt) : 0;
-      lastCalcLineItem = { item:"Tile Install Materials", qty:withWaste.toFixed(2), unit:"sqft", unitCost:3.25, labor:4.75 };
+      lastCalcLineItem = { item:"Tile Install Materials", qty:withWaste.toFixed(2), unit:"sqft", unitCost:3.25, laborHours:8, laborRate:75 };
       return [
         ["Floor Area", area.toFixed(2) + " sqft"],
         ["With Waste", withWaste.toFixed(2) + " sqft"],
@@ -2846,7 +2869,7 @@ const calculatorConfigs = {
       const ceilingArea = getNumber("roomLength") * getNumber("roomWidth");
       const total = (wallArea + ceilingArea) * (1 + getNumber("drywallWaste") / 100);
       const sheets = Math.ceil(total / (getNumber("sheetSize") || 32));
-      lastCalcLineItem = { item:"Drywall Hang / Finish", qty:sheets, unit:"sheets", unitCost:18, labor:55 };
+      lastCalcLineItem = { item:"Drywall Hang / Finish", qty:sheets, unit:"sheets", unitCost:18, laborHours:8, laborRate:65 };
       return [
         ["Wall Area", wallArea.toFixed(2) + " sqft"],
         ["Ceiling Area", ceilingArea.toFixed(2) + " sqft"],
@@ -2874,7 +2897,7 @@ const calculatorConfigs = {
       const studs = Math.ceil(((wallLength * 12) / (getNumber("studSpacing") || 16)) + 1 + (getNumber("openings") * 2));
       const studsWaste = Math.ceil(studs * (1 + getNumber("framingWaste") / 100));
       const plateFt = wallLength * ((getNumber("plateLayers") || 2) + 1);
-      lastCalcLineItem = { item:"Wall Framing", qty:wallLength.toFixed(2), unit:"linear ft", unitCost:12, labor:18 };
+      lastCalcLineItem = { item:"Wall Framing", qty:wallLength.toFixed(2), unit:"linear ft", unitCost:12, laborHours:6, laborRate:75 };
       return [
         ["Wall Length", wallLength.toFixed(2) + " linear ft"],
         ["Wall Height", getNumber("wallHeightFraming").toFixed(2) + " ft"],
@@ -2901,7 +2924,7 @@ const calculatorConfigs = {
       const area = getNumber("roofLength") * getNumber("roofWidth") * (getNumber("roofPitchFactor") || 1);
       const withWaste = area * (1 + getNumber("roofWaste") / 100);
       const squares = withWaste / 100;
-      lastCalcLineItem = { item:"Roofing Install", qty:squares.toFixed(2), unit:"squares", unitCost:145, labor:250 };
+      lastCalcLineItem = { item:"Roofing Install", qty:squares.toFixed(2), unit:"squares", unitCost:145, laborHours:8, laborRate:85 };
       return [
         ["Roof Area", area.toFixed(2) + " sqft"],
         ["With Waste", withWaste.toFixed(2) + " sqft"],
@@ -2927,7 +2950,7 @@ const calculatorConfigs = {
     calculate: function(){
       const area = Math.max(0, getNumber("sidingWallLength") * getNumber("sidingHeight") - getNumber("sidingOpenings"));
       const withWaste = area * (1 + getNumber("sidingWaste") / 100);
-      lastCalcLineItem = { item:"Vinyl Siding Install", qty:(withWaste/100).toFixed(2), unit:"squares", unitCost:125, labor:275 };
+      lastCalcLineItem = { item:"Vinyl Siding Install", qty:(withWaste/100).toFixed(2), unit:"squares", unitCost:125, laborHours:8, laborRate:75 };
       return [
         ["Net Wall Area", area.toFixed(2) + " sqft"],
         ["With Waste", withWaste.toFixed(2) + " sqft"],
@@ -2953,7 +2976,7 @@ const calculatorConfigs = {
     calculate: function(){
       const area = getNumber("floorLength") * getNumber("floorWidth");
       const withWaste = area * (1 + getNumber("floorWaste") / 100);
-      lastCalcLineItem = { item:"Flooring Install", qty:withWaste.toFixed(2), unit:"sqft", unitCost:4.25, labor:4.75 };
+      lastCalcLineItem = { item:"Flooring Install", qty:withWaste.toFixed(2), unit:"sqft", unitCost:4.25, laborHours:6, laborRate:70 };
       return [
         ["Floor Area", area.toFixed(2) + " sqft"],
         ["With Waste", withWaste.toFixed(2) + " sqft"],
@@ -2980,7 +3003,7 @@ const calculatorConfigs = {
       const wallArea = Math.max(0, ((getNumber("paintLength") + getNumber("paintWidth")) * 2 * getNumber("paintHeight")) - getNumber("paintOpenings"));
       const ceiling = getNumber("paintLength") * getNumber("paintWidth");
       const finishArea = (wallArea + ceiling) * (getNumber("paintCoats") || 1);
-      lastCalcLineItem = { item:"Interior Painting", qty:(wallArea + ceiling).toFixed(2), unit:"sqft", unitCost:0.65, labor:1.85 };
+      lastCalcLineItem = { item:"Interior Painting", qty:(wallArea + ceiling).toFixed(2), unit:"sqft", unitCost:0.65, laborHours:6, laborRate:60 };
       return [
         ["Wall Area", wallArea.toFixed(2) + " sqft"],
         ["Ceiling Area", ceiling.toFixed(2) + " sqft"],
@@ -3007,7 +3030,7 @@ const calculatorConfigs = {
       const supply = getNumber("supplyRun") * (1 + getNumber("plumbingWaste") / 100);
       const drain = getNumber("drainRun") * (1 + getNumber("plumbingWaste") / 100);
       const fixtures = getNumber("fixtureCount");
-      lastCalcLineItem = { item:"Plumbing Rough-In", qty:fixtures || 1, unit:"fixtures", unitCost:220, labor:475 };
+      lastCalcLineItem = { item:"Plumbing Rough-In", qty:fixtures || 1, unit:"fixtures", unitCost:220, laborHours:4, laborRate:95 };
       return [
         ["Fixtures", Math.ceil(fixtures) + " fixtures"],
         ["Supply Line", Math.ceil(supply) + " linear ft"],
@@ -3033,7 +3056,7 @@ const calculatorConfigs = {
     calculate: function(){
       const devices = getNumber("outletCount") + getNumber("switchCount") + getNumber("lightCount");
       const wire = getNumber("wireRun") * (1 + getNumber("electricalWaste") / 100);
-      lastCalcLineItem = { item:"Electrical Rough-In", qty:devices || 1, unit:"devices", unitCost:32, labor:95 };
+      lastCalcLineItem = { item:"Electrical Rough-In", qty:devices || 1, unit:"devices", unitCost:32, laborHours:4, laborRate:95 };
       return [
         ["Total Devices", Math.ceil(devices) + " devices"],
         ["Device Boxes", Math.ceil(devices) + " boxes"],
@@ -3061,7 +3084,7 @@ const calculatorConfigs = {
       const cuFt = area * (getNumber("slabDepth") / 12) * (1 + getNumber("concreteWaste") / 100);
       const yards = cuFt / 27;
       const gravelCuFt = area * (getNumber("gravelDepth") / 12);
-      lastCalcLineItem = { item:"Concrete Slab", qty:yards.toFixed(2), unit:"cubic yd", unitCost:185, labor:450 };
+      lastCalcLineItem = { item:"Concrete Slab", qty:yards.toFixed(2), unit:"cubic yd", unitCost:185, laborHours:6, laborRate:85 };
       return [
         ["Slab Area", area.toFixed(2) + " sqft"],
         ["Concrete Volume", cuFt.toFixed(2) + " cu ft"],
@@ -3087,7 +3110,7 @@ const calculatorConfigs = {
     calculate: function(){
       const openings = getNumber("doorCount") + getNumber("windowCount");
       const trim = getNumber("doorCount") * getNumber("avgDoorTrim") + getNumber("windowCount") * getNumber("avgWindowTrim");
-      lastCalcLineItem = { item:"Door / Window Install", qty:openings || 1, unit:"openings", unitCost:95, labor:275 };
+      lastCalcLineItem = { item:"Door / Window Install", qty:openings || 1, unit:"openings", unitCost:95, laborHours:3, laborRate:75 };
       return [
         ["Total Openings", Math.ceil(openings) + " openings"],
         ["Casing / Trim", Math.ceil(trim) + " linear ft"],
@@ -3112,7 +3135,7 @@ const calculatorConfigs = {
     ],
     calculate: function(){
       const area = (getNumber("insulLength") * getNumber("insulHeight") + getNumber("insulCeilingArea")) * (1 + getNumber("insulWaste") / 100);
-      lastCalcLineItem = { item:"Insulation Install", qty:area.toFixed(2), unit:"sqft", unitCost:1.15, labor:1.25 };
+      lastCalcLineItem = { item:"Insulation Install", qty:area.toFixed(2), unit:"sqft", unitCost:1.15, laborHours:4, laborRate:60 };
       return [
         ["Insulation Area", area.toFixed(2) + " sqft"],
         ["Bags / Rolls", Math.ceil(area / (getNumber("battCoverage") || 75)) + " bags/rolls"],
@@ -3139,7 +3162,7 @@ const calculatorConfigs = {
       const area = getNumber("deckLength") * getNumber("deckWidth");
       const boards = Math.ceil((getNumber("deckWidth") * 12 / (getNumber("deckBoardWidth") || 5.5)) * (getNumber("deckLength") / (getNumber("deckBoardLength") || 16)) * (1 + getNumber("deckWaste") / 100));
       const joists = Math.ceil((getNumber("deckLength") * 12) / (getNumber("joistSpacing") || 16)) + 1;
-      lastCalcLineItem = { item:"Deck Framing / Decking", qty:area.toFixed(2), unit:"sqft", unitCost:18, labor:28 };
+      lastCalcLineItem = { item:"Deck Framing / Decking", qty:area.toFixed(2), unit:"sqft", unitCost:18, laborHours:8, laborRate:80 };
       return [
         ["Deck Area", area.toFixed(2) + " sqft"],
         ["Deck Boards", boards + " boards"],
@@ -3165,7 +3188,7 @@ const calculatorConfigs = {
     calculate: function(){
       const area = getNumber("blockWallLength") * getNumber("blockWallHeight");
       const blocks = Math.ceil((area / (getNumber("blockSqft") || 0.89)) * (1 + getNumber("blockWaste") / 100));
-      lastCalcLineItem = { item:"Masonry Block Wall", qty:blocks, unit:"blocks", unitCost:3.75, labor:12 };
+      lastCalcLineItem = { item:"Masonry Block Wall", qty:blocks, unit:"blocks", unitCost:3.75, laborHours:8, laborRate:85 };
       return [
         ["Wall Area", area.toFixed(2) + " sqft"],
         ["Blocks", blocks + " blocks"],
@@ -3192,7 +3215,7 @@ const calculatorConfigs = {
       const btu = getNumber("hvacSqft") * getNumber("btuPerSqft");
       const tons = btu / 12000;
       const duct = getNumber("ductRuns") * getNumber("avgDuctLength");
-      lastCalcLineItem = { item:"HVAC Basic Install Allowance", qty:getNumber("hvacSqft") || 1, unit:"sqft", unitCost:4, labor:8 };
+      lastCalcLineItem = { item:"HVAC Basic Install Allowance", qty:getNumber("hvacSqft") || 1, unit:"sqft", unitCost:4, laborHours:6, laborRate:100 };
       return [
         ["Estimated BTU", Math.ceil(btu).toLocaleString() + " BTU"],
         ["Approx Tons", tons.toFixed(2) + " tons"],
@@ -3219,7 +3242,7 @@ const calculatorConfigs = {
       const hours = getNumber("crewSize") * getNumber("workDays") * getNumber("hoursPerDay");
       const laborCost = hours * getNumber("laborRate");
       const total = laborCost + getNumber("disposalCost") + getNumber("miscCost");
-      lastCalcLineItem = { item:"General Labor / Project Allowance", qty:hours.toFixed(2), unit:"hours", unitCost:0, labor:getNumber("laborRate") };
+      lastCalcLineItem = { item:"General Labor / Project Allowance", qty:hours.toFixed(2), unit:"hours", unitCost:0, laborHours:hours.toFixed(2), laborRate:getNumber("laborRate") };
       return [
         ["Total Labor Hours", hours.toFixed(2) + " hours"],
         ["Labor Cost", currency(laborCost)],
@@ -3300,7 +3323,7 @@ function calculateTile(){
   selectCalculator("tile");
 }
 
-function addEstimateLine(item, qty, unit, unitCost, labor){
+function addEstimateLine(item, qty, unit, unitCost, laborHours, laborRate){
   const tbody = document.querySelector("#estimateTable tbody");
   if (!tbody) return;
 
@@ -3310,7 +3333,8 @@ function addEstimateLine(item, qty, unit, unitCost, labor){
     <td><input class="table-input qty" type="number" value="${qty || 1}" step="0.01" /></td>
     <td><input class="table-input" value="${unit || "unit"}" /></td>
     <td><input class="table-input unitCost" type="number" value="${unitCost || 0}" step="0.01" /></td>
-    <td><input class="table-input laborCost" type="number" value="${labor || 0}" step="0.01" /></td>
+    <td><input class="table-input laborHours" type="number" value="${laborHours || 0}" step="0.25" /></td>
+    <td><input class="table-input laborRate" type="number" value="${laborRate || 75}" step="0.01" /></td>
     <td class="lineTotal">$0.00</td>
   `;
 
@@ -3332,7 +3356,8 @@ function pushCalcResultsToEstimate(){
     lastCalcLineItem.qty,
     lastCalcLineItem.unit,
     lastCalcLineItem.unitCost,
-    lastCalcLineItem.labor
+    lastCalcLineItem.laborHours,
+    lastCalcLineItem.laborRate
   );
 }
 
@@ -3348,9 +3373,12 @@ function recalcEstimate(){
 
     const qty=parseFloat(row.querySelector('.qty')?.value)||0;
     const unitCost=parseFloat(row.querySelector('.unitCost')?.value)||0;
-    const laborCost=parseFloat(row.querySelector('.laborCost')?.value)||0;
+    const laborHours=parseFloat(row.querySelector('.laborHours')?.value)||0;
+    const laborRate=parseFloat(row.querySelector('.laborRate')?.value)||0;
 
-    const total=qty*(unitCost+laborCost);
+    const materialTotal = qty * unitCost;
+    const laborTotal = laborHours * laborRate;
+    const total = materialTotal + laborTotal;
 
     row.querySelector('.lineTotal').textContent=currency(total);
 
@@ -3377,10 +3405,11 @@ function addRow(){
 
   tr.innerHTML=`
 <td><input class="table-input" value="New Item"/></td>
-<td><input class="table-input qty" type="number" value="1"/></td>
+<td><input class="table-input qty" type="number" value="1" step="0.01"/></td>
 <td><input class="table-input" value="unit"/></td>
-<td><input class="table-input unitCost" type="number" value="0"/></td>
-<td><input class="table-input laborCost" type="number" value="0"/></td>
+<td><input class="table-input unitCost" type="number" value="0" step="0.01"/></td>
+<td><input class="table-input laborHours" type="number" value="0" step="0.25"/></td>
+<td><input class="table-input laborRate" type="number" value="75" step="0.01"/></td>
 <td class="lineTotal">$0.00</td>
 `;
 
@@ -3394,7 +3423,7 @@ function addRow(){
 
 function attachEstimateListeners(){
 
-  document.querySelectorAll('.qty,.unitCost,.laborCost').forEach(input=>{
+  document.querySelectorAll('.qty,.unitCost,.laborHours,.laborRate').forEach(input=>{
 
     input.removeEventListener('input',recalcEstimate);
 
@@ -3872,10 +3901,11 @@ function getEstimateRowsForProposal(){
     const qty = inputs[1]?.value || "";
     const unit = inputs[2]?.value || "";
     const unitCost = inputs[3]?.value || "0";
-    const labor = inputs[4]?.value || "0";
+    const laborHours = inputs[4]?.value || "0";
+    const laborRate = inputs[5]?.value || "0";
     const total = row.querySelector(".lineTotal")?.innerText || "$0.00";
 
-    return { item, qty, unit, unitCost, labor, total };
+    return { item, qty, unit, unitCost, laborHours, laborRate, total };
   }).filter(row => row.item.trim());
 }
 
@@ -3898,7 +3928,7 @@ function buildProposalText(){
   const rows = getEstimateRowsForProposal();
 
   const lineItems = rows.map((row, index) => {
-    return `${index + 1}. ${row.item} — Qty: ${row.qty} ${row.unit} | Material: $${row.unitCost} | Labor: $${row.labor} | Total: ${row.total}`;
+    return `${index + 1}. ${row.item} — Qty: ${row.qty} ${row.unit} | Material/Unit: $${row.unitCost} | Labor: ${row.laborHours} hrs × $${row.laborRate}/hr | Total: ${row.total}`;
   }).join("");
 
   return [
