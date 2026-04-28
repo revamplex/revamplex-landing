@@ -1614,7 +1614,144 @@
       }
     }
 
-  </style>
+  
+/* ===== DESKTOP CENTERED UNIFORM LAYOUT ===== */
+body {
+  background:
+    linear-gradient(90deg, #e2e8f0 0, #e2e8f0 calc((100vw - 1220px) / 2), transparent calc((100vw - 1220px) / 2), transparent calc(100vw - ((100vw - 1220px) / 2)), #e2e8f0 calc(100vw - ((100vw - 1220px) / 2)), #e2e8f0 100%),
+    linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px);
+}
+
+.app-shell {
+  width: min(100%, 1220px);
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.hero,
+.dashboard,
+.workspace,
+.workspace > .panel,
+.contractor-tools,
+.contractor-tools > .panel {
+  width: 100%;
+  max-width: 100%;
+}
+
+.dashboard {
+  grid-template-columns: 245px minmax(0, 1fr);
+}
+
+.workspace {
+  min-width: 0;
+}
+
+.panel,
+.hero,
+.sidebar {
+  border: 1px solid rgba(226, 232, 240, 0.95);
+}
+
+.estimate-summary {
+  grid-template-columns: 1fr;
+}
+
+.summary-box {
+  width: 100%;
+}
+
+.ai-chat-shell,
+.calc-layout,
+.schedule-layout,
+.signature-layout {
+  grid-template-columns: 1fr;
+}
+
+.tool-grid,
+.photo-strip,
+.mini-stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.contractor-info-grid,
+.form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.estimate-table-wrap {
+  width: 100%;
+}
+
+/* ===== MOBILE FULL WIDTH ===== */
+@media (max-width: 760px) {
+  body {
+    background: linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px);
+  }
+
+  .app-shell {
+    width: 100%;
+    max-width: none;
+    padding: 10px;
+  }
+
+  .hero,
+  .panel,
+  .sidebar {
+    border-radius: 18px;
+  }
+
+  .dashboard,
+  .hero-grid,
+  .workspace,
+  .contractor-tools,
+  .ai-chat-shell,
+  .calc-layout,
+  .estimate-summary,
+  .schedule-layout,
+  .signature-layout,
+  .contractor-info-grid,
+  .form-grid,
+  .tool-grid,
+  .photo-strip,
+  .mini-stats {
+    grid-template-columns: 1fr !important;
+  }
+
+  .panel {
+    padding: 14px;
+  }
+
+  .sidebar {
+    padding: 12px;
+  }
+
+  .topbar,
+  .panel-header,
+  .estimate-toolbar,
+  .proposal-actions,
+  .video-controls {
+    gap: 8px;
+  }
+
+  .btn {
+    padding: 10px 12px;
+    border-radius: 12px;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1300px) {
+  body {
+    background: linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px);
+  }
+
+  .app-shell {
+    width: 100%;
+    max-width: 1180px;
+  }
+}
+
+</style>
 </head>
 <body>
 <div class="app-shell">
