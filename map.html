@@ -298,6 +298,25 @@
   }
 }
 
+
+/* ===== REVAMP REAL ACCOUNT / PAYMENT / APPROVAL PATCH ===== */
+.account-warning {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #fff7ed;
+  color: #9a3412;
+  border: 1px solid rgba(249,115,22,0.25);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+.plan-grid { display:grid; grid-template-columns:1fr; gap:10px; margin:12px 0; }
+.plan-card { border:1px solid var(--line); border-radius:16px; padding:12px; background:#fff; }
+.plan-card strong { display:block; margin-bottom:4px; font-size:15px; }
+.plan-card span { display:block; color:var(--muted); font-size:12px; line-height:1.35; margin-bottom:8px; }
+.plan-card .mini-btn { width:100%; }
+
 </style>
   <style>
     :root {
@@ -1627,7 +1646,7 @@
         <div class="welcomeRolePill" id="welcomeRolePill">Homeowner Registration</div>
 
         <p class="welcomeNote" id="contractorTrialNote">
-          Pro Contractors can browse and bid after signup. Billing and locking can be connected later.
+          Pro Contractors get a 3-month free trial, but your profile will stay pending until Revamp LEX approves license and insurance.
         </p>
 
         <div class="welcomeGrid">
@@ -1700,6 +1719,24 @@
               <label class="welcomeLabel" for="welcomeBio">Company Bio</label>
               <textarea class="welcomeTextarea" id="welcomeBio" placeholder="Briefly describe your company and specialties..."></textarea>
             </div>
+
+            <div class="welcomeField">
+              <label class="welcomeLabel" for="welcomeInsuranceCompany">Insurance Company</label>
+              <input class="welcomeInput" id="welcomeInsuranceCompany" type="text" placeholder="Insurance company">
+            </div>
+            <div class="welcomeField">
+              <label class="welcomeLabel" for="welcomeInsuranceExpiration">Insurance Expiration</label>
+              <input class="welcomeInput" id="welcomeInsuranceExpiration" type="date">
+            </div>
+            <div class="welcomeField full">
+              <label class="welcomeLabel" for="welcomeLicenseFile">License Document</label>
+              <input class="welcomeInput" id="welcomeLicenseFile" type="file" accept=".pdf,.jpg,.jpeg,.png">
+            </div>
+            <div class="welcomeField full">
+              <label class="welcomeLabel" for="welcomeInsuranceFile">Insurance Certificate</label>
+              <input class="welcomeInput" id="welcomeInsuranceFile" type="file" accept=".pdf,.jpg,.jpeg,.png">
+            </div>
+
           </div>
         </div>
 
@@ -3498,9 +3535,8 @@ async function saveEdit(id, type) {
     }
 async function loadContractors() {
   const { data, error } = await supabaseClient
-  .from('contractors')
-  .select('*')
-  .eq('is_approved', true);
+    .from('contractors')
+    .select('*');
 
   if (error) {
     console.error('contractors load error', error);
