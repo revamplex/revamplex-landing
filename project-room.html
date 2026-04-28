@@ -3627,7 +3627,7 @@ function escapeHTML(str){
 function formatAIText(text){
   let safe = escapeHTML(text);
 
-  safe = safe.replace(/^#{1,6}*(.+)$/gm, '<span class="ai-heading">$1</span>');
+  safe = safe.replace(/^#{1,6}\s*(.+)$/gm, '<span class="ai-heading">$1</span>');
   safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
   const lines = safe.split("");
