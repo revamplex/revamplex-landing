@@ -1925,847 +1925,42 @@ body {
 }
 
 
-/* ===== HORIZONTAL WORKSPACE SECTIONS NAV - DESKTOP + MOBILE ===== */
-.dashboard {
-  display: grid !important;
-  grid-template-columns: 1fr !important;
-  gap: 16px !important;
-  width: 100% !important;
-}
-
-.sidebar {
-  position: static !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  padding: 14px 16px !important;
-  border-radius: 22px !important;
-}
-
-.nav-title {
-  margin: 0 0 10px !important;
-  font-size: 0.78rem !important;
-  letter-spacing: 0.10em !important;
-}
-
-.nav-list {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-  gap: 10px !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  padding: 2px 2px 6px !important;
-  scrollbar-width: thin;
-}
-
-.nav-list::-webkit-scrollbar {
-  height: 6px;
-}
-
-.nav-list::-webkit-scrollbar-thumb {
-  background: rgba(249, 115, 22, 0.35);
-  border-radius: 999px;
-}
-
-.nav-item {
-  flex: 0 0 auto !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-width: auto !important;
-  white-space: nowrap !important;
-  border-radius: 999px !important;
-  padding: 11px 16px !important;
-  gap: 8px !important;
-}
-
-.nav-item span:last-child {
-  display: none !important;
-}
-
-.workspace {
-  width: 100% !important;
-}
-
-@media (min-width: 761px) {
-  .app-shell {
-    width: min(100%, 1220px) !important;
-    max-width: 1220px !important;
-    margin: 0 auto !important;
-  }
-
-  .sidebar {
-    top: auto !important;
-  }
-
-  .nav-list {
-    justify-content: flex-start !important;
-  }
-}
-
-@media (max-width: 760px) {
-  .sidebar {
-    padding: 12px !important;
-    border-radius: 18px !important;
-  }
-
-  .nav-list {
-    gap: 8px !important;
-  }
-
-  .nav-item {
-    padding: 10px 12px !important;
-    font-size: 0.86rem !important;
-  }
-}
-
-
-/* ===== FLOATING STICKY WORKSPACE MENU ===== */
-.sidebar {
-  position: sticky !important;
-  top: 10px !important;
-  z-index: 900 !important;
-  background: rgba(255, 255, 255, 0.92) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.12) !important;
-  border: 1px solid rgba(226, 232, 240, 0.95) !important;
-}
-
-.nav-list {
-  scroll-behavior: smooth;
-}
-
-.nav-item {
-  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.06) !important;
-}
-
-.nav-item.active {
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.16), #ffffff) !important;
-  color: var(--brand-dark) !important;
-  border-color: rgba(249, 115, 22, 0.35) !important;
-}
-
-@media (min-width: 761px) {
-  .sidebar {
-    top: 14px !important;
-    margin-top: 4px !important;
-  }
-}
-
-@media (max-width: 760px) {
-  .sidebar {
-    top: 8px !important;
-    border-radius: 18px !important;
-    margin-top: 4px !important;
-  }
-
-  .nav-title {
-    font-size: 0.72rem !important;
-  }
-}
-
 
 /* =========================================================
-   FINAL STRUCTURE FIX:
-   - Desktop: centered page, equal-width sections, horizontal sticky workspace menu
-   - Mobile: full-width sections, sticky horizontal workspace menu visible
+   TRUE FIXED FLOATING WORKSPACE MENU
+   This does NOT rely on position: sticky.
+   It stays visible on desktop + mobile.
    ========================================================= */
 
-html,
-body {
-  max-width: 100%;
-  overflow-x: hidden;
-}
-
-/* Desktop page shell */
-.app-shell {
-  width: min(100%, 1220px) !important;
-  max-width: 1220px !important;
-  margin: 0 auto !important;
-  padding: 20px !important;
-}
-
-/* All major sections stay same width */
-.topbar,
-.hero,
-.dashboard,
-.sidebar,
-.workspace,
-.workspace > section,
-.workspace > .panel,
-.contractor-tools,
-.contractor-tools > section,
-.contractor-tools > .panel,
-.panel {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-/* Main content is one clean column now */
-.dashboard {
-  display: grid !important;
-  grid-template-columns: 1fr !important;
-  gap: 16px !important;
-  align-items: start !important;
-}
-
-.workspace,
-.contractor-tools {
-  display: grid !important;
-  grid-template-columns: 1fr !important;
-  gap: 18px !important;
-  min-width: 0 !important;
-}
-
-/* Keep inner layouts from causing random narrow/wide cards */
-.hero-grid,
-.ai-chat-shell,
-.calc-layout,
-.estimate-summary,
-.schedule-layout,
-.signature-layout {
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-}
-
-.estimate-summary {
-  grid-template-columns: 1fr !important;
-}
-
-.ai-chat-shell,
-.calc-layout,
-.schedule-layout,
-.signature-layout {
-  grid-template-columns: 1fr !important;
-}
-
-/* Desktop grid cards */
-.mini-stats {
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-}
-
-.tool-grid,
-.photo-strip {
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-}
-
-.form-grid,
-.contractor-info-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-}
-
-/* Floating horizontal workspace menu */
-.sidebar {
-  position: sticky !important;
-  top: 12px !important;
-  z-index: 9999 !important;
-  background: rgba(255, 255, 255, 0.94) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border: 1px solid rgba(226, 232, 240, 0.95) !important;
-  border-radius: 22px !important;
-  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.12) !important;
-  padding: 14px 16px !important;
-}
-
-.nav-title {
-  margin: 0 0 10px !important;
-  font-size: 0.78rem !important;
-  letter-spacing: 0.10em !important;
-}
-
-.nav-list {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-  gap: 10px !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  padding: 2px 2px 7px !important;
-  scroll-behavior: smooth !important;
-  -webkit-overflow-scrolling: touch !important;
-}
-
-.nav-item {
-  flex: 0 0 auto !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  white-space: nowrap !important;
-  border-radius: 999px !important;
-  padding: 11px 16px !important;
-  gap: 8px !important;
-  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.06) !important;
-}
-
-.nav-item span:last-child {
-  display: none !important;
-}
-
-.nav-item.active {
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.16), #ffffff) !important;
-  color: var(--brand-dark) !important;
-  border-color: rgba(249, 115, 22, 0.35) !important;
-}
-
-/* Desktop side gutters / centered look */
-@media (min-width: 1301px) {
-  body {
-    background:
-      linear-gradient(90deg,
-        #e2e8f0 0,
-        #e2e8f0 calc((100vw - 1220px) / 2),
-        transparent calc((100vw - 1220px) / 2),
-        transparent calc(100vw - ((100vw - 1220px) / 2)),
-        #e2e8f0 calc(100vw - ((100vw - 1220px) / 2)),
-        #e2e8f0 100%),
-      linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px) !important;
-  }
-}
-
-/* Mobile full-width + sticky menu visible */
-@media (max-width: 760px) {
-  body {
-    background: linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px) !important;
-  }
-
-  .app-shell {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 10px !important;
-  }
-
-  .topbar,
-  .hero,
-  .dashboard,
-  .sidebar,
-  .workspace,
-  .workspace > section,
-  .workspace > .panel,
-  .contractor-tools,
-  .contractor-tools > section,
-  .contractor-tools > .panel,
-  .panel,
-  .side-summary,
-  .stat,
-  .summary-box,
-  .calendar-box,
-  .schedule-list,
-  .signature-box,
-  .proposal-preview-card,
-  .estimate-output-card,
-  .ai-chat-card,
-  .contractor-info-card,
-  .estimate-table-wrap {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    box-sizing: border-box !important;
-  }
-
-  .dashboard,
-  .workspace,
-  .contractor-tools,
-  .hero-grid,
-  .mini-stats,
-  .tool-grid,
-  .photo-strip,
-  .form-grid,
-  .contractor-info-grid,
-  .ai-chat-shell,
-  .ai-compose,
-  .calc-layout,
-  .estimate-summary,
-  .schedule-layout,
-  .signature-layout {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-  }
-
-  .hero,
-  .panel,
-  .sidebar,
-  .side-summary {
-    padding: 14px !important;
-    border-radius: 18px !important;
-  }
-
-  .sidebar {
-    display: block !important;
-    position: sticky !important;
-    top: 8px !important;
-    z-index: 99999 !important;
-    margin: 8px 0 12px !important;
-    background: rgba(255, 255, 255, 0.96) !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
-  }
-
-  .nav-title {
-    display: block !important;
-    font-size: 0.72rem !important;
-    margin-bottom: 8px !important;
-  }
-
-  .nav-list {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    gap: 8px !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    padding: 2px 2px 6px !important;
-  }
-
-  .nav-item {
-    flex: 0 0 auto !important;
-    white-space: nowrap !important;
-    padding: 10px 12px !important;
-    font-size: 0.86rem !important;
-  }
-
-  .calendar-grid {
-    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
-    gap: 5px !important;
-  }
-
-  .cal-day,
-  .cal-date {
-    padding: 8px 4px !important;
-    font-size: 0.78rem !important;
-  }
-
-  .top-actions,
-  .panel-header,
-  .estimate-toolbar,
-  .proposal-actions,
-  .video-controls,
-  .mic-row {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 8px !important;
-  }
-
-  .btn,
-  button {
-    max-width: 100% !important;
-  }
-
-  table {
-    min-width: 720px !important;
-  }
-}
-
-
-/* =========================================================
-   REVAMP PROJECT ROOM - FINAL CLEAN LAYOUT OVERRIDE
-   Purpose:
-   1. All desktop sections same centered width
-   2. Mobile sections full width
-   3. Workspace menu horizontal + sticky on desktop and mobile
-   4. No skinny/wide mixed sections
-   ========================================================= */
-
-html,
-body {
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 !important;
-  overflow-x: hidden !important;
-}
-
-body {
-  background: linear-gradient(180deg, #fff7ed 0%, #f8fafc 180px) !important;
-}
-
-/* One centered page column */
-.app-shell {
-  width: 100% !important;
-  max-width: 1180px !important;
-  margin: 0 auto !important;
-  padding: 18px !important;
-  box-sizing: border-box !important;
-}
-
-/* Force every major page block into same column width */
-.topbar,
-.hero,
-.dashboard,
-.sidebar,
-.workspace,
-.contractor-tools,
-.workspace > section,
-.workspace > .panel,
-.contractor-tools > section,
-.contractor-tools > .panel,
-.panel {
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  box-sizing: border-box !important;
-}
-
-/* Remove old left sidebar layout completely */
 .dashboard {
   display: block !important;
   grid-template-columns: none !important;
-  gap: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding-top: 92px !important; /* creates room for fixed menu */
 }
 
-/* Workspace becomes clean vertical stack */
 .workspace,
 .contractor-tools {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 16px !important;
-}
-
-/* Cards consistent */
-.hero,
-.sidebar,
-.panel,
-.side-summary,
-.summary-box,
-.calendar-box,
-.schedule-list,
-.signature-box,
-.proposal-preview-card,
-.estimate-output-card,
-.ai-chat-card,
-.contractor-info-card,
-.result-card {
-  border-radius: 22px !important;
-  box-sizing: border-box !important;
-}
-
-/* Keep inner sections same width */
-.hero-grid,
-.project-title,
-.mini-stats,
-.ai-chat-shell,
-.calc-layout,
-.estimate-summary,
-.schedule-layout,
-.signature-layout,
-.contractor-info-grid,
-.form-grid,
-.tool-grid,
-.photo-strip,
-.estimate-table-wrap {
   width: 100% !important;
   max-width: 100% !important;
-  min-width: 0 !important;
-  box-sizing: border-box !important;
 }
 
-/* Desktop inner layout */
-.hero-grid {
-  display: grid !important;
-  grid-template-columns: 1fr !important;
-  gap: 16px !important;
-}
-
-.mini-stats {
-  display: grid !important;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  gap: 12px !important;
-}
-
-.tool-grid,
-.photo-strip {
-  display: grid !important;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  gap: 12px !important;
-}
-
-.form-grid,
-.contractor-info-grid {
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 12px !important;
-}
-
-.ai-chat-shell,
-.calc-layout,
-.estimate-summary,
-.schedule-layout,
-.signature-layout {
-  display: grid !important;
-  grid-template-columns: 1fr !important;
-  gap: 16px !important;
-}
-
-/* Horizontal sticky workspace menu */
+/* Fixed floating menu */
 .sidebar {
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 99999 !important;
-  margin: 14px 0 16px !important;
-  padding: 12px 14px !important;
-  background: rgba(255, 255, 255, 0.96) !important;
-  backdrop-filter: blur(18px) !important;
-  -webkit-backdrop-filter: blur(18px) !important;
-  border: 1px solid rgba(226, 232, 240, 0.95) !important;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12) !important;
-}
+  position: fixed !important;
+  top: 86px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
 
-.nav-title {
+  width: min(1180px, calc(100vw - 36px)) !important;
+  max-width: calc(100vw - 36px) !important;
+
+  z-index: 999999 !important;
+
   display: block !important;
-  margin: 0 0 8px !important;
-  font-size: 0.76rem !important;
-  line-height: 1 !important;
-  letter-spacing: 0.12em !important;
-  color: #64748b !important;
-}
-
-.nav-list {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-  align-items: center !important;
-  gap: 8px !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  padding: 2px 2px 6px !important;
   margin: 0 !important;
-  -webkit-overflow-scrolling: touch !important;
-  scrollbar-width: thin !important;
-}
-
-.nav-item {
-  flex: 0 0 auto !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  white-space: nowrap !important;
-  border-radius: 999px !important;
-  padding: 10px 14px !important;
-  font-size: 0.9rem !important;
-  line-height: 1 !important;
-  min-height: 40px !important;
-}
-
-.nav-item span:last-child {
-  display: none !important;
-}
-
-/* Desktop side border/gutter feeling */
-@media (min-width: 1221px) {
-  body {
-    background:
-      linear-gradient(90deg,
-        #e2e8f0 0,
-        #e2e8f0 calc((100vw - 1180px) / 2),
-        transparent calc((100vw - 1180px) / 2),
-        transparent calc(100vw - ((100vw - 1180px) / 2)),
-        #e2e8f0 calc(100vw - ((100vw - 1180px) / 2)),
-        #e2e8f0 100%),
-      linear-gradient(180deg, #fff7ed 0%, #f8fafc 180px) !important;
-  }
-}
-
-/* Tablet */
-@media (max-width: 900px) {
-  .app-shell {
-    max-width: 100% !important;
-    padding: 12px !important;
-  }
-
-  .mini-stats,
-  .tool-grid,
-  .photo-strip,
-  .form-grid,
-  .contractor-info-grid {
-    grid-template-columns: 1fr !important;
-  }
-}
-
-/* Mobile: all full width and consistent */
-@media (max-width: 760px) {
-  .app-shell {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 10px !important;
-  }
-
-  .topbar,
-  .hero,
-  .dashboard,
-  .sidebar,
-  .workspace,
-  .contractor-tools,
-  .workspace > section,
-  .workspace > .panel,
-  .contractor-tools > section,
-  .contractor-tools > .panel,
-  .panel,
-  .side-summary,
-  .stat,
-  .summary-box,
-  .calendar-box,
-  .schedule-list,
-  .signature-box,
-  .proposal-preview-card,
-  .estimate-output-card,
-  .ai-chat-card,
-  .contractor-info-card,
-  .result-card {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    box-sizing: border-box !important;
-  }
-
-  .hero,
-  .sidebar,
-  .panel,
-  .side-summary,
-  .summary-box,
-  .calendar-box,
-  .schedule-list,
-  .signature-box,
-  .proposal-preview-card,
-  .estimate-output-card,
-  .ai-chat-card,
-  .contractor-info-card {
-    padding: 14px !important;
-    border-radius: 18px !important;
-  }
-
-  .dashboard {
-    display: block !important;
-  }
-
-  .workspace,
-  .contractor-tools {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 12px !important;
-  }
-
-  .hero-grid,
-  .mini-stats,
-  .tool-grid,
-  .photo-strip,
-  .form-grid,
-  .contractor-info-grid,
-  .ai-chat-shell,
-  .ai-compose,
-  .calc-layout,
-  .estimate-summary,
-  .schedule-layout,
-  .signature-layout {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-  }
-
-  .sidebar {
-    display: block !important;
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 999999 !important;
-    margin: 10px 0 12px !important;
-    padding: 12px !important;
-  }
-
-  .nav-title {
-    display: block !important;
-    font-size: 0.7rem !important;
-    margin: 0 0 8px !important;
-  }
-
-  .nav-list {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    gap: 8px !important;
-    padding-bottom: 6px !important;
-  }
-
-  .nav-item {
-    flex: 0 0 auto !important;
-    white-space: nowrap !important;
-    padding: 10px 12px !important;
-    font-size: 0.84rem !important;
-    min-height: 38px !important;
-  }
-
-  .calendar-grid {
-    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
-    gap: 5px !important;
-  }
-
-  .cal-day,
-  .cal-date {
-    padding: 8px 3px !important;
-    font-size: 0.76rem !important;
-  }
-
-  .top-actions,
-  .panel-header,
-  .estimate-toolbar,
-  .proposal-actions,
-  .video-controls,
-  .mic-row {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 8px !important;
-  }
-
-  .btn,
-  button {
-    max-width: 100% !important;
-  }
-
-  table {
-    min-width: 720px !important;
-  }
-}
-
-
-/* =========================================================
-   FINAL WORKSPACE SECTIONS HOVER / STICKY FIX
-   Put last so it beats every older .sidebar rule.
-   ========================================================= */
-
-.dashboard,
-.workspace,
-.contractor-tools,
-.app-shell {
-  overflow: visible !important;
-}
-
-.topbar {
-  position: relative !important;
-  z-index: 1000 !important;
-}
-
-.sidebar {
-  position: sticky !important;
-  top: 10px !important;
-  z-index: 99999 !important;
-
-  display: block !important;
-  width: 100% !important;
-  max-width: 100% !important;
-
-  margin: 12px 0 16px !important;
-  padding: 12px 14px !important;
+  padding: 10px 12px !important;
 
   background: rgba(255, 255, 255, 0.96) !important;
   backdrop-filter: blur(18px) !important;
@@ -2773,19 +1968,23 @@ body {
 
   border: 1px solid rgba(226, 232, 240, 0.95) !important;
   border-radius: 20px !important;
-  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.14) !important;
+  box-shadow: 0 16px 38px rgba(15, 23, 42, 0.18) !important;
 }
 
+/* Compact title */
 .nav-title {
   display: block !important;
-  margin: 0 0 8px !important;
-  font-size: 0.72rem !important;
+  margin: 0 0 7px !important;
+  padding: 0 !important;
+
+  font-size: 0.7rem !important;
   line-height: 1 !important;
   letter-spacing: 0.12em !important;
   color: #64748b !important;
   text-transform: uppercase !important;
 }
 
+/* Horizontal scroll menu */
 .nav-list {
   display: flex !important;
   flex-direction: row !important;
@@ -2799,7 +1998,7 @@ body {
   overflow-x: auto !important;
   overflow-y: hidden !important;
 
-  padding: 2px 2px 6px !important;
+  padding: 2px 2px 5px !important;
   margin: 0 !important;
 
   -webkit-overflow-scrolling: touch !important;
@@ -2807,7 +2006,7 @@ body {
 }
 
 .nav-list::-webkit-scrollbar {
-  height: 6px !important;
+  height: 5px !important;
 }
 
 .nav-list::-webkit-scrollbar-thumb {
@@ -2817,19 +2016,26 @@ body {
 
 .nav-item {
   flex: 0 0 auto !important;
+
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
 
-  white-space: nowrap !important;
   min-width: auto !important;
-  min-height: 38px !important;
+  min-height: 36px !important;
 
-  padding: 10px 14px !important;
+  padding: 9px 13px !important;
+
+  white-space: nowrap !important;
   border-radius: 999px !important;
 
-  font-size: 0.88rem !important;
+  font-size: 0.86rem !important;
+  font-weight: 800 !important;
   line-height: 1 !important;
+
+  background: #ffffff !important;
+  border: 1px solid var(--line) !important;
+  color: var(--text) !important;
 }
 
 .nav-item span:last-child {
@@ -2838,36 +2044,56 @@ body {
 
 .nav-item.active {
   background: linear-gradient(135deg, rgba(249, 115, 22, 0.18), #ffffff) !important;
-  color: var(--brand-dark) !important;
   border-color: rgba(249, 115, 22, 0.38) !important;
+  color: var(--brand-dark) !important;
 }
 
+/* Desktop keeps header normal */
+.topbar {
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+/* Mobile fixed version */
 @media (max-width: 760px) {
+  .dashboard {
+    padding-top: 82px !important;
+  }
+
   .sidebar {
-    position: sticky !important;
-    top: 6px !important;
-    z-index: 999999 !important;
+    top: 72px !important;
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
 
-    margin: 8px 0 12px !important;
-    padding: 10px 10px !important;
-
+    padding: 9px 9px !important;
     border-radius: 16px !important;
   }
 
   .nav-title {
-    font-size: 0.68rem !important;
-    margin-bottom: 7px !important;
+    font-size: 0.66rem !important;
+    margin-bottom: 6px !important;
   }
 
   .nav-list {
     gap: 7px !important;
-    padding-bottom: 5px !important;
+    padding-bottom: 4px !important;
   }
 
   .nav-item {
-    min-height: 36px !important;
-    padding: 9px 11px !important;
-    font-size: 0.82rem !important;
+    min-height: 34px !important;
+    padding: 8px 10px !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 420px) {
+  .sidebar {
+    top: 66px !important;
+  }
+
+  .dashboard {
+    padding-top: 80px !important;
   }
 }
 
