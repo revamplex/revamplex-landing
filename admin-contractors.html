@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Revamp LEX Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Arial,sans-serif; background:#f8fafc; color:#0f172a; }
+    header { background:#0f172a; color:white; padding:18px; text-align:center; font-weight:900; }
+    .wrap { max-width:1100px; margin:0 auto; padding:20px; }
+    .card { background:white; border:1px solid #e2e8f0; border-radius:16px; padding:16px; margin-bottom:14px; box-shadow:0 8px 20px rgba(15,23,42,.06); }
+    .row { display:grid; grid-template-columns:1fr auto; gap:14px; align-items:start; }
+    .muted { color:#64748b; font-size:14px; line-height:1.45; }
+    button { border:0; cursor:pointer; border-radius:10px; padding:10px 12px; font-weight:900; }
+    .approve { background:#16a34a; color:white; }
+    .suspend { background:#dc2626; color:white; }
+    .soft { background:#f1f5f9; color:#0f172a; }
+    .pill { display:inline-block; padding:4px 8px; border-radius:999px; background:#fff7ed; color:#9a3412; font-size:12px; font-weight:900; margin:2px; }
+    .actions { display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; }
+    input { width:100%; padding:11px; border:1px solid #cbd5e1; border-radius:10px; margin-bottom:12px; }
+  </style>
+</head>
+<body>
+<header>Revamp LEX Admin — Contractor Approval</header>
+<div class="wrap">
+  <div class="card" id="loginCard">
+    <h3>Admin Login</h3>
+    <p class="muted">Use your Supabase login. Only revamplex@gmail.com should use this page.</p>
+    <input id="email" placeholder="Email" value="revamplex@gmail.com">
+    <input id="password" placeholder="Password" type="password">
+    <button class="approve" onclick="login()">Login</button>
+  </div>
+
+  <div id="adminContent" style="display:none;">
+    <div class="card">
+      <button class="soft" onclick="loadContractors()">Refresh Contractors</button>
+      <button class="soft" onclick="location.href='map.html'">Back to Map</button>
+    </div>
+    <div id="contractorList"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const client = window.supabase.createClient("https://dezvwoedboikshqttdqu.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E");
+
+async function login(){
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  if (email.toLowerCase() !== "revamplex@gmail.com") {
+    alert("Only Revamp LEX admin can use this page.");
+    return;
+  }
+
+  const { error } = await client.auth.signInWithPassword({ email, password });
+  if (error) { alert(error.message); return; }
+
+  document.getElementById("loginCard").style.display = "none";
+  document.getElementById("adminContent").style.display = "block";
+  loadContractors();
+}
+
+async function loadContractors(){
+  const { data, error } = await client.from("profiles").select("*").eq("role", "contractor").order("created_at", { ascending:false });
+  if (error) { alert(error.message); return; }
+
+  document.getElementById("contractorList").innerHTML = (data || []).map(p => `
+    <div class="card">
+      <div class="row">
+        <div>
+          <h3>${p.company || p.full_name || p.email}</h3>
+          <p class="muted">${p.email} • ${p.phone || ""}</p>
+          <p>
+            <span class="pill">Status: ${p.account_status || "pending_review"}</span>
+            <span class="pill">Approved: ${p.is_approved ? "Yes" : "No"}</span>
+            <span class="pill">Plan: ${p.plan || "trial"}</span>
+            <span class="pill">Subscription: ${p.subscription_status || "trial"}</span>
+          </p>
+          <p class="muted"><strong>Trade:</strong> ${p.trade || ""}</p>
+          <p class="muted"><strong>License:</strong> ${p.license_number || p.license || ""}</p>
+          <p class="muted"><strong>Insurance:</strong> ${p.insurance_company || ""} ${p.insurance_expiration || ""}</p>
+          <p class="muted"><strong>Location:</strong> ${p.location || p.address || ""}</p>
+          <p class="muted">${p.bio || ""}</p>
+          ${p.license_file_url ? `<p><a href="${p.license_file_url}" target="_blank">View License File</a></p>` : ""}
+          ${p.insurance_file_url ? `<p><a href="${p.insurance_file_url}" target="_blank">View Insurance File</a></p>` : ""}
+        </div>
+        <div class="actions">
+          <button class="approve" onclick="approve('${p.id}')">Approve + Go Live</button>
+          <button class="suspend" onclick="suspend('${p.id}')">Suspend</button>
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
+
+async function approve(id){
+  const payload = { is_approved: true, can_go_live: true, account_status: "active" };
+  const { error } = await client.from("profiles").update(payload).eq("id", id);
+  if (error) { alert(error.message); return; }
+  await client.from("contractors").update(payload).eq("id", id);
+  alert("Contractor approved and live.");
+  loadContractors();
+}
+
+async function suspend(id){
+  const payload = { account_status: "suspended", can_go_live: false };
+  const { error } = await client.from("profiles").update(payload).eq("id", id);
+  if (error) { alert(error.message); return; }
+  await client.from("contractors").update(payload).eq("id", id);
+  alert("Contractor suspended.");
+  loadContractors();
+}
+</script>
+</body>
+</html>
