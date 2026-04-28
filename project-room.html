@@ -3090,8 +3090,9 @@ body {
 <body>
 <div class="app-shell">
     <div class="topbar">
-      <div class="brand">
-        <div class="revamp-logo-mark">R</div>
+     <div class="brand">
+  <img src="/images/revamplex-logo.png" alt="Revamp LEX" class="main-logo">
+</div>
         <div class="brand-text">
           <strong>Revamp LEX</strong>
           <span>Contractor Workspace</span>
@@ -5669,6 +5670,26 @@ if (inviteBtnSafe) {
     setupCalendarTools();
   });
 })();
+  /* ===== REAL REVAMP LOGO ===== */
+
+.main-logo {
+  height: 42px;
+  width: auto;
+  display: block;
+}
+
+/* keep layout tight */
+.brand {
+  display: flex;
+  align-items: center;
+}
+
+/* mobile scaling */
+@media (max-width: 760px) {
+  .main-logo {
+    height: 34px;
+  }
+}
 </script>
 
 </body>
