@@ -65,6 +65,239 @@
   padding: 0 12px;
 }
 
+
+/* ===== SCROLLABLE MAP FOOTER ===== */
+.map-footer-section {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  padding: 46px 18px 22px;
+}
+
+.footer-cta {
+  max-width: 1180px;
+  margin: 0 auto 26px;
+  border-radius: 28px;
+  padding: 26px;
+  background:
+    radial-gradient(circle at top right, rgba(249,115,22,0.16), transparent 36%),
+    #0f172a;
+  color: #fff;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.18);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+}
+
+.footer-cta h2 {
+  margin: 0 0 8px;
+  font-size: clamp(1.35rem, 2vw, 2rem);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.footer-cta p {
+  margin: 0;
+  color: #cbd5e1;
+  line-height: 1.5;
+}
+
+.footer-cta-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.footer-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 900;
+  font-size: 0.92rem;
+}
+
+.footer-btn.primary {
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(249,115,22,0.25);
+}
+
+.footer-btn.secondary {
+  background: rgba(255,255,255,0.10);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.18);
+}
+
+.site-footer {
+  max-width: 1180px;
+  margin: 0 auto;
+  border-radius: 28px;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.footer-main {
+  display: grid;
+  grid-template-columns: 1.2fr repeat(3, minmax(160px, 1fr));
+  gap: 24px;
+  padding: 28px;
+}
+
+.footer-brand img {
+  width: 170px;
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.footer-brand strong {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.footer-brand p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+  font-size: 0.92rem;
+}
+
+.footer-col h4 {
+  margin: 0 0 12px;
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 900;
+}
+
+.footer-col a {
+  display: block;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.92rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.footer-col a:hover {
+  color: var(--brand-dark);
+}
+
+.social-links {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.social-links a {
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  border: 1px solid rgba(15,23,42,0.08);
+  color: var(--text);
+  font-size: 18px;
+  text-decoration: none;
+  font-weight: 900;
+}
+
+.social-links a:hover {
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  padding: 16px 28px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.footer-bottom a {
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.footer-bottom a:hover {
+  color: var(--brand-dark);
+}
+
+@media (max-width: 900px) {
+  #app {
+    height: 84vh;
+    min-height: 620px;
+  }
+
+  .footer-cta {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-cta-actions {
+    justify-content: flex-start;
+  }
+
+  .footer-main {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  #app {
+    height: 86vh;
+    min-height: 620px;
+  }
+
+  .map-footer-section {
+    padding: 28px 10px 16px;
+  }
+
+  .footer-cta {
+    padding: 20px;
+    border-radius: 22px;
+  }
+
+  .footer-cta-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .footer-btn {
+    width: 100%;
+  }
+
+  .site-footer {
+    border-radius: 22px;
+  }
+
+  .footer-main {
+    grid-template-columns: 1fr;
+    padding: 22px;
+  }
+
+  .footer-bottom {
+    padding: 14px 22px;
+    display: grid;
+  }
+}
+
 </style>
   <style>
     :root {
@@ -84,8 +317,9 @@
     html, body {
       margin: 0;
       width: 100%;
-      height: 100%;
-      overflow: visible;
+      min-height: 100%;
+      overflow-x: hidden;
+      overflow-y: auto;
       font-family: Inter, Arial, Helvetica, sans-serif;
       background: var(--bg);
       color: var(--text);
@@ -95,7 +329,8 @@
 #app {
   position: relative;
   width: 100%;
-  height: 100vh; /* 🔥 THIS FIXES EVERYTHING */
+  height: 82vh; /* leaves room to scroll to footer */
+  min-height: 640px;
   overflow: hidden;
 }
 
@@ -1249,6 +1484,65 @@
       </div>
     </div>
   </div>
+
+
+  <section class="map-footer-section">
+    <div class="footer-cta">
+      <div>
+        <h2>Find contractors. Compare projects. Build with confidence.</h2>
+        <p>Revamp LEX connects homeowners and contractors through a map-based project workspace built for estimates, bidding, scheduling, and communication.</p>
+      </div>
+      <div class="footer-cta-actions">
+        <a class="footer-btn primary" href="#" onclick="openWelcomeAuth('register'); return false;">Get Started</a>
+        <a class="footer-btn secondary" href="how-it-works.html">How it Works</a>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+      <div class="footer-main">
+        <div class="footer-brand">
+          <img src="revamplex-logo.png" alt="RevampLEX Logo" onerror="this.style.display='none'">
+          <strong>Revamp LEX</strong>
+          <p>Location • Estimation • eXecution. A smarter way for homeowners and contractors to connect and manage renovation projects.</p>
+          <div class="social-links" aria-label="Social media links">
+            <a href="https://www.facebook.com/" target="_blank" rel="noopener" aria-label="Facebook">f</a>
+            <a href="https://www.instagram.com/" target="_blank" rel="noopener" aria-label="Instagram">◎</a>
+            <a href="https://www.linkedin.com/" target="_blank" rel="noopener" aria-label="LinkedIn">in</a>
+            <a href="https://www.youtube.com/" target="_blank" rel="noopener" aria-label="YouTube">▶</a>
+            <a href="https://www.tiktok.com/" target="_blank" rel="noopener" aria-label="TikTok">♪</a>
+            <a href="https://x.com/" target="_blank" rel="noopener" aria-label="X">𝕏</a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="how-it-works.html">How it Works</a>
+          <a href="about.html">About Us</a>
+          <a href="contact.html">Contact Us</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <a href="terms.html">Terms of Use</a>
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="contractor-terms.html">Contractor Terms</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>For Users</h4>
+          <a href="#" onclick="openWelcomeAuth('register'); return false;">Create Account</a>
+          <a href="#" onclick="openWelcomeAuth('login'); return false;">Login</a>
+          <a href="dashboard.html">Dashboard</a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 Revamp LEX. All rights reserved.</span>
+        <span><a href="mailto:Revamplex@gmail.com">Revamplex@gmail.com</a></span>
+      </div>
+    </footer>
+  </section>
+
 
   <div class="modal" id="jobModal">
     <div class="modal-card">
