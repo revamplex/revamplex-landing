@@ -2415,6 +2415,329 @@ body {
   }
 }
 
+
+/* =========================================================
+   FINAL REVAMP PROJECT ROOM FIXES
+   - Menu sits below header normally, then floats after scroll
+   - One clean video control row
+   - Calendar/actions are mobile-safe
+   ========================================================= */
+
+html, body {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+.app-shell {
+  width: min(100%, 1220px) !important;
+  max-width: 1220px !important;
+  margin: 0 auto !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+}
+
+.topbar,
+.hero,
+.dashboard,
+.sidebar,
+.workspace,
+.contractor-tools,
+.workspace > section,
+.workspace > .panel,
+.contractor-tools > section,
+.contractor-tools > .panel,
+.panel {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.dashboard {
+  display: block !important;
+  grid-template-columns: none !important;
+  padding-top: 0 !important;
+  overflow: visible !important;
+}
+
+.workspace,
+.contractor-tools {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  overflow: visible !important;
+}
+
+/* Normal position: menu appears right after contractor workspace/project header */
+.sidebar {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+  z-index: 50 !important;
+  margin: 14px 0 16px !important;
+  padding: 12px 14px !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.12) !important;
+}
+
+/* Floating position: JavaScript adds this class after scroll */
+.sidebar.workspace-floating {
+  position: fixed !important;
+  top: 8px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: min(1220px, calc(100vw - 24px)) !important;
+  max-width: calc(100vw - 24px) !important;
+  z-index: 999999 !important;
+  margin: 0 !important;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.20) !important;
+}
+
+.workspace-menu-spacer {
+  display: none;
+  width: 100%;
+}
+
+.workspace-menu-spacer.active {
+  display: block;
+}
+
+.nav-title {
+  display: block !important;
+  margin: 0 0 8px !important;
+  padding: 0 !important;
+  font-size: 0.72rem !important;
+  line-height: 1 !important;
+  letter-spacing: 0.12em !important;
+  color: var(--muted) !important;
+  text-transform: uppercase !important;
+}
+
+.nav-list {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 2px 2px 6px !important;
+  margin: 0 !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: thin !important;
+}
+
+.nav-item {
+  flex: 0 0 auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: auto !important;
+  min-height: 38px !important;
+  white-space: nowrap !important;
+  padding: 10px 14px !important;
+  border-radius: 999px !important;
+  font-size: 0.86rem !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  background: #ffffff !important;
+  border: 1px solid var(--line) !important;
+  color: var(--text) !important;
+}
+
+.nav-item span:last-child {
+  display: none !important;
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.18), #ffffff) !important;
+  border-color: rgba(249, 115, 22, 0.38) !important;
+  color: var(--brand-dark) !important;
+}
+
+.video-call-frame {
+  background: #fff;
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: 0 8px 22px rgba(0,0,0,.10);
+  margin-bottom: 18px;
+}
+
+.video-call-box {
+  height: 520px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #0f172a;
+  display: grid;
+  place-items: center;
+  color: #fff;
+}
+
+.video-placeholder {
+  display: grid;
+  gap: 8px;
+  text-align: center;
+  padding: 18px;
+  color: rgba(255,255,255,0.85);
+}
+
+.video-placeholder strong {
+  font-size: 1.05rem;
+  color: #fff;
+}
+
+.video-controls .btn.is-active,
+#recordSessionBtn.is-active {
+  outline: 2px solid rgba(249,115,22,0.45);
+  box-shadow: 0 0 0 4px rgba(249,115,22,0.12) !important;
+}
+
+.hero,
+.panel {
+  scroll-margin-top: 118px !important;
+}
+
+@media (min-width: 1221px) {
+  body {
+    background:
+      linear-gradient(90deg,
+        #e2e8f0 0,
+        #e2e8f0 calc((100vw - 1220px) / 2),
+        transparent calc((100vw - 1220px) / 2),
+        transparent calc(100vw - ((100vw - 1220px) / 2)),
+        #e2e8f0 calc(100vw - ((100vw - 1220px) / 2)),
+        #e2e8f0 100%),
+      linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .app-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 10px !important;
+  }
+
+  .topbar,
+  .hero,
+  .dashboard,
+  .sidebar,
+  .workspace,
+  .contractor-tools,
+  .workspace > section,
+  .workspace > .panel,
+  .contractor-tools > section,
+  .contractor-tools > .panel,
+  .panel,
+  .side-summary,
+  .stat,
+  .summary-box,
+  .calendar-box,
+  .schedule-list,
+  .signature-box,
+  .proposal-preview-card,
+  .estimate-output-card,
+  .ai-chat-card,
+  .contractor-info-card,
+  .result-card,
+  .estimate-table-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .hero-grid,
+  .mini-stats,
+  .tool-grid,
+  .photo-strip,
+  .form-grid,
+  .contractor-info-grid,
+  .ai-chat-shell,
+  .ai-compose,
+  .calc-layout,
+  .estimate-summary,
+  .schedule-layout,
+  .signature-layout {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .hero,
+  .panel,
+  .sidebar,
+  .side-summary,
+  .summary-box,
+  .calendar-box,
+  .schedule-list,
+  .signature-box,
+  .proposal-preview-card,
+  .estimate-output-card,
+  .ai-chat-card,
+  .contractor-info-card {
+    padding: 14px !important;
+    border-radius: 18px !important;
+  }
+
+  .sidebar.workspace-floating {
+    top: 6px !important;
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+  }
+
+  .nav-title {
+    font-size: 0.66rem !important;
+    margin-bottom: 7px !important;
+  }
+
+  .nav-list {
+    gap: 7px !important;
+    padding-bottom: 5px !important;
+  }
+
+  .nav-item {
+    min-height: 34px !important;
+    padding: 9px 11px !important;
+    font-size: 0.8rem !important;
+  }
+
+  .video-call-box {
+    height: 360px !important;
+  }
+
+  .calendar-grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+  }
+
+  .cal-day,
+  .cal-date {
+    padding: 8px 3px !important;
+    font-size: 0.76rem !important;
+  }
+
+  .hero,
+  .panel {
+    scroll-margin-top: 105px !important;
+  }
+
+  table {
+    min-width: 720px !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -2499,7 +2822,7 @@ Back to Project Feed
               <h3>Appointment Scheduling Calendar</h3>
               <p>Set walkthroughs, install dates, inspections, and customer appointments without endless texting.</p>
             </div>
-            <button class="btn btn-primary">Send Appointment Invite</button>
+            <button class="btn btn-primary" id="sendAppointmentBtn" type="button">Send Appointment Invite</button>
           </div>
 
           <div class="schedule-layout">
@@ -2609,36 +2932,19 @@ Back to Project Feed
               <p>Use this area for live walkthroughs, screen-sharing plans, field notes, and private project communication.</p>
             </div>
             <div class="video-controls">
-              <button class="btn btn-primary">Start Video Call</button>
-              <button class="btn btn-soft">Share Screen</button>
-              <button class="btn btn-soft">Capture Photo</button>
-              <button class="btn btn-dark">Record Session</button>
+              <button class="btn btn-primary" id="startVideoCallBtn" type="button">Start Video Call</button>
+              <button class="btn btn-soft" id="shareScreenBtn" type="button">Share Screen</button>
+              <button class="btn btn-soft" id="capturePhotoBtn" type="button">Capture Photo</button>
+              <button class="btn btn-dark" id="recordSessionBtn" type="button">Record Session</button>
             </div>
           </div>
-<div style="background:white; border-radius:18px; padding:16px; box-shadow:0 8px 22px rgba(0,0,0,.12); margin-bottom:18px;">
-  <h2 style="margin-top:0;">Video Call</h2>
-
-  <button id="startVideoCallBtn" style="
-    width:100%;
-    height:48px;
-    border:0;
-    border-radius:14px;
-    background:#f97316;
-    color:white;
-    font-weight:900;
-    cursor:pointer;
-  ">
-    Start Video Call
-  </button>
-
-  <div id="videoCallBox" style="
-    display:none;
-    margin-top:14px;
-    height:520px;
-    border-radius:16px;
-    overflow:hidden;
-    background:#0f172a;
-  "></div>
+<div class="video-call-frame">
+  <div id="videoCallBox" class="video-call-box">
+    <div class="video-placeholder">
+      <strong>Video call area</strong>
+      <span>Click Start Video Call above to open the private meeting room.</span>
+    </div>
+  </div>
 </div>
 
             <div class="chat-box">
@@ -4518,7 +4824,7 @@ document.addEventListener('DOMContentLoaded', setupWorkspaceNav);
 </script>
   <script src="https://meet.jit.si/external_api.js"></script>
   <script>
-let jitsiApi = null;
+window.jitsiApi = window.jitsiApi || null;
 
 function getProjectRoomName() {
   const params = new URLSearchParams(window.location.search);
@@ -4529,29 +4835,7 @@ function getProjectRoomName() {
   return `revamplex-${jobId}-${contractorId}`.replace(/[^a-zA-Z0-9-_]/g, "");
 }
 
-document.getElementById("startVideoCallBtn").addEventListener("click", () => {
-  const box = document.getElementById("videoCallBox");
-  box.style.display = "block";
 
-  if (jitsiApi) return;
-
-  const roomName = getProjectRoomName();
-
-  jitsiApi = new JitsiMeetExternalAPI("meet.jit.si", {
-    roomName: roomName,
-    parentNode: box,
-    width: "100%",
-    height: "100%",
-    configOverwrite: {
-      startWithAudioMuted: true,
-      startWithVideoMuted: false
-    },
-    interfaceConfigOverwrite: {
-      SHOW_JITSI_WATERMARK: false,
-      SHOW_WATERMARK_FOR_GUESTS: false
-    }
-  });
-});
     const inviteBtnSafe = document.getElementById("inviteBtn") || document.getElementById("inviteContractorBtn");
 
 if (inviteBtnSafe) {
@@ -4574,5 +4858,244 @@ if (inviteBtnSafe) {
   });
 }
 </script>
+<input id="sessionPhotoCapture" type="file" accept="image/*" capture="environment" style="display:none;">
+
+<script>
+/* ---------- FINAL INTERACTION FIXES ---------- */
+(function(){
+  let workspaceMenuOriginalTop = null;
+  let workspaceMenuSpacer = null;
+  let isRecordingSession = false;
+
+  function setupFloatingWorkspaceMenu(){
+    const menu = document.querySelector('.sidebar');
+    if (!menu) return;
+
+    if (!workspaceMenuSpacer) {
+      workspaceMenuSpacer = document.createElement('div');
+      workspaceMenuSpacer.className = 'workspace-menu-spacer';
+      menu.parentNode.insertBefore(workspaceMenuSpacer, menu.nextSibling);
+    }
+
+    function measure(){
+      const wasFloating = menu.classList.contains('workspace-floating');
+      if (wasFloating) {
+        menu.classList.remove('workspace-floating');
+        workspaceMenuSpacer.classList.remove('active');
+        workspaceMenuSpacer.style.height = '0px';
+      }
+      workspaceMenuOriginalTop = menu.getBoundingClientRect().top + window.scrollY;
+      if (wasFloating) update();
+    }
+
+    function update(){
+      if (workspaceMenuOriginalTop === null) measure();
+      const shouldFloat = window.scrollY > workspaceMenuOriginalTop - 8;
+
+      if (shouldFloat) {
+        workspaceMenuSpacer.style.height = menu.offsetHeight + 'px';
+        workspaceMenuSpacer.classList.add('active');
+        menu.classList.add('workspace-floating');
+      } else {
+        menu.classList.remove('workspace-floating');
+        workspaceMenuSpacer.classList.remove('active');
+        workspaceMenuSpacer.style.height = '0px';
+      }
+    }
+
+    measure();
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', function(){
+      workspaceMenuOriginalTop = null;
+      measure();
+      update();
+    });
+  }
+
+  function startVideoCall(){
+    const box = document.getElementById('videoCallBox');
+    const btn = document.getElementById('startVideoCallBtn');
+    if (!box) return;
+
+    box.innerHTML = '';
+    box.style.display = 'block';
+
+    if (window.jitsiApi) {
+      if (btn) btn.textContent = 'Video Call Running';
+      return;
+    }
+
+    if (typeof JitsiMeetExternalAPI === 'undefined') {
+      box.innerHTML = '<div class="video-placeholder"><strong>Video library still loading.</strong><span>Wait a second and click Start Video Call again.</span></div>';
+      return;
+    }
+
+    const roomName = typeof getProjectRoomName === 'function' ? getProjectRoomName() : ('revamplex-' + Date.now());
+
+    window.window.jitsiApi = new JitsiMeetExternalAPI('meet.jit.si', {
+      roomName: roomName,
+      parentNode: box,
+      width: '100%',
+      height: '100%',
+      configOverwrite: {
+        startWithAudioMuted: true,
+        startWithVideoMuted: false
+      },
+      interfaceConfigOverwrite: {
+        SHOW_JITSI_WATERMARK: false,
+        SHOW_WATERMARK_FOR_GUESTS: false
+      }
+    });
+
+    if (btn) {
+      btn.textContent = 'Video Call Running';
+      btn.classList.add('is-active');
+    }
+  }
+
+  async function shareScreen(){
+    if (window.jitsiApi && typeof window.jitsiApi.executeCommand === 'function') {
+      try {
+        window.jitsiApi.executeCommand('toggleShareScreen');
+        return;
+      } catch (err) {
+        console.warn('Jitsi share screen command failed:', err);
+      }
+    }
+
+    if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+        alert('Screen share permission works. Start the video call first to share inside the meeting.');
+        stream.getTracks().forEach(track => track.stop());
+      } catch (err) {
+        console.warn('Screen share cancelled or failed:', err);
+      }
+    } else {
+      alert('Screen sharing is supported best on desktop Chrome/Edge over HTTPS.');
+    }
+  }
+
+  function capturePhoto(){
+    const input = document.getElementById('sessionPhotoCapture');
+    if (input) {
+      input.click();
+    } else {
+      alert('Photo capture input not found.');
+    }
+  }
+
+  function setupPhotoCaptureStatus(){
+    const input = document.getElementById('sessionPhotoCapture');
+    const status = document.getElementById('uploadStatus');
+    if (!input) return;
+
+    input.addEventListener('change', function(){
+      const file = input.files && input.files[0];
+      if (!file) return;
+      if (status) {
+        status.innerText = 'Captured photo ready: ' + file.name;
+      } else {
+        alert('Captured photo ready: ' + file.name);
+      }
+    });
+  }
+
+  function recordSession(){
+    const btn = document.getElementById('recordSessionBtn');
+    isRecordingSession = !isRecordingSession;
+
+    if (btn) {
+      btn.classList.toggle('is-active', isRecordingSession);
+      btn.textContent = isRecordingSession ? 'Recording Notes...' : 'Record Session';
+    }
+
+    const stamp = new Date().toLocaleString();
+    const note = isRecordingSession
+      ? 'Recording/session notes started at ' + stamp + '. Add notes from the walkthrough here.'
+      : 'Recording/session notes stopped at ' + stamp + '.';
+
+    const notes = document.getElementById('estimateNotes');
+    if (notes) {
+      notes.value = (notes.value.trim() + '\n\n' + note).trim();
+    }
+
+    if (window.jitsiApi && typeof window.jitsiApi.executeCommand === 'function' && isRecordingSession) {
+      try {
+        window.jitsiApi.executeCommand('startRecording', { mode: 'file' });
+      } catch (err) {
+        console.warn('Jitsi recording command may require account setup:', err);
+      }
+    }
+  }
+
+  function setupVideoButtons(){
+    const startBtn = document.getElementById('startVideoCallBtn');
+    const shareBtn = document.getElementById('shareScreenBtn');
+    const captureBtn = document.getElementById('capturePhotoBtn');
+    const recordBtn = document.getElementById('recordSessionBtn');
+
+    if (startBtn) startBtn.onclick = startVideoCall;
+    if (shareBtn) shareBtn.onclick = shareScreen;
+    if (captureBtn) captureBtn.onclick = capturePhoto;
+    if (recordBtn) recordBtn.onclick = recordSession;
+  }
+
+  function setupCalendarTools(){
+    const calendarDates = document.querySelectorAll('.cal-date');
+    const sendBtn = document.getElementById('sendAppointmentBtn');
+    let selectedDay = document.querySelector('.cal-date.active')?.textContent?.trim() || '14';
+
+    calendarDates.forEach(date => {
+      date.addEventListener('click', function(){
+        calendarDates.forEach(d => d.classList.remove('active'));
+        date.classList.add('active');
+        selectedDay = date.textContent.trim();
+      });
+    });
+
+    if (sendBtn) {
+      sendBtn.onclick = function(){
+        const title = prompt('Appointment title:', 'Site Walkthrough');
+        if (!title) return;
+
+        const time = prompt('Appointment time:', '10:00 AM');
+        if (!time) return;
+
+        const location = prompt('Location / note:', 'At property • Customer + Contractor') || 'At property';
+        const list = document.querySelector('#schedulePanel .schedule-list');
+        if (!list) return;
+
+        const item = document.createElement('div');
+        item.className = 'task-item';
+        item.innerHTML = '<strong>' + escapeText(title) + '</strong>' +
+          '<span>March ' + escapeText(selectedDay) + ', 2026 • ' + escapeText(time) + '</span>' +
+          '<span>' + escapeText(location) + '</span>';
+
+        list.appendChild(item);
+        alert('Appointment added to the schedule.');
+      };
+    }
+  }
+
+  function escapeText(value){
+    return String(value || '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    setupFloatingWorkspaceMenu();
+    setupVideoButtons();
+    setupPhotoCaptureStatus();
+    setupCalendarTools();
+  });
+})();
+</script>
+
 </body>
 </html>
