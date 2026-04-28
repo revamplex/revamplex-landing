@@ -1624,504 +1624,27 @@
     }
 
   
-/* ===== DESKTOP CENTERED UNIFORM LAYOUT ===== */
-body {
-  background:
-    linear-gradient(90deg, #e2e8f0 0, #e2e8f0 calc((100vw - 1220px) / 2), transparent calc((100vw - 1220px) / 2), transparent calc(100vw - ((100vw - 1220px) / 2)), #e2e8f0 calc(100vw - ((100vw - 1220px) / 2)), #e2e8f0 100%),
-    linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px);
-}
 
-.app-shell {
-  width: min(100%, 1220px);
-  max-width: 1220px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.hero,
-.dashboard,
-.workspace,
-.workspace > .panel,
-.contractor-tools,
-.contractor-tools > .panel {
+/* =========================================================
+   FINAL CLEAN OVERRIDE — LOGO + CENTERED LAYOUT + FLOATING MENU
+   ========================================================= */
+html, body {
   width: 100%;
   max-width: 100%;
-}
-
-.dashboard {
-  grid-template-columns: 245px minmax(0, 1fr);
-}
-
-.workspace {
-  min-width: 0;
-}
-
-.panel,
-.hero,
-.sidebar {
-  border: 1px solid rgba(226, 232, 240, 0.95);
-}
-
-.estimate-summary {
-  grid-template-columns: 1fr;
-}
-
-.summary-box {
-  width: 100%;
-}
-
-.ai-chat-shell,
-.calc-layout,
-.schedule-layout,
-.signature-layout {
-  grid-template-columns: 1fr;
-}
-
-.tool-grid,
-.photo-strip,
-.mini-stats {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.contractor-info-grid,
-.form-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.estimate-table-wrap {
-  width: 100%;
-}
-
-/* ===== MOBILE FULL WIDTH ===== */
-@media (max-width: 760px) {
-  body {
-    background: linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px);
-  }
-
-  .app-shell {
-    width: 100%;
-    max-width: none;
-    padding: 10px;
-  }
-
-  .hero,
-  .panel,
-  .sidebar {
-    border-radius: 18px;
-  }
-
-  .dashboard,
-  .hero-grid,
-  .workspace,
-  .contractor-tools,
-  .ai-chat-shell,
-  .calc-layout,
-  .estimate-summary,
-  .schedule-layout,
-  .signature-layout,
-  .contractor-info-grid,
-  .form-grid,
-  .tool-grid,
-  .photo-strip,
-  .mini-stats {
-    grid-template-columns: 1fr !important;
-  }
-
-  .panel {
-    padding: 14px;
-  }
-
-  .sidebar {
-    padding: 12px;
-  }
-
-  .topbar,
-  .panel-header,
-  .estimate-toolbar,
-  .proposal-actions,
-  .video-controls {
-    gap: 8px;
-  }
-
-  .btn {
-    padding: 10px 12px;
-    border-radius: 12px;
-  }
-}
-
-@media (min-width: 761px) and (max-width: 1300px) {
-  body {
-    background: linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px);
-  }
-
-  .app-shell {
-    width: 100%;
-    max-width: 1180px;
-  }
-}
-
-
-/* ===== FINAL MOBILE WIDTH FIX ===== */
-@media (max-width: 760px) {
-  html,
-  body {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: hidden;
-  }
-
-  body {
-    margin: 0;
-    background: linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px) !important;
-  }
-
-  .app-shell {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 10px !important;
-  }
-
-  .topbar,
-  .brand,
-  .top-actions,
-  .hero,
-  .hero-grid,
-  .project-title,
-  .mini-stats,
-  .stat,
-  .side-summary,
-  .dashboard,
-  .sidebar,
-  .workspace,
-  .workspace > section,
-  .workspace > .panel,
-  .contractor-tools,
-  .contractor-tools > section,
-  .contractor-tools > .panel,
-  .panel,
-  .panel-header,
-  .video-controls,
-  .chat-box,
-  .ai-chat-card,
-  .ai-chat-shell,
-  .ai-chat-window,
-  .ai-compose,
-  .ai-side-tools,
-  .contractor-info-card,
-  .contractor-info-grid,
-  .estimate-output-card,
-  .proposal-preview-card,
-  .proposal-actions,
-  .estimate-table-wrap,
-  .estimate-summary,
-  .summary-box,
-  .calc-layout,
-  .form-grid,
-  .result-card,
-  .schedule-layout,
-  .calendar-box,
-  .schedule-list,
-  .signature-layout,
-  .signature-box,
-  .photo-strip,
-  .photo-card {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-
-  .hero-grid,
-  .dashboard,
-  .workspace,
-  .contractor-tools,
-  .mini-stats,
-  .tool-grid,
-  .photo-strip,
-  .form-grid,
-  .contractor-info-grid,
-  .ai-chat-shell,
-  .ai-compose,
-  .calc-layout,
-  .estimate-summary,
-  .schedule-layout,
-  .signature-layout {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-  }
-
-  .topbar,
-  .brand,
-  .top-actions,
-  .panel-header,
-  .estimate-toolbar,
-  .proposal-actions,
-  .video-controls,
-  .mic-row {
-    display: flex !important;
-    flex-wrap: wrap !important;
-  }
-
-  .hero,
-  .sidebar,
-  .panel,
-  .side-summary,
-  .calendar-box,
-  .schedule-list,
-  .summary-box,
-  .proposal-preview-card,
-  .estimate-output-card,
-  .ai-chat-card,
-  .contractor-info-card {
-    padding: 14px !important;
-    border-radius: 18px !important;
-    box-sizing: border-box !important;
-  }
-
-  .workspace {
-    gap: 12px !important;
-  }
-
-  .sidebar {
-    position: static !important;
-  }
-
-  .nav-list {
-    display: flex !important;
-    overflow-x: auto !important;
-    gap: 8px !important;
-    padding-bottom: 4px !important;
-  }
-
-  .nav-item {
-    flex: 0 0 auto !important;
-    white-space: nowrap !important;
-    padding: 10px 12px !important;
-  }
-
-  .calendar-grid {
-    width: 100% !important;
-    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
-    gap: 5px !important;
-  }
-
-  .cal-day,
-  .cal-date {
-    padding: 8px 4px !important;
-    font-size: 0.78rem !important;
-  }
-
-  .btn,
-  button {
-    max-width: 100% !important;
-  }
-
-  .panel-header h3,
-  .schedule-list h4,
-  .calendar-box h4 {
-    font-size: 1.15rem !important;
-  }
-
-  .panel-header p {
-    font-size: 0.94rem !important;
-  }
-
-  table {
-    min-width: 720px !important;
-  }
-}
-
-
-
-/* =========================================================
-   TRUE FIXED FLOATING WORKSPACE MENU
-   This does NOT rely on position: sticky.
-   It stays visible on desktop + mobile.
-   ========================================================= */
-
-.dashboard {
-  display: block !important;
-  grid-template-columns: none !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  padding-top: 92px !important; /* creates room for fixed menu */
-}
-
-.workspace,
-.contractor-tools {
-  width: 100% !important;
-  max-width: 100% !important;
-}
-
-/* Fixed floating menu */
-.sidebar {
-  position: fixed !important;
-  top: 86px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-
-  width: min(1180px, calc(100vw - 36px)) !important;
-  max-width: calc(100vw - 36px) !important;
-
-  z-index: 999999 !important;
-
-  display: block !important;
-  margin: 0 !important;
-  padding: 10px 12px !important;
-
-  background: rgba(255, 255, 255, 0.96) !important;
-  backdrop-filter: blur(18px) !important;
-  -webkit-backdrop-filter: blur(18px) !important;
-
-  border: 1px solid rgba(226, 232, 240, 0.95) !important;
-  border-radius: 20px !important;
-  box-shadow: 0 16px 38px rgba(15, 23, 42, 0.18) !important;
-}
-
-/* Compact title */
-.nav-title {
-  display: block !important;
-  margin: 0 0 7px !important;
-  padding: 0 !important;
-
-  font-size: 0.7rem !important;
-  line-height: 1 !important;
-  letter-spacing: 0.12em !important;
-  color: #64748b !important;
-  text-transform: uppercase !important;
-}
-
-/* Horizontal scroll menu */
-.nav-list {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-  align-items: center !important;
-  gap: 8px !important;
-
-  width: 100% !important;
-  max-width: 100% !important;
-
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-
-  padding: 2px 2px 5px !important;
-  margin: 0 !important;
-
-  -webkit-overflow-scrolling: touch !important;
-  scrollbar-width: thin !important;
-}
-
-.nav-list::-webkit-scrollbar {
-  height: 5px !important;
-}
-
-.nav-list::-webkit-scrollbar-thumb {
-  background: rgba(249, 115, 22, 0.35) !important;
-  border-radius: 999px !important;
-}
-
-.nav-item {
-  flex: 0 0 auto !important;
-
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-
-  min-width: auto !important;
-  min-height: 36px !important;
-
-  padding: 9px 13px !important;
-
-  white-space: nowrap !important;
-  border-radius: 999px !important;
-
-  font-size: 0.86rem !important;
-  font-weight: 800 !important;
-  line-height: 1 !important;
-
-  background: #ffffff !important;
-  border: 1px solid var(--line) !important;
-  color: var(--text) !important;
-}
-
-.nav-item span:last-child {
-  display: none !important;
-}
-
-.nav-item.active {
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.18), #ffffff) !important;
-  border-color: rgba(249, 115, 22, 0.38) !important;
-  color: var(--brand-dark) !important;
-}
-
-/* Desktop keeps header normal */
-.topbar {
-  position: relative !important;
-  z-index: 10 !important;
-}
-
-/* Mobile fixed version */
-@media (max-width: 760px) {
-  .dashboard {
-    padding-top: 82px !important;
-  }
-
-  .sidebar {
-    top: 72px !important;
-    width: calc(100vw - 20px) !important;
-    max-width: calc(100vw - 20px) !important;
-
-    padding: 9px 9px !important;
-    border-radius: 16px !important;
-  }
-
-  .nav-title {
-    font-size: 0.66rem !important;
-    margin-bottom: 6px !important;
-  }
-
-  .nav-list {
-    gap: 7px !important;
-    padding-bottom: 4px !important;
-  }
-
-  .nav-item {
-    min-height: 34px !important;
-    padding: 8px 10px !important;
-    font-size: 0.8rem !important;
-  }
-}
-
-/* Very small phones */
-@media (max-width: 420px) {
-  .sidebar {
-    top: 66px !important;
-  }
-
-  .dashboard {
-    padding-top: 80px !important;
-  }
-}
-
-
-/* =========================================================
-   REVAMP RESCUE FIX - CLEAN STRUCTURE + STICKY WORKSPACE MENU
-   This final block intentionally overrides older conflicting .sidebar rules.
-   ========================================================= */
-
-html,
-body {
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 !important;
-  overflow-x: hidden !important;
+  margin: 0;
+  overflow-x: hidden;
 }
 
 body {
-  background: linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px) !important;
+  background:
+    linear-gradient(90deg,
+      #e2e8f0 0,
+      #e2e8f0 calc((100vw - 1220px) / 2),
+      transparent calc((100vw - 1220px) / 2),
+      transparent calc(100vw - ((100vw - 1220px) / 2)),
+      #e2e8f0 calc(100vw - ((100vw - 1220px) / 2)),
+      #e2e8f0 100%),
+    linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px) !important;
 }
 
 .app-shell {
@@ -2149,11 +1672,55 @@ body {
   box-sizing: border-box !important;
 }
 
+.topbar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  margin-bottom: 16px !important;
+  padding: 14px 16px !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08) !important;
+  position: relative !important;
+  z-index: 100 !important;
+}
+
+.brand {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  min-width: 0 !important;
+}
+
+.logo-wrap {
+  display: flex !important;
+  align-items: center !important;
+  width: 150px !important;
+  max-width: 150px !important;
+  flex: 0 0 150px !important;
+}
+
+.main-logo {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 44px !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+.top-actions {
+  display: flex !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+  justify-content: flex-end !important;
+}
+
 .dashboard {
   display: block !important;
   grid-template-columns: none !important;
   padding-top: 0 !important;
-  gap: 0 !important;
   overflow: visible !important;
 }
 
@@ -2165,100 +1732,6 @@ body {
   overflow: visible !important;
 }
 
-/* menu appears AFTER the contractor workspace header/hero, then sticks while scrolling */
-.sidebar {
-  position: sticky !important;
-  top: 10px !important;
-  left: auto !important;
-  transform: none !important;
-  z-index: 99999 !important;
-
-  display: block !important;
-  width: 100% !important;
-  max-width: 100% !important;
-
-  margin: 14px 0 16px !important;
-  padding: 12px 14px !important;
-
-  background: rgba(255, 255, 255, 0.96) !important;
-  backdrop-filter: blur(18px) !important;
-  -webkit-backdrop-filter: blur(18px) !important;
-
-  border: 1px solid rgba(226, 232, 240, 0.95) !important;
-  border-radius: 20px !important;
-  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.14) !important;
-}
-
-.nav-title {
-  display: block !important;
-  margin: 0 0 8px !important;
-  padding: 0 !important;
-  font-size: 0.72rem !important;
-  line-height: 1 !important;
-  letter-spacing: 0.12em !important;
-  color: var(--muted) !important;
-  text-transform: uppercase !important;
-}
-
-.nav-list {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-  align-items: center !important;
-  gap: 8px !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  padding: 2px 2px 6px !important;
-  margin: 0 !important;
-  -webkit-overflow-scrolling: touch !important;
-  scrollbar-width: thin !important;
-}
-
-.nav-list::-webkit-scrollbar {
-  height: 5px !important;
-}
-
-.nav-list::-webkit-scrollbar-thumb {
-  background: rgba(249, 115, 22, 0.35) !important;
-  border-radius: 999px !important;
-}
-
-.nav-item {
-  flex: 0 0 auto !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-width: auto !important;
-  min-height: 38px !important;
-  white-space: nowrap !important;
-  padding: 10px 14px !important;
-  border-radius: 999px !important;
-  font-size: 0.86rem !important;
-  font-weight: 800 !important;
-  line-height: 1 !important;
-  background: #ffffff !important;
-  border: 1px solid var(--line) !important;
-  color: var(--text) !important;
-}
-
-.nav-item span:last-child {
-  display: none !important;
-}
-
-.nav-item.active {
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.18), #ffffff) !important;
-  border-color: rgba(249, 115, 22, 0.38) !important;
-  color: var(--brand-dark) !important;
-}
-
-.hero,
-.panel {
-  scroll-margin-top: 90px !important;
-}
-
-/* keep all sections centered and equal on desktop */
 .hero-grid,
 .ai-chat-shell,
 .calc-layout,
@@ -2268,210 +1741,6 @@ body {
   grid-template-columns: 1fr !important;
 }
 
-.estimate-summary {
-  grid-template-columns: 1fr !important;
-}
-
-@media (min-width: 1221px) {
-  body {
-    background:
-      linear-gradient(90deg,
-        #e2e8f0 0,
-        #e2e8f0 calc((100vw - 1220px) / 2),
-        transparent calc((100vw - 1220px) / 2),
-        transparent calc(100vw - ((100vw - 1220px) / 2)),
-        #e2e8f0 calc(100vw - ((100vw - 1220px) / 2)),
-        #e2e8f0 100%),
-      linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px) !important;
-  }
-}
-
-/* mobile full width */
-@media (max-width: 760px) {
-  .app-shell {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 10px !important;
-  }
-
-  .topbar,
-  .hero,
-  .dashboard,
-  .sidebar,
-  .workspace,
-  .contractor-tools,
-  .workspace > section,
-  .workspace > .panel,
-  .contractor-tools > section,
-  .contractor-tools > .panel,
-  .panel,
-  .side-summary,
-  .stat,
-  .summary-box,
-  .calendar-box,
-  .schedule-list,
-  .signature-box,
-  .proposal-preview-card,
-  .estimate-output-card,
-  .ai-chat-card,
-  .contractor-info-card,
-  .result-card,
-  .estimate-table-wrap {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    box-sizing: border-box !important;
-  }
-
-  .dashboard {
-    display: block !important;
-    padding-top: 0 !important;
-  }
-
-  .workspace,
-  .contractor-tools {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 12px !important;
-  }
-
-  .hero-grid,
-  .mini-stats,
-  .tool-grid,
-  .photo-strip,
-  .form-grid,
-  .contractor-info-grid,
-  .ai-chat-shell,
-  .ai-compose,
-  .calc-layout,
-  .estimate-summary,
-  .schedule-layout,
-  .signature-layout {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-  }
-
-  .hero,
-  .panel,
-  .sidebar,
-  .side-summary,
-  .summary-box,
-  .calendar-box,
-  .schedule-list,
-  .signature-box,
-  .proposal-preview-card,
-  .estimate-output-card,
-  .ai-chat-card,
-  .contractor-info-card {
-    padding: 14px !important;
-    border-radius: 18px !important;
-  }
-
-  .sidebar {
-    position: sticky !important;
-    top: 6px !important;
-    z-index: 999999 !important;
-    margin: 10px 0 12px !important;
-    padding: 10px !important;
-    border-radius: 16px !important;
-  }
-
-  .nav-title {
-    font-size: 0.66rem !important;
-    margin-bottom: 7px !important;
-  }
-
-  .nav-list {
-    gap: 7px !important;
-    padding-bottom: 5px !important;
-  }
-
-  .nav-item {
-    min-height: 34px !important;
-    padding: 9px 11px !important;
-    font-size: 0.8rem !important;
-  }
-
-  .calendar-grid {
-    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
-    gap: 5px !important;
-  }
-
-  .cal-day,
-  .cal-date {
-    padding: 8px 3px !important;
-    font-size: 0.76rem !important;
-  }
-
-  .hero,
-  .panel {
-    scroll-margin-top: 80px !important;
-  }
-
-  table {
-    min-width: 720px !important;
-  }
-}
-
-
-/* =========================================================
-   FINAL REVAMP PROJECT ROOM FIXES
-   - Menu sits below header normally, then floats after scroll
-   - One clean video control row
-   - Calendar/actions are mobile-safe
-   ========================================================= */
-
-html, body {
-  width: 100% !important;
-  max-width: 100% !important;
-  overflow-x: hidden !important;
-}
-
-.app-shell {
-  width: min(100%, 1220px) !important;
-  max-width: 1220px !important;
-  margin: 0 auto !important;
-  padding: 20px !important;
-  box-sizing: border-box !important;
-}
-
-.topbar,
-.hero,
-.dashboard,
-.sidebar,
-.workspace,
-.contractor-tools,
-.workspace > section,
-.workspace > .panel,
-.contractor-tools > section,
-.contractor-tools > .panel,
-.panel {
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  box-sizing: border-box !important;
-}
-
-.dashboard {
-  display: block !important;
-  grid-template-columns: none !important;
-  padding-top: 0 !important;
-  overflow: visible !important;
-}
-
-.workspace,
-.contractor-tools {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 16px !important;
-  overflow: visible !important;
-}
-
-/* Normal position: menu appears right after contractor workspace/project header */
 .sidebar {
   position: relative !important;
   top: auto !important;
@@ -2488,7 +1757,6 @@ html, body {
   box-shadow: 0 14px 34px rgba(15, 23, 42, 0.12) !important;
 }
 
-/* Floating position: JavaScript adds this class after scroll */
 .sidebar.workspace-floating {
   position: fixed !important;
   top: 8px !important;
@@ -2565,183 +1833,11 @@ html, body {
   color: var(--brand-dark) !important;
 }
 
-.video-call-frame {
-  background: #fff;
-  border-radius: 18px;
-  padding: 14px;
-  box-shadow: 0 8px 22px rgba(0,0,0,.10);
-  margin-bottom: 18px;
-}
-
-.video-call-box {
-  height: 520px;
-  border-radius: 16px;
-  overflow: hidden;
-  background: #0f172a;
-  display: grid;
-  place-items: center;
-  color: #fff;
-}
-
-.video-placeholder {
-  display: grid;
-  gap: 8px;
-  text-align: center;
-  padding: 18px;
-  color: rgba(255,255,255,0.85);
-}
-
-.video-placeholder strong {
-  font-size: 1.05rem;
-  color: #fff;
-}
-
-.video-controls .btn.is-active,
-#recordSessionBtn.is-active {
-  outline: 2px solid rgba(249,115,22,0.45);
-  box-shadow: 0 0 0 4px rgba(249,115,22,0.12) !important;
-}
-
 .hero,
 .panel {
   scroll-margin-top: 118px !important;
 }
 
-@media (min-width: 1221px) {
-  body {
-    background:
-      linear-gradient(90deg,
-        #e2e8f0 0,
-        #e2e8f0 calc((100vw - 1220px) / 2),
-        transparent calc((100vw - 1220px) / 2),
-        transparent calc(100vw - ((100vw - 1220px) / 2)),
-        #e2e8f0 calc(100vw - ((100vw - 1220px) / 2)),
-        #e2e8f0 100%),
-      linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px) !important;
-  }
-}
-
-@media (max-width: 760px) {
-  .app-shell {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 10px !important;
-  }
-
-  .topbar,
-  .hero,
-  .dashboard,
-  .sidebar,
-  .workspace,
-  .contractor-tools,
-  .workspace > section,
-  .workspace > .panel,
-  .contractor-tools > section,
-  .contractor-tools > .panel,
-  .panel,
-  .side-summary,
-  .stat,
-  .summary-box,
-  .calendar-box,
-  .schedule-list,
-  .signature-box,
-  .proposal-preview-card,
-  .estimate-output-card,
-  .ai-chat-card,
-  .contractor-info-card,
-  .result-card,
-  .estimate-table-wrap {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    box-sizing: border-box !important;
-  }
-
-  .hero-grid,
-  .mini-stats,
-  .tool-grid,
-  .photo-strip,
-  .form-grid,
-  .contractor-info-grid,
-  .ai-chat-shell,
-  .ai-compose,
-  .calc-layout,
-  .estimate-summary,
-  .schedule-layout,
-  .signature-layout {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-  }
-
-  .hero,
-  .panel,
-  .sidebar,
-  .side-summary,
-  .summary-box,
-  .calendar-box,
-  .schedule-list,
-  .signature-box,
-  .proposal-preview-card,
-  .estimate-output-card,
-  .ai-chat-card,
-  .contractor-info-card {
-    padding: 14px !important;
-    border-radius: 18px !important;
-  }
-
-  .sidebar.workspace-floating {
-    top: 6px !important;
-    width: calc(100vw - 20px) !important;
-    max-width: calc(100vw - 20px) !important;
-  }
-
-  .nav-title {
-    font-size: 0.66rem !important;
-    margin-bottom: 7px !important;
-  }
-
-  .nav-list {
-    gap: 7px !important;
-    padding-bottom: 5px !important;
-  }
-
-  .nav-item {
-    min-height: 34px !important;
-    padding: 9px 11px !important;
-    font-size: 0.8rem !important;
-  }
-
-  .video-call-box {
-    height: 360px !important;
-  }
-
-  .calendar-grid {
-    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
-    gap: 5px !important;
-  }
-
-  .cal-day,
-  .cal-date {
-    padding: 8px 3px !important;
-    font-size: 0.76rem !important;
-  }
-
-  .hero,
-  .panel {
-    scroll-margin-top: 105px !important;
-  }
-
-  table {
-    min-width: 720px !important;
-  }
-}
-
-
-/* ===== CURRENT INTERACTIVE CALENDAR ===== */
 .calendar-toolbar {
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -2750,13 +1846,7 @@ html, body {
   margin-bottom: 12px;
 }
 
-.calendar-title-wrap {
-  text-align: center;
-}
-
-.calendar-title-wrap h4 {
-  font-size: 1.08rem;
-}
+.calendar-title-wrap { text-align: center; }
 
 .calendar-today-label {
   color: var(--muted);
@@ -2815,20 +1905,6 @@ html, body {
   margin-bottom: 10px;
 }
 
-.selected-date-box span {
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  display: block;
-  margin-bottom: 4px;
-}
-
-.selected-date-box strong {
-  font-size: 1rem;
-}
-
 .appointment-empty {
   color: var(--muted);
   border: 1px dashed var(--line);
@@ -2838,197 +1914,14 @@ html, body {
   background: #fff;
 }
 
-.task-item .appointment-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.task-item .appointment-actions button {
-  padding: 8px 10px;
-  font-size: 0.8rem;
-}
-
-@media (max-width: 760px) {
-  .calendar-jump-row {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .calendar-jump-row .btn {
-    grid-column: 1 / -1;
-    width: 100%;
-  }
-
-  .calendar-nav-btn {
-    width: 38px;
-    height: 38px;
-  }
-}
-
-
-/* ===== SAFE REVAMP TOPBAR + CENTERED WIDTH FIX ===== */
-body {
-  background:
-    linear-gradient(90deg,
-      #e2e8f0 0,
-      #e2e8f0 calc((100vw - 1220px) / 2),
-      transparent calc((100vw - 1220px) / 2),
-      transparent calc(100vw - ((100vw - 1220px) / 2)),
-      #e2e8f0 calc(100vw - ((100vw - 1220px) / 2)),
-      #e2e8f0 100%),
-    linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px) !important;
-}
-
-.app-shell {
-  width: min(100%, 1220px) !important;
-  max-width: 1220px !important;
-  margin: 0 auto !important;
-  padding: 20px !important;
-  box-sizing: border-box !important;
-}
-
-.topbar,
-.hero,
-.dashboard,
-.sidebar,
-.workspace,
-.workspace > section,
-.workspace > .panel,
-.contractor-tools,
-.contractor-tools > section,
-.contractor-tools > .panel,
-.panel {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-.topbar {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 14px !important;
-  margin-bottom: 16px !important;
-  padding: 14px 16px !important;
-
-  background: rgba(255, 255, 255, 0.96) !important;
-  border: 1px solid rgba(226, 232, 240, 0.95) !important;
-  border-radius: 22px !important;
-  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08) !important;
-
-  position: relative !important;
-  top: auto !important;
-  z-index: 50 !important;
-}
-
-.brand {
-  display: flex !important;
-  align-items: center !important;
-  gap: 12px !important;
-  min-width: 0 !important;
-}
-
-.revamp-logo-mark {
-  width: 42px !important;
-  height: 42px !important;
-  border-radius: 14px !important;
-  background: linear-gradient(135deg, var(--brand), var(--brand-dark)) !important;
-  color: white !important;
-  display: grid !important;
-  place-items: center !important;
-  font-weight: 900 !important;
-  font-size: 1.15rem !important;
-  box-shadow: 0 10px 24px rgba(249,115,22,0.24) !important;
-  flex: 0 0 42px !important;
-}
-
-.brand-text {
-  display: flex !important;
-  flex-direction: column !important;
-  line-height: 1.05 !important;
-}
-
-.brand-text strong {
-  font-size: 1rem !important;
-  font-weight: 900 !important;
-  color: var(--text) !important;
-}
-
-.brand-text span {
-  margin-top: 4px !important;
-  font-size: 0.78rem !important;
-  color: var(--muted) !important;
-  font-weight: 700 !important;
-}
-
-.top-actions {
-  display: flex !important;
-  gap: 10px !important;
-  flex-wrap: wrap !important;
-  justify-content: flex-end !important;
-}
-
-.hero {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  border-radius: 26px !important;
-}
-
-.hero-grid {
-  grid-template-columns: 1fr !important;
-}
-
-.dashboard {
-  display: block !important;
-  grid-template-columns: none !important;
-  padding-top: 0 !important;
-}
-
-.workspace,
-.contractor-tools {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 16px !important;
-}
-
-/* Workspace menu: stays under the project header, then sticks while scrolling */
-.sidebar {
-  position: sticky !important;
-  top: 10px !important;
-  left: auto !important;
-  transform: none !important;
-  z-index: 9999 !important;
-
-  margin: 14px 0 16px !important;
-  padding: 12px 14px !important;
-  background: rgba(255,255,255,0.96) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border: 1px solid rgba(226,232,240,0.95) !important;
-  border-radius: 20px !important;
-  box-shadow: 0 14px 32px rgba(15,23,42,0.12) !important;
-}
-
-.nav-list {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-  gap: 8px !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  padding: 2px 2px 6px !important;
-  -webkit-overflow-scrolling: touch !important;
-}
-
-.nav-item {
-  flex: 0 0 auto !important;
-  white-space: nowrap !important;
-  border-radius: 999px !important;
-  padding: 10px 14px !important;
-}
-
-.nav-item span:last-child {
-  display: none !important;
+.video-call-box {
+  height: 520px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #0f172a;
+  display: grid;
+  place-items: center;
+  color: #fff;
 }
 
 @media (max-width: 760px) {
@@ -3039,8 +1932,8 @@ body {
   .app-shell {
     width: 100% !important;
     max-width: 100% !important;
-    padding: 10px !important;
     margin: 0 !important;
+    padding: 10px !important;
   }
 
   .topbar {
@@ -3049,19 +1942,10 @@ body {
     gap: 10px !important;
   }
 
-  .revamp-logo-mark {
-    width: 36px !important;
-    height: 36px !important;
-    border-radius: 12px !important;
-    flex-basis: 36px !important;
-  }
-
-  .brand-text strong {
-    font-size: 0.92rem !important;
-  }
-
-  .brand-text span {
-    font-size: 0.7rem !important;
+  .logo-wrap {
+    width: 130px !important;
+    max-width: 130px !important;
+    flex-basis: 130px !important;
   }
 
   .top-actions {
@@ -3078,34 +1962,83 @@ body {
   .hero,
   .panel,
   .sidebar {
+    padding: 14px !important;
     border-radius: 18px !important;
   }
 
-  .sidebar {
+  .hero-grid,
+  .mini-stats,
+  .tool-grid,
+  .photo-strip,
+  .form-grid,
+  .contractor-info-grid,
+  .ai-chat-shell,
+  .ai-compose,
+  .calc-layout,
+  .estimate-summary,
+  .schedule-layout,
+  .signature-layout {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .sidebar.workspace-floating {
     top: 6px !important;
-    margin: 10px 0 12px !important;
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+  }
+
+  .nav-title {
+    font-size: 0.66rem !important;
+    margin-bottom: 7px !important;
+  }
+
+  .nav-item {
+    min-height: 34px !important;
+    padding: 9px 11px !important;
+    font-size: 0.8rem !important;
+  }
+
+  .calendar-jump-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .calendar-jump-row .btn {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .calendar-grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+  }
+
+  .cal-day,
+  .cal-date {
+    padding: 8px 3px !important;
+    font-size: 0.76rem !important;
+  }
+
+  .video-call-box {
+    height: 360px !important;
+  }
+
+  table {
+    min-width: 720px !important;
   }
 }
-.floating-menu {
-  position: fixed !important;
-  top: 80px;
-  left: 50%;
-  transform: translateX(-50%);
 
-  width: min(1180px, calc(100vw - 20px));
-  z-index: 999999;
-
-  box-shadow: 0 16px 40px rgba(0,0,0,0.15);
-}
 </style>
 </head>
 <body>
 <div class="app-shell">
     <div class="topbar">
-     <div class="brand">
-  <div class="logo-wrap">
-  <img src="/images/revamplex-logo.png" class="main-logo">
-</div>
+      <div class="brand">
+        <div class="logo-wrap">
+          <img src="/images/revamplex-logo.png" alt="Revamp LEX" class="main-logo">
+        </div>
+      </div>
 
       <div class="top-actions">
         <button id="backToFeed" class="btn btn-soft">Back to Project Feed</button>
@@ -3489,7 +2422,7 @@ body {
             <div class="ai-chat-shell">
               <div>
                 <div class="ai-chat-window" id="aiChatWindow">
-                  <div class="ai-msg assistant">Tell me the job details and I’ll build a professional estimate. Example: “Bathroom remodel, 8x10, demo tile, install new floor tile, tile shower walls, new vanity, toilet, fixtures, paint.”</div>
+                  <div class="ai-msg assistant">Tell me the job details and I'll build a professional estimate. Example: "Bathroom remodel, 8x10, demo tile, install new floor tile, tile shower walls, new vanity, toilet, fixtures, paint."</div>
                 </div>
 
                 <div class="ai-compose">
@@ -3497,7 +2430,7 @@ body {
                   <button class="btn btn-primary" id="aiSendBtn" type="button" onclick="sendAIMessage(false)">Send</button>
                 </div>
                 <div class="mic-row">
-                  <button id="micDictateBtn" class="btn btn-soft" type="button" onclick="toggleDictation()">🎙 Dictate</button>
+                  <button id="micDictateBtn" class="btn btn-soft" type="button" onclick="toggleDictation()"> Dictate</button>
                   <span id="micStatus"></span>
                 </div>
               </div>
@@ -4680,7 +3613,7 @@ function getFallbackJobPrompt(){
     "- Timeline",
     "- Exclusions / notes",
     "- Suggested payment schedule"
-  ].join("\n");
+  ].join("");
 }
 
 
@@ -4694,22 +3627,22 @@ function escapeHTML(str){
 function formatAIText(text){
   let safe = escapeHTML(text);
 
-  safe = safe.replace(/^#{1,6}\s*(.+)$/gm, '<span class="ai-heading">$1</span>');
+  safe = safe.replace(/^#{1,6}*(.+)$/gm, '<span class="ai-heading">$1</span>');
   safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
-  const lines = safe.split("\n");
+  const lines = safe.split("");
   let html = "";
   let inList = false;
 
   lines.forEach(line => {
     const trimmed = line.trim();
 
-    if (/^[-•]\s+/.test(trimmed)) {
+    if (/^[-•]+/.test(trimmed)) {
       if (!inList) {
         html += "<ul>";
         inList = true;
       }
-      html += "<li>" + trimmed.replace(/^[-•]\s+/, "") + "</li>";
+      html += "<li>" + trimmed.replace(/^[-•]+/, "") + "</li>";
     } else {
       if (inList) {
         html += "</ul>";
@@ -4802,7 +3735,7 @@ async function sendAIMessage(forceEstimatePrompt=false){
       "",
       "Conversation:",
       ...aiConversation.map(m => (m.role === "user" ? "Contractor: " : "AI: ") + m.content)
-    ].join("\n");
+    ].join("");
 
     const res = await fetch("/api/generate-estimate", {
       method: "POST",
@@ -4966,7 +3899,7 @@ function buildProposalText(){
 
   const lineItems = rows.map((row, index) => {
     return `${index + 1}. ${row.item} — Qty: ${row.qty} ${row.unit} | Material: $${row.unitCost} | Labor: $${row.labor} | Total: ${row.total}`;
-  }).join("\n");
+  }).join("");
 
   return [
     "REVAMP PROJECT ROOM PROPOSAL",
@@ -5000,7 +3933,7 @@ function buildProposalText(){
     "This proposal is subject to final contractor review, customer approval, signed agreement, and any change orders required after field verification.",
     "",
     "Generated by Revamp Project Room"
-  ].join("\n");
+  ].join("");
 }
 
 function generateProposalPDF(){
@@ -5434,9 +4367,9 @@ if (inviteBtnSafe) {
 
     try {
       await navigator.clipboard.writeText(inviteLink);
-      alert("Invite link copied:\n\n" + inviteLink);
+      alert("Invite link copied:" + inviteLink);
     } catch (err) {
-      alert("Copy this invite link:\n\n" + inviteLink);
+      alert("Copy this invite link:" + inviteLink);
     }
   });
 }
@@ -5516,7 +4449,7 @@ if (inviteBtnSafe) {
 
     const roomName = typeof getProjectRoomName === 'function' ? getProjectRoomName() : ('revamplex-' + Date.now());
 
-    window.window.jitsiApi = new JitsiMeetExternalAPI('meet.jit.si', {
+    window.jitsiApi = new JitsiMeetExternalAPI('meet.jit.si', {
       roomName: roomName,
       parentNode: box,
       width: '100%',
@@ -5601,7 +4534,7 @@ if (inviteBtnSafe) {
 
     const notes = document.getElementById('estimateNotes');
     if (notes) {
-      notes.value = (notes.value.trim() + '\n\n' + note).trim();
+      notes.value = (notes.value.trim() + '' + note).trim();
     }
 
     if (window.jitsiApi && typeof window.jitsiApi.executeCommand === 'function' && isRecordingSession) {
@@ -5672,47 +4605,75 @@ if (inviteBtnSafe) {
   }
 
   document.addEventListener('DOMContentLoaded', function(){
-    setupFloatingWorkspaceMenu();
+    
     setupVideoButtons();
     setupPhotoCaptureStatus();
     setupCalendarTools();
   });
 })();
-  /* ===== REAL REVAMP LOGO ===== */
-
-.main-logo {
-  height: 42px;
-  width: auto;
-  display: block;
-}
-
-/* keep layout tight */
-.brand {
-  display: flex;
-  align-items: center;
-}
-
-/* mobile scaling */
-@media (max-width: 760px) {
-  .main-logo {
-    height: 34px;
-  }
-}
-  window.addEventListener("scroll", () => {
-  const menu = document.querySelector(".sidebar");
-  if (!menu) return;
-
-  const rect = menu.getBoundingClientRect();
-
-  // when it scrolls past top → float it
-  if (rect.top <= 80) {
-    menu.classList.add("floating-menu");
-  } else {
-    menu.classList.remove("floating-menu");
-  }
-});
   
-</script>
+  </script>
 
+<script>
+
+/* ---------- FINAL RELIABLE FLOATING WORKSPACE MENU ---------- */
+(function(){
+  let workspaceMenuOriginalTop = null;
+  let workspaceMenuSpacer = null;
+
+  function setupFloatingWorkspaceMenu(){
+    const menu = document.querySelector('.sidebar');
+    if (!menu) return;
+
+    if (!workspaceMenuSpacer) {
+      workspaceMenuSpacer = document.createElement('div');
+      workspaceMenuSpacer.className = 'workspace-menu-spacer';
+      menu.parentNode.insertBefore(workspaceMenuSpacer, menu.nextSibling);
+    }
+
+    function resetForMeasure(){
+      menu.classList.remove('workspace-floating');
+      workspaceMenuSpacer.classList.remove('active');
+      workspaceMenuSpacer.style.height = '0px';
+    }
+
+    function measure(){
+      resetForMeasure();
+      workspaceMenuOriginalTop = menu.getBoundingClientRect().top + window.scrollY;
+    }
+
+    function update(){
+      if (workspaceMenuOriginalTop === null) measure();
+
+      const shouldFloat = window.scrollY >= workspaceMenuOriginalTop - 8;
+
+      if (shouldFloat) {
+        workspaceMenuSpacer.style.height = menu.offsetHeight + 'px';
+        workspaceMenuSpacer.classList.add('active');
+        menu.classList.add('workspace-floating');
+      } else {
+        resetForMeasure();
+      }
+    }
+
+    setTimeout(function(){
+      measure();
+      update();
+    }, 150);
+
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', function(){
+      workspaceMenuOriginalTop = null;
+      setTimeout(function(){
+        measure();
+        update();
+      }, 100);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', setupFloatingWorkspaceMenu);
+})();
+
+</script>
 </body>
 </html>
