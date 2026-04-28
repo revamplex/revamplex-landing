@@ -153,6 +153,16 @@
       .trade-grid { grid-template-columns: 1fr; }
     }
   </style>
+
+<style>
+.status-pill-box { display:inline-block; padding:6px 10px; border-radius:999px; background:#fff7ed; color:#9a3412; font-weight:800; font-size:13px; margin:4px 0; }
+.plans { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-top:12px; }
+.plan-card { border:1px solid #e5e7eb; border-radius:14px; padding:14px; background:#fff; }
+.plan-card h4 { margin:0 0 6px; }
+.plan-card p { margin:0 0 10px; color:#666; font-size:13px; }
+@media(max-width:700px){ .plans{grid-template-columns:1fr;} }
+</style>
+
 </head>
 
 <body>
@@ -179,6 +189,19 @@
 
     <button class="btn" onclick="openEditProfile()">Edit Profile</button>
   </div>
+
+  <div class="card contractor-display" id="billingCard">
+    <h3>Billing & Approval</h3>
+    <p><strong>Approval:</strong> <span id="displayApproval">—</span></p>
+    <p><strong>Subscription:</strong> <span id="displaySubscription">—</span></p>
+    <p><strong>Trial Ends:</strong> <span id="displayTrialEnd">—</span></p>
+    <p class="muted">Your contractor listing will not go live until Revamp LEX approves your license and insurance.</p>
+    <div class="plans">
+      <div class="plan-card"><h4>Basic — $29/mo</h4><p>Up to 5 bids per month.</p><button class="btn" onclick="subscribe('basic')">Choose Basic</button></div>
+      <div class="plan-card"><h4>Pro — $59/mo</h4><p>Unlimited bids and better visibility.</p><button class="btn" onclick="subscribe('pro')">Choose Pro</button></div>
+      <div class="plan-card"><h4>Elite — $99/mo</h4><p>Priority placement and premium tools.</p><button class="btn" onclick="subscribe('elite')">Choose Elite</button></div>
+    </div>
+  </div>
 </div>
 
 <div class="modal" id="profileModal">
@@ -189,6 +212,13 @@
 
     <div class="contractor-only">
       <input id="profileCompany" placeholder="Company Name" />
+      <input id="profileLicenseNumber" placeholder="License Number" />
+      <input id="profileInsuranceCompany" placeholder="Insurance Company" />
+      <input id="profileInsuranceExpiration" type="date" placeholder="Insurance Expiration" />
+      <label class="muted">License Document</label>
+      <input id="profileLicenseFile" type="file" accept=".pdf,.jpg,.jpeg,.png" />
+      <label class="muted">Insurance Certificate</label>
+      <input id="profileInsuranceFile" type="file" accept=".pdf,.jpg,.jpeg,.png" />
 
       <p><strong>Select Your Trades</strong></p>
       <div class="trade-grid" id="tradeCheckboxes">
@@ -534,6 +564,126 @@ window.onload = function () {
   document.getElementById("closeProfileBtn").onclick = closeEditProfile;
   document.getElementById("saveProfileBtn").onclick = saveProfile;
   loadDashboard();
+};
+</script>
+
+
+<script>
+/* ===== REVAMP PAYMENT DASHBOARD PATCH ===== */
+async function subscribe(plan) {
+  const { data: { session } } = await client.auth.getSession();
+  if (!session) {
+    alert("Please log in first.");
+    return;
+  }
+
+  const lookupKeys = {
+    basic: "revamp_basic_monthly",
+    pro: "revamp_pro_monthly",
+    elite: "revamp_elite_monthly"
+  };
+
+  const res = await fetch("/api/create-checkout-session", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + session.access_token
+    },
+    body: JSON.stringify({ plan, lookup_key: lookupKeys[plan] })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.error || "Checkout failed");
+    return;
+  }
+
+  window.location.href = data.url;
+}
+
+const oldRefreshDisplay = refreshDisplay;
+refreshDisplay = function(){
+  oldRefreshDisplay();
+  const isContractor = isContractorProfile();
+  if (isContractor) {
+    setText("displayApproval", currentProfile.is_approved ? "Approved" : "Pending Review");
+    setText("displaySubscription", currentProfile.subscription_status || "trial");
+    setText("displayTrialEnd", currentProfile.trial_end ? new Date(currentProfile.trial_end).toLocaleDateString() : "—");
+  }
+};
+
+const oldOpenEditProfile = openEditProfile;
+openEditProfile = function(){
+  oldOpenEditProfile();
+  if (!currentProfile) return;
+  const ids = {
+    profileLicenseNumber: currentProfile.license_number || currentProfile.license || "",
+    profileInsuranceCompany: currentProfile.insurance_company || "",
+    profileInsuranceExpiration: currentProfile.insurance_expiration || ""
+  };
+  Object.entries(ids).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val || "";
+  });
+};
+
+const oldSaveProfile = saveProfile;
+saveProfile = async function(){
+  if (!currentUser || !currentProfile) {
+    alert("Profile is not ready yet. Refresh and try again.");
+    return;
+  }
+
+  await oldSaveProfile();
+
+  if (!isContractorProfile()) return;
+
+  const extraData = {
+    license_number: document.getElementById("profileLicenseNumber")?.value?.trim() || "",
+    license: document.getElementById("profileLicenseNumber")?.value?.trim() || "",
+    insurance_company: document.getElementById("profileInsuranceCompany")?.value?.trim() || "",
+    insurance_expiration: document.getElementById("profileInsuranceExpiration")?.value || null,
+    is_approved: currentProfile.is_approved || false,
+    can_go_live: currentProfile.can_go_live || false,
+    account_status: currentProfile.account_status || "pending_review",
+    subscription_status: currentProfile.subscription_status || "trial",
+    plan: currentProfile.plan || "trial",
+    trial_end: currentProfile.trial_end || new Date(Date.now() + 90*24*60*60*1000).toISOString()
+  };
+
+  async function uploadDoc(file, label){
+    if (!file) return "";
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+    const path = `${currentUser.id}/${label}-${Date.now()}-${safeName}`;
+    const { error } = await client.storage.from("contractor-documents").upload(path, file, { upsert: true });
+    if (error) {
+      console.warn(error);
+      return "";
+    }
+    const { data } = client.storage.from("contractor-documents").getPublicUrl(path);
+    return data?.publicUrl || path;
+  }
+
+  const licenseUrl = await uploadDoc(document.getElementById("profileLicenseFile")?.files?.[0], "license");
+  const insuranceUrl = await uploadDoc(document.getElementById("profileInsuranceFile")?.files?.[0], "insurance");
+
+  if (licenseUrl) extraData.license_file_url = licenseUrl;
+  if (insuranceUrl) extraData.insurance_file_url = insuranceUrl;
+
+  await client.from("profiles").update(extraData).eq("id", currentUser.id);
+  await client.from("contractors").update(extraData).eq("id", currentUser.id);
+
+  await fetch("/api/notify-signup", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({
+      event_type: "contractor_documents_updated",
+      email: currentUser.email,
+      role: "contractor",
+      ...extraData
+    })
+  }).catch(()=>{});
 };
 </script>
 
