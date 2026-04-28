@@ -1751,6 +1751,179 @@ body {
   }
 }
 
+
+/* ===== FINAL MOBILE WIDTH FIX ===== */
+@media (max-width: 760px) {
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    margin: 0;
+    background: linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px) !important;
+  }
+
+  .app-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 10px !important;
+  }
+
+  .topbar,
+  .brand,
+  .top-actions,
+  .hero,
+  .hero-grid,
+  .project-title,
+  .mini-stats,
+  .stat,
+  .side-summary,
+  .dashboard,
+  .sidebar,
+  .workspace,
+  .workspace > section,
+  .workspace > .panel,
+  .contractor-tools,
+  .contractor-tools > section,
+  .contractor-tools > .panel,
+  .panel,
+  .panel-header,
+  .video-controls,
+  .chat-box,
+  .ai-chat-card,
+  .ai-chat-shell,
+  .ai-chat-window,
+  .ai-compose,
+  .ai-side-tools,
+  .contractor-info-card,
+  .contractor-info-grid,
+  .estimate-output-card,
+  .proposal-preview-card,
+  .proposal-actions,
+  .estimate-table-wrap,
+  .estimate-summary,
+  .summary-box,
+  .calc-layout,
+  .form-grid,
+  .result-card,
+  .schedule-layout,
+  .calendar-box,
+  .schedule-list,
+  .signature-layout,
+  .signature-box,
+  .photo-strip,
+  .photo-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .hero-grid,
+  .dashboard,
+  .workspace,
+  .contractor-tools,
+  .mini-stats,
+  .tool-grid,
+  .photo-strip,
+  .form-grid,
+  .contractor-info-grid,
+  .ai-chat-shell,
+  .ai-compose,
+  .calc-layout,
+  .estimate-summary,
+  .schedule-layout,
+  .signature-layout {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .topbar,
+  .brand,
+  .top-actions,
+  .panel-header,
+  .estimate-toolbar,
+  .proposal-actions,
+  .video-controls,
+  .mic-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+  }
+
+  .hero,
+  .sidebar,
+  .panel,
+  .side-summary,
+  .calendar-box,
+  .schedule-list,
+  .summary-box,
+  .proposal-preview-card,
+  .estimate-output-card,
+  .ai-chat-card,
+  .contractor-info-card {
+    padding: 14px !important;
+    border-radius: 18px !important;
+    box-sizing: border-box !important;
+  }
+
+  .workspace {
+    gap: 12px !important;
+  }
+
+  .sidebar {
+    position: static !important;
+  }
+
+  .nav-list {
+    display: flex !important;
+    overflow-x: auto !important;
+    gap: 8px !important;
+    padding-bottom: 4px !important;
+  }
+
+  .nav-item {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+    padding: 10px 12px !important;
+  }
+
+  .calendar-grid {
+    width: 100% !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+  }
+
+  .cal-day,
+  .cal-date {
+    padding: 8px 4px !important;
+    font-size: 0.78rem !important;
+  }
+
+  .btn,
+  button {
+    max-width: 100% !important;
+  }
+
+  .panel-header h3,
+  .schedule-list h4,
+  .calendar-box h4 {
+    font-size: 1.15rem !important;
+  }
+
+  .panel-header p {
+    font-size: 0.94rem !important;
+  }
+
+  table {
+    min-width: 720px !important;
+  }
+}
+
 </style>
 </head>
 <body>
