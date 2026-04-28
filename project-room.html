@@ -2862,99 +2862,244 @@ html, body {
     height: 38px;
   }
 }
-/* ===== TOPBAR LOGO ===== */
+
+
+/* ===== SAFE REVAMP TOPBAR + CENTERED WIDTH FIX ===== */
+body {
+  background:
+    linear-gradient(90deg,
+      #e2e8f0 0,
+      #e2e8f0 calc((100vw - 1220px) / 2),
+      transparent calc((100vw - 1220px) / 2),
+      transparent calc(100vw - ((100vw - 1220px) / 2)),
+      #e2e8f0 calc(100vw - ((100vw - 1220px) / 2)),
+      #e2e8f0 100%),
+    linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px) !important;
+}
+
+.app-shell {
+  width: min(100%, 1220px) !important;
+  max-width: 1220px !important;
+  margin: 0 auto !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+}
+
+.topbar,
+.hero,
+.dashboard,
+.sidebar,
+.workspace,
+.workspace > section,
+.workspace > .panel,
+.contractor-tools,
+.contractor-tools > section,
+.contractor-tools > .panel,
+.panel {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
 
 .topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  margin-bottom: 16px !important;
+  padding: 14px 16px !important;
 
-  padding: 14px 18px;
-  margin-bottom: 12px;
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08) !important;
 
-  background: rgba(255,255,255,0.95);
-  backdrop-filter: blur(14px);
-
-  border-radius: 18px;
-  border: 1px solid rgba(226,232,240,0.9);
-
-  position: sticky;
-  top: 0;
-  z-index: 100000;
+  position: relative !important;
+  top: auto !important;
+  z-index: 50 !important;
 }
 
 .brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  min-width: 0 !important;
 }
 
-.logo {
-  height: 36px;
-  width: auto;
+.revamp-logo-mark {
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark)) !important;
+  color: white !important;
+  display: grid !important;
+  place-items: center !important;
+  font-weight: 900 !important;
+  font-size: 1.15rem !important;
+  box-shadow: 0 10px 24px rgba(249,115,22,0.24) !important;
+  flex: 0 0 42px !important;
 }
 
 .brand-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1;
+  display: flex !important;
+  flex-direction: column !important;
+  line-height: 1.05 !important;
 }
 
 .brand-text strong {
-  font-size: 1rem;
+  font-size: 1rem !important;
+  font-weight: 900 !important;
+  color: var(--text) !important;
 }
 
 .brand-text span {
-  font-size: 0.75rem;
-  color: #64748b;
+  margin-top: 4px !important;
+  font-size: 0.78rem !important;
+  color: var(--muted) !important;
+  font-weight: 700 !important;
 }
 
 .top-actions {
-  display: flex;
-  gap: 8px;
+  display: flex !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+  justify-content: flex-end !important;
 }
 
-/* MOBILE */
+.hero {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  border-radius: 26px !important;
+}
+
+.hero-grid {
+  grid-template-columns: 1fr !important;
+}
+
+.dashboard {
+  display: block !important;
+  grid-template-columns: none !important;
+  padding-top: 0 !important;
+}
+
+.workspace,
+.contractor-tools {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+
+/* Workspace menu: stays under the project header, then sticks while scrolling */
+.sidebar {
+  position: sticky !important;
+  top: 10px !important;
+  left: auto !important;
+  transform: none !important;
+  z-index: 9999 !important;
+
+  margin: 14px 0 16px !important;
+  padding: 12px 14px !important;
+  background: rgba(255,255,255,0.96) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(226,232,240,0.95) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 14px 32px rgba(15,23,42,0.12) !important;
+}
+
+.nav-list {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 2px 2px 6px !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.nav-item {
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+  border-radius: 999px !important;
+  padding: 10px 14px !important;
+}
+
+.nav-item span:last-child {
+  display: none !important;
+}
+
 @media (max-width: 760px) {
-  .topbar {
-    padding: 10px 12px;
+  body {
+    background: linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px) !important;
   }
 
-  .logo {
-    height: 30px;
+  .app-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 10px !important;
+    margin: 0 !important;
+  }
+
+  .topbar {
+    border-radius: 18px !important;
+    padding: 11px !important;
+    gap: 10px !important;
+  }
+
+  .revamp-logo-mark {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 12px !important;
+    flex-basis: 36px !important;
   }
 
   .brand-text strong {
-    font-size: 0.9rem;
+    font-size: 0.92rem !important;
   }
 
   .brand-text span {
-    font-size: 0.7rem;
+    font-size: 0.7rem !important;
+  }
+
+  .top-actions {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  .top-actions .btn {
+    width: 100% !important;
+  }
+
+  .hero,
+  .panel,
+  .sidebar {
+    border-radius: 18px !important;
+  }
+
+  .sidebar {
+    top: 6px !important;
+    margin: 10px 0 12px !important;
   }
 }
+
 </style>
 </head>
 <body>
 <div class="app-shell">
     <div class="topbar">
-  <div class="brand">
-    <img src="https://revamplex.com/logo.png" alt="Revamp LEX" class="logo">
-    <div class="brand-text">
-      <strong>Revamp LEX</strong>
-      <span>Contractor Workspace</span>
-    </div>
-  </div>
+      <div class="brand">
+        <div class="revamp-logo-mark">R</div>
+        <div class="brand-text">
+          <strong>Revamp LEX</strong>
+          <span>Contractor Workspace</span>
+        </div>
+      </div>
 
-  <div class="top-actions">
-    <button class="btn btn-soft">Dashboard</button>
-    <button class="btn btn-primary">Logout</button>
-  </div>
-</div>
       <div class="top-actions">
-        <button id="backToFeed" class="btn btn-soft">
-Back to Project Feed
-</button>
+        <button id="backToFeed" class="btn btn-soft">Back to Project Feed</button>
         <button id="inviteBtn" class="btn btn-primary">Invite Customer</button>
       </div>
     </div>
