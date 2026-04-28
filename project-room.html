@@ -2104,6 +2104,317 @@ body {
   }
 }
 
+
+/* =========================================================
+   REVAMP RESCUE FIX - CLEAN STRUCTURE + STICKY WORKSPACE MENU
+   This final block intentionally overrides older conflicting .sidebar rules.
+   ========================================================= */
+
+html,
+body {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  overflow-x: hidden !important;
+}
+
+body {
+  background: linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px) !important;
+}
+
+.app-shell {
+  width: min(100%, 1220px) !important;
+  max-width: 1220px !important;
+  margin: 0 auto !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+}
+
+.topbar,
+.hero,
+.dashboard,
+.sidebar,
+.workspace,
+.contractor-tools,
+.workspace > section,
+.workspace > .panel,
+.contractor-tools > section,
+.contractor-tools > .panel,
+.panel {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.dashboard {
+  display: block !important;
+  grid-template-columns: none !important;
+  padding-top: 0 !important;
+  gap: 0 !important;
+  overflow: visible !important;
+}
+
+.workspace,
+.contractor-tools {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  overflow: visible !important;
+}
+
+/* menu appears AFTER the contractor workspace header/hero, then sticks while scrolling */
+.sidebar {
+  position: sticky !important;
+  top: 10px !important;
+  left: auto !important;
+  transform: none !important;
+  z-index: 99999 !important;
+
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+
+  margin: 14px 0 16px !important;
+  padding: 12px 14px !important;
+
+  background: rgba(255, 255, 255, 0.96) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.14) !important;
+}
+
+.nav-title {
+  display: block !important;
+  margin: 0 0 8px !important;
+  padding: 0 !important;
+  font-size: 0.72rem !important;
+  line-height: 1 !important;
+  letter-spacing: 0.12em !important;
+  color: var(--muted) !important;
+  text-transform: uppercase !important;
+}
+
+.nav-list {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 2px 2px 6px !important;
+  margin: 0 !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: thin !important;
+}
+
+.nav-list::-webkit-scrollbar {
+  height: 5px !important;
+}
+
+.nav-list::-webkit-scrollbar-thumb {
+  background: rgba(249, 115, 22, 0.35) !important;
+  border-radius: 999px !important;
+}
+
+.nav-item {
+  flex: 0 0 auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: auto !important;
+  min-height: 38px !important;
+  white-space: nowrap !important;
+  padding: 10px 14px !important;
+  border-radius: 999px !important;
+  font-size: 0.86rem !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  background: #ffffff !important;
+  border: 1px solid var(--line) !important;
+  color: var(--text) !important;
+}
+
+.nav-item span:last-child {
+  display: none !important;
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.18), #ffffff) !important;
+  border-color: rgba(249, 115, 22, 0.38) !important;
+  color: var(--brand-dark) !important;
+}
+
+.hero,
+.panel {
+  scroll-margin-top: 90px !important;
+}
+
+/* keep all sections centered and equal on desktop */
+.hero-grid,
+.ai-chat-shell,
+.calc-layout,
+.estimate-summary,
+.schedule-layout,
+.signature-layout {
+  grid-template-columns: 1fr !important;
+}
+
+.estimate-summary {
+  grid-template-columns: 1fr !important;
+}
+
+@media (min-width: 1221px) {
+  body {
+    background:
+      linear-gradient(90deg,
+        #e2e8f0 0,
+        #e2e8f0 calc((100vw - 1220px) / 2),
+        transparent calc((100vw - 1220px) / 2),
+        transparent calc(100vw - ((100vw - 1220px) / 2)),
+        #e2e8f0 calc(100vw - ((100vw - 1220px) / 2)),
+        #e2e8f0 100%),
+      linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px) !important;
+  }
+}
+
+/* mobile full width */
+@media (max-width: 760px) {
+  .app-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 10px !important;
+  }
+
+  .topbar,
+  .hero,
+  .dashboard,
+  .sidebar,
+  .workspace,
+  .contractor-tools,
+  .workspace > section,
+  .workspace > .panel,
+  .contractor-tools > section,
+  .contractor-tools > .panel,
+  .panel,
+  .side-summary,
+  .stat,
+  .summary-box,
+  .calendar-box,
+  .schedule-list,
+  .signature-box,
+  .proposal-preview-card,
+  .estimate-output-card,
+  .ai-chat-card,
+  .contractor-info-card,
+  .result-card,
+  .estimate-table-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .dashboard {
+    display: block !important;
+    padding-top: 0 !important;
+  }
+
+  .workspace,
+  .contractor-tools {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .hero-grid,
+  .mini-stats,
+  .tool-grid,
+  .photo-strip,
+  .form-grid,
+  .contractor-info-grid,
+  .ai-chat-shell,
+  .ai-compose,
+  .calc-layout,
+  .estimate-summary,
+  .schedule-layout,
+  .signature-layout {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .hero,
+  .panel,
+  .sidebar,
+  .side-summary,
+  .summary-box,
+  .calendar-box,
+  .schedule-list,
+  .signature-box,
+  .proposal-preview-card,
+  .estimate-output-card,
+  .ai-chat-card,
+  .contractor-info-card {
+    padding: 14px !important;
+    border-radius: 18px !important;
+  }
+
+  .sidebar {
+    position: sticky !important;
+    top: 6px !important;
+    z-index: 999999 !important;
+    margin: 10px 0 12px !important;
+    padding: 10px !important;
+    border-radius: 16px !important;
+  }
+
+  .nav-title {
+    font-size: 0.66rem !important;
+    margin-bottom: 7px !important;
+  }
+
+  .nav-list {
+    gap: 7px !important;
+    padding-bottom: 5px !important;
+  }
+
+  .nav-item {
+    min-height: 34px !important;
+    padding: 9px 11px !important;
+    font-size: 0.8rem !important;
+  }
+
+  .calendar-grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+  }
+
+  .cal-day,
+  .cal-date {
+    padding: 8px 3px !important;
+    font-size: 0.76rem !important;
+  }
+
+  .hero,
+  .panel {
+    scroll-margin-top: 80px !important;
+  }
+
+  table {
+    min-width: 720px !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -2874,24 +3185,7 @@ function applyWorkspaceMode() {
     if (title) {
       title.textContent = "Revamp Project Room™ — Contractor Workspace";
     }
-<div class="contractor-workspace">
-  <!-- Contractor Workspace content -->
-</div>
-
-<div class="sidebar">
-  <!-- Workspace Sections menu -->
-</div>
-
-<div class="workspace">
-  <!-- All your sections -->
-</div>
-    @media (max-width: 760px) {
-  .sidebar {
-    top: 70px;
-    margin: 12px 0;
-  }
-}
-    if (inviteBtn) {
+if (inviteBtn) {
       inviteBtn.textContent = "Invite Customer";
     }
   }
