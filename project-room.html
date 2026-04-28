@@ -2065,6 +2065,304 @@ body {
   }
 }
 
+
+/* =========================================================
+   FINAL STRUCTURE FIX:
+   - Desktop: centered page, equal-width sections, horizontal sticky workspace menu
+   - Mobile: full-width sections, sticky horizontal workspace menu visible
+   ========================================================= */
+
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Desktop page shell */
+.app-shell {
+  width: min(100%, 1220px) !important;
+  max-width: 1220px !important;
+  margin: 0 auto !important;
+  padding: 20px !important;
+}
+
+/* All major sections stay same width */
+.topbar,
+.hero,
+.dashboard,
+.sidebar,
+.workspace,
+.workspace > section,
+.workspace > .panel,
+.contractor-tools,
+.contractor-tools > section,
+.contractor-tools > .panel,
+.panel {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Main content is one clean column now */
+.dashboard {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 16px !important;
+  align-items: start !important;
+}
+
+.workspace,
+.contractor-tools {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 18px !important;
+  min-width: 0 !important;
+}
+
+/* Keep inner layouts from causing random narrow/wide cards */
+.hero-grid,
+.ai-chat-shell,
+.calc-layout,
+.estimate-summary,
+.schedule-layout,
+.signature-layout {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+.estimate-summary {
+  grid-template-columns: 1fr !important;
+}
+
+.ai-chat-shell,
+.calc-layout,
+.schedule-layout,
+.signature-layout {
+  grid-template-columns: 1fr !important;
+}
+
+/* Desktop grid cards */
+.mini-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+.tool-grid,
+.photo-strip {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+.form-grid,
+.contractor-info-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+/* Floating horizontal workspace menu */
+.sidebar {
+  position: sticky !important;
+  top: 12px !important;
+  z-index: 9999 !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.12) !important;
+  padding: 14px 16px !important;
+}
+
+.nav-title {
+  margin: 0 0 10px !important;
+  font-size: 0.78rem !important;
+  letter-spacing: 0.10em !important;
+}
+
+.nav-list {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: 10px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 2px 2px 7px !important;
+  scroll-behavior: smooth !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.nav-item {
+  flex: 0 0 auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+  border-radius: 999px !important;
+  padding: 11px 16px !important;
+  gap: 8px !important;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.06) !important;
+}
+
+.nav-item span:last-child {
+  display: none !important;
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.16), #ffffff) !important;
+  color: var(--brand-dark) !important;
+  border-color: rgba(249, 115, 22, 0.35) !important;
+}
+
+/* Desktop side gutters / centered look */
+@media (min-width: 1301px) {
+  body {
+    background:
+      linear-gradient(90deg,
+        #e2e8f0 0,
+        #e2e8f0 calc((100vw - 1220px) / 2),
+        transparent calc((100vw - 1220px) / 2),
+        transparent calc(100vw - ((100vw - 1220px) / 2)),
+        #e2e8f0 calc(100vw - ((100vw - 1220px) / 2)),
+        #e2e8f0 100%),
+      linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px) !important;
+  }
+}
+
+/* Mobile full-width + sticky menu visible */
+@media (max-width: 760px) {
+  body {
+    background: linear-gradient(180deg, #fff7ed 0%, var(--bg) 180px) !important;
+  }
+
+  .app-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 10px !important;
+  }
+
+  .topbar,
+  .hero,
+  .dashboard,
+  .sidebar,
+  .workspace,
+  .workspace > section,
+  .workspace > .panel,
+  .contractor-tools,
+  .contractor-tools > section,
+  .contractor-tools > .panel,
+  .panel,
+  .side-summary,
+  .stat,
+  .summary-box,
+  .calendar-box,
+  .schedule-list,
+  .signature-box,
+  .proposal-preview-card,
+  .estimate-output-card,
+  .ai-chat-card,
+  .contractor-info-card,
+  .estimate-table-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .dashboard,
+  .workspace,
+  .contractor-tools,
+  .hero-grid,
+  .mini-stats,
+  .tool-grid,
+  .photo-strip,
+  .form-grid,
+  .contractor-info-grid,
+  .ai-chat-shell,
+  .ai-compose,
+  .calc-layout,
+  .estimate-summary,
+  .schedule-layout,
+  .signature-layout {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .hero,
+  .panel,
+  .sidebar,
+  .side-summary {
+    padding: 14px !important;
+    border-radius: 18px !important;
+  }
+
+  .sidebar {
+    display: block !important;
+    position: sticky !important;
+    top: 8px !important;
+    z-index: 99999 !important;
+    margin: 8px 0 12px !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+  }
+
+  .nav-title {
+    display: block !important;
+    font-size: 0.72rem !important;
+    margin-bottom: 8px !important;
+  }
+
+  .nav-list {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding: 2px 2px 6px !important;
+  }
+
+  .nav-item {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+    padding: 10px 12px !important;
+    font-size: 0.86rem !important;
+  }
+
+  .calendar-grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+  }
+
+  .cal-day,
+  .cal-date {
+    padding: 8px 4px !important;
+    font-size: 0.78rem !important;
+  }
+
+  .top-actions,
+  .panel-header,
+  .estimate-toolbar,
+  .proposal-actions,
+  .video-controls,
+  .mic-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .btn,
+  button {
+    max-width: 100% !important;
+  }
+
+  table {
+    min-width: 720px !important;
+  }
+}
+
 </style>
 </head>
 <body>
