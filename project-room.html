@@ -2738,6 +2738,131 @@ html, body {
   }
 }
 
+
+/* ===== CURRENT INTERACTIVE CALENDAR ===== */
+.calendar-toolbar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.calendar-title-wrap {
+  text-align: center;
+}
+
+.calendar-title-wrap h4 {
+  font-size: 1.08rem;
+}
+
+.calendar-today-label {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.calendar-nav-btn {
+  width: 42px;
+  height: 42px;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  font-size: 1.4rem !important;
+  display: grid;
+  place-items: center;
+}
+
+.calendar-jump-row {
+  display: grid;
+  grid-template-columns: 1fr 110px auto;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+#dynamicCalendarGrid {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.cal-date.muted {
+  background: #f8fafc;
+  border-color: #edf2f7;
+  color: #94a3b8;
+}
+
+.cal-date.today {
+  outline: 2px solid rgba(249, 115, 22, 0.55);
+  outline-offset: 2px;
+}
+
+.cal-date.has-appointment::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: var(--brand);
+  border-radius: 999px;
+  display: block;
+  margin: 4px auto 0;
+}
+
+.selected-date-box {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fff, #fff7ed);
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.selected-date-box span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.selected-date-box strong {
+  font-size: 1rem;
+}
+
+.appointment-empty {
+  color: var(--muted);
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+  padding: 14px;
+  text-align: center;
+  background: #fff;
+}
+
+.task-item .appointment-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.task-item .appointment-actions button {
+  padding: 8px 10px;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 760px) {
+  .calendar-jump-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .calendar-jump-row .btn {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .calendar-nav-btn {
+    width: 38px;
+    height: 38px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -2820,74 +2945,64 @@ Back to Project Feed
           <div class="panel-header">
             <div>
               <h3>Appointment Scheduling Calendar</h3>
-              <p>Set walkthroughs, install dates, inspections, and customer appointments without endless texting.</p>
+              <p>Current date-aware calendar with month/year navigation, appointment selection, and project scheduling.</p>
             </div>
-            <button class="btn btn-primary" id="sendAppointmentBtn" type="button">Send Appointment Invite</button>
+            <button class="btn btn-primary" type="button" onclick="openAppointmentPrompt()">Add Appointment</button>
           </div>
 
           <div class="schedule-layout">
             <div class="calendar-box">
-              <h4 style="margin-top:0;">March 2026</h4>
-              <div class="calendar-grid">
-                <div class="cal-day">Sun</div>
-                <div class="cal-day">Mon</div>
-                <div class="cal-day">Tue</div>
-                <div class="cal-day">Wed</div>
-                <div class="cal-day">Thu</div>
-                <div class="cal-day">Fri</div>
-                <div class="cal-day">Sat</div>
-
-                <div class="cal-date">1</div>
-                <div class="cal-date">2</div>
-                <div class="cal-date">3</div>
-                <div class="cal-date">4</div>
-                <div class="cal-date">5</div>
-                <div class="cal-date">6</div>
-                <div class="cal-date">7</div>
-                <div class="cal-date">8</div>
-                <div class="cal-date">9</div>
-                <div class="cal-date">10</div>
-                <div class="cal-date">11</div>
-                <div class="cal-date">12</div>
-                <div class="cal-date">13</div>
-                <div class="cal-date active">14</div>
-                <div class="cal-date">15</div>
-                <div class="cal-date">16</div>
-                <div class="cal-date">17</div>
-                <div class="cal-date">18</div>
-                <div class="cal-date">19</div>
-                <div class="cal-date">20</div>
-                <div class="cal-date">21</div>
-                <div class="cal-date">22</div>
-                <div class="cal-date">23</div>
-                <div class="cal-date">24</div>
-                <div class="cal-date">25</div>
-                <div class="cal-date">26</div>
-                <div class="cal-date">27</div>
-                <div class="cal-date">28</div>
-                <div class="cal-date">29</div>
-                <div class="cal-date">30</div>
-                <div class="cal-date">31</div>
+              <div class="calendar-toolbar">
+                <button class="btn btn-soft calendar-nav-btn" type="button" onclick="changeCalendarMonth(-1)">‹</button>
+                <div class="calendar-title-wrap">
+                  <h4 id="calendarTitle" style="margin:0;">Loading...</h4>
+                  <div id="calendarTodayLabel" class="calendar-today-label">Today</div>
+                </div>
+                <button class="btn btn-soft calendar-nav-btn" type="button" onclick="changeCalendarMonth(1)">›</button>
               </div>
+
+              <div class="calendar-jump-row">
+                <select id="calendarMonthSelect" onchange="jumpCalendarDate()"></select>
+                <select id="calendarYearSelect" onchange="jumpCalendarDate()"></select>
+                <button class="btn btn-soft" type="button" onclick="goToToday()">Today</button>
+              </div>
+
+              <div class="calendar-grid" id="dynamicCalendarGrid"></div>
             </div>
 
             <div class="schedule-list">
-              <h4 style="margin-top:0;">Upcoming Appointments</h4>
-              <div class="task-item">
-                <strong>Site Walkthrough</strong>
-                <span>Saturday, March 14, 2026 • 10:00 AM</span>
-                <span>At property • Customer + Contractor</span>
+              <h4 style="margin-top:0;">Appointments</h4>
+              <div class="selected-date-box">
+                <span>Selected Date</span>
+                <strong id="selectedDateLabel">Today</strong>
               </div>
-              <div class="task-item">
-                <strong>Estimate Review Call</strong>
-                <span>Monday, March 16, 2026 • 7:00 PM</span>
-                <span>Video meeting</span>
+
+              <div class="form-grid" style="margin:12px 0;">
+                <div>
+                  <label>Time</label>
+                  <input id="appointmentTimeInput" type="time" value="10:00">
+                </div>
+                <div>
+                  <label>Type</label>
+                  <select id="appointmentTypeInput">
+                    <option>Site Walkthrough</option>
+                    <option>Estimate Review Call</option>
+                    <option>Material Drop-Off</option>
+                    <option>Projected Start Date</option>
+                    <option>Inspection</option>
+                    <option>Customer Follow-Up</option>
+                  </select>
+                </div>
+                <div class="full">
+                  <label>Notes</label>
+                  <input id="appointmentNoteInput" type="text" placeholder="Example: Meet homeowner at property">
+                </div>
+                <div class="full">
+                  <button class="btn btn-primary" type="button" onclick="addCalendarAppointment()">Add to Schedule</button>
+                </div>
               </div>
-              <div class="task-item">
-                <strong>Projected Start Date</strong>
-                <span>Sunday, March 22, 2026 • 8:00 AM</span>
-                <span>Pending signed approval + deposit</span>
-              </div>
+
+              <div id="appointmentList"></div>
             </div>
           </div>
         </section>
@@ -4792,6 +4907,246 @@ async function uploadProjectFiles(){
 }
 
 
+
+
+
+/* ---------- CURRENT INTERACTIVE CALENDAR ---------- */
+
+let calendarViewDate = new Date();
+let selectedCalendarDate = new Date();
+let projectAppointments = [];
+
+function formatDateKey(date){
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function formatPrettyDate(date){
+  return date.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric"
+  });
+}
+
+function sameDate(a, b){
+  return a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate();
+}
+
+function initCalendarControls(){
+  const monthSelect = document.getElementById("calendarMonthSelect");
+  const yearSelect = document.getElementById("calendarYearSelect");
+
+  if (monthSelect && !monthSelect.dataset.ready) {
+    monthSelect.innerHTML = Array.from({length: 12}, (_, i) => {
+      const name = new Date(2026, i, 1).toLocaleDateString("en-US", { month: "long" });
+      return `<option value="${i}">${name}</option>`;
+    }).join("");
+    monthSelect.dataset.ready = "true";
+  }
+
+  if (yearSelect && !yearSelect.dataset.ready) {
+    const currentYear = new Date().getFullYear();
+    let html = "";
+    for (let y = currentYear - 2; y <= currentYear + 5; y++) {
+      html += `<option value="${y}">${y}</option>`;
+    }
+    yearSelect.innerHTML = html;
+    yearSelect.dataset.ready = "true";
+  }
+}
+
+function renderCalendar(){
+  initCalendarControls();
+
+  const grid = document.getElementById("dynamicCalendarGrid");
+  const title = document.getElementById("calendarTitle");
+  const todayLabel = document.getElementById("calendarTodayLabel");
+  const monthSelect = document.getElementById("calendarMonthSelect");
+  const yearSelect = document.getElementById("calendarYearSelect");
+  const selectedLabel = document.getElementById("selectedDateLabel");
+
+  if (!grid) return;
+
+  const today = new Date();
+  const viewYear = calendarViewDate.getFullYear();
+  const viewMonth = calendarViewDate.getMonth();
+
+  if (title) {
+    title.textContent = calendarViewDate.toLocaleDateString("en-US", {
+      month: "long",
+      year: "numeric"
+    });
+  }
+
+  if (todayLabel) {
+    todayLabel.textContent = "Today: " + formatPrettyDate(today);
+  }
+
+  if (monthSelect) monthSelect.value = viewMonth;
+  if (yearSelect) yearSelect.value = viewYear;
+  if (selectedLabel) selectedLabel.textContent = formatPrettyDate(selectedCalendarDate);
+
+  const firstDay = new Date(viewYear, viewMonth, 1);
+  const startDate = new Date(firstDay);
+  startDate.setDate(firstDay.getDate() - firstDay.getDay());
+
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  let html = dayNames.map(day => `<div class="cal-day">${day}</div>`).join("");
+
+  for (let i = 0; i < 42; i++) {
+    const date = new Date(startDate);
+    date.setDate(startDate.getDate() + i);
+
+    const key = formatDateKey(date);
+    const isMuted = date.getMonth() !== viewMonth;
+    const isToday = sameDate(date, today);
+    const isSelected = sameDate(date, selectedCalendarDate);
+    const hasAppointment = projectAppointments.some(a => a.date === key);
+
+    html += `
+      <button type="button"
+        class="cal-date ${isMuted ? "muted" : ""} ${isToday ? "today" : ""} ${isSelected ? "active" : ""} ${hasAppointment ? "has-appointment" : ""}"
+        onclick="selectCalendarDate('${key}')">
+        ${date.getDate()}
+      </button>
+    `;
+  }
+
+  grid.innerHTML = html;
+  renderAppointmentList();
+}
+
+function selectCalendarDate(dateKey){
+  const [y, m, d] = dateKey.split("-").map(Number);
+  selectedCalendarDate = new Date(y, m - 1, d);
+  calendarViewDate = new Date(y, m - 1, 1);
+  renderCalendar();
+}
+
+function changeCalendarMonth(delta){
+  calendarViewDate = new Date(calendarViewDate.getFullYear(), calendarViewDate.getMonth() + delta, 1);
+  renderCalendar();
+}
+
+function jumpCalendarDate(){
+  const monthSelect = document.getElementById("calendarMonthSelect");
+  const yearSelect = document.getElementById("calendarYearSelect");
+
+  if (!monthSelect || !yearSelect) return;
+
+  calendarViewDate = new Date(Number(yearSelect.value), Number(monthSelect.value), 1);
+  renderCalendar();
+}
+
+function goToToday(){
+  const today = new Date();
+  selectedCalendarDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  calendarViewDate = new Date(today.getFullYear(), today.getMonth(), 1);
+  renderCalendar();
+}
+
+function addCalendarAppointment(){
+  const timeInput = document.getElementById("appointmentTimeInput");
+  const typeInput = document.getElementById("appointmentTypeInput");
+  const noteInput = document.getElementById("appointmentNoteInput");
+
+  const dateKey = formatDateKey(selectedCalendarDate);
+  const time = timeInput?.value || "10:00";
+  const type = typeInput?.value || "Appointment";
+  const note = noteInput?.value || "Project appointment";
+
+  projectAppointments.push({
+    id: Date.now(),
+    date: dateKey,
+    time,
+    type,
+    note
+  });
+
+  if (noteInput) noteInput.value = "";
+
+  renderCalendar();
+}
+
+function deleteCalendarAppointment(id){
+  projectAppointments = projectAppointments.filter(a => a.id !== id);
+  renderCalendar();
+}
+
+function renderAppointmentList(){
+  const list = document.getElementById("appointmentList");
+  if (!list) return;
+
+  const selectedKey = formatDateKey(selectedCalendarDate);
+  const dayAppointments = projectAppointments
+    .filter(a => a.date === selectedKey)
+    .sort((a, b) => a.time.localeCompare(b.time));
+
+  if (!dayAppointments.length) {
+    list.innerHTML = `<div class="appointment-empty">No appointments for this date yet.</div>`;
+    return;
+  }
+
+  list.innerHTML = dayAppointments.map(a => `
+    <div class="task-item">
+      <strong>${a.type}</strong>
+      <span>${formatPrettyDate(selectedCalendarDate)} • ${a.time}</span>
+      <span>${a.note}</span>
+      <div class="appointment-actions">
+        <button class="btn btn-soft" type="button" onclick="deleteCalendarAppointment(${a.id})">Remove</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function openAppointmentPrompt(){
+  const panel = document.getElementById("schedulePanel");
+  if (panel) panel.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  setTimeout(() => {
+    const input = document.getElementById("appointmentNoteInput");
+    if (input) input.focus();
+  }, 350);
+}
+
+function seedDefaultAppointments(){
+  if (projectAppointments.length) return;
+
+  const today = new Date();
+  const siteWalk = new Date(today);
+  siteWalk.setDate(today.getDate() + 2);
+
+  const review = new Date(today);
+  review.setDate(today.getDate() + 4);
+
+  projectAppointments = [
+    {
+      id: Date.now() + 1,
+      date: formatDateKey(siteWalk),
+      time: "10:00",
+      type: "Site Walkthrough",
+      note: "At property • Customer + Contractor"
+    },
+    {
+      id: Date.now() + 2,
+      date: formatDateKey(review),
+      time: "19:00",
+      type: "Estimate Review Call",
+      note: "Video meeting"
+    }
+  ];
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+  seedDefaultAppointments();
+  goToToday();
+});
 
 
 /* ---------- WORKSPACE NAV LINKS ---------- */
