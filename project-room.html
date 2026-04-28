@@ -1427,24 +1427,15 @@
         display: block;
       }
 
-      .sidebar {
-  position: sticky;
-  top: 80px; /* height of your topbar + spacing */
-  z-index: 9999;
-
+.sidebar {
+  position: relative; /* important reset */
   width: 100%;
-  max-width: 100%;
-
   margin: 16px 0;
   padding: 12px 14px;
 
-  background: rgba(255,255,255,0.95);
-  backdrop-filter: blur(16px);
-
-  border: 1px solid rgba(226,232,240,0.9);
+  background: rgba(255,255,255,0.96);
   border-radius: 18px;
-
-  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+  border: 1px solid rgba(226,232,240,0.9);
 }
 
       .nav-title {
@@ -3095,7 +3086,17 @@ body {
     margin: 10px 0 12px !important;
   }
 }
+.floating-menu {
+  position: fixed !important;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
 
+  width: min(1180px, calc(100vw - 20px));
+  z-index: 999999;
+
+  box-shadow: 0 16px 40px rgba(0,0,0,0.15);
+}
 </style>
 </head>
 <body>
@@ -5697,6 +5698,20 @@ if (inviteBtnSafe) {
     height: 34px;
   }
 }
+  window.addEventListener("scroll", () => {
+  const menu = document.querySelector(".sidebar");
+  if (!menu) return;
+
+  const rect = menu.getBoundingClientRect();
+
+  // when it scrolls past top → float it
+  if (rect.top <= 80) {
+    menu.classList.add("floating-menu");
+  } else {
+    menu.classList.remove("floating-menu");
+  }
+});
+  
 </script>
 
 </body>
