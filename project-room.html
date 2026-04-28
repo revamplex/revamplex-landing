@@ -1417,17 +1417,24 @@
       }
 
       .sidebar {
-        position: sticky;
-        top: 0;
-        z-index: 40;
-        padding: 10px;
-        margin-bottom: 12px;
-        border-radius: 0 0 18px 18px;
-        background: rgba(255,255,255,0.96);
-        backdrop-filter: blur(10px);
-        border-left: 0;
-        border-right: 0;
-      }
+  position: sticky;
+  top: 80px; /* height of your topbar + spacing */
+  z-index: 9999;
+
+  width: 100%;
+  max-width: 100%;
+
+  margin: 16px 0;
+  padding: 12px 14px;
+
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(16px);
+
+  border: 1px solid rgba(226,232,240,0.9);
+  border-radius: 18px;
+
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+}
 
       .nav-title {
         font-size: 0.72rem;
@@ -2867,7 +2874,23 @@ function applyWorkspaceMode() {
     if (title) {
       title.textContent = "Revamp Project Room™ — Contractor Workspace";
     }
+<div class="contractor-workspace">
+  <!-- Contractor Workspace content -->
+</div>
 
+<div class="sidebar">
+  <!-- Workspace Sections menu -->
+</div>
+
+<div class="workspace">
+  <!-- All your sections -->
+</div>
+    @media (max-width: 760px) {
+  .sidebar {
+    top: 70px;
+    margin: 12px 0;
+  }
+}
     if (inviteBtn) {
       inviteBtn.textContent = "Invite Customer";
     }
