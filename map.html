@@ -317,6 +317,87 @@
 .plan-card span { display:block; color:var(--muted); font-size:12px; line-height:1.35; margin-bottom:8px; }
 .plan-card .mini-btn { width:100%; }
 
+
+/* ===== PREMIUM DEMO CARDS ===== */
+.demo-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.86);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 18px rgba(15,23,42,.22);
+}
+
+.featured-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  box-shadow: 0 8px 18px rgba(249,115,22,.28);
+}
+
+.card-image-wrap {
+  position: relative;
+  width: 100%;
+  height: 118px;
+  overflow: hidden;
+  background: #e2e8f0;
+}
+
+.card-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.02);
+}
+
+.card-image-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(15,23,42,0.03), rgba(15,23,42,0.24));
+  pointer-events: none;
+}
+
+.demo-mini-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: rgba(249,115,22,.10);
+  color: #c2410c;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.listing-card .card-title {
+  letter-spacing: -0.02em;
+}
+
+.card-inner {
+  position: relative;
+}
+
 </style>
   <style>
     :root {
@@ -2066,6 +2147,339 @@ if (profile.role === 'contractor') {
       'Water Damage Restoration','Windows'
     ];
     
+
+const DEMO_CONTRACTORS = [
+  {
+    id: "demo-contractor-roofing",
+    name: "RidgePro Roofing",
+    company: "RidgePro Roofing",
+    trade: "Roofing",
+    trades_full: "Roofing, Gutters, Siding",
+    city: "Hackensack, NJ",
+    lat: 40.8859,
+    lng: -74.0435,
+    rating: 4.9,
+    reviews: 86,
+    projects_completed: 124,
+    response_time: "Usually replies in 15 min",
+    distance: 2.1,
+    image_url: "images/jobs/roofing.jpg",
+    bio: "Roof repairs, full replacements, leak detection, gutters, and storm damage work.",
+    tags: ["Roof repair", "Shingles", "Gutters"],
+    licensed: true,
+    insured: true,
+    verified: true,
+    featured: true,
+    is_demo: true
+  },
+  {
+    id: "demo-contractor-plumbing",
+    name: "FlowRight Plumbing",
+    company: "FlowRight Plumbing",
+    trade: "Plumbing",
+    trades_full: "Plumbing, Water Damage Restoration",
+    city: "Paramus, NJ",
+    lat: 40.9445,
+    lng: -74.0754,
+    rating: 4.8,
+    reviews: 71,
+    projects_completed: 98,
+    response_time: "Usually replies in 25 min",
+    distance: 3.4,
+    image_url: "images/jobs/plumbing.jpg",
+    bio: "Leak repairs, fixture installs, drain issues, rough plumbing, and emergency service.",
+    tags: ["Leak repair", "Fixtures", "Rough plumbing"],
+    licensed: true,
+    insured: true,
+    verified: true,
+    is_demo: true
+  },
+  {
+    id: "demo-contractor-electrical",
+    name: "VoltWorks Electric",
+    company: "VoltWorks Electric",
+    trade: "Electrical",
+    trades_full: "Electrical, Lighting, Panels",
+    city: "Teaneck, NJ",
+    lat: 40.8976,
+    lng: -74.0159,
+    rating: 5.0,
+    reviews: 104,
+    projects_completed: 142,
+    response_time: "Usually replies in 10 min",
+    distance: 1.8,
+    image_url: "images/jobs/electrical.jpg",
+    bio: "Panel upgrades, recessed lighting, outlets, troubleshooting, and renovation wiring.",
+    tags: ["Panels", "Lighting", "Outlets"],
+    licensed: true,
+    insured: true,
+    verified: true,
+    featured: true,
+    is_demo: true
+  },
+  {
+    id: "demo-contractor-painting",
+    name: "PrimeCoat Painters",
+    company: "PrimeCoat Painters",
+    trade: "Painting",
+    trades_full: "Painting, Drywall & Insulation",
+    city: "Fair Lawn, NJ",
+    lat: 40.9404,
+    lng: -74.1318,
+    rating: 4.7,
+    reviews: 58,
+    projects_completed: 88,
+    response_time: "Usually replies in 1 hr",
+    distance: 4.2,
+    image_url: "images/jobs/painting.jpg",
+    bio: "Interior painting, patching, trim, accent walls, and apartment turnovers.",
+    tags: ["Interior", "Trim", "Patchwork"],
+    licensed: true,
+    insured: true,
+    verified: true,
+    is_demo: true
+  },
+  {
+    id: "demo-contractor-kitchen",
+    name: "NorthStar Remodelers",
+    company: "NorthStar Remodelers",
+    trade: "Kitchen Renovation",
+    trades_full: "Kitchen Renovation, Bathroom Renovation, Tile & Stone",
+    city: "Clifton, NJ",
+    lat: 40.8584,
+    lng: -74.1638,
+    rating: 4.9,
+    reviews: 93,
+    projects_completed: 76,
+    response_time: "Usually replies in 30 min",
+    distance: 5.0,
+    image_url: "images/jobs/kitchen.jpg",
+    bio: "Full kitchen and bath remodeling with tile, cabinetry, trim, and finish work.",
+    tags: ["Kitchens", "Bathrooms", "Tile"],
+    licensed: true,
+    insured: true,
+    verified: true,
+    featured: true,
+    is_demo: true
+  },
+  {
+    id: "demo-contractor-flooring",
+    name: "EverLevel Flooring",
+    company: "EverLevel Flooring",
+    trade: "Flooring",
+    trades_full: "Flooring, Tile & Stone",
+    city: "Ridgewood, NJ",
+    lat: 40.9793,
+    lng: -74.1165,
+    rating: 4.8,
+    reviews: 67,
+    projects_completed: 113,
+    response_time: "Usually replies same day",
+    distance: 6.1,
+    image_url: "images/jobs/flooring.jpg",
+    bio: "Vinyl plank, hardwood, tile floors, subfloor prep, and transitions.",
+    tags: ["LVP", "Hardwood", "Tile"],
+    licensed: true,
+    insured: true,
+    verified: true,
+    is_demo: true
+  },
+  {
+    id: "demo-contractor-hvac",
+    name: "ComfortLine HVAC",
+    company: "ComfortLine HVAC",
+    trade: "HVAC",
+    trades_full: "HVAC, Electrical",
+    city: "Lodi, NJ",
+    lat: 40.8823,
+    lng: -74.0832,
+    rating: 4.6,
+    reviews: 49,
+    projects_completed: 64,
+    response_time: "Usually replies in 45 min",
+    distance: 3.0,
+    image_url: "images/jobs/hvac.jpg",
+    bio: "Mini-splits, furnace replacement, condensers, thermostats, and service calls.",
+    tags: ["Mini-split", "Service", "Install"],
+    licensed: true,
+    insured: true,
+    verified: true,
+    is_demo: true
+  },
+  {
+    id: "demo-contractor-deck",
+    name: "Summit Deck & Carpentry",
+    company: "Summit Deck & Carpentry",
+    trade: "Decks & Porches",
+    trades_full: "Decks & Porches, Carpentry, Patios",
+    city: "Wayne, NJ",
+    lat: 40.9254,
+    lng: -74.2765,
+    rating: 4.9,
+    reviews: 61,
+    projects_completed: 72,
+    response_time: "Usually replies in 35 min",
+    distance: 8.4,
+    image_url: "images/jobs/decks-porches.jpg",
+    bio: "Deck framing, composite decking, railings, stairs, porch repairs, and patios.",
+    tags: ["Composite", "Railings", "Framing"],
+    licensed: true,
+    insured: true,
+    verified: true,
+    is_demo: true
+  }
+];
+
+const DEMO_JOBS = [
+  {
+    id: "demo-job-roof",
+    title: "Roof Leak Near Chimney",
+    trade: "Roofing",
+    budget: "$2,500",
+    city: "Hackensack, NJ",
+    lat: 40.8859,
+    lng: -74.0435,
+    description: "Homeowner has a roof leak around chimney flashing. Needs inspection, repair, and photos of completed work.",
+    customer_name: "Customer",
+    rating: 5.0,
+    reviews: 3,
+    posted_ago: "Demo",
+    max_bids: 5,
+    bids: [{ amount: "$2,350", eta: "2 days", message: "Includes flashing repair and sealant." }],
+    verified: true,
+    is_demo: true
+  },
+  {
+    id: "demo-job-bath",
+    title: "Small Bathroom Remodel",
+    trade: "Bathroom Renovation",
+    budget: "$8,500",
+    city: "Paramus, NJ",
+    lat: 40.9445,
+    lng: -74.0754,
+    description: "Replace vanity, toilet, tile floor, medicine cabinet, lighting, and repaint bathroom.",
+    customer_name: "Customer",
+    rating: 4.9,
+    reviews: 5,
+    posted_ago: "Demo",
+    max_bids: 5,
+    bids: [],
+    verified: true,
+    featured: true,
+    is_demo: true
+  },
+  {
+    id: "demo-job-electric",
+    title: "Install Recessed Lighting",
+    trade: "Electrical",
+    budget: "$3,800",
+    city: "Teaneck, NJ",
+    lat: 40.8976,
+    lng: -74.0159,
+    description: "Install 10 recessed lights in living room and add dimmer switches.",
+    customer_name: "Customer",
+    rating: 5.0,
+    reviews: 4,
+    posted_ago: "Demo",
+    max_bids: 5,
+    bids: [{ amount: "$3,600", eta: "1 week", message: "Includes lights, wiring, and dimmers." }],
+    verified: true,
+    is_demo: true
+  },
+  {
+    id: "demo-job-paint",
+    title: "Paint 2-Bedroom Apartment",
+    trade: "Painting",
+    budget: "$4,500",
+    city: "Fair Lawn, NJ",
+    lat: 40.9404,
+    lng: -74.1318,
+    description: "Paint walls, ceilings, trim, and patch small holes before tenant move-in.",
+    customer_name: "Customer",
+    rating: 4.7,
+    reviews: 2,
+    posted_ago: "Demo",
+    max_bids: 5,
+    bids: [],
+    verified: true,
+    is_demo: true
+  },
+  {
+    id: "demo-job-kitchen",
+    title: "Kitchen Cabinet + Counter Refresh",
+    trade: "Kitchen Renovation",
+    budget: "$18,000",
+    city: "Clifton, NJ",
+    lat: 40.8584,
+    lng: -74.1638,
+    description: "Update cabinets, countertops, backsplash, sink, faucet, and under-cabinet lighting.",
+    customer_name: "Customer",
+    rating: 5.0,
+    reviews: 7,
+    posted_ago: "Demo",
+    max_bids: 5,
+    bids: [{ amount: "$17,800", eta: "3 weeks", message: "Cabinet, counter, backsplash package." }],
+    verified: true,
+    featured: true,
+    is_demo: true
+  },
+  {
+    id: "demo-job-flooring",
+    title: "Luxury Vinyl Flooring Install",
+    trade: "Flooring",
+    budget: "$6,200",
+    city: "Ridgewood, NJ",
+    lat: 40.9793,
+    lng: -74.1165,
+    description: "Install LVP flooring through living room, hallway, and two bedrooms. Existing carpet removal included.",
+    customer_name: "Customer",
+    rating: 4.8,
+    reviews: 4,
+    posted_ago: "Demo",
+    max_bids: 5,
+    bids: [],
+    verified: true,
+    is_demo: true
+  },
+  {
+    id: "demo-job-hvac",
+    title: "Mini-Split Install Estimate",
+    trade: "HVAC",
+    budget: "$7,800",
+    city: "Lodi, NJ",
+    lat: 40.8823,
+    lng: -74.0832,
+    description: "Need quote for ductless mini-split installation in finished basement.",
+    customer_name: "Customer",
+    rating: 4.9,
+    reviews: 6,
+    posted_ago: "Demo",
+    max_bids: 5,
+    bids: [],
+    verified: true,
+    is_demo: true
+  },
+  {
+    id: "demo-job-deck",
+    title: "Composite Deck Repair",
+    trade: "Decks & Porches",
+    budget: "$5,500",
+    city: "Wayne, NJ",
+    lat: 40.9254,
+    lng: -74.2765,
+    description: "Repair framing, replace damaged deck boards, update railings, and inspect stairs.",
+    customer_name: "Customer",
+    rating: 4.9,
+    reviews: 3,
+    posted_ago: "Demo",
+    max_bids: 5,
+    bids: [{ amount: "$5,250", eta: "10 days", message: "Deck repair and railing allowance included." }],
+    verified: true,
+    is_demo: true
+  }
+];
+
+
     let map;
     let contractors = [];
     let jobs = [];
@@ -2181,16 +2595,12 @@ async function getCurrentDataset() {
   let dataset = [];
 
   if (isDemo) {
-    // Demo mode should ALWAYS show sample/fake cards.
-    // If your old fake rows do not have is_demo=true yet, this falls back to the current loaded rows.
     if (mode === 'contractor') {
-      const demoJobs = jobs.filter(i => i.is_demo === true || String(i.id).startsWith("demo"));
-      dataset = (demoJobs.length ? demoJobs : jobs).map(i => ({ ...i, type: 'job' }));
+      dataset = DEMO_JOBS.map(i => ({ ...i, type: 'job' }));
     }
 
     if (mode === 'homeowner') {
-      const demoContractors = contractors.filter(i => i.is_demo === true || String(i.id).startsWith("demo"));
-      dataset = (demoContractors.length ? demoContractors : contractors).map(i => ({ ...i, type: 'contractor' }));
+      dataset = DEMO_CONTRACTORS.map(i => ({ ...i, type: 'contractor' }));
     }
   } else {
     const { data: { session } } = await supabaseClient.auth.getSession();
@@ -2539,7 +2949,8 @@ function formatCount() {
 
   const visibleCards = document.querySelectorAll('.listing-card').length;
 
-  const label = lockedRole === 'homeowner'
+  const mode = lockedRole || currentMode;
+  const label = mode === 'homeowner'
     ? 'contractors'
     : 'jobs';
 
@@ -2547,7 +2958,12 @@ function formatCount() {
     `${visibleCards} ${label} found`;
 }
 
-function getJobImage(trade) {
+function getJobImage(tradeOrItem) {
+  if (typeof tradeOrItem === "object" && tradeOrItem?.image_url) return tradeOrItem.image_url;
+  if (typeof tradeOrItem === "object" && tradeOrItem?.image) return tradeOrItem.image;
+
+  const trade = typeof tradeOrItem === "object" ? tradeOrItem.trade : tradeOrItem;
+
   const map = {
     'Kitchen Renovation': 'images/jobs/kitchen.jpg',
     'Bathroom Renovation': 'images/jobs/bathroom.jpg',
@@ -2710,12 +3126,17 @@ function getContractorImage(item) {
       const tradeLabel = getCompactTradeLabel(item);
       const displayCity = getDisplayCity(item);
       const imageSrc = getContractorImage(item);
+      const isDemo = item.is_demo === true;
+      const isFeatured = item.featured === true;
 
       return `
-              <img src="${imageSrc}" 
-             onerror="this.src='images/jobs/default.jpg'"
-             style="width:100%; height:116px; object-fit:cover; display:block;">
-             
+        <div class="card-image-wrap">
+          ${isDemo ? `<span class="demo-badge">Demo</span>` : ``}
+          ${isFeatured ? `<span class="featured-badge">Featured</span>` : ``}
+          <img src="${imageSrc}" 
+             onerror="this.src='images/jobs/default.jpg'">
+        </div>
+
         <div class="card-top">
           <div class="card-title-wrap">
             <h3 class="card-title">${anonymizeContractorName(item)}</h3>
@@ -2737,6 +3158,7 @@ function getContractorImage(item) {
           <div class="info-row">
             <span><strong>Response:</strong> ${item.response_time || '—'}</span>
             <span><strong>Reviews:</strong> ${item.reviews || 0}</span>
+            ${isDemo ? `<span class="demo-mini-tag">Sample profile</span>` : ``}
           </div>
           <div class="card-actions">
             <button class="mini-btn secondary" data-action="view" data-id="${item.id}">View</button>
@@ -2747,11 +3169,17 @@ function getContractorImage(item) {
     }
 
     function jobCardHtml(item) {
+      const isDemo = item.is_demo === true;
+      const isFeatured = item.featured === true;
+
       return `
-              <img src="${getJobImage(item.trade)}" 
-             onerror="this.src='images/jobs/default.jpg'"
-             style="width:100%; height:116px; object-fit:cover; display:block;">
-             
+        <div class="card-image-wrap">
+          ${isDemo ? `<span class="demo-badge">Demo Job</span>` : ``}
+          ${isFeatured ? `<span class="featured-badge">Hot Lead</span>` : ``}
+          <img src="${getJobImage(item)}" 
+             onerror="this.src='images/jobs/default.jpg'">
+        </div>
+
         <div class="card-top">
           <div class="card-title-wrap">
             <h3 class="card-title">${item.title}</h3>
@@ -2773,10 +3201,11 @@ function getContractorImage(item) {
           <div class="info-row">
             <span><strong>By:</strong> ${anonymizeCustomerName(item)}</span>
             <span><strong>Posted:</strong> ${item.posted_ago || 'Live'}</span>
+            ${isDemo ? `<span class="demo-mini-tag">Sample project</span>` : ``}
           </div>
           <div class="card-actions">
             <button class="mini-btn secondary" data-action="job-details" data-id="${item.id}">View</button>
-            <button class="mini-btn primary submit-bid-btn" onclick="openProjectRoom(${item.id})">Submit Bid</button>
+            <button class="mini-btn primary submit-bid-btn" onclick="openProjectRoom('${item.id}')">Submit Bid</button>
           </div>
         </div>
       `;
@@ -3448,7 +3877,7 @@ async function setMode(mode) {
     if (mode !== lockedRole) {
       showStatus(`Locked as ${lockedRole}`);
     }
-    mode = lockedRole; // 🔥 FORCE it no matter what
+    mode = lockedRole;
   }
 
   currentMode = mode;
@@ -3459,8 +3888,16 @@ async function setMode(mode) {
   window.history.replaceState({}, '', url);
 
   syncModeUI();
+
+  const isDemo = localStorage.getItem('revamplex_demo') === 'true';
+  if (isDemo) {
+    contractors = DEMO_CONTRACTORS.map(i => ({ ...i, type: 'contractor' }));
+    jobs = DEMO_JOBS.map(i => ({ ...i, type: 'job' }));
+  }
+
   const dataset = await getCurrentDataset();
-  activeId = dataset[0] ? dataset[0].id : null;
+  activeId = dataset[0] ? `${dataset[0].type}-${dataset[0].id}` : null;
+  __lastRenderKey = '';
   applyFilters();
   expandUI();
 }
@@ -3816,23 +4253,28 @@ async function loadLiveData() {
   isLoadingData = true;
 
   try {
-    const freshContractors = await loadContractors();
-    const freshJobs = await loadJobs();
+    const isDemo = localStorage.getItem('revamplex_demo') === 'true';
 
-    // 🔥 CLEAN ASSIGN (NO STACKING)
-contractors = Array.from(new Map(
-  freshContractors.map(i => [i.id, { ...i, type: 'contractor' }])
-).values());
+    if (isDemo) {
+      contractors = DEMO_CONTRACTORS.map(i => ({ ...i, type: 'contractor' }));
+      jobs = DEMO_JOBS.map(i => ({ ...i, type: 'job' }));
+    } else {
+      const freshContractors = await loadContractors();
+      const freshJobs = await loadJobs();
 
-jobs = Array.from(new Map(
-  freshJobs.map(i => [i.id, { ...i, type: 'job' }])
-).values());
+      contractors = Array.from(new Map(
+        freshContractors.map(i => [i.id, { ...i, type: 'contractor' }])
+      ).values());
+
+      jobs = Array.from(new Map(
+        freshJobs.map(i => [i.id, { ...i, type: 'job' }])
+      ).values());
+    }
 
     const dataset = await getCurrentDataset();
-    activeId = dataset[0] ? dataset[0].id : null;
+    activeId = dataset[0] ? `${dataset[0].type}-${dataset[0].id}` : null;
 
-// 🔥 ONLY ONE RENDER TRIGGER
-applyFilters();
+    applyFilters();
 
  } catch (err) {
   console.error("LOAD ERROR:", err);
@@ -3880,13 +4322,26 @@ function subscribeLive() {
 
   location.reload();
 });
-function exploreDemo() {
+async function exploreDemo() {
   welcomeOverlay.classList.add('hidden');
-  welcomeOverlay.style.display = 'none'; // 🔥 force remove from DOM flow
+  welcomeOverlay.style.display = 'none';
 
   localStorage.setItem('revamplex_demo', 'true');
+  lockedRole = null;
+  currentProfile = null;
 
-  setMode('homeowner');
+  homeownerModeBtn.style.display = '';
+  contractorModeBtn.style.display = '';
+  homeownerModeBtn.disabled = false;
+  contractorModeBtn.disabled = false;
+
+  currentMode = 'homeowner';
+  syncModeUI();
+
+  __lastRenderKey = '';
+  await loadLiveData();
+  applyFilters();
+
   showStatus('Demo mode');
 }
     welcomeSubmitBtn.addEventListener('click', submitWelcomeRegistration);
