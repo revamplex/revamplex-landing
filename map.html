@@ -298,106 +298,6 @@
   }
 }
 
-
-/* ===== REVAMP REAL ACCOUNT / PAYMENT / APPROVAL PATCH ===== */
-.account-warning {
-  margin: 10px 0 0;
-  padding: 10px 12px;
-  border-radius: 14px;
-  background: #fff7ed;
-  color: #9a3412;
-  border: 1px solid rgba(249,115,22,0.25);
-  font-size: 13px;
-  font-weight: 800;
-  line-height: 1.35;
-}
-.plan-grid { display:grid; grid-template-columns:1fr; gap:10px; margin:12px 0; }
-.plan-card { border:1px solid var(--line); border-radius:16px; padding:12px; background:#fff; }
-.plan-card strong { display:block; margin-bottom:4px; font-size:15px; }
-.plan-card span { display:block; color:var(--muted); font-size:12px; line-height:1.35; margin-bottom:8px; }
-.plan-card .mini-btn { width:100%; }
-
-
-/* ===== PREMIUM DEMO CARDS ===== */
-.demo-badge {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 6px 9px;
-  border-radius: 999px;
-  background: rgba(15, 23, 42, 0.86);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 18px rgba(15,23,42,.22);
-}
-
-.featured-badge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 9px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #f97316, #ea580c);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 900;
-  box-shadow: 0 8px 18px rgba(249,115,22,.28);
-}
-
-.card-image-wrap {
-  position: relative;
-  width: 100%;
-  height: 118px;
-  overflow: hidden;
-  background: #e2e8f0;
-}
-
-.card-image-wrap img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transform: scale(1.02);
-}
-
-.card-image-wrap::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(15,23,42,0.03), rgba(15,23,42,0.24));
-  pointer-events: none;
-}
-
-.demo-mini-tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 7px;
-  border-radius: 999px;
-  background: rgba(249,115,22,.10);
-  color: #c2410c;
-  font-size: 10px;
-  font-weight: 900;
-}
-
-.listing-card .card-title {
-  letter-spacing: -0.02em;
-}
-
-.card-inner {
-  position: relative;
-}
-
 </style>
   <style>
     :root {
@@ -1727,7 +1627,7 @@
         <div class="welcomeRolePill" id="welcomeRolePill">Homeowner Registration</div>
 
         <p class="welcomeNote" id="contractorTrialNote">
-          Pro Contractors get a 3-month free trial, but your profile will stay pending until Revamp LEX approves license and insurance.
+          Pro Contractors can browse and bid after signup. Billing and locking can be connected later.
         </p>
 
         <div class="welcomeGrid">
@@ -1800,24 +1700,6 @@
               <label class="welcomeLabel" for="welcomeBio">Company Bio</label>
               <textarea class="welcomeTextarea" id="welcomeBio" placeholder="Briefly describe your company and specialties..."></textarea>
             </div>
-
-            <div class="welcomeField">
-              <label class="welcomeLabel" for="welcomeInsuranceCompany">Insurance Company</label>
-              <input class="welcomeInput" id="welcomeInsuranceCompany" type="text" placeholder="Insurance company">
-            </div>
-            <div class="welcomeField">
-              <label class="welcomeLabel" for="welcomeInsuranceExpiration">Insurance Expiration</label>
-              <input class="welcomeInput" id="welcomeInsuranceExpiration" type="date">
-            </div>
-            <div class="welcomeField full">
-              <label class="welcomeLabel" for="welcomeLicenseFile">License Document</label>
-              <input class="welcomeInput" id="welcomeLicenseFile" type="file" accept=".pdf,.jpg,.jpeg,.png">
-            </div>
-            <div class="welcomeField full">
-              <label class="welcomeLabel" for="welcomeInsuranceFile">Insurance Certificate</label>
-              <input class="welcomeInput" id="welcomeInsuranceFile" type="file" accept=".pdf,.jpg,.jpeg,.png">
-            </div>
-
           </div>
         </div>
 
@@ -1838,7 +1720,6 @@
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let lockedRole = null;
-let currentProfile = null;
 
 async function checkUserSession() {
   const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
@@ -1850,7 +1731,6 @@ async function checkUserSession() {
   // not logged in
   if (!session || !session.user) {
     lockedRole = null;
-    currentProfile = null;
 
     authContainer.innerHTML = `
       <button onclick="openWelcomeAuth('login')" class="auth-btn">Login</button>
@@ -1871,16 +1751,13 @@ contractorModeBtn.disabled = false;
 window.__currentUserId = user.id;
   const { data: profile, error: profileError } = await supabaseClient
     .from('profiles')
-    .select('*')
+    .select('role,email')
     .eq('id', user.id)
     .maybeSingle();
 
   if (profileError) {
     console.error('profile load error', profileError);
   }
-
-  currentProfile = profile || null;
-
 let role = profile?.role;
 
 // 🔧 fallback if profile missing
@@ -2147,339 +2024,6 @@ if (profile.role === 'contractor') {
       'Water Damage Restoration','Windows'
     ];
     
-
-const DEMO_CONTRACTORS = [
-  {
-    id: "demo-contractor-roofing",
-    name: "RidgePro Roofing",
-    company: "RidgePro Roofing",
-    trade: "Roofing",
-    trades_full: "Roofing, Gutters, Siding",
-    city: "Hackensack, NJ",
-    lat: 40.8859,
-    lng: -74.0435,
-    rating: 4.9,
-    reviews: 86,
-    projects_completed: 124,
-    response_time: "Usually replies in 15 min",
-    distance: 2.1,
-    image_url: "images/jobs/roofing.jpg",
-    bio: "Roof repairs, full replacements, leak detection, gutters, and storm damage work.",
-    tags: ["Roof repair", "Shingles", "Gutters"],
-    licensed: true,
-    insured: true,
-    verified: true,
-    featured: true,
-    is_demo: true
-  },
-  {
-    id: "demo-contractor-plumbing",
-    name: "FlowRight Plumbing",
-    company: "FlowRight Plumbing",
-    trade: "Plumbing",
-    trades_full: "Plumbing, Water Damage Restoration",
-    city: "Paramus, NJ",
-    lat: 40.9445,
-    lng: -74.0754,
-    rating: 4.8,
-    reviews: 71,
-    projects_completed: 98,
-    response_time: "Usually replies in 25 min",
-    distance: 3.4,
-    image_url: "images/jobs/plumbing.jpg",
-    bio: "Leak repairs, fixture installs, drain issues, rough plumbing, and emergency service.",
-    tags: ["Leak repair", "Fixtures", "Rough plumbing"],
-    licensed: true,
-    insured: true,
-    verified: true,
-    is_demo: true
-  },
-  {
-    id: "demo-contractor-electrical",
-    name: "VoltWorks Electric",
-    company: "VoltWorks Electric",
-    trade: "Electrical",
-    trades_full: "Electrical, Lighting, Panels",
-    city: "Teaneck, NJ",
-    lat: 40.8976,
-    lng: -74.0159,
-    rating: 5.0,
-    reviews: 104,
-    projects_completed: 142,
-    response_time: "Usually replies in 10 min",
-    distance: 1.8,
-    image_url: "images/jobs/electrical.jpg",
-    bio: "Panel upgrades, recessed lighting, outlets, troubleshooting, and renovation wiring.",
-    tags: ["Panels", "Lighting", "Outlets"],
-    licensed: true,
-    insured: true,
-    verified: true,
-    featured: true,
-    is_demo: true
-  },
-  {
-    id: "demo-contractor-painting",
-    name: "PrimeCoat Painters",
-    company: "PrimeCoat Painters",
-    trade: "Painting",
-    trades_full: "Painting, Drywall & Insulation",
-    city: "Fair Lawn, NJ",
-    lat: 40.9404,
-    lng: -74.1318,
-    rating: 4.7,
-    reviews: 58,
-    projects_completed: 88,
-    response_time: "Usually replies in 1 hr",
-    distance: 4.2,
-    image_url: "images/jobs/painting.jpg",
-    bio: "Interior painting, patching, trim, accent walls, and apartment turnovers.",
-    tags: ["Interior", "Trim", "Patchwork"],
-    licensed: true,
-    insured: true,
-    verified: true,
-    is_demo: true
-  },
-  {
-    id: "demo-contractor-kitchen",
-    name: "NorthStar Remodelers",
-    company: "NorthStar Remodelers",
-    trade: "Kitchen Renovation",
-    trades_full: "Kitchen Renovation, Bathroom Renovation, Tile & Stone",
-    city: "Clifton, NJ",
-    lat: 40.8584,
-    lng: -74.1638,
-    rating: 4.9,
-    reviews: 93,
-    projects_completed: 76,
-    response_time: "Usually replies in 30 min",
-    distance: 5.0,
-    image_url: "images/jobs/kitchen.jpg",
-    bio: "Full kitchen and bath remodeling with tile, cabinetry, trim, and finish work.",
-    tags: ["Kitchens", "Bathrooms", "Tile"],
-    licensed: true,
-    insured: true,
-    verified: true,
-    featured: true,
-    is_demo: true
-  },
-  {
-    id: "demo-contractor-flooring",
-    name: "EverLevel Flooring",
-    company: "EverLevel Flooring",
-    trade: "Flooring",
-    trades_full: "Flooring, Tile & Stone",
-    city: "Ridgewood, NJ",
-    lat: 40.9793,
-    lng: -74.1165,
-    rating: 4.8,
-    reviews: 67,
-    projects_completed: 113,
-    response_time: "Usually replies same day",
-    distance: 6.1,
-    image_url: "images/jobs/flooring.jpg",
-    bio: "Vinyl plank, hardwood, tile floors, subfloor prep, and transitions.",
-    tags: ["LVP", "Hardwood", "Tile"],
-    licensed: true,
-    insured: true,
-    verified: true,
-    is_demo: true
-  },
-  {
-    id: "demo-contractor-hvac",
-    name: "ComfortLine HVAC",
-    company: "ComfortLine HVAC",
-    trade: "HVAC",
-    trades_full: "HVAC, Electrical",
-    city: "Lodi, NJ",
-    lat: 40.8823,
-    lng: -74.0832,
-    rating: 4.6,
-    reviews: 49,
-    projects_completed: 64,
-    response_time: "Usually replies in 45 min",
-    distance: 3.0,
-    image_url: "images/jobs/hvac.jpg",
-    bio: "Mini-splits, furnace replacement, condensers, thermostats, and service calls.",
-    tags: ["Mini-split", "Service", "Install"],
-    licensed: true,
-    insured: true,
-    verified: true,
-    is_demo: true
-  },
-  {
-    id: "demo-contractor-deck",
-    name: "Summit Deck & Carpentry",
-    company: "Summit Deck & Carpentry",
-    trade: "Decks & Porches",
-    trades_full: "Decks & Porches, Carpentry, Patios",
-    city: "Wayne, NJ",
-    lat: 40.9254,
-    lng: -74.2765,
-    rating: 4.9,
-    reviews: 61,
-    projects_completed: 72,
-    response_time: "Usually replies in 35 min",
-    distance: 8.4,
-    image_url: "images/jobs/decks-porches.jpg",
-    bio: "Deck framing, composite decking, railings, stairs, porch repairs, and patios.",
-    tags: ["Composite", "Railings", "Framing"],
-    licensed: true,
-    insured: true,
-    verified: true,
-    is_demo: true
-  }
-];
-
-const DEMO_JOBS = [
-  {
-    id: "demo-job-roof",
-    title: "Roof Leak Near Chimney",
-    trade: "Roofing",
-    budget: "$2,500",
-    city: "Hackensack, NJ",
-    lat: 40.8859,
-    lng: -74.0435,
-    description: "Homeowner has a roof leak around chimney flashing. Needs inspection, repair, and photos of completed work.",
-    customer_name: "Customer",
-    rating: 5.0,
-    reviews: 3,
-    posted_ago: "Demo",
-    max_bids: 5,
-    bids: [{ amount: "$2,350", eta: "2 days", message: "Includes flashing repair and sealant." }],
-    verified: true,
-    is_demo: true
-  },
-  {
-    id: "demo-job-bath",
-    title: "Small Bathroom Remodel",
-    trade: "Bathroom Renovation",
-    budget: "$8,500",
-    city: "Paramus, NJ",
-    lat: 40.9445,
-    lng: -74.0754,
-    description: "Replace vanity, toilet, tile floor, medicine cabinet, lighting, and repaint bathroom.",
-    customer_name: "Customer",
-    rating: 4.9,
-    reviews: 5,
-    posted_ago: "Demo",
-    max_bids: 5,
-    bids: [],
-    verified: true,
-    featured: true,
-    is_demo: true
-  },
-  {
-    id: "demo-job-electric",
-    title: "Install Recessed Lighting",
-    trade: "Electrical",
-    budget: "$3,800",
-    city: "Teaneck, NJ",
-    lat: 40.8976,
-    lng: -74.0159,
-    description: "Install 10 recessed lights in living room and add dimmer switches.",
-    customer_name: "Customer",
-    rating: 5.0,
-    reviews: 4,
-    posted_ago: "Demo",
-    max_bids: 5,
-    bids: [{ amount: "$3,600", eta: "1 week", message: "Includes lights, wiring, and dimmers." }],
-    verified: true,
-    is_demo: true
-  },
-  {
-    id: "demo-job-paint",
-    title: "Paint 2-Bedroom Apartment",
-    trade: "Painting",
-    budget: "$4,500",
-    city: "Fair Lawn, NJ",
-    lat: 40.9404,
-    lng: -74.1318,
-    description: "Paint walls, ceilings, trim, and patch small holes before tenant move-in.",
-    customer_name: "Customer",
-    rating: 4.7,
-    reviews: 2,
-    posted_ago: "Demo",
-    max_bids: 5,
-    bids: [],
-    verified: true,
-    is_demo: true
-  },
-  {
-    id: "demo-job-kitchen",
-    title: "Kitchen Cabinet + Counter Refresh",
-    trade: "Kitchen Renovation",
-    budget: "$18,000",
-    city: "Clifton, NJ",
-    lat: 40.8584,
-    lng: -74.1638,
-    description: "Update cabinets, countertops, backsplash, sink, faucet, and under-cabinet lighting.",
-    customer_name: "Customer",
-    rating: 5.0,
-    reviews: 7,
-    posted_ago: "Demo",
-    max_bids: 5,
-    bids: [{ amount: "$17,800", eta: "3 weeks", message: "Cabinet, counter, backsplash package." }],
-    verified: true,
-    featured: true,
-    is_demo: true
-  },
-  {
-    id: "demo-job-flooring",
-    title: "Luxury Vinyl Flooring Install",
-    trade: "Flooring",
-    budget: "$6,200",
-    city: "Ridgewood, NJ",
-    lat: 40.9793,
-    lng: -74.1165,
-    description: "Install LVP flooring through living room, hallway, and two bedrooms. Existing carpet removal included.",
-    customer_name: "Customer",
-    rating: 4.8,
-    reviews: 4,
-    posted_ago: "Demo",
-    max_bids: 5,
-    bids: [],
-    verified: true,
-    is_demo: true
-  },
-  {
-    id: "demo-job-hvac",
-    title: "Mini-Split Install Estimate",
-    trade: "HVAC",
-    budget: "$7,800",
-    city: "Lodi, NJ",
-    lat: 40.8823,
-    lng: -74.0832,
-    description: "Need quote for ductless mini-split installation in finished basement.",
-    customer_name: "Customer",
-    rating: 4.9,
-    reviews: 6,
-    posted_ago: "Demo",
-    max_bids: 5,
-    bids: [],
-    verified: true,
-    is_demo: true
-  },
-  {
-    id: "demo-job-deck",
-    title: "Composite Deck Repair",
-    trade: "Decks & Porches",
-    budget: "$5,500",
-    city: "Wayne, NJ",
-    lat: 40.9254,
-    lng: -74.2765,
-    description: "Repair framing, replace damaged deck boards, update railings, and inspect stairs.",
-    customer_name: "Customer",
-    rating: 4.9,
-    reviews: 3,
-    posted_ago: "Demo",
-    max_bids: 5,
-    bids: [{ amount: "$5,250", eta: "10 days", message: "Deck repair and railing allowance included." }],
-    verified: true,
-    is_demo: true
-  }
-];
-
-
     let map;
     let contractors = [];
     let jobs = [];
@@ -2589,32 +2133,16 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     }
 
 async function getCurrentDataset() {
-  const isDemo = localStorage.getItem('revamplex_demo') === 'true';
   const mode = lockedRole || currentMode;
 
   let dataset = [];
 
-  if (isDemo) {
-    if (mode === 'contractor') {
-      dataset = DEMO_JOBS.map(i => ({ ...i, type: 'job' }));
-    }
+  if (mode === 'contractor') {
+    dataset = jobs.map(i => ({ ...i, type: 'job' }));
+  }
 
-    if (mode === 'homeowner') {
-      dataset = DEMO_CONTRACTORS.map(i => ({ ...i, type: 'contractor' }));
-    }
-  } else {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-
-    // Real cards require login.
-    if (!session) return [];
-
-    if (mode === 'contractor') {
-      dataset = jobs.map(i => ({ ...i, type: 'job' }));
-    }
-
-    if (mode === 'homeowner') {
-      dataset = contractors.map(i => ({ ...i, type: 'contractor' }));
-    }
+  if (mode === 'homeowner') {
+    dataset = contractors.map(i => ({ ...i, type: 'contractor' }));
   }
 
   const seen = new Map();
@@ -2898,8 +2426,8 @@ function renderMarkers(items) {
       const card = document.querySelector(`.listing-card[data-id="${item.id}"]`);
       if (card) card.classList.add('hovered');
 
-      setActive(`${item.type}-${item.id}`, false);
-      scrollCardIntoView(`${item.type}-${item.id}`);
+      setActive(item.id, false);
+      scrollCardIntoView(item.id);
     });
 
     interactionLayer.on('mouseout', () => {
@@ -2912,8 +2440,8 @@ function renderMarkers(items) {
 
     interactionLayer.on('click', () => {
       selectedId = item.id;
-      setActive(`${item.type}-${item.id}`, true);
-      scrollCardIntoView(`${item.type}-${item.id}`);
+      setActive(item.id, true);
+      scrollCardIntoView(item.id);
 
       activeCircles.forEach(c => {
         if (c.setStyle) c.setStyle({ fillOpacity: 0.18 });
@@ -2949,8 +2477,7 @@ function formatCount() {
 
   const visibleCards = document.querySelectorAll('.listing-card').length;
 
-  const mode = lockedRole || currentMode;
-  const label = mode === 'homeowner'
+  const label = lockedRole === 'homeowner'
     ? 'contractors'
     : 'jobs';
 
@@ -2958,12 +2485,7 @@ function formatCount() {
     `${visibleCards} ${label} found`;
 }
 
-function getJobImage(tradeOrItem) {
-  if (typeof tradeOrItem === "object" && tradeOrItem?.image_url) return tradeOrItem.image_url;
-  if (typeof tradeOrItem === "object" && tradeOrItem?.image) return tradeOrItem.image;
-
-  const trade = typeof tradeOrItem === "object" ? tradeOrItem.trade : tradeOrItem;
-
+function getJobImage(trade) {
   const map = {
     'Kitchen Renovation': 'images/jobs/kitchen.jpg',
     'Bathroom Renovation': 'images/jobs/bathroom.jpg',
@@ -3126,17 +2648,12 @@ function getContractorImage(item) {
       const tradeLabel = getCompactTradeLabel(item);
       const displayCity = getDisplayCity(item);
       const imageSrc = getContractorImage(item);
-      const isDemo = item.is_demo === true;
-      const isFeatured = item.featured === true;
 
       return `
-        <div class="card-image-wrap">
-          ${isDemo ? `<span class="demo-badge">Demo</span>` : ``}
-          ${isFeatured ? `<span class="featured-badge">Featured</span>` : ``}
-          <img src="${imageSrc}" 
-             onerror="this.src='images/jobs/default.jpg'">
-        </div>
-
+              <img src="${imageSrc}" 
+             onerror="this.src='images/jobs/default.jpg'"
+             style="width:100%; height:116px; object-fit:cover; display:block;">
+             
         <div class="card-top">
           <div class="card-title-wrap">
             <h3 class="card-title">${anonymizeContractorName(item)}</h3>
@@ -3158,7 +2675,6 @@ function getContractorImage(item) {
           <div class="info-row">
             <span><strong>Response:</strong> ${item.response_time || '—'}</span>
             <span><strong>Reviews:</strong> ${item.reviews || 0}</span>
-            ${isDemo ? `<span class="demo-mini-tag">Sample profile</span>` : ``}
           </div>
           <div class="card-actions">
             <button class="mini-btn secondary" data-action="view" data-id="${item.id}">View</button>
@@ -3169,17 +2685,11 @@ function getContractorImage(item) {
     }
 
     function jobCardHtml(item) {
-      const isDemo = item.is_demo === true;
-      const isFeatured = item.featured === true;
-
       return `
-        <div class="card-image-wrap">
-          ${isDemo ? `<span class="demo-badge">Demo Job</span>` : ``}
-          ${isFeatured ? `<span class="featured-badge">Hot Lead</span>` : ``}
-          <img src="${getJobImage(item)}" 
-             onerror="this.src='images/jobs/default.jpg'">
-        </div>
-
+              <img src="${getJobImage(item.trade)}" 
+             onerror="this.src='images/jobs/default.jpg'"
+             style="width:100%; height:116px; object-fit:cover; display:block;">
+             
         <div class="card-top">
           <div class="card-title-wrap">
             <h3 class="card-title">${item.title}</h3>
@@ -3201,11 +2711,10 @@ function getContractorImage(item) {
           <div class="info-row">
             <span><strong>By:</strong> ${anonymizeCustomerName(item)}</span>
             <span><strong>Posted:</strong> ${item.posted_ago || 'Live'}</span>
-            ${isDemo ? `<span class="demo-mini-tag">Sample project</span>` : ``}
           </div>
           <div class="card-actions">
             <button class="mini-btn secondary" data-action="job-details" data-id="${item.id}">View</button>
-            <button class="mini-btn primary submit-bid-btn" onclick="openProjectRoom('${item.id}')">Submit Bid</button>
+            <button class="mini-btn primary submit-bid-btn" onclick="openProjectRoom(${item.id})">Submit Bid</button>
           </div>
         </div>
       `;
@@ -3462,9 +2971,7 @@ async function createJobFromForm() {
     verified: true,
     posted_ago: 'Just now',
     max_bids: 5,
-    type: 'job',
-    is_demo: false,
-    is_live: true
+    type: 'job'
   };
 
   const { error } = await supabaseClient.from('jobs').insert([payload]);
@@ -3494,28 +3001,21 @@ async function createJobFromForm() {
 
   window.location.href = `project-room.html?mode=homeowner&contractor=${contractorId}`;
 }
-function contractorCanAccess(profile){
-  if (!profile || profile.role !== "contractor") return true;
-  if (profile.account_status === "suspended") return false;
 
-  // Contractor must be manually approved before bidding.
-  if (profile.is_approved !== true && profile.can_go_live !== true) return false;
-
-  // Active paid subscription works.
-  if (profile.subscription_status === "active") return true;
-
-  // Trial works only before trial_end.
-  if (profile.trial_end && new Date(profile.trial_end) > new Date()) return true;
-
-  return false;
-}
-  async function openProjectRoom(jobId) {
+    async function openProjectRoom(jobId) {
   try {
     const isDemo = localStorage.getItem('revamplex_demo') === 'true';
+    const rawJobId = String(jobId || "");
+    const cleanJobId = rawJobId.replace(/^job-/, "");
 
-    const job = jobs.find(entry => String(entry.id) === String(jobId));
+    const job = jobs.find(entry =>
+      String(entry.id) === rawJobId ||
+      String(entry.id) === cleanJobId ||
+      `job-${entry.id}` === rawJobId
+    );
 
     if (!job) {
+      console.warn("Project room job not found:", { rawJobId, cleanJobId, jobs });
       alert("Job not found. Refresh the page and try again.");
       return;
     }
@@ -3527,7 +3027,7 @@ function contractorCanAccess(profile){
         JSON.stringify(getSafeJobSessionItem(job))
       );
 
-      window.location.href = `project-room.html?mode=demo&job=${jobId}`;
+      window.location.href = `project-room.html?mode=demo&job=${encodeURIComponent(job.id)}`;
       return;
     }
 
@@ -3578,7 +3078,7 @@ function contractorCanAccess(profile){
       return;
     }
 
-    window.location.href = `project-room.html?mode=contractor&job=${jobId}`;
+    window.location.href = `project-room.html?mode=contractor&job=${encodeURIComponent(job.id)}`;
   } catch (err) {
     console.error("OPEN PROJECT ROOM ERROR:", err);
     alert(err.message || "Could not open project room.");
@@ -3586,63 +3086,32 @@ function contractorCanAccess(profile){
 }
     
     async function submitBid(jobId) {
-  try {
-    const { data: { user } } = await supabaseClient.auth.getUser();
+      try {
+        const amount = prompt("Enter your bid amount:");
+        if (!amount) return;
+        const message = prompt("Add a message (optional):") || "";
 
-    if (!user) {
-      alert("Please log in as a contractor before submitting a bid.");
-      openWelcomeAuth("login");
-      return;
+        const { error } = await supabaseClient.from('bids').insert([{
+          job_id: jobId,
+contractor_id: 'demo-contractor',
+contractor_name: 'Verified Contractor',
+          amount: amount,
+          message: message,
+          eta: 'TBD'
+        }]);
+
+        if (error) {
+          console.error(error);
+          alert('Error submitting bid');
+          return;
+        }
+
+        showStatus('Bid submitted');
+        await loadLiveData();
+      } catch (err) {
+        console.error(err);
+      }
     }
-
-    if (!currentProfile) {
-      const { data: profile } = await supabaseClient
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle();
-
-      currentProfile = profile || null;
-    }
-
-    if (!currentProfile || currentProfile.role !== "contractor") {
-      alert("Only contractors can submit bids.");
-      return;
-    }
-
-    if (!contractorCanAccess(currentProfile)) {
-      alert("Your contractor account must be approved and have an active trial or subscription before bidding.");
-      openDashboard();
-      return;
-    }
-
-    const amount = prompt("Enter your bid amount:");
-    if (!amount) return;
-
-    const message = prompt("Add a message (optional):") || "";
-
-    const { error } = await supabaseClient.from('bids').insert([{
-      job_id: jobId,
-      contractor_id: user.id,
-      contractor_name: currentProfile.company || currentProfile.full_name || currentProfile.name || "Verified Contractor",
-      amount: amount,
-      message: message,
-      eta: 'TBD'
-    }]);
-
-    if (error) {
-      console.error(error);
-      alert(error.message || 'Error submitting bid');
-      return;
-    }
-
-    showStatus('Bid submitted');
-    await loadLiveData();
-  } catch (err) {
-    console.error(err);
-    alert(err.message || "Could not submit bid.");
-  }
-}
 function canEditItem(item) {
   const currentUserId = window.__currentUserId || null;
   if (!currentUserId || !item) return false;
@@ -3739,7 +3208,9 @@ const bidsHtml = visibleBids.length
     }
 
    function handleCardAction(action, id) {
-  const cleanId = String(id).replace('contractor-', '').replace('job-', '');
+  const rawId = String(id || "");
+  const cleanId = rawId.replace(/^contractor-/, '').replace(/^job-/, '');
+  const isDemo = localStorage.getItem('revamplex_demo') === 'true';
 
   if (action === 'edit') {
     openEditModal(cleanId);
@@ -3747,16 +3218,54 @@ const bidsHtml = visibleBids.length
   }
 
   if (action === 'view' || action === 'job-details') {
-    const item = [...contractors, ...jobs].find(entry => String(entry.id) === cleanId);
-    if (item) openDetailModal(item);
+    // IMPORTANT: demo IDs contain words like "demo-contractor-roofing".
+    // Do NOT strip every "contractor-" or "job-" inside the ID.
+    const item = [...contractors, ...jobs].find(entry =>
+      String(entry.id) === rawId ||
+      String(entry.id) === cleanId ||
+      `${entry.type}-${entry.id}` === rawId
+    );
+
+    if (item) {
+      openDetailModal(item);
+    } else {
+      console.warn("View item not found:", { action, id, rawId, cleanId, contractors, jobs });
+      showStatus("Could not open details");
+    }
     return;
   }
 
   if (action === 'message') {
-    const contractor = contractors.find(c => String(c.id) === cleanId);
+    const contractor = contractors.find(c =>
+      String(c.id) === rawId ||
+      String(c.id) === cleanId ||
+      `contractor-${c.id}` === rawId
+    );
 
     if (!contractor) {
       showStatus("Contractor not found");
+      return;
+    }
+
+    // In demo mode, let visitors preview homeowner project room without login.
+    if (isDemo) {
+      const matchingJob = DEMO_JOBS.find(job =>
+        String(job.trade || '').toLowerCase().trim() === String(contractor.trade || '').toLowerCase().trim()
+      ) || DEMO_JOBS[0];
+
+      sessionStorage.setItem(
+        'revampSelectedContractor',
+        JSON.stringify(getSafeContractorSessionItem(contractor))
+      );
+
+      sessionStorage.setItem(
+        'revampSelectedJob',
+        JSON.stringify(getSafeJobSessionItem(matchingJob))
+      );
+
+      window.location.assign(
+        `project-room.html?mode=demo&contractor=${contractor.id}&job=${matchingJob.id}`
+      );
       return;
     }
 
@@ -3877,7 +3386,7 @@ async function setMode(mode) {
     if (mode !== lockedRole) {
       showStatus(`Locked as ${lockedRole}`);
     }
-    mode = lockedRole;
+    mode = lockedRole; // 🔥 FORCE it no matter what
   }
 
   currentMode = mode;
@@ -3888,16 +3397,8 @@ async function setMode(mode) {
   window.history.replaceState({}, '', url);
 
   syncModeUI();
-
-  const isDemo = localStorage.getItem('revamplex_demo') === 'true';
-  if (isDemo) {
-    contractors = DEMO_CONTRACTORS.map(i => ({ ...i, type: 'contractor' }));
-    jobs = DEMO_JOBS.map(i => ({ ...i, type: 'job' }));
-  }
-
   const dataset = await getCurrentDataset();
-  activeId = dataset[0] ? `${dataset[0].type}-${dataset[0].id}` : null;
-  __lastRenderKey = '';
+  activeId = dataset[0] ? dataset[0].id : null;
   applyFilters();
   expandUI();
 }
@@ -4071,177 +3572,64 @@ async function saveEdit(id, type) {
 }
 
     async function loadJobs() {
-  const isDemo = localStorage.getItem('revamplex_demo') === 'true';
-
-  if (isDemo) {
-    // Try true demo rows first. If none are marked yet, fall back to older fake/sample jobs.
-    let { data: demoRows, error: demoError } = await supabaseClient
-      .from('jobs')
-      .select('*')
-      .eq('is_demo', true)
-      .order('created_at', { ascending: false });
-
-    if (demoError) {
-      console.warn('demo jobs filter failed, falling back:', demoError);
-      demoRows = [];
-    }
-
-    let rows = demoRows || [];
-
-    if (!rows.length) {
-      const fallback = await supabaseClient
+      const { data, error } = await supabaseClient
         .from('jobs')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (fallback.error) {
-        console.error('jobs demo fallback load error', fallback.error);
+      if (error) {
+        console.error('jobs load error', error);
         return [];
       }
 
-      rows = fallback.data || [];
-    }
+      const rows = data || [];
+      const ids = rows.map(r => r.id);
+      let bidsByJob = {};
 
-    const ids = rows.map(r => r.id);
-    let bidsByJob = {};
+      if (ids.length) {
+        const { data: bidRows, error: bidError } = await supabaseClient
+          .from('bids')
+          .select('*')
+          .in('job_id', ids)
+          .order('created_at', { ascending: true });
 
-    if (ids.length) {
-      const { data: bidRows, error: bidError } = await supabaseClient
-        .from('bids')
-        .select('*')
-        .in('job_id', ids)
-        .order('created_at', { ascending: true });
-
-      if (!bidError && bidRows) {
-        bidsByJob = bidRows.reduce((acc, bid) => {
-          if (!acc[bid.job_id]) acc[bid.job_id] = [];
-          acc[bid.job_id].push(bid);
-          return acc;
-        }, {});
+        if (!bidError && bidRows) {
+          bidsByJob = bidRows.reduce((acc, bid) => {
+            if (!acc[bid.job_id]) acc[bid.job_id] = [];
+            acc[bid.job_id].push(bid);
+            return acc;
+          }, {});
+        }
       }
+
+      return rows.map(item => ({
+        ...item,
+        bids: bidsByJob[item.id] || [],
+        type: 'job'
+      }));
     }
-
-    return rows.map(item => ({
-      ...item,
-      bids: bidsByJob[item.id] || [],
-      type: 'job'
-    }));
-  }
-
-  let query = supabaseClient
-    .from('jobs')
-    .select('*')
-    .eq('is_live', true)
-    .order('created_at', { ascending: false });
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error('jobs load error', error);
-    return [];
-  }
-
-  const rows = data || [];
-  const ids = rows.map(r => r.id);
-  let bidsByJob = {};
-
-  if (ids.length) {
-    const { data: bidRows, error: bidError } = await supabaseClient
-      .from('bids')
-      .select('*')
-      .in('job_id', ids)
-      .order('created_at', { ascending: true });
-
-    if (!bidError && bidRows) {
-      bidsByJob = bidRows.reduce((acc, bid) => {
-        if (!acc[bid.job_id]) acc[bid.job_id] = [];
-        acc[bid.job_id].push(bid);
-        return acc;
-      }, {});
-    }
-  }
-
-  return rows.map(item => ({
-    ...item,
-    bids: bidsByJob[item.id] || [],
-    type: 'job'
-  }));
-}
 async function loadContractors() {
-  const isDemo = localStorage.getItem('revamplex_demo') === 'true';
-
-  let query = supabaseClient
+  const { data, error } = await supabaseClient
     .from('contractors')
     .select('*');
-
-  if (isDemo) {
-    // Try true demo rows first. If none are marked yet, fall back to older fake/sample contractor rows.
-    const { data: demoData, error: demoError } = await query.eq('is_demo', true);
-
-    if (!demoError && demoData && demoData.length) {
-      return demoData.map(item => {
-        const publicLocation = getPublicLocation(item);
-        return {
-          ...item,
-          city: publicLocation,
-          location: publicLocation,
-          address: '',
-          private_address: '',
-          trades_full: item.trades_full || item.trade || '',
-          trade: item.trade || item.trades_full || 'General Contractors',
-          type: 'contractor'
-        };
-      });
-    }
-
-    // Fallback: old demo cards may not have is_demo=true.
-    const { data: allData, error: allError } = await supabaseClient.from('contractors').select('*');
-    if (allError) {
-      console.error('contractors demo fallback load error', allError);
-      return [];
-    }
-
-    return (allData || []).map(item => {
-      const publicLocation = getPublicLocation(item);
-      return {
-        ...item,
-        city: publicLocation,
-        location: publicLocation,
-        address: '',
-        private_address: '',
-        trades_full: item.trades_full || item.trade || '',
-        trade: item.trade || item.trades_full || 'General Contractors',
-        type: 'contractor'
-      };
-    });
-  }
-
-  query = query
-    .eq('is_approved', true)
-    .eq('can_go_live', true)
-    .neq('account_status', 'suspended');
-
-  const { data, error } = await query;
 
   if (error) {
     console.error('contractors load error', error);
     return [];
   }
 
-  return (data || []).filter(item => {
-    if (item.subscription_status === "active") return true;
-    if (item.trial_end && new Date(item.trial_end) > new Date()) return true;
-    return false;
-  }).map(item => {
+  return (data || []).map(item => {
     const publicLocation = getPublicLocation(item);
 
     return {
       ...item,
+      // PUBLIC DISPLAY ONLY — never expose exact street address on cards/modals.
       city: publicLocation,
       location: publicLocation,
       address: '',
       private_address: '',
       trades_full: item.trades_full || item.trade || '',
+      // keep full trade data here; small cards shorten it with getCompactTradeLabel()
       trade: item.trade || item.trades_full || 'General Contractors',
       type: 'contractor'
     };
@@ -4253,28 +3641,23 @@ async function loadLiveData() {
   isLoadingData = true;
 
   try {
-    const isDemo = localStorage.getItem('revamplex_demo') === 'true';
+    const freshContractors = await loadContractors();
+    const freshJobs = await loadJobs();
 
-    if (isDemo) {
-      contractors = DEMO_CONTRACTORS.map(i => ({ ...i, type: 'contractor' }));
-      jobs = DEMO_JOBS.map(i => ({ ...i, type: 'job' }));
-    } else {
-      const freshContractors = await loadContractors();
-      const freshJobs = await loadJobs();
+    // 🔥 CLEAN ASSIGN (NO STACKING)
+contractors = Array.from(new Map(
+  freshContractors.map(i => [i.id, { ...i, type: 'contractor' }])
+).values());
 
-      contractors = Array.from(new Map(
-        freshContractors.map(i => [i.id, { ...i, type: 'contractor' }])
-      ).values());
-
-      jobs = Array.from(new Map(
-        freshJobs.map(i => [i.id, { ...i, type: 'job' }])
-      ).values());
-    }
+jobs = Array.from(new Map(
+  freshJobs.map(i => [i.id, { ...i, type: 'job' }])
+).values());
 
     const dataset = await getCurrentDataset();
-    activeId = dataset[0] ? `${dataset[0].type}-${dataset[0].id}` : null;
+    activeId = dataset[0] ? dataset[0].id : null;
 
-    applyFilters();
+// 🔥 ONLY ONE RENDER TRIGGER
+applyFilters();
 
  } catch (err) {
   console.error("LOAD ERROR:", err);
@@ -4322,26 +3705,13 @@ function subscribeLive() {
 
   location.reload();
 });
-async function exploreDemo() {
+function exploreDemo() {
   welcomeOverlay.classList.add('hidden');
-  welcomeOverlay.style.display = 'none';
+  welcomeOverlay.style.display = 'none'; // 🔥 force remove from DOM flow
 
   localStorage.setItem('revamplex_demo', 'true');
-  lockedRole = null;
-  currentProfile = null;
 
-  homeownerModeBtn.style.display = '';
-  contractorModeBtn.style.display = '';
-  homeownerModeBtn.disabled = false;
-  contractorModeBtn.disabled = false;
-
-  currentMode = 'homeowner';
-  syncModeUI();
-
-  __lastRenderKey = '';
-  await loadLiveData();
-  applyFilters();
-
+  setMode('homeowner');
   showStatus('Demo mode');
 }
     welcomeSubmitBtn.addEventListener('click', submitWelcomeRegistration);
