@@ -2628,6 +2628,48 @@ const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ===== ROLE ENFORCEMENT ADDED ===== */
+async function enforceProjectRoomRole() {
+  const params = new URLSearchParams(window.location.search);
+  const roomMode = params.get("mode") || "homeowner";
+  const jobId = params.get("job");
+
+  const { data: { user } } = await supabaseClient.auth.getUser();
+
+  if (!user) {
+    if (roomMode !== "demo") {
+      window.location.href = `project-room.html?mode=homeowner&job=${jobId}`;
+    }
+    return;
+  }
+
+  const { data: profile } = await supabaseClient
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    window.location.href = "dashboard.html";
+    return;
+  }
+
+  const realRole = profile.role;
+
+  if (realRole === "homeowner" && roomMode === "contractor") {
+    window.location.href = `project-room.html?mode=homeowner&job=${jobId}`;
+    return;
+  }
+
+  if (realRole === "contractor" && roomMode === "homeowner") {
+    window.location.href = `project-room.html?mode=contractor&job=${jobId}`;
+    return;
+  }
+
+  enforceProjectRoomRole();
+}
+
   checkAuth();
 const urlParams = new URLSearchParams(window.location.search);
 const jobId = urlParams.get('job');
@@ -3583,7 +3625,7 @@ function submitBid(){
 
 /* ---------- INIT ---------- */
 
-applyWorkspaceMode();
+enforceProjectRoomRole();
 
 buildTradeQuickMenu();
 selectCalculator("tile");
