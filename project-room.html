@@ -2492,16 +2492,20 @@ body.contractor-view .contractor-tools {
             </div>
           </div>
 
-  <section class="panel" id="photoDocsPanel">
+  
+</section>
+</div>
+
+<section class="panel shared-docs-panel" id="photoDocsPanel">
           <div class="panel-header">
             <div>
               <h3>Photos + Documentation</h3>
-              <p>Upload before photos, walkthrough videos, plans, permits, and marked-up screenshots.</p>
+              <p>Shared project files for both homeowner and contractor. Upload before photos, walkthrough videos, plans, permits, estimates, and approvals.</p>
             </div>
           </div>
 
           <div class="summary-box" style="margin-bottom:16px;">
-            <h4 style="margin-top:0;">Upload Project Files</h4>
+            <h4 style="margin-top:0;">Shared Project Files</h4>
             <input type="file" id="projectFileUpload" accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx" multiple>
             <button class="btn btn-primary" onclick="uploadProjectFiles()" style="margin-top:10px;">
               Upload Files
@@ -2523,9 +2527,14 @@ body.contractor-view .contractor-tools {
               <div class="photo-placeholder">Estimate PDF, permit, signed contract</div>
             </div>
           </div>
+
+          <div class="summary-box" style="margin-top:16px;">
+            <h4 style="margin-top:0;">Uploaded Shared Files</h4>
+            <p style="color:var(--muted);margin-top:0;">Files uploaded here should be visible and downloadable to both the homeowner and contractor in this Project Room.</p>
+            <div id="sharedFileList" class="appointment-empty">No shared files uploaded yet.</div>
+          </div>
         </section>
-</section>
-</div>
+
 <section class="panel" id="signaturePanel">
           <div class="panel-header">
             <div>
@@ -4243,24 +4252,87 @@ async function uploadProjectFiles(){
 
   status.innerText = "Uploading...";
 
+  const uploadedFiles = JSON.parse(sessionStorage.getItem("revampProjectRoomFiles") || "[]");
+
   for(const file of files){
 
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
     const fileName = `${Date.now()}-${safeName}`;
 
-    const { error } = await supabaseClient.storage
-      .from("project-files")
-      .upload(fileName, file);
+    let downloadableUrl = "";
 
-    if(error){
-      console.error("UPLOAD ERROR:", error);
-      status.innerText = "Upload failed: " + error.message;
+    try {
+      const { error } = await supabaseClient.storage
+        .from("project-files")
+        .upload(fileName, file);
+
+      if(error){
+        console.error("UPLOAD ERROR:", error);
+        status.innerText = "Upload failed: " + error.message;
+        return;
+      }
+
+      const publicUrlData = supabaseClient.storage
+        .from("project-files")
+        .getPublicUrl(fileName);
+
+      downloadableUrl = publicUrlData?.data?.publicUrl || "";
+
+    } catch(err) {
+      console.error("UPLOAD ERROR:", err);
+      status.innerText = "Upload failed. Check Console.";
       return;
     }
+
+    uploadedFiles.push({
+      name: file.name,
+      storedName: fileName,
+      type: file.type || "file",
+      size: file.size || 0,
+      url: downloadableUrl,
+      uploadedAt: new Date().toLocaleString(),
+      uploadedBy: mode === "contractor" ? "Contractor" : "Homeowner"
+    });
   }
 
+  sessionStorage.setItem("revampProjectRoomFiles", JSON.stringify(uploadedFiles));
+
   status.innerText = "Upload complete ✔";
+  fileInput.value = "";
+
+  renderSharedProjectFiles();
 }
+
+function renderSharedProjectFiles(){
+  const list = document.getElementById("sharedFileList");
+  if (!list) return;
+
+  const files = JSON.parse(sessionStorage.getItem("revampProjectRoomFiles") || "[]");
+
+  if (!files.length) {
+    list.className = "appointment-empty";
+    list.innerHTML = "No shared files uploaded yet.";
+    return;
+  }
+
+  list.className = "";
+  list.innerHTML = files.map(file => {
+    const sizeKb = file.size ? Math.round(file.size / 1024).toLocaleString() + " KB" : "File";
+    const link = file.url
+      ? `<a class="btn btn-soft" href="${file.url}" target="_blank" download>View / Download</a>`
+      : `<span style="color:var(--muted);font-weight:700;">Uploaded</span>`;
+
+    return `
+      <div class="task-item">
+        <strong>${escapeHTML(file.name)}</strong>
+        <span>${escapeHTML(file.uploadedBy || "User")} • ${escapeHTML(file.uploadedAt || "")} • ${escapeHTML(sizeKb)}</span>
+        <div style="margin-top:10px;">${link}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+document.addEventListener("DOMContentLoaded", renderSharedProjectFiles);
 
 
 
