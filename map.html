@@ -1757,6 +1757,7 @@
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let lockedRole = null;
+let currentProfile = null;
 
 async function checkUserSession() {
   const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
@@ -1768,6 +1769,7 @@ async function checkUserSession() {
   // not logged in
   if (!session || !session.user) {
     lockedRole = null;
+    currentProfile = null;
 
     authContainer.innerHTML = `
       <button onclick="openWelcomeAuth('login')" class="auth-btn">Login</button>
@@ -1795,6 +1797,9 @@ window.__currentUserId = user.id;
   if (profileError) {
     console.error('profile load error', profileError);
   }
+
+  currentProfile = profile || null;
+
 let role = profile?.role;
 
 // 🔧 fallback if profile missing
@@ -2170,16 +2175,32 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     }
 
 async function getCurrentDataset() {
+  const isDemo = localStorage.getItem('revamplex_demo') === 'true';
   const mode = lockedRole || currentMode;
 
   let dataset = [];
 
-  if (mode === 'contractor') {
-    dataset = jobs.map(i => ({ ...i, type: 'job' }));
-  }
+  if (isDemo) {
+    if (mode === 'contractor') {
+      dataset = jobs.filter(i => i.is_demo === true || String(i.id).startsWith("demo")).map(i => ({ ...i, type: 'job' }));
+    }
 
-  if (mode === 'homeowner') {
-    dataset = contractors.map(i => ({ ...i, type: 'contractor' }));
+    if (mode === 'homeowner') {
+      dataset = contractors.filter(i => i.is_demo === true || String(i.id).startsWith("demo")).map(i => ({ ...i, type: 'contractor' }));
+    }
+  } else {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+
+    // Real cards require login.
+    if (!session) return [];
+
+    if (mode === 'contractor') {
+      dataset = jobs.map(i => ({ ...i, type: 'job' }));
+    }
+
+    if (mode === 'homeowner') {
+      dataset = contractors.map(i => ({ ...i, type: 'contractor' }));
+    }
   }
 
   const seen = new Map();
@@ -2463,8 +2484,8 @@ function renderMarkers(items) {
       const card = document.querySelector(`.listing-card[data-id="${item.id}"]`);
       if (card) card.classList.add('hovered');
 
-      setActive(item.id, false);
-      scrollCardIntoView(item.id);
+      setActive(`${item.type}-${item.id}`, false);
+      scrollCardIntoView(`${item.type}-${item.id}`);
     });
 
     interactionLayer.on('mouseout', () => {
@@ -2477,8 +2498,8 @@ function renderMarkers(items) {
 
     interactionLayer.on('click', () => {
       selectedId = item.id;
-      setActive(item.id, true);
-      scrollCardIntoView(item.id);
+      setActive(`${item.type}-${item.id}`, true);
+      scrollCardIntoView(`${item.type}-${item.id}`);
 
       activeCircles.forEach(c => {
         if (c.setStyle) c.setStyle({ fillOpacity: 0.18 });
@@ -2770,7 +2791,7 @@ function renderCards(items) {
     cardsRow.innerHTML = `
       <div class="listing-card">
         <div style="padding:22px;text-align:center;">
-          <div style="font-size:17px;font-weight:900;margin-bottom:8px;">No results found</div>
+          <div style="font-size:17px;font-weight:900;margin-bottom:8px;">No results found</div><div style="font-size:13px;color:#64748b;line-height:1.4;">If you are in demo mode, make sure your fake rows have is_demo = true.</div>
         </div>
       </div>
     `;
@@ -3008,7 +3029,9 @@ async function createJobFromForm() {
     verified: true,
     posted_ago: 'Just now',
     max_bids: 5,
-    type: 'job'
+    type: 'job',
+    is_demo: false,
+    is_live: true
   };
 
   const { error } = await supabaseClient.from('jobs').insert([payload]);
@@ -3041,61 +3064,139 @@ async function createJobFromForm() {
 function contractorCanAccess(profile){
   if (!profile || profile.role !== "contractor") return true;
   if (profile.account_status === "suspended") return false;
-  if (profile.is_approved !== true) return false;
+
+  // Contractor must be manually approved before bidding.
+  if (profile.is_approved !== true && profile.can_go_live !== true) return false;
+
+  // Active paid subscription works.
   if (profile.subscription_status === "active") return true;
+
+  // Trial works only before trial_end.
   if (profile.trial_end && new Date(profile.trial_end) > new Date()) return true;
+
   return false;
 }
-  function openProjectRoom(jobId) {
-  if (lockedRole === "contractor" && currentProfile && !contractorCanAccess(currentProfile)) {
-    if (currentProfile.is_approved !== true) {
-      alert("Your contractor account is pending Revamp LEX approval. You cannot submit bids until your license and insurance are approved.");
+  async function openProjectRoom(jobId) {
+  try {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+
+    if (!user) {
+      alert("Please log in as a contractor before submitting a bid.");
+      openWelcomeAuth("login");
+      return;
+    }
+
+    if (!currentProfile) {
+      const { data: profile, error: profileError } = await supabaseClient
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error("PROFILE LOAD ERROR:", profileError);
+        alert(profileError.message);
+        return;
+      }
+
+      currentProfile = profile || null;
+    }
+
+    if (!currentProfile) {
+      alert("No profile found. Please complete your account setup.");
+      goToDashboard();
+      return;
+    }
+
+    if (currentProfile.role !== "contractor") {
+      alert("Only contractor accounts can submit bids.");
+      return;
+    }
+
+    if (!contractorCanAccess(currentProfile)) {
+      if (currentProfile.is_approved !== true && currentProfile.can_go_live !== true) {
+        alert("Your contractor account is pending Revamp LEX approval. You cannot submit bids until your license and insurance are approved.");
+        openDashboard();
+        return;
+      }
+
+      alert("Your contractor trial/payment access is not active. Please choose a subscription plan.");
       openDashboard();
       return;
     }
 
-    alert("Your contractor trial/payment access is not active. Please choose a subscription plan.");
-    openDashboard();
-    return;
+    const job = jobs.find(entry => String(entry.id) === String(jobId));
+
+    if (!job) {
+      alert("Job not found. Refresh the page and try again.");
+      return;
+    }
+
+    window.location.href = `project-room.html?mode=contractor&job=${jobId}`;
+  } catch (err) {
+    console.error("OPEN PROJECT ROOM ERROR:", err);
+    alert(err.message || "Could not open project room.");
   }
-
-  const job = jobs.find(entry => String(entry.id) === String(jobId));
-
-  if (!job) {
-    alert("Job not found");
-    return;
-  }
-
-  window.location.href = `project-room.html?mode=contractor&job=${jobId}`;
 }
     
     async function submitBid(jobId) {
-      try {
-        const amount = prompt("Enter your bid amount:");
-        if (!amount) return;
-        const message = prompt("Add a message (optional):") || "";
+  try {
+    const { data: { user } } = await supabaseClient.auth.getUser();
 
-        const { error } = await supabaseClient.from('bids').insert([{
-          job_id: jobId,
-contractor_id: 'demo-contractor',
-contractor_name: 'Verified Contractor',
-          amount: amount,
-          message: message,
-          eta: 'TBD'
-        }]);
-
-        if (error) {
-          console.error(error);
-          alert('Error submitting bid');
-          return;
-        }
-
-        showStatus('Bid submitted');
-        await loadLiveData();
-      } catch (err) {
-        console.error(err);
-      }
+    if (!user) {
+      alert("Please log in as a contractor before submitting a bid.");
+      openWelcomeAuth("login");
+      return;
     }
+
+    if (!currentProfile) {
+      const { data: profile } = await supabaseClient
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      currentProfile = profile || null;
+    }
+
+    if (!currentProfile || currentProfile.role !== "contractor") {
+      alert("Only contractors can submit bids.");
+      return;
+    }
+
+    if (!contractorCanAccess(currentProfile)) {
+      alert("Your contractor account must be approved and have an active trial or subscription before bidding.");
+      openDashboard();
+      return;
+    }
+
+    const amount = prompt("Enter your bid amount:");
+    if (!amount) return;
+
+    const message = prompt("Add a message (optional):") || "";
+
+    const { error } = await supabaseClient.from('bids').insert([{
+      job_id: jobId,
+      contractor_id: user.id,
+      contractor_name: currentProfile.company || currentProfile.full_name || currentProfile.name || "Verified Contractor",
+      amount: amount,
+      message: message,
+      eta: 'TBD'
+    }]);
+
+    if (error) {
+      console.error(error);
+      alert(error.message || 'Error submitting bid');
+      return;
+    }
+
+    showStatus('Bid submitted');
+    await loadLiveData();
+  } catch (err) {
+    console.error(err);
+    alert(err.message || "Could not submit bid.");
+  }
+}
 function canEditItem(item) {
   const currentUserId = window.__currentUserId || null;
   if (!currentUserId || !item) return false;
@@ -3516,64 +3617,90 @@ async function saveEdit(id, type) {
 }
 
     async function loadJobs() {
-      const { data, error } = await supabaseClient
-        .from('jobs')
-        .select('*')
-        .order('created_at', { ascending: false });
+  const isDemo = localStorage.getItem('revamplex_demo') === 'true';
 
-      if (error) {
-        console.error('jobs load error', error);
-        return [];
-      }
+  let query = supabaseClient
+    .from('jobs')
+    .select('*')
+    .order('created_at', { ascending: false });
 
-      const rows = data || [];
-      const ids = rows.map(r => r.id);
-      let bidsByJob = {};
+  if (isDemo) {
+    query = query.eq('is_demo', true);
+  } else {
+    query = query.eq('is_live', true);
+  }
 
-      if (ids.length) {
-        const { data: bidRows, error: bidError } = await supabaseClient
-          .from('bids')
-          .select('*')
-          .in('job_id', ids)
-          .order('created_at', { ascending: true });
+  const { data, error } = await query;
 
-        if (!bidError && bidRows) {
-          bidsByJob = bidRows.reduce((acc, bid) => {
-            if (!acc[bid.job_id]) acc[bid.job_id] = [];
-            acc[bid.job_id].push(bid);
-            return acc;
-          }, {});
-        }
-      }
+  if (error) {
+    console.error('jobs load error', error);
+    return [];
+  }
 
-      return rows.map(item => ({
-        ...item,
-        bids: bidsByJob[item.id] || [],
-        type: 'job'
-      }));
+  const rows = data || [];
+  const ids = rows.map(r => r.id);
+  let bidsByJob = {};
+
+  if (ids.length) {
+    const { data: bidRows, error: bidError } = await supabaseClient
+      .from('bids')
+      .select('*')
+      .in('job_id', ids)
+      .order('created_at', { ascending: true });
+
+    if (!bidError && bidRows) {
+      bidsByJob = bidRows.reduce((acc, bid) => {
+        if (!acc[bid.job_id]) acc[bid.job_id] = [];
+        acc[bid.job_id].push(bid);
+        return acc;
+      }, {});
     }
+  }
+
+  return rows.map(item => ({
+    ...item,
+    bids: bidsByJob[item.id] || [],
+    type: 'job'
+  }));
+}
 async function loadContractors() {
-  const { data, error } = await supabaseClient
+  const isDemo = localStorage.getItem('revamplex_demo') === 'true';
+
+  let query = supabaseClient
     .from('contractors')
     .select('*');
+
+  if (isDemo) {
+    query = query.eq('is_demo', true);
+  } else {
+    query = query
+      .eq('is_approved', true)
+      .eq('can_go_live', true)
+      .neq('account_status', 'suspended');
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error('contractors load error', error);
     return [];
   }
 
-  return (data || []).map(item => {
+  return (data || []).filter(item => {
+    if (isDemo) return true;
+    if (item.subscription_status === "active") return true;
+    if (item.trial_end && new Date(item.trial_end) > new Date()) return true;
+    return false;
+  }).map(item => {
     const publicLocation = getPublicLocation(item);
 
     return {
       ...item,
-      // PUBLIC DISPLAY ONLY — never expose exact street address on cards/modals.
       city: publicLocation,
       location: publicLocation,
       address: '',
       private_address: '',
       trades_full: item.trades_full || item.trade || '',
-      // keep full trade data here; small cards shorten it with getCompactTradeLabel()
       trade: item.trade || item.trades_full || 'General Contractors',
       type: 'contractor'
     };
