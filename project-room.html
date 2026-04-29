@@ -2043,21 +2043,9 @@ body {
 }
 
 
-
-/* ===== PROJECT ROOM ROLE LOCK — HIDE CONTRACTOR TOOLS UNTIL VERIFIED ===== */
-body:not(.role-contractor) .contractor-tools {
-  display: none !important;
-}
-
-body.role-homeowner .nav-item[data-target="smartCalculatorPanel"],
-body.role-homeowner .nav-item[data-target="estimateProposalPanel"],
-body.role-homeowner .nav-item[data-target="photoDocsPanel"],
-body.role-homeowner #jobListPanel button[onclick*="smartCalculatorPanel"] {
-  display: none !important;
-}
-
-body.role-contractor .contractor-tools {
-  display: flex !important;
+/* ===== ROLE SAFETY: contractor tools hidden until mode is verified ===== */
+.contractor-tools {
+  display: none;
 }
 
 </style>
@@ -2647,40 +2635,47 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-/* ===== SECURE PROJECT ROOM ROLE LOCK ===== */
-window.__projectRoomRole = "loading";
+/* ===== PROJECT ROOM ROLE / DEMO MODE LOCK =====
+   - Signed-in users follow their Supabase profile role.
+   - Demo / logged-out users follow the URL mode so they can preview:
+     project-room.html?mode=contractor&job=demo-123
+     project-room.html?mode=homeowner&job=demo-123
+     project-room.html?mode=demo&view=contractor&job=demo-123
+     project-room.html?mode=demo&view=homeowner&job=demo-123
+*/
+function getRequestedProjectRoomMode() {
+  const params = new URLSearchParams(window.location.search);
 
-function setProjectRoomRoleClass(role) {
-  document.body.classList.remove("role-loading", "role-homeowner", "role-contractor", "role-demo");
-  document.body.classList.add("role-" + role);
-  window.__projectRoomRole = role;
+  const rawMode = params.get("mode");
+  const viewMode = params.get("view") || params.get("role") || params.get("demoRole");
+
+  if (rawMode === "demo") {
+    return viewMode === "contractor" ? "contractor" : "homeowner";
+  }
+
+  if (rawMode === "contractor" || rawMode === "homeowner") {
+    return rawMode;
+  }
+
+  return "homeowner";
 }
 
 async function enforceProjectRoomRole() {
   const params = new URLSearchParams(window.location.search);
-  const requestedMode = params.get("mode") || "homeowner";
+  const requestedMode = getRequestedProjectRoomMode();
   const jobId = params.get("job") || "";
-
-  setProjectRoomRoleClass("loading");
 
   const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
 
-  // Demo/no-login users must never see contractor tools.
-  if (userError || !user) {
-    if (requestedMode === "demo") {
-      setProjectRoomRoleClass("homeowner");
-      mode = "homeowner";
-      applyWorkspaceMode();
-      return;
-    }
+  if (userError) {
+    console.warn("Role check auth error:", userError);
+  }
 
-    setProjectRoomRoleClass("homeowner");
-    mode = "homeowner";
-    applyWorkspaceMode();
-
-    if (requestedMode === "contractor") {
-      window.location.replace(`project-room.html?mode=homeowner&job=${encodeURIComponent(jobId)}`);
-    }
+  // Logged-out / demo visitor:
+  // Let them preview the role they selected from the demo map.
+  if (!user) {
+    mode = requestedMode;
+    applyWorkspaceMode(mode);
     return;
   }
 
@@ -2690,23 +2685,23 @@ async function enforceProjectRoomRole() {
     .eq("id", user.id)
     .single();
 
-  if (profileError || !profile || !profile.role) {
-    alert("Profile not found. Please finish your profile first.");
+  if (profileError || !profile) {
+    console.warn("Profile role check failed:", profileError);
+    alert("Profile not found.");
     window.location.href = "dashboard.html";
     return;
   }
 
   const realRole = profile.role === "contractor" ? "contractor" : "homeowner";
 
-  // URL cannot override database role.
-  if (requestedMode !== realRole) {
-    window.location.replace(`project-room.html?mode=${realRole}&job=${encodeURIComponent(jobId)}`);
+  // Signed-in users cannot force the opposite role through the URL.
+  if (realRole !== requestedMode) {
+    window.location.href = `project-room.html?mode=${realRole}&job=${encodeURIComponent(jobId)}`;
     return;
   }
 
-  setProjectRoomRoleClass(realRole);
   mode = realRole;
-  applyWorkspaceMode();
+  applyWorkspaceMode(mode);
 }
 
   checkAuth();
@@ -2890,7 +2885,7 @@ console.log("PROJECT ROOM JOB ID:", jobId);
 
 const params = new URLSearchParams(window.location.search);
 
-let mode = params.get("mode") || "contractor";
+let mode = getRequestedProjectRoomMode();
 
 console.log("ACTIVE JOB ID:", jobId);
   
@@ -2909,53 +2904,42 @@ const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null
 
 /* ---------- MODE SWITCH ---------- */
 
-function applyWorkspaceMode() {
+function applyWorkspaceMode(forcedMode) {
+  mode = forcedMode || getRequestedProjectRoomMode();
+
   const inviteBtn = document.getElementById("inviteBtn");
+  const isContractorMode = mode === "contractor";
 
-  // Never trust the URL for tool visibility. Only trust the verified DB role.
-  const verifiedRole = window.__projectRoomRole === "contractor" ? "contractor" : "homeowner";
-  mode = verifiedRole;
+  document.querySelectorAll(".contractor-tools").forEach(el => {
+    el.style.display = isContractorMode ? "" : "none";
+  });
 
-  if (verifiedRole === "homeowner") {
-    document.querySelectorAll(".contractor-tools").forEach(el => {
-      el.style.display = "none";
-    });
+  document.querySelectorAll(".contractor-only").forEach(el => {
+    el.style.display = isContractorMode ? "" : "none";
+  });
 
-    document.querySelectorAll('[data-target="smartCalculatorPanel"], [data-target="estimateProposalPanel"], [data-target="photoDocsPanel"]').forEach(el => {
-      el.style.display = "none";
-    });
+  document.querySelectorAll(".homeowner-only").forEach(el => {
+    el.style.display = isContractorMode ? "none" : "";
+  });
 
-    const buildEstimateBtn = document.querySelector('#jobListPanel button[onclick*="smartCalculatorPanel"]');
-    if (buildEstimateBtn) buildEstimateBtn.style.display = "none";
+  const title = document.querySelector(".brand h1");
 
-    const title = document.querySelector(".brand h1");
-    if (title) {
-      title.textContent = "Revamp Project Room™ — Homeowner Workspace";
-    }
-
-    if (inviteBtn) {
-      inviteBtn.textContent = "Invite Contractor";
-    }
-
-  } else {
-    document.querySelectorAll(".contractor-tools").forEach(el => {
-      el.style.display = "flex";
-    });
-
-    document.querySelectorAll('[data-target="smartCalculatorPanel"], [data-target="estimateProposalPanel"], [data-target="photoDocsPanel"]').forEach(el => {
-      el.style.display = "";
-    });
-
-    const buildEstimateBtn = document.querySelector('#jobListPanel button[onclick*="smartCalculatorPanel"]');
-    if (buildEstimateBtn) buildEstimateBtn.style.display = "";
-
-    const title = document.querySelector(".brand h1");
+  if (isContractorMode) {
     if (title) {
       title.textContent = "Revamp Project Room™ — Contractor Workspace";
     }
 
     if (inviteBtn) {
       inviteBtn.textContent = "Invite Customer";
+    }
+
+  } else {
+    if (title) {
+      title.textContent = "Revamp Project Room™ — Homeowner Workspace";
+    }
+
+    if (inviteBtn) {
+      inviteBtn.textContent = "Invite Contractor";
     }
   }
 }
@@ -2972,7 +2956,7 @@ function setupBackButton(){
 
     const params=new URLSearchParams(window.location.search);
 
-    const role=params.get("mode") || "contractor";
+    const role=getRequestedProjectRoomMode();
 
     window.location.href=`map.html?view=${role}`;
 
