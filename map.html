@@ -3082,6 +3082,26 @@ function contractorCanAccess(profile){
 }
   async function openProjectRoom(jobId) {
   try {
+    const isDemo = localStorage.getItem('revamplex_demo') === 'true';
+
+    const job = jobs.find(entry => String(entry.id) === String(jobId));
+
+    if (!job) {
+      alert("Job not found. Refresh the page and try again.");
+      return;
+    }
+
+    // Demo mode should allow visitors to preview the Project Room without login/payment.
+    if (isDemo) {
+      sessionStorage.setItem(
+        'revampSelectedJob',
+        JSON.stringify(getSafeJobSessionItem(job))
+      );
+
+      window.location.href = `project-room.html?mode=demo&job=${jobId}`;
+      return;
+    }
+
     const { data: { user } } = await supabaseClient.auth.getUser();
 
     if (!user) {
@@ -3126,13 +3146,6 @@ function contractorCanAccess(profile){
 
       alert("Your contractor trial/payment access is not active. Please choose a subscription plan.");
       openDashboard();
-      return;
-    }
-
-    const job = jobs.find(entry => String(entry.id) === String(jobId));
-
-    if (!job) {
-      alert("Job not found. Refresh the page and try again.");
       return;
     }
 
