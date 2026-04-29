@@ -2653,8 +2653,44 @@ console.log("PROJECT ROOM JOB ID:", jobId);
 
   const params = new URLSearchParams(window.location.search);
   const rawJobId = params.get('job');
+  const modeParam = params.get('mode');
+  const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null");
 
   console.log("RAW PROJECT ROOM JOB ID:", rawJobId);
+  console.log("PROJECT ROOM MODE:", modeParam);
+  console.log("SAVED SESSION JOB:", savedJob);
+
+  // Demo/fake jobs should load from sessionStorage, not Supabase.
+  if (modeParam === "demo" && savedJob) {
+    renderJob({
+      id: savedJob.id || rawJobId || "demo",
+      title: savedJob.title || "Demo Project",
+      city: savedJob.city || "NJ Area",
+      budget: savedJob.budget || "$0",
+      trade: savedJob.trade || "General Renovation",
+      room_size: savedJob.room_size || "N/A",
+      start_goal: savedJob.start_goal || "TBD",
+      deposit: savedJob.deposit || "$0",
+      description: savedJob.description || "Demo project loaded from the Revamp LEX map."
+    });
+    return;
+  }
+
+  // Also support any session job when the ID is a string demo ID.
+  if (savedJob && rawJobId && String(savedJob.id) === String(rawJobId)) {
+    renderJob({
+      id: savedJob.id,
+      title: savedJob.title || "Demo Project",
+      city: savedJob.city || "NJ Area",
+      budget: savedJob.budget || "$0",
+      trade: savedJob.trade || "General Renovation",
+      room_size: savedJob.room_size || "N/A",
+      start_goal: savedJob.start_goal || "TBD",
+      deposit: savedJob.deposit || "$0",
+      description: savedJob.description || "Project loaded from map session."
+    });
+    return;
+  }
 
   if (!rawJobId) {
     console.warn("No job ID in URL — staying on Project Room.");
@@ -2672,6 +2708,22 @@ console.log("PROJECT ROOM JOB ID:", jobId);
     return;
   }
 
+  // If fake/demo string ID arrived without session data, keep the room open.
+  if (String(rawJobId).startsWith("demo-")) {
+    renderJob({
+      id: rawJobId,
+      title: "Demo Project",
+      city: "NJ Area",
+      budget: "$0",
+      trade: "General Renovation",
+      room_size: "N/A",
+      start_goal: "TBD",
+      deposit: "$0",
+      description: "Demo project preview. Opened from the demo map."
+    });
+    return;
+  }
+
   const jobIdNumber = Number(rawJobId);
   const jobIdValue = isNaN(jobIdNumber) ? rawJobId : jobIdNumber;
 
@@ -2684,7 +2736,18 @@ console.log("PROJECT ROOM JOB ID:", jobId);
 
   if (error) {
     console.error("SUPABASE ERROR:", error);
-    alert("Error loading job. Check console.");
+
+    renderJob({
+      id: rawJobId,
+      title: "Project Room Preview",
+      city: "NJ Area",
+      budget: "$0",
+      trade: "General Renovation",
+      room_size: "N/A",
+      start_goal: "TBD",
+      deposit: "$0",
+      description: "Supabase could not load this job. The room is staying open so the user does not hit a dead end."
+    });
     return;
   }
 
