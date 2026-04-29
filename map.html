@@ -2181,12 +2181,16 @@ async function getCurrentDataset() {
   let dataset = [];
 
   if (isDemo) {
+    // Demo mode should ALWAYS show sample/fake cards.
+    // If your old fake rows do not have is_demo=true yet, this falls back to the current loaded rows.
     if (mode === 'contractor') {
-      dataset = jobs.filter(i => i.is_demo === true || String(i.id).startsWith("demo")).map(i => ({ ...i, type: 'job' }));
+      const demoJobs = jobs.filter(i => i.is_demo === true || String(i.id).startsWith("demo"));
+      dataset = (demoJobs.length ? demoJobs : jobs).map(i => ({ ...i, type: 'job' }));
     }
 
     if (mode === 'homeowner') {
-      dataset = contractors.filter(i => i.is_demo === true || String(i.id).startsWith("demo")).map(i => ({ ...i, type: 'contractor' }));
+      const demoContractors = contractors.filter(i => i.is_demo === true || String(i.id).startsWith("demo"));
+      dataset = (demoContractors.length ? demoContractors : contractors).map(i => ({ ...i, type: 'contractor' }));
     }
   } else {
     const { data: { session } } = await supabaseClient.auth.getSession();
@@ -2791,7 +2795,7 @@ function renderCards(items) {
     cardsRow.innerHTML = `
       <div class="listing-card">
         <div style="padding:22px;text-align:center;">
-          <div style="font-size:17px;font-weight:900;margin-bottom:8px;">No results found</div><div style="font-size:13px;color:#64748b;line-height:1.4;">If you are in demo mode, make sure your fake rows have is_demo = true.</div>
+          <div style="font-size:17px;font-weight:900;margin-bottom:8px;">No results found</div>
         </div>
       </div>
     `;
@@ -3619,16 +3623,66 @@ async function saveEdit(id, type) {
     async function loadJobs() {
   const isDemo = localStorage.getItem('revamplex_demo') === 'true';
 
+  if (isDemo) {
+    // Try true demo rows first. If none are marked yet, fall back to older fake/sample jobs.
+    let { data: demoRows, error: demoError } = await supabaseClient
+      .from('jobs')
+      .select('*')
+      .eq('is_demo', true)
+      .order('created_at', { ascending: false });
+
+    if (demoError) {
+      console.warn('demo jobs filter failed, falling back:', demoError);
+      demoRows = [];
+    }
+
+    let rows = demoRows || [];
+
+    if (!rows.length) {
+      const fallback = await supabaseClient
+        .from('jobs')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (fallback.error) {
+        console.error('jobs demo fallback load error', fallback.error);
+        return [];
+      }
+
+      rows = fallback.data || [];
+    }
+
+    const ids = rows.map(r => r.id);
+    let bidsByJob = {};
+
+    if (ids.length) {
+      const { data: bidRows, error: bidError } = await supabaseClient
+        .from('bids')
+        .select('*')
+        .in('job_id', ids)
+        .order('created_at', { ascending: true });
+
+      if (!bidError && bidRows) {
+        bidsByJob = bidRows.reduce((acc, bid) => {
+          if (!acc[bid.job_id]) acc[bid.job_id] = [];
+          acc[bid.job_id].push(bid);
+          return acc;
+        }, {});
+      }
+    }
+
+    return rows.map(item => ({
+      ...item,
+      bids: bidsByJob[item.id] || [],
+      type: 'job'
+    }));
+  }
+
   let query = supabaseClient
     .from('jobs')
     .select('*')
+    .eq('is_live', true)
     .order('created_at', { ascending: false });
-
-  if (isDemo) {
-    query = query.eq('is_demo', true);
-  } else {
-    query = query.eq('is_live', true);
-  }
 
   const { data, error } = await query;
 
@@ -3671,13 +3725,51 @@ async function loadContractors() {
     .select('*');
 
   if (isDemo) {
-    query = query.eq('is_demo', true);
-  } else {
-    query = query
-      .eq('is_approved', true)
-      .eq('can_go_live', true)
-      .neq('account_status', 'suspended');
+    // Try true demo rows first. If none are marked yet, fall back to older fake/sample contractor rows.
+    const { data: demoData, error: demoError } = await query.eq('is_demo', true);
+
+    if (!demoError && demoData && demoData.length) {
+      return demoData.map(item => {
+        const publicLocation = getPublicLocation(item);
+        return {
+          ...item,
+          city: publicLocation,
+          location: publicLocation,
+          address: '',
+          private_address: '',
+          trades_full: item.trades_full || item.trade || '',
+          trade: item.trade || item.trades_full || 'General Contractors',
+          type: 'contractor'
+        };
+      });
+    }
+
+    // Fallback: old demo cards may not have is_demo=true.
+    const { data: allData, error: allError } = await supabaseClient.from('contractors').select('*');
+    if (allError) {
+      console.error('contractors demo fallback load error', allError);
+      return [];
+    }
+
+    return (allData || []).map(item => {
+      const publicLocation = getPublicLocation(item);
+      return {
+        ...item,
+        city: publicLocation,
+        location: publicLocation,
+        address: '',
+        private_address: '',
+        trades_full: item.trades_full || item.trade || '',
+        trade: item.trade || item.trades_full || 'General Contractors',
+        type: 'contractor'
+      };
+    });
   }
+
+  query = query
+    .eq('is_approved', true)
+    .eq('can_go_live', true)
+    .neq('account_status', 'suspended');
 
   const { data, error } = await query;
 
@@ -3687,7 +3779,6 @@ async function loadContractors() {
   }
 
   return (data || []).filter(item => {
-    if (isDemo) return true;
     if (item.subscription_status === "active") return true;
     if (item.trial_end && new Date(item.trial_end) > new Date()) return true;
     return false;
