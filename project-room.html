@@ -2043,9 +2043,12 @@ body {
 }
 
 
-/* ===== ROLE SAFETY: contractor tools hidden until mode is verified ===== */
-.contractor-tools {
-  display: none;
+/* ===== ROLE SAFETY: hide contractor tools until JS confirms contractor view ===== */
+body:not(.contractor-view) .contractor-tools {
+  display: none !important;
+}
+body.contractor-view .contractor-tools {
+  display: flex !important;
 }
 
 </style>
@@ -2636,16 +2639,27 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* ===== PROJECT ROOM ROLE / DEMO MODE LOCK =====
-   - Signed-in users follow their Supabase profile role.
-   - Demo / logged-out users follow the URL mode so they can preview:
-     project-room.html?mode=contractor&job=demo-123
-     project-room.html?mode=homeowner&job=demo-123
-     project-room.html?mode=demo&view=contractor&job=demo-123
-     project-room.html?mode=demo&view=homeowner&job=demo-123
+   Demo mode follows the demo URL, even if someone is logged in.
+   Signed-in real use follows the Supabase profile role.
 */
+function isProjectRoomDemoMode() {
+  const params = new URLSearchParams(window.location.search);
+  const rawMode = params.get("mode");
+  const jobId = params.get("job") || "";
+
+  if (rawMode === "demo") return true;
+  if (String(jobId).startsWith("demo-")) return true;
+
+  try {
+    const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null");
+    if (savedJob && String(savedJob.id) === String(jobId)) return true;
+  } catch (e) {}
+
+  return false;
+}
+
 function getRequestedProjectRoomMode() {
   const params = new URLSearchParams(window.location.search);
-
   const rawMode = params.get("mode");
   const viewMode = params.get("view") || params.get("role") || params.get("demoRole");
 
@@ -2657,6 +2671,10 @@ function getRequestedProjectRoomMode() {
     return rawMode;
   }
 
+  if (viewMode === "contractor" || viewMode === "homeowner") {
+    return viewMode;
+  }
+
   return "homeowner";
 }
 
@@ -2665,14 +2683,21 @@ async function enforceProjectRoomRole() {
   const requestedMode = getRequestedProjectRoomMode();
   const jobId = params.get("job") || "";
 
+  // IMPORTANT:
+  // Demo mode should preview whichever role the demo URL requests,
+  // even if the browser is already logged into a contractor/homeowner account.
+  if (isProjectRoomDemoMode()) {
+    mode = requestedMode;
+    applyWorkspaceMode(mode);
+    return;
+  }
+
   const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
 
   if (userError) {
     console.warn("Role check auth error:", userError);
   }
 
-  // Logged-out / demo visitor:
-  // Let them preview the role they selected from the demo map.
   if (!user) {
     mode = requestedMode;
     applyWorkspaceMode(mode);
@@ -2694,7 +2719,6 @@ async function enforceProjectRoomRole() {
 
   const realRole = profile.role === "contractor" ? "contractor" : "homeowner";
 
-  // Signed-in users cannot force the opposite role through the URL.
   if (realRole !== requestedMode) {
     window.location.href = `project-room.html?mode=${realRole}&job=${encodeURIComponent(jobId)}`;
     return;
@@ -2910,37 +2934,29 @@ function applyWorkspaceMode(forcedMode) {
   const inviteBtn = document.getElementById("inviteBtn");
   const isContractorMode = mode === "contractor";
 
+  document.body.classList.toggle("contractor-view", isContractorMode);
+  document.body.classList.toggle("homeowner-view", !isContractorMode);
+
   document.querySelectorAll(".contractor-tools").forEach(el => {
-    el.style.display = isContractorMode ? "" : "none";
+    el.style.setProperty("display", isContractorMode ? "flex" : "none", "important");
   });
 
   document.querySelectorAll(".contractor-only").forEach(el => {
-    el.style.display = isContractorMode ? "" : "none";
+    el.style.setProperty("display", isContractorMode ? "" : "none", "important");
   });
 
   document.querySelectorAll(".homeowner-only").forEach(el => {
-    el.style.display = isContractorMode ? "none" : "";
+    el.style.setProperty("display", isContractorMode ? "none" : "", "important");
   });
 
   const title = document.querySelector(".brand h1");
 
   if (isContractorMode) {
-    if (title) {
-      title.textContent = "Revamp Project Room™ — Contractor Workspace";
-    }
-
-    if (inviteBtn) {
-      inviteBtn.textContent = "Invite Customer";
-    }
-
+    if (title) title.textContent = "Revamp Project Room™ — Contractor Workspace";
+    if (inviteBtn) inviteBtn.textContent = "Invite Customer";
   } else {
-    if (title) {
-      title.textContent = "Revamp Project Room™ — Homeowner Workspace";
-    }
-
-    if (inviteBtn) {
-      inviteBtn.textContent = "Invite Contractor";
-    }
+    if (title) title.textContent = "Revamp Project Room™ — Homeowner Workspace";
+    if (inviteBtn) inviteBtn.textContent = "Invite Contractor";
   }
 }
 
@@ -4852,5 +4868,14 @@ if (inviteBtnSafe) {
 })();
 
 </script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+  if (typeof enforceProjectRoomRole === "function") {
+    enforceProjectRoomRole();
+  }
+});
+</script>
+
 </body>
 </html>
