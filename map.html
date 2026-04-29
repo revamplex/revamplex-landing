@@ -1788,7 +1788,7 @@ contractorModeBtn.disabled = false;
 window.__currentUserId = user.id;
   const { data: profile, error: profileError } = await supabaseClient
     .from('profiles')
-    .select('role,email')
+    .select('*')
     .eq('id', user.id)
     .maybeSingle();
 
@@ -3038,8 +3038,27 @@ async function createJobFromForm() {
 
   window.location.href = `project-room.html?mode=homeowner&contractor=${contractorId}`;
 }
+function contractorCanAccess(profile){
+  if (!profile || profile.role !== "contractor") return true;
+  if (profile.account_status === "suspended") return false;
+  if (profile.is_approved !== true) return false;
+  if (profile.subscription_status === "active") return true;
+  if (profile.trial_end && new Date(profile.trial_end) > new Date()) return true;
+  return false;
+}
+  function openProjectRoom(jobId) {
+  if (lockedRole === "contractor" && currentProfile && !contractorCanAccess(currentProfile)) {
+    if (currentProfile.is_approved !== true) {
+      alert("Your contractor account is pending Revamp LEX approval. You cannot submit bids until your license and insurance are approved.");
+      openDashboard();
+      return;
+    }
 
-    function openProjectRoom(jobId) {
+    alert("Your contractor trial/payment access is not active. Please choose a subscription plan.");
+    openDashboard();
+    return;
+  }
+
   const job = jobs.find(entry => String(entry.id) === String(jobId));
 
   if (!job) {
