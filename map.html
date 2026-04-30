@@ -4127,10 +4127,23 @@ address: `${document.getElementById('welcomeStreet').value.trim()}, ${document.g
   .upsert([profilePayload], { onConflict: 'id' });
 
       if (profileError) {
-      console.error("PROFILE ERROR:", profileError);
-      alert(profileError.message);
-      return;
-    }
+  console.error("PROFILE ERROR:", profileError);
+  alert(profileError.message);
+  return;
+}
+
+alert("Account created! Please check your email and click the confirmation link before logging in.");
+
+clearWelcomeForm();
+backToRoleChooser();
+
+welcomeOverlay.classList.remove('hidden');
+welcomeOverlay.style.display = 'flex';
+
+localStorage.removeItem('revamplex_registered');
+localStorage.setItem('revamplex_role', selectedWelcomeRole);
+
+return;
 
     alert("Account created. Please check your email and confirm your account before logging in.");
 
