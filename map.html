@@ -4132,18 +4132,13 @@ address: `${document.getElementById('welcomeStreet').value.trim()}, ${document.g
       return;
     }
 
-    // 🔥 FORCE LOGIN AFTER SIGNUP
-    const { error: loginError } = await supabaseClient.auth.signInWithPassword({
-      email,
-      password
-    });
+    alert("Account created. Please check your email and confirm your account before logging in.");
 
-    if (loginError) throw loginError;
+localStorage.removeItem('revamplex_registered');
+localStorage.setItem('revamplex_role', selectedWelcomeRole);
 
-    localStorage.setItem('revamplex_registered', 'true');
-    localStorage.setItem('revamplex_role', selectedWelcomeRole);
-
-    window.location.href = `map.html?view=${selectedWelcomeRole}`;
+window.location.href = "map.html";
+return;
 
   } catch (err) {
     alert(err.message);
