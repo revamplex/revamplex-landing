@@ -1748,9 +1748,30 @@
             <input class="welcomeInput" id="welcomePassword" type="password" placeholder="Create password">
           </div>
           <div class="welcomeField full">
-            <label class="welcomeLabel" for="welcomeAddress">Address / City / State</label>
-            <input class="welcomeInput" id="welcomeAddress" type="text" placeholder="Hackensack, NJ">
-          </div>
+  <label class="welcomeLabel" for="welcomeStreet">Street Address</label>
+  <input class="welcomeInput" id="welcomeStreet" type="text" placeholder="123 Main St" required>
+</div>
+
+<div class="welcomeField">
+  <label class="welcomeLabel" for="welcomeCity">City</label>
+  <input class="welcomeInput" id="welcomeCity" type="text" placeholder="Hackensack" required>
+</div>
+
+<div class="welcomeField">
+  <label class="welcomeLabel" for="welcomeState">State</label>
+  <select class="welcomeSelect" id="welcomeState" required>
+    <option value="">Select State</option>
+    <option value="NJ">NJ</option>
+    <option value="NY">NY</option>
+    <option value="PA">PA</option>
+    <option value="CT">CT</option>
+  </select>
+</div>
+
+<div class="welcomeField">
+  <label class="welcomeLabel" for="welcomeZip">ZIP Code</label>
+  <input class="welcomeInput" id="welcomeZip" type="text" maxlength="5" placeholder="07601" required>
+</div>
 
           <div class="homeownerFields" id="homeownerFields">
             <div class="welcomeField full">
@@ -3999,7 +4020,15 @@ async function setMode(mode) {
     alert('Enter email & password');
     return;
   }
+const street = document.getElementById('welcomeStreet').value.trim();
+const city = document.getElementById('welcomeCity').value.trim();
+const state = document.getElementById('welcomeState').value;
+const zip = document.getElementById('welcomeZip').value.trim();
 
+if (!street || !city || !state || !/^\d{5}$/.test(zip)) {
+  alert("Please enter a complete address with a valid 5-digit ZIP code.");
+  return;
+}
   try {
     // 🔥 SIGN UP USER
     const { data, error } = await supabaseClient.auth.signUp({
@@ -4023,7 +4052,11 @@ async function setMode(mode) {
       role: selectedWelcomeRole,
       full_name: document.getElementById('welcomeFullName').value.trim(),
       phone: document.getElementById('welcomePhone').value.trim(),
-      address: document.getElementById('welcomeAddress').value.trim(),
+      street_address: document.getElementById('welcomeStreet').value.trim(),
+city: document.getElementById('welcomeCity').value.trim(),
+state: document.getElementById('welcomeState').value,
+zip: document.getElementById('welcomeZip').value.trim(),
+address: `${document.getElementById('welcomeStreet').value.trim()}, ${document.getElementById('welcomeCity').value.trim()}, ${document.getElementById('welcomeState').value} ${document.getElementById('welcomeZip').value.trim()}`,
 
       // homeowner fields
       project_type: document.getElementById('welcomeProjectType').value,
