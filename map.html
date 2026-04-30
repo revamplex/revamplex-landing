@@ -4078,9 +4078,15 @@ if (!street || !city || !state || !/^\d{5}$/.test(zip)) {
   try {
     // 🔥 SIGN UP USER
     const { data, error } = await supabaseClient.auth.signUp({
-      email,
-      password
-    });
+  email,
+  password,
+  options: {
+    data: {
+      role: selectedWelcomeRole
+    },
+    emailRedirectTo: window.location.origin + '/map.html'
+  }
+});
 
     if (error) throw error;
 
@@ -4117,8 +4123,8 @@ address: `${document.getElementById('welcomeStreet').value.trim()}, ${document.g
     };
 
     const { error: profileError } = await supabaseClient
-      .from('profiles')
-      .insert([profilePayload]);
+  .from('profiles')
+  .upsert([profilePayload], { onConflict: 'id' });
 
       if (profileError) {
       console.error("PROFILE ERROR:", profileError);
