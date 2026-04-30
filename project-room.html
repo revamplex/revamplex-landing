@@ -2663,47 +2663,25 @@ function getRequestedProjectRoomMode() {
 }
 
 function applyWorkspaceMode(forcedMode) {
-  mode = forcedMode || getRequestedProjectRoomMode();
+  const params = new URLSearchParams(window.location.search);
+  mode = forcedMode || params.get("mode") || "homeowner";
 
   const isContractorMode = mode === "contractor";
   const inviteBtn = document.getElementById("inviteBtn");
 
-  document.body.classList.toggle("contractor-view", isContractorMode);
-  document.body.classList.toggle("homeowner-view", !isContractorMode);
-
   document.querySelectorAll(".contractor-tools").forEach(el => {
-    if (isContractorMode) {
-      el.style.setProperty("display", "flex", "important");
-      el.style.setProperty("flex-direction", "column", "important");
-      el.style.setProperty("gap", "16px", "important");
-    } else {
-      el.style.setProperty("display", "none", "important");
-    }
+    el.style.display = isContractorMode ? "flex" : "none";
+    el.style.flexDirection = "column";
+    el.style.gap = "16px";
   });
 
   document.querySelectorAll(".contractor-only").forEach(el => {
-    if (isContractorMode) {
-      if (el.classList.contains("nav-item")) {
-        el.style.setProperty("display", "inline-flex", "important");
-      } else {
-        el.style.removeProperty("display");
-      }
-    } else {
-      el.style.setProperty("display", "none", "important");
-    }
+    el.style.display = isContractorMode ? "inline-flex" : "none";
   });
 
-  document.querySelectorAll(".homeowner-only").forEach(el => {
-    if (isContractorMode) {
-      el.style.setProperty("display", "none", "important");
-    } else {
-      el.style.removeProperty("display");
-    }
-  });
-
-  if (inviteBtn) inviteBtn.textContent = isContractorMode ? "Invite Customer" : "Invite Contractor";
-
-  console.log("Project Room mode applied:", mode);
+  if (inviteBtn) {
+    inviteBtn.textContent = isContractorMode ? "Invite Customer" : "Invite Contractor";
+  }
 }
 
 async function enforceProjectRoomRole() {
