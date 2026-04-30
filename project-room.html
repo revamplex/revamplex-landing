@@ -2043,12 +2043,17 @@ body {
 }
 
 
-/* ===== ROLE SAFETY: hide contractor tools until JS confirms contractor view ===== */
-body:not(.contractor-view) .contractor-tools {
-  display: none !important;
+/* ===== ROLE SAFETY ===== */
+.contractor-tools {
+  display: none;
 }
 body.contractor-view .contractor-tools {
   display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+body.homeowner-view .contractor-tools {
+  display: none !important;
 }
 
 </style>
@@ -2118,8 +2123,8 @@ body.contractor-view .contractor-tools {
           <div class="nav-item" data-target="schedulePanel"><span>Schedule Calendar</span><span>4 items</span></div>
           <div class="nav-item" data-target="jobListPanel"><span>Active Job List</span><span>Live</span></div>
           <div class="nav-item" data-target="videoChatPanel"><span>Video + Chat</span><span>2 alerts</span></div>
-          <div class="nav-item" data-target="smartCalculatorPanel"><span>Trade Calculators</span><span>Tools</span></div>
-          <div class="nav-item" data-target="estimateProposalPanel"><span>Estimate + Proposal</span><span>v3.2</span></div>
+          <div class="nav-item contractor-only" data-target="smartCalculatorPanel"><span>Trade Calculators</span><span>Tools</span></div>
+          <div class="nav-item contractor-only" data-target="estimateProposalPanel"><span>Estimate + Proposal</span><span>v3.2</span></div>
           <div class="nav-item" data-target="photoDocsPanel"><span>Photos + Docs</span><span>Upload</span></div>
           <div class="nav-item" data-target="signaturePanel"><span>Customer Signature</span><span>Pending</span></div>
         </div>
@@ -2649,7 +2654,7 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* ===== PROJECT ROOM ROLE / DEMO MODE LOCK =====
    Demo mode follows the demo URL, even if someone is logged in.
-   Signed-in real use follows the Supabase profile role.
+   Real signed-in use follows the Supabase profile role when available.
 */
 function isProjectRoomDemoMode() {
   const params = new URLSearchParams(window.location.search);
@@ -2692,9 +2697,7 @@ async function enforceProjectRoomRole() {
   const requestedMode = getRequestedProjectRoomMode();
   const jobId = params.get("job") || "";
 
-  // IMPORTANT:
-  // Demo mode should preview whichever role the demo URL requests,
-  // even if the browser is already logged into a contractor/homeowner account.
+  // Demo preview always follows the demo/requested role.
   if (isProjectRoomDemoMode()) {
     mode = requestedMode;
     applyWorkspaceMode(mode);
@@ -2707,6 +2710,7 @@ async function enforceProjectRoomRole() {
     console.warn("Role check auth error:", userError);
   }
 
+  // Logged-out live preview follows URL mode.
   if (!user) {
     mode = requestedMode;
     applyWorkspaceMode(mode);
@@ -2720,9 +2724,9 @@ async function enforceProjectRoomRole() {
     .single();
 
   if (profileError || !profile) {
-    console.warn("Profile role check failed:", profileError);
-    alert("Profile not found.");
-    window.location.href = "dashboard.html";
+    console.warn("Profile role check failed. Falling back to requested mode:", profileError);
+    mode = requestedMode;
+    applyWorkspaceMode(mode);
     return;
   }
 
@@ -2946,16 +2950,31 @@ function applyWorkspaceMode(forcedMode) {
   document.body.classList.toggle("contractor-view", isContractorMode);
   document.body.classList.toggle("homeowner-view", !isContractorMode);
 
-  document.querySelectorAll(".contractor-tools").forEach(el => {
-    el.style.setProperty("display", isContractorMode ? "flex" : "none", "important");
+  const contractorTools = document.querySelectorAll(".contractor-tools");
+  contractorTools.forEach(el => {
+    if (isContractorMode) {
+      el.style.setProperty("display", "flex", "important");
+      el.style.setProperty("flex-direction", "column", "important");
+      el.style.setProperty("gap", "16px", "important");
+    } else {
+      el.style.setProperty("display", "none", "important");
+    }
   });
 
   document.querySelectorAll(".contractor-only").forEach(el => {
-    el.style.setProperty("display", isContractorMode ? "" : "none", "important");
+    if (isContractorMode) {
+      el.style.removeProperty("display");
+    } else {
+      el.style.setProperty("display", "none", "important");
+    }
   });
 
   document.querySelectorAll(".homeowner-only").forEach(el => {
-    el.style.setProperty("display", isContractorMode ? "none" : "", "important");
+    if (isContractorMode) {
+      el.style.setProperty("display", "none", "important");
+    } else {
+      el.style.removeProperty("display");
+    }
   });
 
   const title = document.querySelector(".brand h1");
@@ -2967,6 +2986,8 @@ function applyWorkspaceMode(forcedMode) {
     if (title) title.textContent = "Revamp Project Room™ — Homeowner Workspace";
     if (inviteBtn) inviteBtn.textContent = "Invite Contractor";
   }
+
+  console.log("Project Room mode applied:", mode, "contractor tools:", contractorTools.length);
 }
 
 /* ---------- BACK BUTTON ---------- */
