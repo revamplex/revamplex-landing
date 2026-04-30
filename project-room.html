@@ -2057,6 +2057,16 @@ body.contractor-room .contractor-tools {
   display: flex !important;
 }
 
+
+/* ===== SHARED HOMEOWNER + CONTRACTOR SECTION ===== */
+.shared-tools-section,
+#photosDocs,
+#photosDocumentation,
+#documentation,
+[data-shared-section="photos-docs"] {
+  display: block !important;
+}
+
 </style>
 </head>
 <body>
@@ -2498,7 +2508,7 @@ body.contractor-room .contractor-tools {
             </div>
           </div>
 
-  <section class="panel" id="photoDocsPanel">
+  <section data-shared-section="photos-docs" class="panel" id="photoDocsPanel">
           <div class="panel-header">
             <div>
               <h3>Photos + Documentation</h3>
@@ -4828,5 +4838,100 @@ if (inviteBtnSafe) {
 })();
 
 </script>
+
+<script>
+/* ===== FINAL ROLE VISIBILITY PATCH: PHOTOS/DOCS SHARED ===== */
+(function(){
+  function isHomeownerProjectRoomMode(){
+    const params = new URLSearchParams(window.location.search);
+    const mode = (params.get("mode") || "").toLowerCase();
+
+    // Homeowner should hide contractor-only tools.
+    // Demo opened from contractor Submit Bid uses mode=demo with no contractor param, so keep tools.
+    // Demo opened from homeowner/message path usually has contractor param.
+    if (mode === "homeowner") return true;
+    if (mode === "demo" && params.has("contractor")) return true;
+    return false;
+  }
+
+  function textIncludes(el, words){
+    const text = (el.innerText || el.textContent || "").toLowerCase();
+    return words.some(w => text.includes(w));
+  }
+
+  function findSectionFromHeadingText(matchWords){
+    const headings = Array.from(document.querySelectorAll("h1,h2,h3,h4,.panel-title,.section-title"));
+    return headings
+      .filter(h => textIncludes(h, matchWords))
+      .map(h => h.closest("section,.panel,.card,.tool-card,.workspace-section,div"))
+      .filter(Boolean);
+  }
+
+  function applyProjectRoomVisibility(){
+    const homeownerMode = isHomeownerProjectRoomMode();
+
+    const sharedPhotoDocSections = [
+      ...document.querySelectorAll('[data-shared-section="photos-docs"], #photosDocs, #photosDocumentation, #documentation, .shared-tools-section'),
+      ...findSectionFromHeadingText(["photos + documentation", "photos & docs", "photos + docs", "upload project files"])
+    ];
+
+    sharedPhotoDocSections.forEach(section => {
+      section.style.display = "";
+      section.classList.add("shared-tools-section");
+      section.setAttribute("data-shared-section", "photos-docs");
+    });
+
+    if (!homeownerMode) return;
+
+    // Hide contractor-only sections, but never hide Photos/Documentation.
+    const contractorOnlyWords = [
+      "ai chat",
+      "smart material calculator",
+      "trade calculators",
+      "estimate notes",
+      "proposal draft",
+      "proposal preview",
+      "generate proposal",
+      "estimate line items",
+      "item qty unit",
+      "submit bid",
+      "bid tools"
+    ];
+
+    const headings = Array.from(document.querySelectorAll("h1,h2,h3,h4,.panel-title,.section-title"));
+    headings.forEach(h => {
+      const section = h.closest("section,.panel,.card,.tool-card,.workspace-section,div");
+      if (!section) return;
+
+      if (sharedPhotoDocSections.includes(section) || section.closest('[data-shared-section="photos-docs"]')) {
+        section.style.display = "";
+        return;
+      }
+
+      if (textIncludes(h, contractorOnlyWords)) {
+        section.style.display = "none";
+      }
+    });
+
+    // Also hide common contractor tool containers, excluding shared photo/docs.
+    document.querySelectorAll(".contractor-tools, .contractor-only, [data-contractor-only='true']").forEach(el => {
+      if (el.matches('[data-shared-section="photos-docs"]') || el.closest('[data-shared-section="photos-docs"]')) {
+        el.style.display = "";
+      } else {
+        el.style.display = "none";
+      }
+    });
+
+    sharedPhotoDocSections.forEach(section => {
+      section.style.display = "";
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", applyProjectRoomVisibility);
+  window.addEventListener("load", applyProjectRoomVisibility);
+  setTimeout(applyProjectRoomVisibility, 250);
+})();
+</script>
+
 </body>
 </html>
