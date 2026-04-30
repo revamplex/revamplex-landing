@@ -2067,6 +2067,17 @@ body.contractor-room .contractor-tools {
   display: block !important;
 }
 
+
+/* ===== FORCE SHARED PHOTOS/DOCS FOR HOMEOWNER ===== */
+#photosDocsSection,
+#photosDocsSection * {
+  visibility: visible !important;
+}
+
+#photosDocsSection {
+  display: block !important;
+}
+
 </style>
 </head>
 <body>
@@ -2510,7 +2521,7 @@ body.contractor-room .contractor-tools {
 
   <section data-shared-section="photos-docs" class="panel" id="photoDocsPanel">
           <div class="panel-header">
-            <div>
+            <div id="photosDocsSection" data-shared-section="photos-docs" data-shared="true">
               <h3>Photos + Documentation</h3>
               <p>Upload before photos, walkthrough videos, plans, permits, and marked-up screenshots.</p>
             </div>
@@ -2591,7 +2602,18 @@ body.contractor-room .contractor-tools {
 
     <p class="footer-note">Revamp Project Room prototype • Private homeowner + contractor workspace • Ready to connect to Supabase / auth / database next</p>
   </div>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js">
+function scrollToSection(id) {
+  const el = document.getElementById(id);
+  if (!el) {
+    console.warn("Section not found:", id);
+    return;
+  }
+  el.style.display = "block";
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+</script>
 <script>
 /* ---------- AI BUTTON BACKUP WIRING ---------- */
 
@@ -4930,6 +4952,146 @@ if (inviteBtnSafe) {
   document.addEventListener("DOMContentLoaded", applyProjectRoomVisibility);
   window.addEventListener("load", applyProjectRoomVisibility);
   setTimeout(applyProjectRoomVisibility, 250);
+})();
+</script>
+
+
+<script>
+/* ===== FINAL HOMEOWNER PHOTOS/DOCS FIX ===== */
+(function(){
+  function getRoomMode(){
+    const params = new URLSearchParams(window.location.search);
+    const mode = (params.get("mode") || "").toLowerCase();
+
+    if (mode === "homeowner") return "homeowner";
+    if (mode === "contractor") return "contractor";
+
+    // Demo with contractor param means homeowner viewing a contractor/project room.
+    if (mode === "demo" && params.has("contractor")) return "homeowner";
+
+    // Demo Submit Bid path means contractor preview.
+    if (mode === "demo") return "contractor";
+
+    return mode || "contractor";
+  }
+
+  function findPhotosDocsSection(){
+    let section = document.getElementById("photosDocsSection");
+    if (section) return section;
+
+    const headings = Array.from(document.querySelectorAll("h1,h2,h3,h4,.panel-title,.section-title"));
+    const heading = headings.find(h => {
+      const t = (h.innerText || h.textContent || "").toLowerCase();
+      return t.includes("photos + documentation") ||
+             t.includes("photos & documentation") ||
+             t.includes("photos + docs") ||
+             t.includes("photos & docs") ||
+             t.includes("upload project files");
+    });
+
+    if (!heading) return null;
+
+    section = heading.closest("section,.panel,.card,.workspace-section,.tool-card,div") || heading.parentElement;
+    if (section) {
+      section.id = "photosDocsSection";
+      section.setAttribute("data-shared-section", "photos-docs");
+      section.setAttribute("data-shared", "true");
+    }
+
+    return section;
+  }
+
+  function fixPhotosDocsForHomeowner(){
+    const mode = getRoomMode();
+    const photosSection = findPhotosDocsSection();
+
+    if (!photosSection) {
+      console.warn("Photos & Docs section not found.");
+      return;
+    }
+
+    // Always shared for both roles.
+    photosSection.style.display = "block";
+    photosSection.style.visibility = "visible";
+    photosSection.hidden = false;
+    photosSection.classList.remove("contractor-only");
+
+    // Make all parents visible if an older homeowner-hide rule hid a parent panel/container.
+    let parent = photosSection.parentElement;
+    while (parent && parent !== document.body) {
+      const parentText = (parent.innerText || parent.textContent || "").toLowerCase();
+      const looksLikeOnlyContractorTools =
+        parentText.includes("ai chat") &&
+        parentText.includes("smart material calculator") &&
+        parentText.includes("estimate");
+
+      // Do not force huge contractor-only wrapper visible unless it is the direct wrapper needed for photos.
+      if (!looksLikeOnlyContractorTools || parent.contains(photosSection)) {
+        parent.hidden = false;
+        if (parent.style && parent.style.display === "none" && parent.contains(photosSection)) {
+          parent.style.display = "";
+        }
+      }
+
+      parent = parent.parentElement;
+    }
+
+    // Wire Workspace Sections Photos & Docs nav buttons/links.
+    Array.from(document.querySelectorAll("a,button")).forEach(el => {
+      const t = (el.innerText || el.textContent || "").toLowerCase();
+      if (
+        t.includes("photos & docs") ||
+        t.includes("photos + docs") ||
+        t.includes("photos & documentation") ||
+        t.includes("photos + documentation") ||
+        t.includes("project files")
+      ) {
+        el.onclick = function(e){
+          e.preventDefault();
+          e.stopPropagation();
+          const target = findPhotosDocsSection();
+          if (!target) return false;
+          target.style.display = "block";
+          target.hidden = false;
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+          return false;
+        };
+      }
+    });
+
+    if (mode === "homeowner") {
+      // Hide contractor-only tools by text, but explicitly skip Photos & Docs.
+      const contractorOnlyWords = [
+        "ai chat",
+        "smart material calculator",
+        "trade calculators",
+        "estimate notes",
+        "proposal draft",
+        "proposal preview",
+        "generate proposal",
+        "estimate line items",
+        "submit bid",
+        "bid tools"
+      ];
+
+      Array.from(document.querySelectorAll("section,.panel,.card,.workspace-section,.tool-card")).forEach(section => {
+        if (section === photosSection || section.contains(photosSection) || photosSection.contains(section)) return;
+
+        const text = (section.innerText || section.textContent || "").toLowerCase();
+        const shouldHide = contractorOnlyWords.some(w => text.includes(w));
+
+        if (shouldHide) section.style.display = "none";
+      });
+
+      photosSection.style.display = "block";
+      photosSection.hidden = false;
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", fixPhotosDocsForHomeowner);
+  window.addEventListener("load", fixPhotosDocsForHomeowner);
+  setTimeout(fixPhotosDocsForHomeowner, 100);
+  setTimeout(fixPhotosDocsForHomeowner, 500);
 })();
 </script>
 
