@@ -2043,9 +2043,11 @@ body {
 }
 
 
-/* ===== PROJECT ROOM ROLE VISIBILITY ===== */
-.contractor-tools,
-.contractor-only {
+
+/* ===== PROJECT ROOM ROLE VISIBILITY - SAFE VERSION ===== */
+/* Contractor tools stay visible by default so contractor view cannot accidentally lose them. */
+body.homeowner-view .contractor-tools,
+body.homeowner-view .contractor-only {
   display: none !important;
 }
 
@@ -2053,10 +2055,6 @@ body.contractor-view .contractor-tools {
   display: flex !important;
   flex-direction: column !important;
   gap: 16px !important;
-}
-
-body.contractor-view .contractor-only {
-  display: flex !important;
 }
 
 body.contractor-view .nav-item.contractor-only {
@@ -2128,7 +2126,6 @@ body.contractor-view .nav-item.contractor-only {
         <div class="nav-list">
           <div class="nav-item active" data-target="projectOverviewPanel"><span>Project Overview</span><span>Top</span></div>
           <div class="nav-item" data-target="schedulePanel"><span>Schedule Calendar</span><span>4 items</span></div>
-          <div class="nav-item" data-target="jobListPanel"><span>Active Job List</span><span>Live</span></div>
           <div class="nav-item" data-target="videoChatPanel"><span>Video + Chat</span><span>2 alerts</span></div>
           <div class="nav-item contractor-only" data-target="smartCalculatorPanel"><span>Trade Calculators</span><span>Tools</span></div>
           <div class="nav-item contractor-only" data-target="estimateProposalPanel"><span>Estimate + Proposal</span><span>v3.2</span></div>
@@ -2203,45 +2200,6 @@ body.contractor-view .nav-item.contractor-only {
             </div>
           </div>
         </section>
-<section class="panel" id="jobListPanel">
-  <div class="panel-header">
-    <div>
-      <h3>Active Job List</h3>
-      <p>Keep the current job, budget, trade, and next action visible while you build the estimate.</p>
-    </div>
-    <button class="btn btn-soft" type="button" onclick="window.scrollTo({top:0,behavior:'smooth'})">Back to Top</button>
-  </div>
-
-  <div class="labor-explainer">
-    <strong>Labor is calculated as:</strong> Labor Hrs × Rate / Hr. 
-    Example: 8 hrs × $75/hr = $600 labor added to that line item.
-  </div>
-
-  <div class="estimate-table-wrap">
-    <table id="topJobTable">
-      <thead>
-        <tr>
-          <th>Job</th>
-          <th>Trade</th>
-          <th>Location</th>
-          <th>Budget</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td id="topJobTitle">Loading...</td>
-          <td id="topJobTrade">Loading...</td>
-          <td id="topJobCity">NJ Area</td>
-          <td id="topJobBudget">$0</td>
-          <td>Estimate Review</td>
-          <td><button class="btn btn-primary" type="button" onclick="document.getElementById('smartCalculatorPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Build Estimate</button></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</section>
 <section class="panel" id="videoChatPanel">
           <div class="panel-header">
             <div>
@@ -2705,39 +2663,43 @@ function applyWorkspaceMode(forcedMode) {
   document.body.classList.toggle("contractor-view", isContractorMode);
   document.body.classList.toggle("homeowner-view", !isContractorMode);
 
+  // Contractor tools: visible for contractor, hidden for homeowner.
   document.querySelectorAll(".contractor-tools").forEach(el => {
     if (isContractorMode) {
-      el.style.setProperty("display", "flex", "important");
-      el.style.setProperty("flex-direction", "column", "important");
-      el.style.setProperty("gap", "16px", "important");
+      el.style.display = "flex";
+      el.style.flexDirection = "column";
+      el.style.gap = "16px";
     } else {
-      el.style.setProperty("display", "none", "important");
+      el.style.display = "none";
     }
   });
 
+  // Contractor-only nav/buttons/sections.
   document.querySelectorAll(".contractor-only").forEach(el => {
     if (isContractorMode) {
       if (el.classList.contains("nav-item")) {
-        el.style.setProperty("display", "inline-flex", "important");
+        el.style.display = "inline-flex";
       } else {
-        el.style.removeProperty("display");
+        el.style.display = "";
       }
     } else {
-      el.style.setProperty("display", "none", "important");
+      el.style.display = "none";
     }
   });
 
+  // Homeowner-only items, if we add any later.
   document.querySelectorAll(".homeowner-only").forEach(el => {
-    if (isContractorMode) {
-      el.style.setProperty("display", "none", "important");
-    } else {
-      el.style.removeProperty("display");
-    }
+    el.style.display = isContractorMode ? "none" : "";
   });
 
-  if (inviteBtn) inviteBtn.textContent = isContractorMode ? "Invite Customer" : "Invite Contractor";
+  if (inviteBtn) {
+    inviteBtn.textContent = isContractorMode ? "Invite Customer" : "Invite Contractor";
+  }
 
-  console.log("Project Room mode applied:", mode);
+  console.log("Project Room mode applied:", mode, {
+    contractorTools: document.querySelectorAll(".contractor-tools").length,
+    contractorOnly: document.querySelectorAll(".contractor-only").length
+  });
 }
 
 async function enforceProjectRoomRole() {
@@ -4588,6 +4550,8 @@ function setupWorkspaceNav(){
 
   navItems.forEach(item => {
     item.addEventListener('click', () => {
+      if (item.style.display === "none") return;
+
       const targetId = item.getAttribute('data-target');
       const target = document.getElementById(targetId);
 
