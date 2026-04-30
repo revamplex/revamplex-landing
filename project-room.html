@@ -2078,6 +2078,18 @@ body.contractor-room .contractor-tools {
   display: block !important;
 }
 
+
+/* ===== HARD FIX: PHOTOS DOCS OUTSIDE CONTRACTOR TOOLS ===== */
+body.homeowner-room #photoDocsPanel,
+body.homeowner-room #photosDocsSection,
+body.contractor-room #photoDocsPanel {
+  display: block !important;
+  visibility: visible !important;
+}
+body.homeowner-room .nav-item[data-target="photoDocsPanel"] {
+  display: flex !important;
+}
+
 </style>
 </head>
 <body>
@@ -2147,7 +2159,7 @@ body.contractor-room .contractor-tools {
           <div class="nav-item" data-target="videoChatPanel"><span>Video + Chat</span><span>2 alerts</span></div>
           <div class="nav-item" data-target="smartCalculatorPanel"><span>Trade Calculators</span><span>Tools</span></div>
           <div class="nav-item" data-target="estimateProposalPanel"><span>Estimate + Proposal</span><span>v3.2</span></div>
-          <div class="nav-item" data-target="photoDocsPanel"><span>Photos + Docs</span><span>Upload</span></div>
+          <div class="nav-item" data-target="photoDocsPanel" onclick="scrollToSection('photoDocsPanel')"><span>Photos + Docs</span><span>Upload</span></div>
           <div class="nav-item" data-target="signaturePanel"><span>Customer Signature</span><span>Pending</span></div>
         </div>
       </aside>
@@ -2519,9 +2531,13 @@ body.contractor-room .contractor-tools {
             </div>
           </div>
 
-  <section data-shared-section="photos-docs" class="panel" id="photoDocsPanel">
+  
+</section>
+</div>
+<section class="panel" id="photoDocsPanel" data-shared-section="photos-docs" data-shared="true">
+          <div id="photosDocsSection" style="position:relative;top:-90px;height:0;"></div>
           <div class="panel-header">
-            <div id="photosDocsSection" data-shared-section="photos-docs" data-shared="true">
+            <div data-shared-section="photos-docs" data-shared="true">
               <h3>Photos + Documentation</h3>
               <p>Upload before photos, walkthrough videos, plans, permits, and marked-up screenshots.</p>
             </div>
@@ -2551,8 +2567,6 @@ body.contractor-room .contractor-tools {
             </div>
           </div>
         </section>
-</section>
-</div>
 <section class="panel" id="signaturePanel">
           <div class="panel-header">
             <div>
@@ -2904,7 +2918,15 @@ function applyWorkspaceMode() {
   document.body.classList.toggle("homeowner-room", isHomeownerRoom);
   document.body.classList.toggle("contractor-room", !isHomeownerRoom);
 
-  // Hide/show the actual contractor tool blocks.
+  const photoDocs = document.getElementById("photoDocsPanel");
+  if (photoDocs) {
+    photoDocs.style.display = "block";
+    photoDocs.hidden = false;
+    photoDocs.setAttribute("data-shared", "true");
+    photoDocs.setAttribute("data-shared-section", "photos-docs");
+  }
+
+  // Hide/show actual contractor tool blocks.
   document.querySelectorAll(".contractor-tools").forEach(el => {
     el.style.display = isHomeownerRoom ? "none" : "";
   });
@@ -2922,10 +2944,27 @@ function applyWorkspaceMode() {
     item.style.display = isHomeownerRoom && isContractorOnly ? "none" : "";
   });
 
+  // Photos + Docs must stay available for homeowners and contractors.
+  const photoNav = document.querySelector('.nav-item[data-target="photoDocsPanel"]');
+  if (photoNav) {
+    photoNav.style.display = "";
+    photoNav.classList.remove("contractor-only-nav");
+  }
+
   // Hide buttons/actions that push homeowners toward contractor-only tools.
   document.querySelectorAll("button, a").forEach(el => {
     const onclick = String(el.getAttribute("onclick") || "");
-    const isContractorOnlyAction = onclick.includes("smartCalculatorPanel") || onclick.includes("estimateProposalPanel") || onclick.includes("pushCalcResultsToEstimate") || onclick.includes("submitBid()") || onclick.includes("generateProposalPDF");
+    const isPhotoDocsAction = onclick.includes("photoDocsPanel") || onclick.includes("photosDocsSection");
+    const isContractorOnlyAction =
+      !isPhotoDocsAction &&
+      (
+        onclick.includes("smartCalculatorPanel") ||
+        onclick.includes("estimateProposalPanel") ||
+        onclick.includes("pushCalcResultsToEstimate") ||
+        onclick.includes("submitBid()") ||
+        onclick.includes("generateProposalPDF")
+      );
+
     el.classList.toggle("contractor-only-action", isContractorOnlyAction);
     if (isHomeownerRoom && isContractorOnlyAction) {
       el.style.display = "none";
@@ -2942,7 +2981,6 @@ function applyWorkspaceMode() {
     inviteBtn.textContent = isHomeownerRoom ? "Invite Contractor" : "Invite Customer";
   }
 
-  // If the active nav item is now hidden, activate Project Overview instead.
   const activeHidden = document.querySelector(".nav-item.active.contractor-only-nav");
   if (activeHidden && isHomeownerRoom) {
     activeHidden.classList.remove("active");
@@ -4503,11 +4541,20 @@ function setupWorkspaceNav(){
   const navItems = document.querySelectorAll('.nav-item[data-target]');
 
   navItems.forEach(item => {
-    item.addEventListener('click', () => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
       const targetId = item.getAttribute('data-target');
       const target = document.getElementById(targetId);
 
-      if (!target) return;
+      if (!target) {
+        console.warn("Workspace section not found:", targetId);
+        return;
+      }
+
+      target.hidden = false;
+      target.style.display = "block";
 
       navItems.forEach(nav => nav.classList.remove('active'));
       item.classList.add('active');
@@ -5092,6 +5139,42 @@ if (inviteBtnSafe) {
   window.addEventListener("load", fixPhotosDocsForHomeowner);
   setTimeout(fixPhotosDocsForHomeowner, 100);
   setTimeout(fixPhotosDocsForHomeowner, 500);
+})();
+</script>
+
+
+<script>
+/* ===== FINAL CLICK FIX: PHOTOS & DOCS NAV ===== */
+(function(){
+  function bindPhotoDocsNav(){
+    const nav = document.querySelector('.nav-item[data-target="photoDocsPanel"]');
+    const target = document.getElementById("photoDocsPanel");
+
+    if (!nav || !target) return;
+
+    target.style.display = "block";
+    target.hidden = false;
+
+    nav.style.display = "";
+    nav.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+
+      target.style.display = "block";
+      target.hidden = false;
+
+      document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
+      nav.classList.add("active");
+
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      return false;
+    };
+  }
+
+  document.addEventListener("DOMContentLoaded", bindPhotoDocsNav);
+  window.addEventListener("load", bindPhotoDocsNav);
+  setTimeout(bindPhotoDocsNav, 250);
+  setTimeout(bindPhotoDocsNav, 800);
 })();
 </script>
 
