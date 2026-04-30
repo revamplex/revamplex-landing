@@ -2043,30 +2043,18 @@ body {
 }
 
 
-
-/* ===== FINAL ROLE DISPLAY OVERRIDE ===== */
-body.homeowner-view .contractor-tools,
-body.homeowner-view .contractor-only {
+/* ===== ROLE-BASED PROJECT ROOM VISIBILITY ===== */
+body.homeowner-room .contractor-tools {
   display: none !important;
 }
 
-body.contractor-view .contractor-tools {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  height: auto !important;
-  overflow: visible !important;
+body.homeowner-room .contractor-only-nav,
+body.homeowner-room .contractor-only-action {
+  display: none !important;
 }
 
-body.contractor-view .contractor-tools > section,
-body.contractor-view .contractor-tools > .panel {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-body.contractor-view .nav-item.contractor-only {
-  display: inline-flex !important;
+body.contractor-room .contractor-tools {
+  display: flex !important;
 }
 
 </style>
@@ -2134,9 +2122,10 @@ body.contractor-view .nav-item.contractor-only {
         <div class="nav-list">
           <div class="nav-item active" data-target="projectOverviewPanel"><span>Project Overview</span><span>Top</span></div>
           <div class="nav-item" data-target="schedulePanel"><span>Schedule Calendar</span><span>4 items</span></div>
+          <div class="nav-item" data-target="jobListPanel"><span>Active Job List</span><span>Live</span></div>
           <div class="nav-item" data-target="videoChatPanel"><span>Video + Chat</span><span>2 alerts</span></div>
-          <div class="nav-item contractor-only" data-target="smartCalculatorPanel"><span>Trade Calculators</span><span>Tools</span></div>
-          <div class="nav-item contractor-only" data-target="estimateProposalPanel"><span>Estimate + Proposal</span><span>v3.2</span></div>
+          <div class="nav-item" data-target="smartCalculatorPanel"><span>Trade Calculators</span><span>Tools</span></div>
+          <div class="nav-item" data-target="estimateProposalPanel"><span>Estimate + Proposal</span><span>v3.2</span></div>
           <div class="nav-item" data-target="photoDocsPanel"><span>Photos + Docs</span><span>Upload</span></div>
           <div class="nav-item" data-target="signaturePanel"><span>Customer Signature</span><span>Pending</span></div>
         </div>
@@ -2208,6 +2197,45 @@ body.contractor-view .nav-item.contractor-only {
             </div>
           </div>
         </section>
+<section class="panel" id="jobListPanel">
+  <div class="panel-header">
+    <div>
+      <h3>Active Job List</h3>
+      <p>Keep the current job, budget, trade, and next action visible while you build the estimate.</p>
+    </div>
+    <button class="btn btn-soft" type="button" onclick="window.scrollTo({top:0,behavior:'smooth'})">Back to Top</button>
+  </div>
+
+  <div class="labor-explainer">
+    <strong>Labor is calculated as:</strong> Labor Hrs × Rate / Hr. 
+    Example: 8 hrs × $75/hr = $600 labor added to that line item.
+  </div>
+
+  <div class="estimate-table-wrap">
+    <table id="topJobTable">
+      <thead>
+        <tr>
+          <th>Job</th>
+          <th>Trade</th>
+          <th>Location</th>
+          <th>Budget</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td id="topJobTitle">Loading...</td>
+          <td id="topJobTrade">Loading...</td>
+          <td id="topJobCity">NJ Area</td>
+          <td id="topJobBudget">$0</td>
+          <td>Estimate Review</td>
+          <td><button class="btn btn-primary" type="button" onclick="document.getElementById('smartCalculatorPanel')?.scrollIntoView({behavior:'smooth',block:'start'})">Build Estimate</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
 <section class="panel" id="videoChatPanel">
           <div class="panel-header">
             <div>
@@ -2470,14 +2498,11 @@ body.contractor-view .nav-item.contractor-only {
             </div>
           </div>
 
-  
-</section>
-</div>
-<section class="panel shared-docs-panel" id="photoDocsPanel">
+  <section class="panel" id="photoDocsPanel">
           <div class="panel-header">
             <div>
               <h3>Photos + Documentation</h3>
-              <p>Shared project files for both homeowner and contractor. Upload photos, videos, plans, permits, estimates, and approvals.</p>
+              <p>Upload before photos, walkthrough videos, plans, permits, and marked-up screenshots.</p>
             </div>
           </div>
 
@@ -2504,12 +2529,9 @@ body.contractor-view .nav-item.contractor-only {
               <div class="photo-placeholder">Estimate PDF, permit, signed contract</div>
             </div>
           </div>
-          <div class="summary-box" style="margin-top:16px;">
-            <h4 style="margin-top:0;">Uploaded Shared Files</h4>
-            <p style="color:var(--muted);margin-top:0;">Files uploaded here are viewable and downloadable by both the homeowner and contractor.</p>
-            <div id="sharedFileList" class="appointment-empty">No shared files uploaded yet.</div>
-          </div>
         </section>
+</section>
+</div>
 <section class="panel" id="signaturePanel">
           <div class="panel-header">
             <div>
@@ -2621,110 +2643,6 @@ const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-/* ===== PROJECT ROOM ROLE LOCK =====
-   Demo mode follows the URL so visitors can preview homeowner or contractor.
-   Real signed-in users follow Supabase profile role unless the job is demo.
-*/
-function isProjectRoomDemoMode() {
-  const params = new URLSearchParams(window.location.search);
-  const rawMode = params.get("mode");
-  const jobId = params.get("job") || "";
-
-  if (rawMode === "demo") return true;
-  if (String(jobId).startsWith("demo-")) return true;
-
-  try {
-    const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null");
-    if (savedJob && String(savedJob.id) === String(jobId)) return true;
-  } catch (e) {}
-
-  return false;
-}
-
-function getRequestedProjectRoomMode() {
-  const params = new URLSearchParams(window.location.search);
-  const rawMode = params.get("mode");
-  const viewMode = params.get("view") || params.get("role") || params.get("demoRole");
-
-  if (rawMode === "demo") {
-    return viewMode === "contractor" ? "contractor" : "homeowner";
-  }
-
-  if (rawMode === "contractor" || rawMode === "homeowner") {
-    return rawMode;
-  }
-
-  if (viewMode === "contractor" || viewMode === "homeowner") {
-    return viewMode;
-  }
-
-  return "homeowner";
-}
-
-function applyWorkspaceMode(forcedMode) {
-  const params = new URLSearchParams(window.location.search);
-  mode = forcedMode || params.get("mode") || "homeowner";
-
-  const isContractorMode = mode === "contractor";
-  const inviteBtn = document.getElementById("inviteBtn");
-
-  document.querySelectorAll(".contractor-tools").forEach(el => {
-    el.style.display = isContractorMode ? "flex" : "none";
-    el.style.flexDirection = "column";
-    el.style.gap = "16px";
-  });
-
-  document.querySelectorAll(".contractor-only").forEach(el => {
-    el.style.display = isContractorMode ? "inline-flex" : "none";
-  });
-
-  if (inviteBtn) {
-    inviteBtn.textContent = isContractorMode ? "Invite Customer" : "Invite Contractor";
-  }
-}
-
-async function enforceProjectRoomRole() {
-  const params = new URLSearchParams(window.location.search);
-  const requestedMode = getRequestedProjectRoomMode();
-  const jobId = params.get("job") || "";
-
-  if (isProjectRoomDemoMode()) {
-    applyWorkspaceMode(requestedMode);
-    return;
-  }
-
-  const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-
-  if (userError) console.warn("Auth role check error:", userError);
-
-  if (!user) {
-    applyWorkspaceMode(requestedMode);
-    return;
-  }
-
-  const { data: profile, error: profileError } = await supabaseClient
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if (profileError || !profile) {
-    console.warn("Profile role check failed. Falling back to requested mode:", profileError);
-    applyWorkspaceMode(requestedMode);
-    return;
-  }
-
-  const realRole = profile.role === "contractor" ? "contractor" : "homeowner";
-
-  if (realRole !== requestedMode) {
-    window.location.href = `project-room.html?mode=${realRole}&job=${encodeURIComponent(jobId)}`;
-    return;
-  }
-
-  applyWorkspaceMode(realRole);
-}
-
   checkAuth();
 const urlParams = new URLSearchParams(window.location.search);
 const jobId = urlParams.get('job');
@@ -2906,7 +2824,7 @@ console.log("PROJECT ROOM JOB ID:", jobId);
 
 const params = new URLSearchParams(window.location.search);
 
-let mode = getRequestedProjectRoomMode();
+let mode = params.get("mode") || "contractor";
 
 console.log("ACTIVE JOB ID:", jobId);
   
@@ -2925,6 +2843,83 @@ const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null
 
 /* ---------- MODE SWITCH ---------- */
 
+function getWorkspaceRole() {
+  const params = new URLSearchParams(window.location.search);
+  const rawMode = params.get("mode") || "contractor";
+  const hasContractorParam = params.has("contractor");
+
+  // Normal live modes
+  if (rawMode === "homeowner") return "homeowner";
+  if (rawMode === "contractor") return "contractor";
+
+  // Demo mode needs context:
+  // - Demo opened from homeowner browsing/message contractor = homeowner view
+  // - Demo opened from contractor Submit Bid/job preview = contractor view
+  if (rawMode === "demo") {
+    return hasContractorParam ? "homeowner" : "contractor";
+  }
+
+  return "contractor";
+}
+
+function applyWorkspaceMode() {
+  const params = new URLSearchParams(window.location.search);
+  const workspaceRole = getWorkspaceRole();
+  const inviteBtn = document.getElementById("inviteBtn");
+  const title = document.querySelector(".brand h1");
+  const isHomeownerRoom = workspaceRole === "homeowner";
+
+  document.body.classList.toggle("homeowner-room", isHomeownerRoom);
+  document.body.classList.toggle("contractor-room", !isHomeownerRoom);
+
+  // Hide/show the actual contractor tool blocks.
+  document.querySelectorAll(".contractor-tools").forEach(el => {
+    el.style.display = isHomeownerRoom ? "none" : "";
+  });
+
+  // Hide/show nav links that point to contractor-only tools.
+  const contractorOnlyTargets = new Set([
+    "smartCalculatorPanel",
+    "estimateProposalPanel"
+  ]);
+
+  document.querySelectorAll(".nav-item").forEach(item => {
+    const target = item.getAttribute("data-target");
+    const isContractorOnly = contractorOnlyTargets.has(target);
+    item.classList.toggle("contractor-only-nav", isContractorOnly);
+    item.style.display = isHomeownerRoom && isContractorOnly ? "none" : "";
+  });
+
+  // Hide buttons/actions that push homeowners toward contractor-only tools.
+  document.querySelectorAll("button, a").forEach(el => {
+    const onclick = String(el.getAttribute("onclick") || "");
+    const isContractorOnlyAction = onclick.includes("smartCalculatorPanel") || onclick.includes("estimateProposalPanel") || onclick.includes("pushCalcResultsToEstimate") || onclick.includes("submitBid()") || onclick.includes("generateProposalPDF");
+    el.classList.toggle("contractor-only-action", isContractorOnlyAction);
+    if (isHomeownerRoom && isContractorOnlyAction) {
+      el.style.display = "none";
+    }
+  });
+
+  if (title) {
+    title.textContent = isHomeownerRoom
+      ? "Revamp Project Room™ — Homeowner Workspace"
+      : "Revamp Project Room™ — Contractor Workspace";
+  }
+
+  if (inviteBtn) {
+    inviteBtn.textContent = isHomeownerRoom ? "Invite Contractor" : "Invite Customer";
+  }
+
+  // If the active nav item is now hidden, activate Project Overview instead.
+  const activeHidden = document.querySelector(".nav-item.active.contractor-only-nav");
+  if (activeHidden && isHomeownerRoom) {
+    activeHidden.classList.remove("active");
+    document.querySelector('.nav-item[data-target="projectOverviewPanel"]')?.classList.add("active");
+  }
+
+  console.log("PROJECT ROOM ROLE:", workspaceRole, "RAW MODE:", params.get("mode"));
+}
+
 /* ---------- BACK BUTTON ---------- */
 
 function setupBackButton(){
@@ -2937,7 +2932,7 @@ function setupBackButton(){
 
     const params=new URLSearchParams(window.location.search);
 
-    const role=getRequestedProjectRoomMode();
+    const role=params.get("mode") || "contractor";
 
     window.location.href=`map.html?view=${role}`;
 
@@ -3648,7 +3643,7 @@ function submitBid(){
 
 /* ---------- INIT ---------- */
 
-enforceProjectRoomRole();
+applyWorkspaceMode();
 
 buildTradeQuickMenu();
 selectCalculator("tile");
@@ -4208,13 +4203,10 @@ async function uploadProjectFiles(){
 
   status.innerText = "Uploading...";
 
-  const uploadedFiles = JSON.parse(sessionStorage.getItem("revampProjectRoomFiles") || "[]");
-
   for(const file of files){
 
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
     const fileName = `${Date.now()}-${safeName}`;
-    let downloadableUrl = "";
 
     const { error } = await supabaseClient.storage
       .from("project-files")
@@ -4225,62 +4217,10 @@ async function uploadProjectFiles(){
       status.innerText = "Upload failed: " + error.message;
       return;
     }
-
-    const publicUrlData = supabaseClient.storage
-      .from("project-files")
-      .getPublicUrl(fileName);
-
-    downloadableUrl = publicUrlData?.data?.publicUrl || "";
-
-    uploadedFiles.push({
-      name: file.name,
-      storedName: fileName,
-      type: file.type || "file",
-      size: file.size || 0,
-      url: downloadableUrl,
-      uploadedAt: new Date().toLocaleString(),
-      uploadedBy: mode === "contractor" ? "Contractor" : "Homeowner"
-    });
   }
-
-  sessionStorage.setItem("revampProjectRoomFiles", JSON.stringify(uploadedFiles));
 
   status.innerText = "Upload complete ✔";
-  fileInput.value = "";
-
-  renderSharedProjectFiles();
 }
-
-function renderSharedProjectFiles(){
-  const list = document.getElementById("sharedFileList");
-  if (!list) return;
-
-  const files = JSON.parse(sessionStorage.getItem("revampProjectRoomFiles") || "[]");
-
-  if (!files.length) {
-    list.className = "appointment-empty";
-    list.innerHTML = "No shared files uploaded yet.";
-    return;
-  }
-
-  list.className = "";
-  list.innerHTML = files.map(file => {
-    const sizeKb = file.size ? Math.round(file.size / 1024).toLocaleString() + " KB" : "File";
-    const link = file.url
-      ? `<a class="btn btn-soft" href="${file.url}" target="_blank" download>View / Download</a>`
-      : `<span style="color:var(--muted);font-weight:700;">Uploaded</span>`;
-
-    return `
-      <div class="task-item">
-        <strong>${escapeHTML(file.name)}</strong>
-        <span>${escapeHTML(file.uploadedBy || "User")} • ${escapeHTML(file.uploadedAt || "")} • ${escapeHTML(sizeKb)}</span>
-        <div style="margin-top:10px;">${link}</div>
-      </div>
-    `;
-  }).join("");
-}
-
-document.addEventListener("DOMContentLoaded", renderSharedProjectFiles);
 
 
 
@@ -4888,91 +4828,5 @@ if (inviteBtnSafe) {
 })();
 
 </script>
-<script>
-document.addEventListener("DOMContentLoaded", function(){
-  if (typeof enforceProjectRoomRole === "function") {
-    enforceProjectRoomRole();
-  }
-});
-</script>
-
-<script>
-/* ===== FINAL HARD ROLE FIX ===== */
-(function(){
-  function finalProjectRoomRoleFix(){
-    const params = new URLSearchParams(window.location.search);
-    const jobId = params.get("job") || "";
-    const rawMode = params.get("mode");
-    const viewMode = params.get("view") || params.get("role") || params.get("demoRole");
-
-    let finalMode = "homeowner";
-
-    if (rawMode === "contractor" || viewMode === "contractor") {
-      finalMode = "contractor";
-    }
-
-    if (rawMode === "demo" && viewMode === "contractor") {
-      finalMode = "contractor";
-    }
-
-    if (String(jobId).startsWith("demo-") && (rawMode === "contractor" || viewMode === "contractor")) {
-      finalMode = "contractor";
-    }
-
-    if (rawMode === "homeowner" || viewMode === "homeowner") {
-      finalMode = "homeowner";
-    }
-
-    document.body.classList.toggle("contractor-view", finalMode === "contractor");
-    document.body.classList.toggle("homeowner-view", finalMode !== "contractor");
-
-    document.querySelectorAll(".contractor-tools").forEach(function(el){
-      if (finalMode === "contractor") {
-        el.style.setProperty("display", "block", "important");
-        el.style.setProperty("visibility", "visible", "important");
-        el.style.setProperty("opacity", "1", "important");
-        el.style.setProperty("height", "auto", "important");
-        el.style.setProperty("overflow", "visible", "important");
-      } else {
-        el.style.setProperty("display", "none", "important");
-      }
-    });
-
-    document.querySelectorAll(".contractor-tools > section, .contractor-tools > .panel").forEach(function(el){
-      if (finalMode === "contractor") {
-        el.style.setProperty("display", "block", "important");
-        el.style.setProperty("visibility", "visible", "important");
-        el.style.setProperty("opacity", "1", "important");
-      }
-    });
-
-    document.querySelectorAll(".contractor-only").forEach(function(el){
-      if (finalMode === "contractor") {
-        if (el.classList.contains("nav-item")) {
-          el.style.setProperty("display", "inline-flex", "important");
-        } else {
-          el.style.removeProperty("display");
-        }
-      } else {
-        el.style.setProperty("display", "none", "important");
-      }
-    });
-
-    const inviteBtn = document.getElementById("inviteBtn");
-    if (inviteBtn) {
-      inviteBtn.textContent = finalMode === "contractor" ? "Invite Customer" : "Invite Contractor";
-    }
-
-    window.__projectRoomFinalMode = finalMode;
-    console.log("FINAL PROJECT ROOM ROLE FIX:", finalMode);
-  }
-
-  document.addEventListener("DOMContentLoaded", finalProjectRoomRoleFix);
-  window.addEventListener("load", finalProjectRoomRoleFix);
-  setTimeout(finalProjectRoomRoleFix, 250);
-  setTimeout(finalProjectRoomRoleFix, 1000);
-})();
-</script>
-
 </body>
 </html>
