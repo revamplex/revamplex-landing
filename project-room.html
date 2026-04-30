@@ -2044,17 +2044,25 @@ body {
 
 
 
-/* ===== PROJECT ROOM ROLE VISIBILITY - SAFE VERSION ===== */
-/* Contractor tools stay visible by default so contractor view cannot accidentally lose them. */
+/* ===== FINAL ROLE DISPLAY OVERRIDE ===== */
 body.homeowner-view .contractor-tools,
 body.homeowner-view .contractor-only {
   display: none !important;
 }
 
 body.contractor-view .contractor-tools {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 16px !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+body.contractor-view .contractor-tools > section,
+body.contractor-view .contractor-tools > .panel {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 body.contractor-view .nav-item.contractor-only {
@@ -2663,43 +2671,39 @@ function applyWorkspaceMode(forcedMode) {
   document.body.classList.toggle("contractor-view", isContractorMode);
   document.body.classList.toggle("homeowner-view", !isContractorMode);
 
-  // Contractor tools: visible for contractor, hidden for homeowner.
   document.querySelectorAll(".contractor-tools").forEach(el => {
     if (isContractorMode) {
-      el.style.display = "flex";
-      el.style.flexDirection = "column";
-      el.style.gap = "16px";
+      el.style.setProperty("display", "flex", "important");
+      el.style.setProperty("flex-direction", "column", "important");
+      el.style.setProperty("gap", "16px", "important");
     } else {
-      el.style.display = "none";
+      el.style.setProperty("display", "none", "important");
     }
   });
 
-  // Contractor-only nav/buttons/sections.
   document.querySelectorAll(".contractor-only").forEach(el => {
     if (isContractorMode) {
       if (el.classList.contains("nav-item")) {
-        el.style.display = "inline-flex";
+        el.style.setProperty("display", "inline-flex", "important");
       } else {
-        el.style.display = "";
+        el.style.removeProperty("display");
       }
     } else {
-      el.style.display = "none";
+      el.style.setProperty("display", "none", "important");
     }
   });
 
-  // Homeowner-only items, if we add any later.
   document.querySelectorAll(".homeowner-only").forEach(el => {
-    el.style.display = isContractorMode ? "none" : "";
+    if (isContractorMode) {
+      el.style.setProperty("display", "none", "important");
+    } else {
+      el.style.removeProperty("display");
+    }
   });
 
-  if (inviteBtn) {
-    inviteBtn.textContent = isContractorMode ? "Invite Customer" : "Invite Contractor";
-  }
+  if (inviteBtn) inviteBtn.textContent = isContractorMode ? "Invite Customer" : "Invite Contractor";
 
-  console.log("Project Room mode applied:", mode, {
-    contractorTools: document.querySelectorAll(".contractor-tools").length,
-    contractorOnly: document.querySelectorAll(".contractor-only").length
-  });
+  console.log("Project Room mode applied:", mode);
 }
 
 async function enforceProjectRoomRole() {
@@ -4550,8 +4554,6 @@ function setupWorkspaceNav(){
 
   navItems.forEach(item => {
     item.addEventListener('click', () => {
-      if (item.style.display === "none") return;
-
       const targetId = item.getAttribute('data-target');
       const target = document.getElementById(targetId);
 
@@ -4915,5 +4917,84 @@ document.addEventListener("DOMContentLoaded", function(){
   }
 });
 </script>
+
+<script>
+/* ===== FINAL HARD ROLE FIX ===== */
+(function(){
+  function finalProjectRoomRoleFix(){
+    const params = new URLSearchParams(window.location.search);
+    const jobId = params.get("job") || "";
+    const rawMode = params.get("mode");
+    const viewMode = params.get("view") || params.get("role") || params.get("demoRole");
+
+    let finalMode = "homeowner";
+
+    if (rawMode === "contractor" || viewMode === "contractor") {
+      finalMode = "contractor";
+    }
+
+    if (rawMode === "demo" && viewMode === "contractor") {
+      finalMode = "contractor";
+    }
+
+    if (String(jobId).startsWith("demo-") && (rawMode === "contractor" || viewMode === "contractor")) {
+      finalMode = "contractor";
+    }
+
+    if (rawMode === "homeowner" || viewMode === "homeowner") {
+      finalMode = "homeowner";
+    }
+
+    document.body.classList.toggle("contractor-view", finalMode === "contractor");
+    document.body.classList.toggle("homeowner-view", finalMode !== "contractor");
+
+    document.querySelectorAll(".contractor-tools").forEach(function(el){
+      if (finalMode === "contractor") {
+        el.style.setProperty("display", "block", "important");
+        el.style.setProperty("visibility", "visible", "important");
+        el.style.setProperty("opacity", "1", "important");
+        el.style.setProperty("height", "auto", "important");
+        el.style.setProperty("overflow", "visible", "important");
+      } else {
+        el.style.setProperty("display", "none", "important");
+      }
+    });
+
+    document.querySelectorAll(".contractor-tools > section, .contractor-tools > .panel").forEach(function(el){
+      if (finalMode === "contractor") {
+        el.style.setProperty("display", "block", "important");
+        el.style.setProperty("visibility", "visible", "important");
+        el.style.setProperty("opacity", "1", "important");
+      }
+    });
+
+    document.querySelectorAll(".contractor-only").forEach(function(el){
+      if (finalMode === "contractor") {
+        if (el.classList.contains("nav-item")) {
+          el.style.setProperty("display", "inline-flex", "important");
+        } else {
+          el.style.removeProperty("display");
+        }
+      } else {
+        el.style.setProperty("display", "none", "important");
+      }
+    });
+
+    const inviteBtn = document.getElementById("inviteBtn");
+    if (inviteBtn) {
+      inviteBtn.textContent = finalMode === "contractor" ? "Invite Customer" : "Invite Contractor";
+    }
+
+    window.__projectRoomFinalMode = finalMode;
+    console.log("FINAL PROJECT ROOM ROLE FIX:", finalMode);
+  }
+
+  document.addEventListener("DOMContentLoaded", finalProjectRoomRoleFix);
+  window.addEventListener("load", finalProjectRoomRoleFix);
+  setTimeout(finalProjectRoomRoleFix, 250);
+  setTimeout(finalProjectRoomRoleFix, 1000);
+})();
+</script>
+
 </body>
 </html>
