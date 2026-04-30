@@ -2043,17 +2043,24 @@ body {
 }
 
 
-/* ===== ROLE SAFETY ===== */
-.contractor-tools {
-  display: none;
+/* ===== PROJECT ROOM ROLE VISIBILITY ===== */
+.contractor-tools,
+.contractor-only {
+  display: none !important;
 }
+
 body.contractor-view .contractor-tools {
   display: flex !important;
   flex-direction: column !important;
   gap: 16px !important;
 }
-body.homeowner-view .contractor-tools {
-  display: none !important;
+
+body.contractor-view .contractor-only {
+  display: flex !important;
+}
+
+body.contractor-view .nav-item.contractor-only {
+  display: inline-flex !important;
 }
 
 </style>
@@ -2500,17 +2507,16 @@ body.homeowner-view .contractor-tools {
   
 </section>
 </div>
-
 <section class="panel shared-docs-panel" id="photoDocsPanel">
           <div class="panel-header">
             <div>
               <h3>Photos + Documentation</h3>
-              <p>Shared project files for both homeowner and contractor. Upload before photos, walkthrough videos, plans, permits, estimates, and approvals.</p>
+              <p>Shared project files for both homeowner and contractor. Upload photos, videos, plans, permits, estimates, and approvals.</p>
             </div>
           </div>
 
           <div class="summary-box" style="margin-bottom:16px;">
-            <h4 style="margin-top:0;">Shared Project Files</h4>
+            <h4 style="margin-top:0;">Upload Project Files</h4>
             <input type="file" id="projectFileUpload" accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx" multiple>
             <button class="btn btn-primary" onclick="uploadProjectFiles()" style="margin-top:10px;">
               Upload Files
@@ -2532,14 +2538,12 @@ body.homeowner-view .contractor-tools {
               <div class="photo-placeholder">Estimate PDF, permit, signed contract</div>
             </div>
           </div>
-
           <div class="summary-box" style="margin-top:16px;">
             <h4 style="margin-top:0;">Uploaded Shared Files</h4>
-            <p style="color:var(--muted);margin-top:0;">Files uploaded here should be visible and downloadable to both the homeowner and contractor in this Project Room.</p>
+            <p style="color:var(--muted);margin-top:0;">Files uploaded here are viewable and downloadable by both the homeowner and contractor.</p>
             <div id="sharedFileList" class="appointment-empty">No shared files uploaded yet.</div>
           </div>
         </section>
-
 <section class="panel" id="signaturePanel">
           <div class="panel-header">
             <div>
@@ -2652,9 +2656,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-/* ===== PROJECT ROOM ROLE / DEMO MODE LOCK =====
-   Demo mode follows the demo URL, even if someone is logged in.
-   Real signed-in use follows the Supabase profile role when available.
+/* ===== PROJECT ROOM ROLE LOCK =====
+   Demo mode follows the URL so visitors can preview homeowner or contractor.
+   Real signed-in users follow Supabase profile role unless the job is demo.
 */
 function isProjectRoomDemoMode() {
   const params = new URLSearchParams(window.location.search);
@@ -2692,28 +2696,66 @@ function getRequestedProjectRoomMode() {
   return "homeowner";
 }
 
+function applyWorkspaceMode(forcedMode) {
+  mode = forcedMode || getRequestedProjectRoomMode();
+
+  const isContractorMode = mode === "contractor";
+  const inviteBtn = document.getElementById("inviteBtn");
+
+  document.body.classList.toggle("contractor-view", isContractorMode);
+  document.body.classList.toggle("homeowner-view", !isContractorMode);
+
+  document.querySelectorAll(".contractor-tools").forEach(el => {
+    if (isContractorMode) {
+      el.style.setProperty("display", "flex", "important");
+      el.style.setProperty("flex-direction", "column", "important");
+      el.style.setProperty("gap", "16px", "important");
+    } else {
+      el.style.setProperty("display", "none", "important");
+    }
+  });
+
+  document.querySelectorAll(".contractor-only").forEach(el => {
+    if (isContractorMode) {
+      if (el.classList.contains("nav-item")) {
+        el.style.setProperty("display", "inline-flex", "important");
+      } else {
+        el.style.removeProperty("display");
+      }
+    } else {
+      el.style.setProperty("display", "none", "important");
+    }
+  });
+
+  document.querySelectorAll(".homeowner-only").forEach(el => {
+    if (isContractorMode) {
+      el.style.setProperty("display", "none", "important");
+    } else {
+      el.style.removeProperty("display");
+    }
+  });
+
+  if (inviteBtn) inviteBtn.textContent = isContractorMode ? "Invite Customer" : "Invite Contractor";
+
+  console.log("Project Room mode applied:", mode);
+}
+
 async function enforceProjectRoomRole() {
   const params = new URLSearchParams(window.location.search);
   const requestedMode = getRequestedProjectRoomMode();
   const jobId = params.get("job") || "";
 
-  // Demo preview always follows the demo/requested role.
   if (isProjectRoomDemoMode()) {
-    mode = requestedMode;
-    applyWorkspaceMode(mode);
+    applyWorkspaceMode(requestedMode);
     return;
   }
 
   const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
 
-  if (userError) {
-    console.warn("Role check auth error:", userError);
-  }
+  if (userError) console.warn("Auth role check error:", userError);
 
-  // Logged-out live preview follows URL mode.
   if (!user) {
-    mode = requestedMode;
-    applyWorkspaceMode(mode);
+    applyWorkspaceMode(requestedMode);
     return;
   }
 
@@ -2725,8 +2767,7 @@ async function enforceProjectRoomRole() {
 
   if (profileError || !profile) {
     console.warn("Profile role check failed. Falling back to requested mode:", profileError);
-    mode = requestedMode;
-    applyWorkspaceMode(mode);
+    applyWorkspaceMode(requestedMode);
     return;
   }
 
@@ -2737,8 +2778,7 @@ async function enforceProjectRoomRole() {
     return;
   }
 
-  mode = realRole;
-  applyWorkspaceMode(mode);
+  applyWorkspaceMode(realRole);
 }
 
   checkAuth();
@@ -2940,55 +2980,6 @@ function currency(value){
 const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null");
 
 /* ---------- MODE SWITCH ---------- */
-
-function applyWorkspaceMode(forcedMode) {
-  mode = forcedMode || getRequestedProjectRoomMode();
-
-  const inviteBtn = document.getElementById("inviteBtn");
-  const isContractorMode = mode === "contractor";
-
-  document.body.classList.toggle("contractor-view", isContractorMode);
-  document.body.classList.toggle("homeowner-view", !isContractorMode);
-
-  const contractorTools = document.querySelectorAll(".contractor-tools");
-  contractorTools.forEach(el => {
-    if (isContractorMode) {
-      el.style.setProperty("display", "flex", "important");
-      el.style.setProperty("flex-direction", "column", "important");
-      el.style.setProperty("gap", "16px", "important");
-    } else {
-      el.style.setProperty("display", "none", "important");
-    }
-  });
-
-  document.querySelectorAll(".contractor-only").forEach(el => {
-    if (isContractorMode) {
-      el.style.removeProperty("display");
-    } else {
-      el.style.setProperty("display", "none", "important");
-    }
-  });
-
-  document.querySelectorAll(".homeowner-only").forEach(el => {
-    if (isContractorMode) {
-      el.style.setProperty("display", "none", "important");
-    } else {
-      el.style.removeProperty("display");
-    }
-  });
-
-  const title = document.querySelector(".brand h1");
-
-  if (isContractorMode) {
-    if (title) title.textContent = "Revamp Project Room™ — Contractor Workspace";
-    if (inviteBtn) inviteBtn.textContent = "Invite Customer";
-  } else {
-    if (title) title.textContent = "Revamp Project Room™ — Homeowner Workspace";
-    if (inviteBtn) inviteBtn.textContent = "Invite Contractor";
-  }
-
-  console.log("Project Room mode applied:", mode, "contractor tools:", contractorTools.length);
-}
 
 /* ---------- BACK BUTTON ---------- */
 
@@ -4279,31 +4270,23 @@ async function uploadProjectFiles(){
 
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
     const fileName = `${Date.now()}-${safeName}`;
-
     let downloadableUrl = "";
 
-    try {
-      const { error } = await supabaseClient.storage
-        .from("project-files")
-        .upload(fileName, file);
+    const { error } = await supabaseClient.storage
+      .from("project-files")
+      .upload(fileName, file);
 
-      if(error){
-        console.error("UPLOAD ERROR:", error);
-        status.innerText = "Upload failed: " + error.message;
-        return;
-      }
-
-      const publicUrlData = supabaseClient.storage
-        .from("project-files")
-        .getPublicUrl(fileName);
-
-      downloadableUrl = publicUrlData?.data?.publicUrl || "";
-
-    } catch(err) {
-      console.error("UPLOAD ERROR:", err);
-      status.innerText = "Upload failed. Check Console.";
+    if(error){
+      console.error("UPLOAD ERROR:", error);
+      status.innerText = "Upload failed: " + error.message;
       return;
     }
+
+    const publicUrlData = supabaseClient.storage
+      .from("project-files")
+      .getPublicUrl(fileName);
+
+    downloadableUrl = publicUrlData?.data?.publicUrl || "";
 
     uploadedFiles.push({
       name: file.name,
@@ -4961,7 +4944,6 @@ if (inviteBtnSafe) {
 })();
 
 </script>
-
 <script>
 document.addEventListener("DOMContentLoaded", function(){
   if (typeof enforceProjectRoomRole === "function") {
@@ -4969,6 +4951,5 @@ document.addEventListener("DOMContentLoaded", function(){
   }
 });
 </script>
-
 </body>
 </html>
