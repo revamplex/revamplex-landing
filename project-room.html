@@ -2908,12 +2908,84 @@ function getWorkspaceRole() {
   return "contractor";
 }
 
+async function inviteContractorToProjectRoom() {
+  const params = new URLSearchParams(window.location.search);
+  const workspaceRole = getWorkspaceRole();
+  const rawMode = params.get("mode") || "contractor";
+
+  const savedContractor = JSON.parse(sessionStorage.getItem("revampSelectedContractor") || "null");
+  const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null");
+  const job = window.currentJob || savedJob || {};
+  const contractor = savedContractor || window.selectedContractor || {};
+
+  const contractorId = params.get("contractor") || contractor.id || "";
+  const jobId = params.get("job") || job.id || "";
+
+  let contractorEmail = contractor.email || contractor.contractor_email || "";
+  let contractorName = contractor.name || contractor.company || contractor.full_name || "Contractor";
+
+  if (!contractorEmail && contractorId && contractorId !== "no-contractor" && !String(contractorId).startsWith("demo")) {
+    const { data, error } = await supabaseClient
+      .from("contractors")
+      .select("email,name,company,full_name")
+      .eq("id", contractorId)
+      .maybeSingle();
+
+    if (!error && data) {
+      contractorEmail = data.email || "";
+      contractorName = data.name || data.company || data.full_name || contractorName;
+    }
+  }
+
+  const inviteMode = workspaceRole === "homeowner" ? "contractor" : "homeowner";
+  const inviteUrl = `${window.location.origin}/project-room.html?mode=${inviteMode}&job=${encodeURIComponent(jobId)}&contractor=${encodeURIComponent(contractorId)}`;
+
+  const payload = {
+    invite_type: workspaceRole === "homeowner" ? "contractor_project_room_invite" : "homeowner_project_room_invite",
+    contractor_email: contractorEmail,
+    contractor_name: contractorName,
+    job_title: job.title || "Revamp Project",
+    trade: job.trade || "",
+    city: job.city || "",
+    project_room_url: inviteUrl
+  };
+
+  if (workspaceRole === "homeowner" && !payload.contractor_email) {
+    alert("No contractor email found. Make sure this contractor has an email saved in Supabase.");
+    return;
+  }
+
+  const zapierUrl = "https://hooks.zapier.com/hooks/catch/27422517/uvgurdp/";
+
+  if (zapierUrl === "PASTE_ZAPIER_WEBHOOK_URL_HERE") {
+    alert("Paste your Zapier webhook URL inside project-room.html first.");
+    return;
+  }
+
+  const res = await fetch(zapierUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+
+  if (!res.ok) {
+    alert("Invite failed. Please try again.");
+    return;
+  }
+
+  alert("Invite sent.");
+}
+
 function applyWorkspaceMode() {
   const params = new URLSearchParams(window.location.search);
   const workspaceRole = getWorkspaceRole();
   const inviteBtn = document.getElementById("inviteBtn");
   const title = document.querySelector(".brand h1");
   const isHomeownerRoom = workspaceRole === "homeowner";
+
+  if (inviteBtn) {
+    inviteBtn.onclick = inviteContractorToProjectRoom;
+  }
 
   document.body.classList.toggle("homeowner-room", isHomeownerRoom);
   document.body.classList.toggle("contractor-room", !isHomeownerRoom);
@@ -4584,27 +4656,7 @@ function getProjectRoomName() {
 }
 
 
-    const inviteBtnSafe = document.getElementById("inviteBtn") || document.getElementById("inviteContractorBtn");
-
-if (inviteBtnSafe) {
-  inviteBtnSafe.addEventListener("click", async () => {
-    const params = new URLSearchParams(window.location.search);
-
-    const jobId = params.get("job") || "no-job";
-    const contractorId = params.get("contractor") || "no-contractor";
-    const currentRoomMode = params.get("mode") || "homeowner";
-    const inviteMode = currentRoomMode === "homeowner" ? "contractor" : "homeowner";
-
-    const inviteLink = `${window.location.origin}/project-room.html?mode=${inviteMode}&job=${jobId}&contractor=${contractorId}`;
-
-    try {
-      await navigator.clipboard.writeText(inviteLink);
-      alert("Invite link copied:" + inviteLink);
-    } catch (err) {
-      alert("Copy this invite link:" + inviteLink);
-    }
-  });
-}
+    // Invite button is wired above by inviteContractorToProjectRoom().
 </script>
 <input id="sessionPhotoCapture" type="file" accept="image/*" capture="environment" style="display:none;">
 
