@@ -4680,14 +4680,11 @@ const { data, error } = await supabaseClient
 }
     
 function openWelcomeAuth(mode = 'register') {
-  // 🔥 EXIT DEMO MODE
   localStorage.removeItem('revamplex_demo');
 
-  // 🔥 FORCE OVERLAY VISIBLE (THIS IS THE FIX)
   welcomeOverlay.classList.remove('hidden');
   welcomeOverlay.style.display = 'flex';
 
-  // 🔥 RESET UI STATE
   backToRoleChooser();
 
   if (mode === 'login') {
@@ -4696,6 +4693,8 @@ function openWelcomeAuth(mode = 'register') {
       setTimeout(() => loginBtn.click(), 100);
     }
   }
+}
+
 const forgotBtn = document.getElementById("forgotPasswordBtn");
 
 if (forgotBtn) {
