@@ -1914,6 +1914,53 @@ body {
   background: #fff;
 }
 
+
+
+.private-room-alert {
+  border: 1px solid rgba(249, 115, 22, 0.28);
+  background: linear-gradient(180deg, #fff7ed, #ffffff);
+  color: #9a3412;
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.calendar-privacy-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 10px 0 12px;
+}
+
+.appointment-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.appointment-meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px;
+  margin-top: 8px;
+  border-radius: 999px;
+  background: #f8fafc;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+@media (max-width: 760px) {
+  .calendar-privacy-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .video-call-box {
   height: 520px;
   border-radius: 16px;
@@ -2125,7 +2172,7 @@ body.homeowner-room .nav-item[data-target="photoDocsPanel"] {
             </div>
             <div class="stat">
               <div class="label">Next Appointment</div>
-              <div class="value">Mar 14 • 10:00 AM</div>
+              <div class="value" id="nextAppointmentStat">No appointment</div>
             </div>
             <div class="stat">
               <div class="label">Approval Status</div>
@@ -2174,6 +2221,10 @@ body.homeowner-room .nav-item[data-target="photoDocsPanel"] {
             <button class="btn btn-primary" type="button" onclick="openAppointmentPrompt()">Add Appointment</button>
           </div>
 
+          <div class="private-room-alert">
+            <strong>Private client portal calendar:</strong> this schedule is saved only for this homeowner + this contractor room. Other contractors bidding on the same job do not see these appointments, notes, files, chat, or calendar changes.
+          </div>
+
           <div class="schedule-layout">
             <div class="calendar-box">
               <div class="calendar-toolbar">
@@ -2217,12 +2268,26 @@ body.homeowner-room .nav-item[data-target="photoDocsPanel"] {
                     <option>Customer Follow-Up</option>
                   </select>
                 </div>
+                <div>
+                  <label>Reminder</label>
+                  <select id="appointmentReminderInput">
+                    <option value="none">No reminder</option>
+                    <option value="60">1 hour before</option>
+                    <option value="1440" selected>24 hours before</option>
+                    <option value="2880">48 hours before</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Calendar Export</label>
+                  <button class="btn btn-soft" type="button" onclick="downloadSelectedDayICS()">Download .ICS</button>
+                </div>
                 <div class="full">
                   <label>Notes</label>
                   <input id="appointmentNoteInput" type="text" placeholder="Example: Meet homeowner at property">
                 </div>
-                <div class="full">
-                  <button class="btn btn-primary" type="button" onclick="addCalendarAppointment()">Add to Schedule</button>
+                <div class="full calendar-privacy-row">
+                  <button class="btn btn-primary" type="button" onclick="addCalendarAppointment()">Add to Private Room Schedule</button>
+                  <button class="btn btn-soft" type="button" onclick="enableCalendarNotifications()">Enable Browser Reminders</button>
                 </div>
               </div>
 
@@ -2616,7 +2681,8 @@ body.homeowner-room .nav-item[data-target="photoDocsPanel"] {
 
     <p class="footer-note">Revamp Project Room prototype • Private homeowner + contractor workspace • Ready to connect to Supabase / auth / database next</p>
   </div>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js">
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script>
 function scrollToSection(id) {
   const el = document.getElementById(id);
   if (!el) {
@@ -2624,9 +2690,9 @@ function scrollToSection(id) {
     return;
   }
   el.style.display = "block";
+  el.hidden = false;
   el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
-
 </script>
 <script>
 /* ---------- AI BUTTON BACKUP WIRING ---------- */
@@ -3780,7 +3846,7 @@ function submitBid(){
     return;
   }
 
-  const maxBids=job.maxBids || 5;
+  const maxBids=Number(job.max_bids || job.maxBids || 5);
 
   if(job.bids.length>=maxBids){
     alert("This job already received the maximum number of bids.");
@@ -3951,7 +4017,7 @@ function formatAIText(text){
   safe = safe.replace(/^#{1,6}\s*(.+)$/gm, '<span class="ai-heading">$1</span>');
   safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
-  const lines = safe.split("");
+  const lines = safe.split("\n");
   let html = "";
   let inList = false;
 
@@ -4395,11 +4461,23 @@ async function uploadProjectFiles(){
 
 
 
-/* ---------- CURRENT INTERACTIVE CALENDAR ---------- */
+/* ---------- PRIVATE PROJECT ROOM CALENDAR ---------- */
 
 let calendarViewDate = new Date();
 let selectedCalendarDate = new Date();
 let projectAppointments = [];
+let calendarReminderTimers = [];
+
+function getPrivateProjectRoomKey(){
+  const params = new URLSearchParams(window.location.search);
+  const jobId = params.get("job") || (window.currentJob && window.currentJob.id) || "preview";
+  const contractorId = params.get("contractor") || "assigned-contractor";
+  return `revamplex-room-${jobId}-${contractorId}`.replace(/[^a-zA-Z0-9-_]/g, "");
+}
+
+function getCalendarStorageKey(){
+  return getPrivateProjectRoomKey() + "-calendar-events";
+}
 
 function formatDateKey(date){
   const y = date.getFullYear();
@@ -4423,6 +4501,28 @@ function sameDate(a, b){
     a.getDate() === b.getDate();
 }
 
+function getWorkspaceActorLabel(){
+  return getWorkspaceRole && getWorkspaceRole() === "homeowner" ? "Homeowner" : "Contractor";
+}
+
+function saveCalendarAppointments(){
+  try {
+    localStorage.setItem(getCalendarStorageKey(), JSON.stringify(projectAppointments));
+  } catch (err) {
+    console.warn("Calendar save failed:", err);
+  }
+}
+
+function loadCalendarAppointments(){
+  try {
+    const saved = JSON.parse(localStorage.getItem(getCalendarStorageKey()) || "[]");
+    projectAppointments = Array.isArray(saved) ? saved : [];
+  } catch (err) {
+    console.warn("Calendar load failed:", err);
+    projectAppointments = [];
+  }
+}
+
 function initCalendarControls(){
   const monthSelect = document.getElementById("calendarMonthSelect");
   const yearSelect = document.getElementById("calendarYearSelect");
@@ -4444,6 +4544,26 @@ function initCalendarControls(){
     yearSelect.innerHTML = html;
     yearSelect.dataset.ready = "true";
   }
+}
+
+function updateNextAppointmentStat(){
+  const stat = document.getElementById("nextAppointmentStat");
+  if (!stat) return;
+
+  const nowKey = formatDateKey(new Date());
+  const upcoming = projectAppointments
+    .filter(a => a.date >= nowKey)
+    .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))[0];
+
+  if (!upcoming) {
+    stat.textContent = "No appointment";
+    return;
+  }
+
+  const [y, m, d] = upcoming.date.split("-").map(Number);
+  const appointmentDate = new Date(y, m - 1, d);
+  const shortDate = appointmentDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  stat.textContent = `${shortDate} • ${formatTimeForDisplay(upcoming.time)}`;
 }
 
 function renderCalendar(){
@@ -4505,6 +4625,7 @@ function renderCalendar(){
 
   grid.innerHTML = html;
   renderAppointmentList();
+  updateNextAppointmentStat();
 }
 
 function selectCalendarDate(dateKey){
@@ -4540,28 +4661,46 @@ function addCalendarAppointment(){
   const timeInput = document.getElementById("appointmentTimeInput");
   const typeInput = document.getElementById("appointmentTypeInput");
   const noteInput = document.getElementById("appointmentNoteInput");
+  const reminderInput = document.getElementById("appointmentReminderInput");
 
   const dateKey = formatDateKey(selectedCalendarDate);
   const time = timeInput?.value || "10:00";
   const type = typeInput?.value || "Appointment";
   const note = noteInput?.value || "Project appointment";
+  const reminderMinutes = reminderInput?.value || "1440";
 
   projectAppointments.push({
     id: Date.now(),
+    room_key: getPrivateProjectRoomKey(),
     date: dateKey,
     time,
     type,
-    note
+    note,
+    reminderMinutes,
+    createdBy: getWorkspaceActorLabel(),
+    visibility: "private_room_only"
   });
 
   if (noteInput) noteInput.value = "";
 
+  saveCalendarAppointments();
+  scheduleBrowserReminders();
   renderCalendar();
 }
 
 function deleteCalendarAppointment(id){
   projectAppointments = projectAppointments.filter(a => a.id !== id);
+  saveCalendarAppointments();
+  scheduleBrowserReminders();
   renderCalendar();
+}
+
+function formatTimeForDisplay(time){
+  if (!time) return "TBD";
+  const [h, m] = String(time).split(":").map(Number);
+  const d = new Date();
+  d.setHours(h || 0, m || 0, 0, 0);
+  return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 }
 
 function renderAppointmentList(){
@@ -4574,16 +4713,18 @@ function renderAppointmentList(){
     .sort((a, b) => a.time.localeCompare(b.time));
 
   if (!dayAppointments.length) {
-    list.innerHTML = `<div class="appointment-empty">No appointments for this date yet.</div>`;
+    list.innerHTML = `<div class="appointment-empty">No private-room appointments for this date yet.</div>`;
     return;
   }
 
   list.innerHTML = dayAppointments.map(a => `
     <div class="task-item">
-      <strong>${a.type}</strong>
-      <span>${formatPrettyDate(selectedCalendarDate)} • ${a.time}</span>
-      <span>${a.note}</span>
+      <strong>${escapeHTML(a.type)}</strong>
+      <span>${formatPrettyDate(selectedCalendarDate)} • ${formatTimeForDisplay(a.time)}</span>
+      <span>${escapeHTML(a.note)}</span>
+      <span class="appointment-meta-pill">Private room only • Added by ${escapeHTML(a.createdBy || "User")}</span>
       <div class="appointment-actions">
+        <button class="btn btn-soft" type="button" onclick="downloadAppointmentICS(${a.id})">Add to My Calendar</button>
         <button class="btn btn-soft" type="button" onclick="deleteCalendarAppointment(${a.id})">Remove</button>
       </div>
     </div>
@@ -4613,24 +4754,155 @@ function seedDefaultAppointments(){
   projectAppointments = [
     {
       id: Date.now() + 1,
+      room_key: getPrivateProjectRoomKey(),
       date: formatDateKey(siteWalk),
       time: "10:00",
       type: "Site Walkthrough",
-      note: "At property • Customer + Contractor"
+      note: "At property • Homeowner + assigned contractor only",
+      reminderMinutes: "1440",
+      createdBy: "System",
+      visibility: "private_room_only"
     },
     {
       id: Date.now() + 2,
+      room_key: getPrivateProjectRoomKey(),
       date: formatDateKey(review),
       time: "19:00",
       type: "Estimate Review Call",
-      note: "Video meeting"
+      note: "Private video meeting",
+      reminderMinutes: "60",
+      createdBy: "System",
+      visibility: "private_room_only"
     }
   ];
+  saveCalendarAppointments();
+}
+
+function toICSDate(dateKey, time){
+  const compactDate = String(dateKey || "").replaceAll("-", "");
+  const compactTime = String(time || "09:00").replace(":", "") + "00";
+  return compactDate + "T" + compactTime;
+}
+
+function buildAppointmentICS(appointment){
+  const job = window.currentJob || {};
+  const start = toICSDate(appointment.date, appointment.time);
+  const endDate = new Date(`${appointment.date}T${appointment.time || "09:00"}`);
+  endDate.setHours(endDate.getHours() + 1);
+  const end = toICSDate(formatDateKey(endDate), `${String(endDate.getHours()).padStart(2,"0")}:${String(endDate.getMinutes()).padStart(2,"0")}`);
+  const summary = `Revamp: ${appointment.type}`;
+  const description = [
+    appointment.note || "Project appointment",
+    "",
+    "Private Revamp Project Room calendar event.",
+    "Job: " + (job.title || "Revamp Project"),
+    "Room: " + getPrivateProjectRoomKey()
+  ].join("\\n");
+
+  return [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//RevampLEX//Private Project Room Calendar//EN",
+    "BEGIN:VEVENT",
+    "UID:" + appointment.id + "@revamplex.com",
+    "DTSTAMP:" + new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z",
+    "DTSTART:" + start,
+    "DTEND:" + end,
+    "SUMMARY:" + summary.replace(/,/g, "\\,"),
+    "DESCRIPTION:" + description.replace(/,/g, "\\,").replace(/\n/g, "\\n"),
+    "END:VEVENT",
+    "END:VCALENDAR"
+  ].join("\r\n");
+}
+
+function downloadICS(filename, icsText){
+  const blob = new Blob([icsText], { type: "text/calendar;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function downloadAppointmentICS(id){
+  const appointment = projectAppointments.find(a => a.id === id);
+  if (!appointment) return;
+  downloadICS(`revamp-${appointment.date}-${appointment.type.replace(/[^a-zA-Z0-9]+/g,"-").toLowerCase()}.ics`, buildAppointmentICS(appointment));
+}
+
+function downloadSelectedDayICS(){
+  const selectedKey = formatDateKey(selectedCalendarDate);
+  const dayAppointments = projectAppointments.filter(a => a.date === selectedKey);
+
+  if (!dayAppointments.length) {
+    alert("No appointments on this selected date yet.");
+    return;
+  }
+
+  const events = dayAppointments.map(buildAppointmentICS)
+    .map(txt => txt.replace("BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//RevampLEX//Private Project Room Calendar//EN\r\n", "").replace("\r\nEND:VCALENDAR", ""))
+    .join("\r\n");
+
+  const fullICS = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//RevampLEX//Private Project Room Calendar//EN",
+    events,
+    "END:VCALENDAR"
+  ].join("\r\n");
+
+  downloadICS(`revamp-private-room-${selectedKey}.ics`, fullICS);
+}
+
+async function enableCalendarNotifications(){
+  if (!("Notification" in window)) {
+    alert("This browser does not support browser notifications. Use Add to My Calendar instead.");
+    return;
+  }
+
+  const permission = await Notification.requestPermission();
+  if (permission === "granted") {
+    alert("Browser reminders enabled for this device while this page is open. Use Add to My Calendar for phone-level reminders.");
+    scheduleBrowserReminders();
+  } else {
+    alert("Notifications were not enabled. You can still download .ICS events to Google, Apple, or Outlook Calendar.");
+  }
+}
+
+function scheduleBrowserReminders(){
+  calendarReminderTimers.forEach(id => clearTimeout(id));
+  calendarReminderTimers = [];
+
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+
+  const now = Date.now();
+
+  projectAppointments.forEach(a => {
+    if (!a.reminderMinutes || a.reminderMinutes === "none") return;
+
+    const eventTime = new Date(`${a.date}T${a.time || "09:00"}`).getTime();
+    const reminderTime = eventTime - (Number(a.reminderMinutes) * 60 * 1000);
+    const delay = reminderTime - now;
+
+    if (delay > 0 && delay < 2147483647) {
+      const timerId = setTimeout(() => {
+        new Notification("Revamp Project Room Reminder", {
+          body: `${a.type} • ${formatTimeForDisplay(a.time)} • ${a.note || "Project appointment"}`
+        });
+      }, delay);
+      calendarReminderTimers.push(timerId);
+    }
+  });
 }
 
 document.addEventListener("DOMContentLoaded", function(){
+  loadCalendarAppointments();
   seedDefaultAppointments();
   goToToday();
+  scheduleBrowserReminders();
 });
 
 
@@ -4845,7 +5117,7 @@ function getProjectRoomName() {
 
     const notes = document.getElementById('estimateNotes');
     if (notes) {
-      notes.value = (notes.value.trim() + '' + note).trim();
+      notes.value = (notes.value.trim() + '\n' + note).trim();
     }
 
     if (window.jitsiApi && typeof window.jitsiApi.executeCommand === 'function' && isRecordingSession) {
