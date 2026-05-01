@@ -4705,7 +4705,7 @@ if (forgotBtn) {
 
     if (!email) return;
 
-    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+    const { error } = await client.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin + "/reset-password.html"
     });
 
