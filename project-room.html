@@ -2962,11 +2962,18 @@ async function inviteContractorToProjectRoom() {
     return;
   }
 
-  const res = await fetch(zapierUrl, {
+  let res;
+
+try {
+  res = await fetch(zapierUrl, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
+} catch (err) {
+  console.error("Zapier invite failed:", err);
+  alert("Invite failed because Zapier blocked the browser request. We may need to send this through Vercel/Supabase instead.");
+  return;
+}
 
   if (!res.ok) {
     alert("Invite failed. Please try again.");
