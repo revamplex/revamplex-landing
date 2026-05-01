@@ -3813,6 +3813,8 @@ let privateChatMessages = [];
 let privateChatHasLoadedOnce = false;
 let privateChatKnownIds = new Set();
 let privateChatAudioContext = null;
+let privateChatPollingTimer = null;
+let privateChatActiveRoomId = null;
 
 function getChatStorageKey(){
   if (typeof getPrivateProjectRoomKey === "function") {
@@ -3971,7 +3973,7 @@ async function loadPrivateChatMessages(options = {}){
   if (!roomId) {
     chatUsesSupabase = false;
     loadLocalChatMessages();
-    setChatStatus("Preview/demo chat: saved only on this device.");
+    if (!options.silent) setChatStatus("Preview/demo chat: saved only on this device.");
     renderPrivateChatMessages({ ping: options.ping === true });
     return;
   }
@@ -3986,36 +3988,101 @@ async function loadPrivateChatMessages(options = {}){
     console.warn("Supabase chat load failed. Using local fallback:", error);
     chatUsesSupabase = false;
     loadLocalChatMessages();
-    setChatStatus("Chat table not connected yet. Using this device only until Supabase SQL is added.");
+    if (!options.silent) setChatStatus("Chat table not connected yet. Using this device only until Supabase SQL is added.");
     renderPrivateChatMessages({ ping: options.ping === true });
     return;
   }
 
   chatUsesSupabase = true;
   privateChatMessages = data || [];
-  setChatStatus("Private chat synced to this homeowner + contractor project room.");
+  if (!options.silent) setChatStatus("Private chat synced to this homeowner + contractor project room.");
   renderPrivateChatMessages({ ping: options.ping === true });
   subscribeToPrivateChat(roomId);
 }
 
 function subscribeToPrivateChat(roomId){
-  if (!roomId || currentChatChannel) return;
+  if (!roomId) return;
+
+  privateChatActiveRoomId = roomId;
+
+  if (currentChatChannel) {
+    startPrivateChatPolling(roomId);
+    return;
+  }
 
   currentChatChannel = supabaseClient
     .channel("project-chat-" + roomId)
     .on(
       "postgres_changes",
       {
-        event: "*",
+        event: "INSERT",
         schema: "public",
         table: "project_chat_messages",
         filter: "project_room_id=eq." + roomId
       },
       function(payload){
-        loadPrivateChatMessages({ ping: payload?.eventType === "INSERT" });
+        const row = payload && payload.new ? payload.new : null;
+        if (!row) {
+          loadPrivateChatMessages({ ping: true });
+          return;
+        }
+
+        const incomingId = getPrivateChatMessageId(row);
+        const alreadyExists = privateChatMessages.some(msg => getPrivateChatMessageId(msg) === incomingId);
+
+        if (!alreadyExists) {
+          privateChatMessages.push(row);
+          privateChatMessages.sort((a, b) => String(a.created_at || "").localeCompare(String(b.created_at || "")));
+          renderPrivateChatMessages({ ping: true });
+        }
       }
     )
-    .subscribe();
+    .on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "project_chat_messages",
+        filter: "project_room_id=eq." + roomId
+      },
+      function(){
+        loadPrivateChatMessages({ ping: false });
+      }
+    )
+    .on(
+      "postgres_changes",
+      {
+        event: "DELETE",
+        schema: "public",
+        table: "project_chat_messages",
+        filter: "project_room_id=eq." + roomId
+      },
+      function(){
+        loadPrivateChatMessages({ ping: false });
+      }
+    )
+    .subscribe(function(status){
+      if (status === "SUBSCRIBED") {
+        setChatStatus("Live private chat connected. Messages appear in real time.");
+      } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+        setChatStatus("Live chat fallback active. Checking for new messages every few seconds.");
+      }
+    });
+
+  startPrivateChatPolling(roomId);
+}
+
+function startPrivateChatPolling(roomId){
+  if (!roomId) return;
+  if (privateChatPollingTimer) return;
+
+  // Backup live-chat loop. Supabase Realtime should be instant, but this keeps
+  // the conversation flowing even if Realtime is not enabled yet in Supabase.
+  privateChatPollingTimer = setInterval(function(){
+    if (!document.hidden && privateChatActiveRoomId) {
+      loadPrivateChatMessages({ ping: true, silent: true });
+    }
+  }, 2500);
 }
 
 async function sendPrivateChatMessage(){
