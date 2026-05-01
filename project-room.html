@@ -2885,8 +2885,29 @@ function currency(value){
 
 /* ---------- LOAD JOB ---------- */
 
-const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null");
+async function loadProjectFromUrl() {
+  const params = new URLSearchParams(window.location.search);
 
+  const jobId = params.get("job");
+
+  if (!jobId) return;
+
+  const { data, error } = await supabaseClient
+    .from("jobs")
+    .select("*")
+    .eq("id", jobId)
+    .single();
+
+  if (error) {
+    console.error("Could not load project:", error);
+    return;
+  }
+
+  window.selectedJob = data;
+
+  renderProjectDetails(data);
+}
+loadProjectFromUrl();
 /* ---------- MODE SWITCH ---------- */
 
 function getWorkspaceRole() {
