@@ -3883,10 +3883,24 @@ const bidsHtml = visibleBids.length
       return;
     }
 
-    const matchingJob = jobs.find(job =>
-      String(job.user_id) === String(userId) &&
-      String(job.trade || '').toLowerCase().trim() === String(contractor.trade || '').toLowerCase().trim()
-    );
+    const contractorTrades = String(contractor.trades_full || contractor.trade || "")
+  .toLowerCase()
+  .split(",")
+  .map(t => t.trim())
+  .filter(Boolean);
+
+const matchingJob = jobs.find(job => {
+  const jobTrade = String(job.trade || "").toLowerCase().trim();
+
+  return (
+    String(job.user_id) === String(userId) &&
+    contractorTrades.some(trade =>
+      trade === jobTrade ||
+      trade.includes(jobTrade) ||
+      jobTrade.includes(trade)
+    )
+  );
+});
 
     if (!matchingJob) {
       showStatus("Post a matching job first before messaging this contractor");
