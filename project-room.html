@@ -1915,7 +1915,6 @@ body {
 }
 
 
-
 .private-room-alert {
   border: 1px solid rgba(249, 115, 22, 0.28);
   background: linear-gradient(180deg, #fff7ed, #ffffff);
@@ -1953,6 +1952,13 @@ body {
   color: var(--muted);
   font-size: 0.78rem;
   font-weight: 800;
+}
+
+.calendar-sync-status {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 800;
+  margin-top: 8px;
 }
 
 @media (max-width: 760px) {
@@ -2216,7 +2222,8 @@ body.homeowner-room .nav-item[data-target="photoDocsPanel"] {
           <div class="panel-header">
             <div>
               <h3>Appointment Scheduling Calendar</h3>
-              <p>Current date-aware calendar with month/year navigation, appointment selection, and project scheduling.</p>
+              <p>Private calendar for this homeowner + this contractor. Events save to Supabase for this project room only.</p>
+              <div id="calendarSyncStatus" class="calendar-sync-status">Calendar ready.</div>
             </div>
             <button class="btn btn-primary" type="button" onclick="openAppointmentPrompt()">Add Appointment</button>
           </div>
@@ -4461,22 +4468,255 @@ async function uploadProjectFiles(){
 
 
 
-/* ---------- PRIVATE PROJECT ROOM CALENDAR ---------- */
+/* ---------- SUPABASE PRIVATE PROJECT ROOM CALENDAR ---------- */
 
 let calendarViewDate = new Date();
 let selectedCalendarDate = new Date();
 let projectAppointments = [];
 let calendarReminderTimers = [];
+let currentProjectRoomId = null;
+let currentCalendarChannel = null;
+let calendarUsesSupabase = false;
+
+function isProbablyUUID(value){
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ""));
+}
+
+function setCalendarSyncStatus(message){
+  const el = document.getElementById("calendarSyncStatus");
+  if (el) el.textContent = message;
+}
+
+function getRawProjectRoomJobId(){
+  const params = new URLSearchParams(window.location.search);
+  return params.get("job") || (window.currentJob && window.currentJob.id) || "";
+}
+
+function getNumericProjectRoomJobId(){
+  const raw = getRawProjectRoomJobId();
+  const num = Number(raw);
+  return Number.isFinite(num) && String(raw).trim() !== "" ? num : null;
+}
 
 function getPrivateProjectRoomKey(){
   const params = new URLSearchParams(window.location.search);
-  const jobId = params.get("job") || (window.currentJob && window.currentJob.id) || "preview";
+  const jobId = getRawProjectRoomJobId() || "preview";
   const contractorId = params.get("contractor") || "assigned-contractor";
   return `revamplex-room-${jobId}-${contractorId}`.replace(/[^a-zA-Z0-9-_]/g, "");
 }
 
 function getCalendarStorageKey(){
   return getPrivateProjectRoomKey() + "-calendar-events";
+}
+
+function getWorkspaceActorLabel(){
+  return (typeof getWorkspaceRole === "function" && getWorkspaceRole() === "homeowner") ? "Homeowner" : "Contractor";
+}
+
+async function getCurrentProjectUser(){
+  const { data, error } = await supabaseClient.auth.getUser();
+  if (error) console.warn("Calendar auth check error:", error);
+  return data?.user || null;
+}
+
+async function findContractorAuthIdFromParam(contractorParam){
+  if (!contractorParam) return null;
+  if (isProbablyUUID(contractorParam)) return contractorParam;
+
+  try {
+    const { data, error } = await supabaseClient
+      .from("contractors")
+      .select("user_id,profile_id,auth_id,id")
+      .eq("id", contractorParam)
+      .maybeSingle();
+
+    if (!error && data) {
+      return data.user_id || data.profile_id || data.auth_id || (isProbablyUUID(data.id) ? data.id : null);
+    }
+  } catch (err) {
+    console.warn("Could not resolve contractor auth id:", err);
+  }
+
+  return null;
+}
+
+async function ensureProjectRoom(){
+  if (currentProjectRoomId) return currentProjectRoomId;
+
+  const user = await getCurrentProjectUser();
+  const jobIdNumber = getNumericProjectRoomJobId();
+
+  if (!user || !jobIdNumber) {
+    calendarUsesSupabase = false;
+    setCalendarSyncStatus("Preview/demo calendar: saved only on this device.");
+    return null;
+  }
+
+  const { data: job, error: jobError } = await supabaseClient
+    .from("jobs")
+    .select("*")
+    .eq("id", jobIdNumber)
+    .maybeSingle();
+
+  if (jobError || !job) {
+    console.warn("Calendar could not load job for project room:", jobError);
+    calendarUsesSupabase = false;
+    setCalendarSyncStatus("Calendar could not connect to this job. Using this device only.");
+    return null;
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const workspaceRole = typeof getWorkspaceRole === "function" ? getWorkspaceRole() : (params.get("mode") || "contractor");
+
+  const homeownerId = job.user_id || job.homeowner_id || job.customer_id || null;
+  let contractorId = null;
+
+  if (workspaceRole === "contractor") {
+    contractorId = user.id;
+  } else {
+    contractorId = await findContractorAuthIdFromParam(params.get("contractor"));
+  }
+
+  if (!homeownerId && !contractorId) {
+    calendarUsesSupabase = false;
+    setCalendarSyncStatus("Calendar needs a homeowner or contractor ID. Using this device only.");
+    return null;
+  }
+
+  let roomQuery = supabaseClient
+    .from("project_rooms")
+    .select("*")
+    .eq("job_id", jobIdNumber);
+
+  if (contractorId) {
+    roomQuery = roomQuery.eq("contractor_id", contractorId);
+  } else {
+    roomQuery = roomQuery.is("contractor_id", null);
+  }
+
+  let { data: room, error: roomError } = await roomQuery.maybeSingle();
+
+  if (roomError) {
+    console.warn("Calendar room lookup error:", roomError);
+  }
+
+  if (room) {
+    currentProjectRoomId = room.id;
+    calendarUsesSupabase = true;
+    setCalendarSyncStatus("Calendar synced to private Supabase project room.");
+    subscribeToCalendarChanges(room.id);
+    return room.id;
+  }
+
+  const insertPayload = {
+    job_id: jobIdNumber,
+    homeowner_id: homeownerId,
+    contractor_id: contractorId,
+    status: "active"
+  };
+
+  const { data: newRoom, error: createError } = await supabaseClient
+    .from("project_rooms")
+    .insert(insertPayload)
+    .select()
+    .single();
+
+  if (createError || !newRoom) {
+    console.warn("Calendar could not create private room:", createError);
+    calendarUsesSupabase = false;
+    setCalendarSyncStatus("Calendar room not created. Using this device only.");
+    return null;
+  }
+
+  currentProjectRoomId = newRoom.id;
+  calendarUsesSupabase = true;
+  setCalendarSyncStatus("Calendar synced to private Supabase project room.");
+  subscribeToCalendarChanges(newRoom.id);
+  return newRoom.id;
+}
+
+function subscribeToCalendarChanges(roomId){
+  if (!roomId || currentCalendarChannel) return;
+
+  currentCalendarChannel = supabaseClient
+    .channel("project-calendar-" + roomId)
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "project_calendar_events",
+        filter: "project_room_id=eq." + roomId
+      },
+      function(){
+        loadCalendarAppointments();
+      }
+    )
+    .subscribe();
+}
+
+function normalizeCalendarRow(row){
+  return {
+    id: row.id,
+    supabase_id: row.id,
+    room_key: row.project_room_id,
+    date: row.event_date,
+    time: row.event_time ? String(row.event_time).slice(0, 5) : "10:00",
+    type: row.event_type || "Appointment",
+    note: row.note || "Project appointment",
+    reminderMinutes: row.remind_1h ? "60" : (row.remind_24h ? "1440" : "none"),
+    createdBy: row.created_by ? "Project User" : "System",
+    visibility: "private_room_only"
+  };
+}
+
+async function saveCalendarAppointments(){
+  // Supabase is saved per event in addCalendarAppointment/deleteCalendarAppointment.
+  // This remains for preview/demo fallback.
+  if (calendarUsesSupabase) return;
+
+  try {
+    localStorage.setItem(getCalendarStorageKey(), JSON.stringify(projectAppointments));
+  } catch (err) {
+    console.warn("Calendar local save failed:", err);
+  }
+}
+
+async function loadCalendarAppointments(){
+  const roomId = await ensureProjectRoom();
+
+  if (roomId) {
+    const { data, error } = await supabaseClient
+      .from("project_calendar_events")
+      .select("*")
+      .eq("project_room_id", roomId)
+      .order("event_date", { ascending: true })
+      .order("event_time", { ascending: true });
+
+    if (error) {
+      console.warn("Calendar Supabase load failed:", error);
+      setCalendarSyncStatus("Calendar load failed. Check Supabase policies.");
+      projectAppointments = [];
+    } else {
+      projectAppointments = (data || []).map(normalizeCalendarRow);
+      setCalendarSyncStatus("Calendar synced to private Supabase project room.");
+    }
+
+    renderCalendar();
+    scheduleBrowserReminders();
+    return;
+  }
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(getCalendarStorageKey()) || "[]");
+    projectAppointments = Array.isArray(saved) ? saved : [];
+  } catch (err) {
+    console.warn("Calendar local load failed:", err);
+    projectAppointments = [];
+  }
+
+  renderCalendar();
+  scheduleBrowserReminders();
 }
 
 function formatDateKey(date){
@@ -4499,28 +4739,6 @@ function sameDate(a, b){
   return a.getFullYear() === b.getFullYear() &&
     a.getMonth() === b.getMonth() &&
     a.getDate() === b.getDate();
-}
-
-function getWorkspaceActorLabel(){
-  return getWorkspaceRole && getWorkspaceRole() === "homeowner" ? "Homeowner" : "Contractor";
-}
-
-function saveCalendarAppointments(){
-  try {
-    localStorage.setItem(getCalendarStorageKey(), JSON.stringify(projectAppointments));
-  } catch (err) {
-    console.warn("Calendar save failed:", err);
-  }
-}
-
-function loadCalendarAppointments(){
-  try {
-    const saved = JSON.parse(localStorage.getItem(getCalendarStorageKey()) || "[]");
-    projectAppointments = Array.isArray(saved) ? saved : [];
-  } catch (err) {
-    console.warn("Calendar load failed:", err);
-    projectAppointments = [];
-  }
 }
 
 function initCalendarControls(){
@@ -4657,7 +4875,7 @@ function goToToday(){
   renderCalendar();
 }
 
-function addCalendarAppointment(){
+async function addCalendarAppointment(){
   const timeInput = document.getElementById("appointmentTimeInput");
   const typeInput = document.getElementById("appointmentTypeInput");
   const noteInput = document.getElementById("appointmentNoteInput");
@@ -4668,6 +4886,37 @@ function addCalendarAppointment(){
   const type = typeInput?.value || "Appointment";
   const note = noteInput?.value || "Project appointment";
   const reminderMinutes = reminderInput?.value || "1440";
+
+  const roomId = await ensureProjectRoom();
+  const user = await getCurrentProjectUser();
+
+  if (roomId && user) {
+    const jobIdNumber = getNumericProjectRoomJobId();
+
+    const { error } = await supabaseClient
+      .from("project_calendar_events")
+      .insert({
+        project_room_id: roomId,
+        job_id: jobIdNumber,
+        created_by: user.id,
+        event_date: dateKey,
+        event_time: time,
+        event_type: type,
+        note: note,
+        remind_24h: reminderMinutes === "1440" || reminderMinutes === "2880",
+        remind_1h: reminderMinutes === "60"
+      });
+
+    if (error) {
+      console.error("Calendar Supabase save failed:", error);
+      alert("Calendar save failed. Check Supabase RLS policies and table columns.");
+      return;
+    }
+
+    if (noteInput) noteInput.value = "";
+    await loadCalendarAppointments();
+    return;
+  }
 
   projectAppointments.push({
     id: Date.now(),
@@ -4683,14 +4932,32 @@ function addCalendarAppointment(){
 
   if (noteInput) noteInput.value = "";
 
-  saveCalendarAppointments();
+  await saveCalendarAppointments();
   scheduleBrowserReminders();
   renderCalendar();
 }
 
-function deleteCalendarAppointment(id){
-  projectAppointments = projectAppointments.filter(a => a.id !== id);
-  saveCalendarAppointments();
+async function deleteCalendarAppointment(id){
+  const appointment = projectAppointments.find(a => String(a.id) === String(id));
+
+  if (appointment && appointment.supabase_id) {
+    const { error } = await supabaseClient
+      .from("project_calendar_events")
+      .delete()
+      .eq("id", appointment.supabase_id);
+
+    if (error) {
+      console.error("Calendar Supabase delete failed:", error);
+      alert("Could not delete appointment. Check Supabase policy.");
+      return;
+    }
+
+    await loadCalendarAppointments();
+    return;
+  }
+
+  projectAppointments = projectAppointments.filter(a => String(a.id) !== String(id));
+  await saveCalendarAppointments();
   scheduleBrowserReminders();
   renderCalendar();
 }
@@ -4710,7 +4977,7 @@ function renderAppointmentList(){
   const selectedKey = formatDateKey(selectedCalendarDate);
   const dayAppointments = projectAppointments
     .filter(a => a.date === selectedKey)
-    .sort((a, b) => a.time.localeCompare(b.time));
+    .sort((a, b) => String(a.time || "").localeCompare(String(b.time || "")));
 
   if (!dayAppointments.length) {
     list.innerHTML = `<div class="appointment-empty">No private-room appointments for this date yet.</div>`;
@@ -4722,10 +4989,10 @@ function renderAppointmentList(){
       <strong>${escapeHTML(a.type)}</strong>
       <span>${formatPrettyDate(selectedCalendarDate)} • ${formatTimeForDisplay(a.time)}</span>
       <span>${escapeHTML(a.note)}</span>
-      <span class="appointment-meta-pill">Private room only • Added by ${escapeHTML(a.createdBy || "User")}</span>
+      <span class="appointment-meta-pill">Private room only • ${calendarUsesSupabase ? "Synced" : "This device"} • Added by ${escapeHTML(a.createdBy || "User")}</span>
       <div class="appointment-actions">
-        <button class="btn btn-soft" type="button" onclick="downloadAppointmentICS(${a.id})">Add to My Calendar</button>
-        <button class="btn btn-soft" type="button" onclick="deleteCalendarAppointment(${a.id})">Remove</button>
+        <button class="btn btn-soft" type="button" onclick="downloadAppointmentICS('${a.id}')">Add to My Calendar</button>
+        <button class="btn btn-soft" type="button" onclick="deleteCalendarAppointment('${a.id}')">Remove</button>
       </div>
     </div>
   `).join("");
@@ -4742,7 +5009,7 @@ function openAppointmentPrompt(){
 }
 
 function seedDefaultAppointments(){
-  if (projectAppointments.length) return;
+  if (calendarUsesSupabase || projectAppointments.length) return;
 
   const today = new Date();
   const siteWalk = new Date(today);
@@ -4775,6 +5042,7 @@ function seedDefaultAppointments(){
       visibility: "private_room_only"
     }
   ];
+
   saveCalendarAppointments();
 }
 
@@ -4828,9 +5096,9 @@ function downloadICS(filename, icsText){
 }
 
 function downloadAppointmentICS(id){
-  const appointment = projectAppointments.find(a => a.id === id);
+  const appointment = projectAppointments.find(a => String(a.id) === String(id));
   if (!appointment) return;
-  downloadICS(`revamp-${appointment.date}-${appointment.type.replace(/[^a-zA-Z0-9]+/g,"-").toLowerCase()}.ics`, buildAppointmentICS(appointment));
+  downloadICS(`revamp-${appointment.date}-${String(appointment.type).replace(/[^a-zA-Z0-9]+/g,"-").toLowerCase()}.ics`, buildAppointmentICS(appointment));
 }
 
 function downloadSelectedDayICS(){
@@ -4898,10 +5166,15 @@ function scheduleBrowserReminders(){
   });
 }
 
-document.addEventListener("DOMContentLoaded", function(){
-  loadCalendarAppointments();
-  seedDefaultAppointments();
+document.addEventListener("DOMContentLoaded", async function(){
   goToToday();
+  await loadCalendarAppointments();
+
+  if (!calendarUsesSupabase && !projectAppointments.length) {
+    seedDefaultAppointments();
+    renderCalendar();
+  }
+
   scheduleBrowserReminders();
 });
 
