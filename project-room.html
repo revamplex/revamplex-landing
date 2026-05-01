@@ -2143,6 +2143,22 @@ body.homeowner-room .nav-item[data-target="photoDocsPanel"] {
   display: flex !important;
 }
 
+/* ===== PRIVATE PROJECT CHAT ===== */
+#videoChatPanel .messages {
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+#privateChatStatus {
+  border: 1px solid rgba(249, 115, 22, 0.22);
+  background: #fff7ed;
+  border-radius: 999px;
+  padding: 7px 10px;
+  display: inline-flex;
+  width: fit-content;
+}
+
 </style>
 </head>
 <body>
@@ -3800,32 +3816,256 @@ function attachEstimateListeners(){
 
 /* ---------- CHAT ---------- */
 
+/* ---------- PRIVATE PROJECT CHAT ---------- */
+
+let currentChatChannel = null;
+let chatUsesSupabase = false;
+let privateChatMessages = [];
+
+function getChatStorageKey(){
+  if (typeof getPrivateProjectRoomKey === "function") {
+    return getPrivateProjectRoomKey() + "-chat-messages";
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const jobId = params.get("job") || "preview";
+  const contractorId = params.get("contractor") || "assigned-contractor";
+  return `revamplex-room-${jobId}-${contractorId}-chat-messages`.replace(/[^a-zA-Z0-9-_]/g, "");
+}
+
+function getChatActor(){
+  const role = typeof getWorkspaceRole === "function" ? getWorkspaceRole() : (mode || "contractor");
+  return {
+    role,
+    label: role === "homeowner" ? "Homeowner" : "Verified Contractor",
+    cssClass: role === "homeowner" ? "customer" : "contractor"
+  };
+}
+
+function setChatStatus(message){
+  const chatBox = document.querySelector("#videoChatPanel .chat-box");
+  if (!chatBox) return;
+
+  let status = document.getElementById("privateChatStatus");
+  if (!status) {
+    status = document.createElement("div");
+    status.id = "privateChatStatus";
+    status.style.cssText = "font-size:0.82rem;font-weight:800;color:#ea580c;margin:6px 0 10px;";
+    const messages = chatBox.querySelector(".messages");
+    if (messages) chatBox.insertBefore(status, messages);
+  }
+
+  status.textContent = message || "";
+}
+
+function saveLocalChatMessages(){
+  try {
+    localStorage.setItem(getChatStorageKey(), JSON.stringify(privateChatMessages));
+  } catch (err) {
+    console.warn("Could not save local chat messages:", err);
+  }
+}
+
+function loadLocalChatMessages(){
+  try {
+    const saved = JSON.parse(localStorage.getItem(getChatStorageKey()) || "[]");
+    privateChatMessages = Array.isArray(saved) ? saved : [];
+  } catch (err) {
+    console.warn("Could not load local chat messages:", err);
+    privateChatMessages = [];
+  }
+}
+
+function seedPrivateChatMessages(){
+  if (privateChatMessages.length) return;
+
+  privateChatMessages = [
+    {
+      id: "seed-1",
+      sender_role: "contractor",
+      sender_name: "Verified Contractor",
+      body: "I uploaded the revised tile layout and added the material quantities to the estimate.",
+      created_at: new Date(Date.now() - 1000 * 60 * 20).toISOString()
+    },
+    {
+      id: "seed-2",
+      sender_role: "homeowner",
+      sender_name: "Homeowner",
+      body: "Looks good. Can we move the walkthrough to Saturday morning?",
+      created_at: new Date(Date.now() - 1000 * 60 * 12).toISOString()
+    },
+    {
+      id: "seed-3",
+      sender_role: "contractor",
+      sender_name: "Verified Contractor",
+      body: "Yes. I added 10:00 AM on the calendar and the estimate is ready for signature.",
+      created_at: new Date(Date.now() - 1000 * 60 * 5).toISOString()
+    }
+  ];
+
+  saveLocalChatMessages();
+}
+
+function renderPrivateChatMessages(){
+  const messages = document.querySelector("#videoChatPanel .messages");
+  if (!messages) return;
+
+  if (!privateChatMessages.length) {
+    messages.innerHTML = `<div class="appointment-empty">No private messages yet. Start the conversation below.</div>`;
+    return;
+  }
+
+  messages.innerHTML = privateChatMessages.map(msg => {
+    const role = msg.sender_role || msg.role || "contractor";
+    const cssClass = role === "homeowner" ? "customer" : "contractor";
+    const senderName = msg.sender_name || (role === "homeowner" ? "Homeowner" : "Verified Contractor");
+    const created = msg.created_at ? new Date(msg.created_at) : null;
+    const time = created && !isNaN(created.getTime())
+      ? created.toLocaleString("en-US", { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" })
+      : "Just now";
+
+    return `
+      <div class="message ${cssClass}">
+        <strong>${escapeHTML(senderName)} <span style="font-weight:700;color:var(--muted);font-size:0.75rem;">• ${escapeHTML(time)}</span></strong>
+        ${escapeHTML(msg.body || msg.message || "")}
+      </div>
+    `;
+  }).join("");
+
+  messages.scrollTop = messages.scrollHeight;
+}
+
+async function loadPrivateChatMessages(){
+  const roomId = typeof ensureProjectRoom === "function" ? await ensureProjectRoom() : null;
+
+  if (!roomId) {
+    chatUsesSupabase = false;
+    loadLocalChatMessages();
+    seedPrivateChatMessages();
+    setChatStatus("Preview/demo chat: saved only on this device.");
+    renderPrivateChatMessages();
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("project_chat_messages")
+    .select("*")
+    .eq("project_room_id", roomId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.warn("Supabase chat load failed. Using local fallback:", error);
+    chatUsesSupabase = false;
+    loadLocalChatMessages();
+    seedPrivateChatMessages();
+    setChatStatus("Chat table not connected yet. Using this device only until Supabase SQL is added.");
+    renderPrivateChatMessages();
+    return;
+  }
+
+  chatUsesSupabase = true;
+  privateChatMessages = data || [];
+  setChatStatus("Private chat synced to this homeowner + contractor project room.");
+  renderPrivateChatMessages();
+  subscribeToPrivateChat(roomId);
+}
+
+function subscribeToPrivateChat(roomId){
+  if (!roomId || currentChatChannel) return;
+
+  currentChatChannel = supabaseClient
+    .channel("project-chat-" + roomId)
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "project_chat_messages",
+        filter: "project_room_id=eq." + roomId
+      },
+      function(){
+        loadPrivateChatMessages();
+      }
+    )
+    .subscribe();
+}
+
+async function sendPrivateChatMessage(){
+  const chatInput = document.querySelector("#videoChatPanel .chat-compose input");
+  const sendBtn = document.querySelector("#videoChatPanel .chat-compose button");
+
+  if (!chatInput) return;
+
+  const text = chatInput.value.trim();
+  if (!text) return;
+
+  const actor = getChatActor();
+  const user = typeof getCurrentProjectUser === "function" ? await getCurrentProjectUser() : null;
+  const roomId = typeof ensureProjectRoom === "function" ? await ensureProjectRoom() : null;
+
+  if (sendBtn) sendBtn.disabled = true;
+
+  try {
+    if (roomId) {
+      const { error } = await supabaseClient
+        .from("project_chat_messages")
+        .insert({
+          project_room_id: roomId,
+          job_id: typeof getNumericProjectRoomJobId === "function" ? getNumericProjectRoomJobId() : null,
+          sender_id: user?.id || null,
+          sender_role: actor.role,
+          sender_name: actor.label,
+          body: text
+        });
+
+      if (error) throw error;
+
+      chatUsesSupabase = true;
+      chatInput.value = "";
+      await loadPrivateChatMessages();
+      return;
+    }
+
+    throw new Error("No private project room available yet.");
+  } catch (err) {
+    console.warn("Supabase chat send failed. Saving locally:", err);
+
+    chatUsesSupabase = false;
+    privateChatMessages.push({
+      id: Date.now(),
+      sender_role: actor.role,
+      sender_name: actor.label,
+      body: text,
+      created_at: new Date().toISOString(),
+      visibility: "private_room_local_fallback"
+    });
+
+    chatInput.value = "";
+    saveLocalChatMessages();
+    setChatStatus("Message saved on this device. Add the Supabase chat SQL below to sync across both users.");
+    renderPrivateChatMessages();
+  } finally {
+    if (sendBtn) sendBtn.disabled = false;
+  }
+}
+
 function setupChat(){
+  const chatInput = document.querySelector("#videoChatPanel .chat-compose input");
+  const sendBtn = document.querySelector("#videoChatPanel .chat-compose button");
 
-  const chatInput=document.querySelector('.chat-compose input');
-  const sendBtn=document.querySelector('.chat-compose button');
-  const messages=document.querySelector('.messages');
+  if (!chatInput || !sendBtn) return;
 
-  if(!chatInput||!sendBtn||!messages) return;
+  sendBtn.type = "button";
+  sendBtn.onclick = sendPrivateChatMessage;
 
-  sendBtn.addEventListener('click',()=>{
-
-    const text=chatInput.value.trim();
-
-    if(!text) return;
-
-    const message=document.createElement('div');
-
-    message.className='message contractor';
-
-    message.innerHTML=`<strong>Verified Contractor</strong>${text}`;
-
-    messages.appendChild(message);
-
-    chatInput.value='';
-
+  chatInput.addEventListener("keydown", function(e){
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendPrivateChatMessage();
+    }
   });
 
+  loadPrivateChatMessages();
 }
 
 /* ---------- SUBMIT BID ---------- */
