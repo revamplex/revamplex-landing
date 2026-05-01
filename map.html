@@ -3518,11 +3518,17 @@ async function createJobFromForm() {
   const center = map.getCenter();
 
   const payload = {
-    user_id: user.id,
-    title,
-    trade,
-    budget,
-    customer_name: 'Customer',
+  user_id: user.id,
+
+  customer_email: user.email || "",
+  customer_name:
+    user.user_metadata?.full_name ||
+    user.email ||
+    "Customer",
+
+  title,
+  trade,
+  budget,
     city,
     description,
     lat: Number(center.lat.toFixed(6)),
