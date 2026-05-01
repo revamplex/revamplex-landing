@@ -2921,7 +2921,7 @@ async function inviteContractorToProjectRoom() {
   const contractorId = params.get("contractor") || contractor.id || "";
   const jobId = params.get("job") || job.id || "";
 
-  let contractorEmail = contractor.email || contractor.contractor_email || "";
+  let contractorEmail = contractor.email || contractor.recipient_email || "";
   let contractorName = contractor.name || contractor.company || contractor.full_name || "Contractor";
 
   if (!contractorEmail && contractorId && contractorId !== "no-contractor" && !String(contractorId).startsWith("demo")) {
@@ -2940,20 +2940,28 @@ async function inviteContractorToProjectRoom() {
   const inviteMode = workspaceRole === "homeowner" ? "contractor" : "homeowner";
   const inviteUrl = `${window.location.origin}/project-room.html?mode=${inviteMode}&job=${encodeURIComponent(jobId)}&contractor=${encodeURIComponent(contractorId)}`;
 
-  const payload = {
-    invite_type: workspaceRole === "homeowner" ? "contractor_project_room_invite" : "homeowner_project_room_invite",
-    contractor_email: contractorEmail,
-    contractor_name: contractorName,
-    job_title: job.title || "Revamp Project",
-    trade: job.trade || "",
-    city: job.city || "",
-    project_room_url: inviteUrl
-  };
+  const workspaceRole = getWorkspaceRole();
 
-  if (workspaceRole === "homeowner" && !payload.contractor_email) {
-    alert("No contractor email found. Make sure this contractor has an email saved in Supabase.");
-    return;
-  }
+const payload = {
+  invite_type: workspaceRole === "contractor"
+    ? "homeowner_project_room_invite"
+    : "contractor_project_room_invite",
+
+  recipient_email: workspaceRole === "contractor"
+    ? (selectedJob?.customer_email || "")
+    : (selectedContractor?.email || ""),
+
+  recipient_name: workspaceRole === "contractor"
+    ? (selectedJob?.customer_name || "Homeowner")
+    : (selectedContractor?.name || selectedContractor?.company || "Contractor"),
+
+  sender_role: workspaceRole,
+
+  job_title: selectedJob?.title || "Revamp Project",
+  trade: selectedJob?.trade || "",
+  city: selectedJob?.city || "",
+  project_room_url: window.location.href
+};
 
   const zapierUrl = "https://hooks.zapier.com/hooks/catch/27422517/uvgb5l2/";
 
