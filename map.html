@@ -1723,6 +1723,9 @@
 <button class="demoBtn" id="loginInsteadBtn">
   Already have an account? Login
 </button>
+      <button id="forgotPasswordBtn" class="demoBtn">
+  Forgot Password?
+</button>
       <div class="welcomeFormWrap" id="welcomeFormWrap">
         <div class="welcomeRolePill" id="welcomeRolePill">Homeowner Registration</div>
 
@@ -4693,6 +4696,28 @@ function openWelcomeAuth(mode = 'register') {
       setTimeout(() => loginBtn.click(), 100);
     }
   }
+  const forgotBtn = document.getElementById("forgotPasswordBtn");
+
+if (forgotBtn) {
+  forgotBtn.addEventListener("click", async () => {
+
+    const email = prompt("Enter your Revamp email:");
+
+    if (!email) return;
+
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + "/reset-password.html"
+    });
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    alert("Password reset email sent. Check your inbox.");
+
+  });
+}
 }
 
 async function initAuthGate() {
