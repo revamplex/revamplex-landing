@@ -2885,29 +2885,8 @@ function currency(value){
 
 /* ---------- LOAD JOB ---------- */
 
-async function loadProjectFromUrl() {
-  const params = new URLSearchParams(window.location.search);
+const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null");
 
-  const jobId = params.get("job");
-
-  if (!jobId) return;
-
-  const { data, error } = await supabaseClient
-    .from("jobs")
-    .select("*")
-    .eq("id", jobId)
-    .single();
-
-  if (error) {
-    console.error("Could not load project:", error);
-    return;
-  }
-
-  window.selectedJob = data;
-
-  renderProjectDetails(data);
-}
-loadProjectFromUrl();
 /* ---------- MODE SWITCH ---------- */
 
 function getWorkspaceRole() {
@@ -2932,20 +2911,25 @@ function getWorkspaceRole() {
 async function inviteContractorToProjectRoom() {
   const params = new URLSearchParams(window.location.search);
   const workspaceRole = getWorkspaceRole();
-  const rawMode = params.get("mode") || "contractor";
 
   const savedContractor = JSON.parse(sessionStorage.getItem("revampSelectedContractor") || "null");
   const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null");
+
   const job = window.currentJob || savedJob || {};
   const contractor = savedContractor || window.selectedContractor || {};
 
   const contractorId = params.get("contractor") || contractor.id || "";
   const jobId = params.get("job") || job.id || "";
 
-  let contractorEmail = contractor.email || contractor.recipient_email || "";
+  let contractorEmail = contractor.email || "";
   let contractorName = contractor.name || contractor.company || contractor.full_name || "Contractor";
 
-  if (!contractorEmail && contractorId && contractorId !== "no-contractor" && !String(contractorId).startsWith("demo")) {
+  let homeownerEmail = job.customer_email || job.email || job.homeowner_email || "";
+  let homeownerName = job.customer_name || job.homeowner_name || "Homeowner";
+
+  // If homeowner is inviting a contractor from an email/direct link, sessionStorage may be empty.
+  // Pull contractor email directly from Supabase using the contractor URL parameter.
+  if (workspaceRole === "homeowner" && !contractorEmail && contractorId && contractorId !== "no-contractor" && !String(contractorId).startsWith("demo")) {
     const { data, error } = await supabaseClient
       .from("contractors")
       .select("email,name,company,full_name")
@@ -2961,48 +2945,55 @@ async function inviteContractorToProjectRoom() {
   const inviteMode = workspaceRole === "homeowner" ? "contractor" : "homeowner";
   const inviteUrl = `${window.location.origin}/project-room.html?mode=${inviteMode}&job=${encodeURIComponent(jobId)}&contractor=${encodeURIComponent(contractorId)}`;
 
-  const workspaceRole = getWorkspaceRole();
+  // Keep the original contractor_email fields because your published Zap currently uses them.
+  // Also send recipient_email fields for the future contractor -> homeowner invite upgrade.
+  const payload = {
+    invite_type: workspaceRole === "contractor"
+      ? "homeowner_project_room_invite"
+      : "contractor_project_room_invite",
 
-const payload = {
-  invite_type: workspaceRole === "contractor"
-    ? "homeowner_project_room_invite"
-    : "contractor_project_room_invite",
+    contractor_email: contractorEmail,
+    contractor_name: contractorName,
 
-  recipient_email: workspaceRole === "contractor"
-    ? (selectedJob?.customer_email || "")
-    : (selectedContractor?.email || ""),
+    recipient_email: workspaceRole === "contractor" ? homeownerEmail : contractorEmail,
+    recipient_name: workspaceRole === "contractor" ? homeownerName : contractorName,
+    sender_role: workspaceRole,
 
-  recipient_name: workspaceRole === "contractor"
-    ? (selectedJob?.customer_name || "Homeowner")
-    : (selectedContractor?.name || selectedContractor?.company || "Contractor"),
+    job_title: job.title || "Revamp Project",
+    trade: job.trade || "",
+    city: job.city || "",
+    project_room_url: inviteUrl
+  };
 
-  sender_role: workspaceRole,
+  if (workspaceRole === "homeowner" && !payload.contractor_email) {
+    alert("No contractor email found. Make sure this contractor has an email saved in Supabase.");
+    return;
+  }
 
-  job_title: selectedJob?.title || "Revamp Project",
-  trade: selectedJob?.trade || "",
-  city: selectedJob?.city || "",
-  project_room_url: window.location.href
-};
+  if (workspaceRole === "contractor" && !payload.recipient_email) {
+    alert("No homeowner email found yet. Add customer_email to the jobs table before contractor-to-homeowner invites.");
+    return;
+  }
 
   const zapierUrl = "https://hooks.zapier.com/hooks/catch/27422517/uvgb5l2/";
 
-  if (zapierUrl === "PASTE_ZAPIER_WEBHOOK_URL_HERE") {
+  if (!zapierUrl || zapierUrl === "PASTE_ZAPIER_WEBHOOK_URL_HERE") {
     alert("Paste your Zapier webhook URL inside project-room.html first.");
     return;
   }
 
   let res;
 
-try {
-  res = await fetch(zapierUrl, {
-    method: "POST",
-    body: JSON.stringify(payload)
-  });
-} catch (err) {
-  console.error("Zapier invite failed:", err);
-  alert("Invite failed because Zapier blocked the browser request. We may need to send this through Vercel/Supabase instead.");
-  return;
-}
+  try {
+    res = await fetch(zapierUrl, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  } catch (err) {
+    console.error("Zapier invite failed:", err);
+    alert("Invite failed because Zapier blocked the browser request. We may need to send this through Vercel/Supabase instead.");
+    return;
+  }
 
   if (!res.ok) {
     alert("Invite failed. Please try again.");
