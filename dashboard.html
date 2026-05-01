@@ -653,19 +653,26 @@ saveProfile = async function(){
   };
 
   async function uploadDoc(file, label){
-    if (!file) return "";
-    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
-    const path = `${currentUser.id}/${label}-${Date.now()}-${safeName}`;
-    const { error } = await client.storage.from("contractor-documents").upload(path, file, { upsert: true });
-    if (error) {
-      if (error) {
-  alert("Document upload failed: " + error.message);
-  throw error;
-}
-    }
-    const { data } = client.storage.from("contractor-documents").getPublicUrl(path);
-    return data?.publicUrl || path;
+  if (!file) return "";
+
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+  const path = `${currentUser.id}/${label}-${Date.now()}-${safeName}`;
+
+  const { error } = await client.storage
+    .from("contractor-documents")
+    .upload(path, file, { upsert: true });
+
+  if (error) {
+    alert("Document upload failed: " + error.message);
+    throw error;
   }
+
+  const { data } = client.storage
+    .from("contractor-documents")
+    .getPublicUrl(path);
+
+  return data?.publicUrl || path;
+}
 
   const licenseUrl = await uploadDoc(document.getElementById("profileLicenseFile")?.files?.[0], "license");
   const insuranceUrl = await uploadDoc(document.getElementById("profileInsuranceFile")?.files?.[0], "insurance");
