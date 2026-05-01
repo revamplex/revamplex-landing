@@ -2842,11 +2842,12 @@ function requestDistanceLocation() {
   );
 }
     function getSafeContractorSessionItem(item) {
-      return {
-        ...item,
-        name: anonymizeContractorName(item)
-      };
-    }
+  return {
+    ...item,
+    email: item.email || "",
+    name: anonymizeContractorName(item)
+  };
+}
 
     function getSafeJobSessionItem(item) {
       return {
