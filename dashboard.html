@@ -652,13 +652,20 @@ saveProfile = async function(){
     trial_end: currentProfile.trial_end || new Date(Date.now() + 90*24*60*60*1000).toISOString()
   };
 
-  async function uploadDoc(file, label){
-  if (!file) return "";
+async function uploadDoc(file, label){
+  alert("uploadDoc started for: " + label);
+
+  if (!file) {
+    alert("No file selected for: " + label);
+    return "";
+  }
+
+  alert("File found: " + file.name);
 
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
   const path = `${currentUser.id}/${label}-${Date.now()}-${safeName}`;
 
-  const { error } = await client.storage
+  const { data, error } = await client.storage
     .from("contractor-documents")
     .upload(path, file, { upsert: true });
 
@@ -667,11 +674,13 @@ saveProfile = async function(){
     throw error;
   }
 
-  const { data } = client.storage
+  alert("Upload success: " + path);
+
+  const { data: publicData } = client.storage
     .from("contractor-documents")
     .getPublicUrl(path);
 
-  return data?.publicUrl || path;
+  return publicData?.publicUrl || path;
 }
 
   const licenseUrl = await uploadDoc(document.getElementById("profileLicenseFile")?.files?.[0], "license");
