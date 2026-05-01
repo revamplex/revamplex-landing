@@ -2387,18 +2387,7 @@ body.homeowner-room .nav-item[data-target="photoDocsPanel"] {
                 </div>
               </div>
               <div class="messages">
-                <div class="message contractor">
-                  <strong>Verified Contractor</strong>
-                  I uploaded the revised tile layout and added the material quantities to the estimate.
-                </div>
-                <div class="message customer">
-                  <strong>Homeowner</strong>
-                  Looks good. Can we move the walkthrough to Saturday morning?
-                </div>
-                <div class="message contractor">
-                  <strong>Verified Contractor</strong>
-                  Yes. I added 10:00 AM on the calendar below and the estimate is ready for signature.
-                </div>
+                <div class="appointment-empty">Loading private chat...</div>
               </div>
               <div class="chat-compose">
                 <input type="text" placeholder="Type a project message..." />
@@ -3821,6 +3810,9 @@ function attachEstimateListeners(){
 let currentChatChannel = null;
 let chatUsesSupabase = false;
 let privateChatMessages = [];
+let privateChatHasLoadedOnce = false;
+let privateChatKnownIds = new Set();
+let privateChatAudioContext = null;
 
 function getChatStorageKey(){
   if (typeof getPrivateProjectRoomKey === "function") {
@@ -3877,38 +3869,76 @@ function loadLocalChatMessages(){
 }
 
 function seedPrivateChatMessages(){
-  if (privateChatMessages.length) return;
-
-  privateChatMessages = [
-    {
-      id: "seed-1",
-      sender_role: "contractor",
-      sender_name: "Verified Contractor",
-      body: "I uploaded the revised tile layout and added the material quantities to the estimate.",
-      created_at: new Date(Date.now() - 1000 * 60 * 20).toISOString()
-    },
-    {
-      id: "seed-2",
-      sender_role: "homeowner",
-      sender_name: "Homeowner",
-      body: "Looks good. Can we move the walkthrough to Saturday morning?",
-      created_at: new Date(Date.now() - 1000 * 60 * 12).toISOString()
-    },
-    {
-      id: "seed-3",
-      sender_role: "contractor",
-      sender_name: "Verified Contractor",
-      body: "Yes. I added 10:00 AM on the calendar and the estimate is ready for signature.",
-      created_at: new Date(Date.now() - 1000 * 60 * 5).toISOString()
-    }
-  ];
-
-  saveLocalChatMessages();
+  // No sample messages after first load. Real private messages should persist from Supabase.
+  // Demo/preview mode uses localStorage only and starts empty unless the user sends messages.
+  return;
 }
 
-function renderPrivateChatMessages(){
+function getPrivateChatMessageId(msg){
+  return String(msg.id || msg.supabase_id || (String(msg.created_at || "") + "-" + String(msg.body || msg.message || "")));
+}
+
+function isIncomingPrivateChatMessage(msg){
+  const actor = getChatActor();
+  const currentUserId = window.__currentUserId || null;
+
+  if (currentUserId && msg.sender_id) {
+    return String(msg.sender_id) !== String(currentUserId);
+  }
+
+  if (msg.sender_role) {
+    return String(msg.sender_role) !== String(actor.role);
+  }
+
+  return false;
+}
+
+function playPrivateChatPing(){
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+
+    privateChatAudioContext = privateChatAudioContext || new AudioContextClass();
+    const ctx = privateChatAudioContext;
+
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(880, ctx.currentTime);
+    oscillator.frequency.setValueAtTime(660, ctx.currentTime + 0.08);
+
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.22);
+
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+    oscillator.start(ctx.currentTime);
+    oscillator.stop(ctx.currentTime + 0.24);
+  } catch (err) {
+    console.warn("Chat ping failed:", err);
+  }
+}
+
+function renderPrivateChatMessages(options = {}){
   const messages = document.querySelector("#videoChatPanel .messages");
   if (!messages) return;
+
+  const shouldPing = options.ping === true;
+  const currentIds = new Set(privateChatMessages.map(getPrivateChatMessageId));
+
+  if (shouldPing && privateChatHasLoadedOnce) {
+    const hasNewIncoming = privateChatMessages.some(msg => {
+      const id = getPrivateChatMessageId(msg);
+      return !privateChatKnownIds.has(id) && isIncomingPrivateChatMessage(msg);
+    });
+
+    if (hasNewIncoming) playPrivateChatPing();
+  }
+
+  privateChatKnownIds = currentIds;
+  privateChatHasLoadedOnce = true;
 
   if (!privateChatMessages.length) {
     messages.innerHTML = `<div class="appointment-empty">No private messages yet. Start the conversation below.</div>`;
@@ -3935,15 +3965,14 @@ function renderPrivateChatMessages(){
   messages.scrollTop = messages.scrollHeight;
 }
 
-async function loadPrivateChatMessages(){
+async function loadPrivateChatMessages(options = {}){
   const roomId = typeof ensureProjectRoom === "function" ? await ensureProjectRoom() : null;
 
   if (!roomId) {
     chatUsesSupabase = false;
     loadLocalChatMessages();
-    seedPrivateChatMessages();
     setChatStatus("Preview/demo chat: saved only on this device.");
-    renderPrivateChatMessages();
+    renderPrivateChatMessages({ ping: options.ping === true });
     return;
   }
 
@@ -3957,16 +3986,15 @@ async function loadPrivateChatMessages(){
     console.warn("Supabase chat load failed. Using local fallback:", error);
     chatUsesSupabase = false;
     loadLocalChatMessages();
-    seedPrivateChatMessages();
     setChatStatus("Chat table not connected yet. Using this device only until Supabase SQL is added.");
-    renderPrivateChatMessages();
+    renderPrivateChatMessages({ ping: options.ping === true });
     return;
   }
 
   chatUsesSupabase = true;
   privateChatMessages = data || [];
   setChatStatus("Private chat synced to this homeowner + contractor project room.");
-  renderPrivateChatMessages();
+  renderPrivateChatMessages({ ping: options.ping === true });
   subscribeToPrivateChat(roomId);
 }
 
@@ -3983,8 +4011,8 @@ function subscribeToPrivateChat(roomId){
         table: "project_chat_messages",
         filter: "project_room_id=eq." + roomId
       },
-      function(){
-        loadPrivateChatMessages();
+      function(payload){
+        loadPrivateChatMessages({ ping: payload?.eventType === "INSERT" });
       }
     )
     .subscribe();
@@ -4022,7 +4050,7 @@ async function sendPrivateChatMessage(){
 
       chatUsesSupabase = true;
       chatInput.value = "";
-      await loadPrivateChatMessages();
+      await loadPrivateChatMessages({ ping: false });
       return;
     }
 
@@ -4043,7 +4071,7 @@ async function sendPrivateChatMessage(){
     chatInput.value = "";
     saveLocalChatMessages();
     setChatStatus("Message saved on this device. Add the Supabase chat SQL below to sync across both users.");
-    renderPrivateChatMessages();
+    renderPrivateChatMessages({ ping: false });
   } finally {
     if (sendBtn) sendBtn.disabled = false;
   }
@@ -4056,7 +4084,12 @@ function setupChat(){
   if (!chatInput || !sendBtn) return;
 
   sendBtn.type = "button";
-  sendBtn.onclick = sendPrivateChatMessage;
+  sendBtn.onclick = async function(){
+    if (privateChatAudioContext && privateChatAudioContext.state === "suspended") {
+      try { await privateChatAudioContext.resume(); } catch (err) {}
+    }
+    sendPrivateChatMessage();
+  };
 
   chatInput.addEventListener("keydown", function(e){
     if (e.key === "Enter" && !e.shiftKey) {
@@ -4136,7 +4169,7 @@ attachEstimateListeners();
 
 recalcEstimate();
 
-setupChat();
+document.addEventListener("DOMContentLoaded", setupChat);
 
 setupBackButton();
   
