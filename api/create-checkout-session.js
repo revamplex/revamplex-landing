@@ -6,12 +6,15 @@ export default async function handler(req, res) {
       return res.status(405).json({ error: "Method not allowed" });
     }
 
-    if (!process.env.STRIPE_SECRET_KEY) {
-      return res.status(500).json({ error: "Missing STRIPE_SECRET_KEY in Vercel" });
-    }
+   const stripeSecretKey =
+  process.env.STRIPE_SECRET_KEY ||
+  process.env.STRIPE_SECRET_KEY_;
 
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+if (!stripeSecretKey) {
+  return res.status(500).json({ error: "Missing STRIPE_SECRET_KEY in Vercel" });
+}
 
+const stripe = new Stripe(stripeSecretKey);
     const { plan, lookup_key } = req.body || {};
 
     if (!lookup_key) {
