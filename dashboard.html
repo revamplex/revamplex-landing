@@ -4,23 +4,23 @@
   <meta charset="UTF-8" />
   <title>Revamp Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-.billing-btn {
-  background: #ff6a00;
-  color: white;
-  border: none;
-  padding: 14px 24px;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 800;
-  cursor: pointer;
-  box-shadow: 0 10px 24px rgba(255, 106, 0, 0.25);
-}
-
-.billing-btn:hover {
-  background: #e95f00;
-  transform: translateY(-1px);
-}
   <style>
+    .billing-btn {
+      background: #f97316;
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 700;
+      margin: 8px 0 18px;
+      box-shadow: 0 4px 12px rgba(249,115,22,.25);
+    }
+
+    .billing-btn:hover {
+      background: #ea580c;
+    }
     * { box-sizing: border-box; }
 
     body {
@@ -334,11 +334,9 @@ function refreshDisplay() {
     el.style.display = isContractor ? "block" : "none";
   });
 }
-document.getElementById("manageBillingBtn")?.addEventListener("click", openBillingPortal);
-
 async function openBillingPortal() {
   try {
-    const customerId = userProfile?.stripe_customer_id;
+    const customerId = currentProfile?.stripe_customer_id;
 
     if (!customerId) {
       alert("No Stripe customer account found yet.");
@@ -355,16 +353,21 @@ async function openBillingPortal() {
 
     const data = await res.json();
 
+    if (!res.ok) {
+      alert(data.error || "Could not open billing portal.");
+      return;
+    }
+
     if (data.url) {
       window.location.href = data.url;
-    } else {
-      alert(data.error || "Could not open billing portal.");
     }
+
   } catch (err) {
-    console.error("Billing portal button error:", err);
+    console.error("Billing portal error:", err);
     alert("Billing portal error. Check console.");
   }
 }
+
 async function loadDashboard() {
   const { data: { session }, error: sessionError } = await client.auth.getSession();
 
@@ -636,6 +639,7 @@ async function saveProfile() {
 window.onload = function () {
   document.getElementById("closeProfileBtn").onclick = closeEditProfile;
   document.getElementById("saveProfileBtn").onclick = saveProfile;
+  document.getElementById("manageBillingBtn").onclick = openBillingPortal;
   loadDashboard();
 };
 </script>
