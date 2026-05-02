@@ -55,11 +55,13 @@ export default async function handler(req, res) {
         {
           method: "PATCH",
           headers: {
-            apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
-            Authorization: "Bearer " + process.env.SUPABASE_SERVICE_ROLE_KEY,
-            "Content-Type": "application/json",
-            Prefer: "return=representation"
-          },
+  apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+  Authorization: "Bearer " + process.env.SUPABASE_SERVICE_ROLE_KEY,
+  "Content-Type": "application/json",
+  "Accept-Profile": "public",
+  "Content-Profile": "public",
+  Prefer: "return=representation"
+},
           body: JSON.stringify({
             subscription_status: "active",
             subscription: plan,
