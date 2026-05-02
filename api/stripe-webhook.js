@@ -63,12 +63,11 @@ export default async function handler(req, res) {
   Prefer: "return=representation"
 },
           body: JSON.stringify({
-            subscription_status: "active",
-            subscription: plan,
-            plan: plan,
-            stripe_customer_id: session.customer,
-            stripe_subscription_id: session.subscription
-          })
+  subscription_status: "active",
+  plan: plan,
+  stripe_customer_id: session.customer,
+  stripe_subscription_id: session.subscription
+})
         }
       );
 
