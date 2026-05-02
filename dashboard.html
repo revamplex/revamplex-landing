@@ -195,6 +195,9 @@
     <p><strong>Approval:</strong> <span id="displayApproval">—</span></p>
     <p><strong>Subscription:</strong> <span id="displaySubscription">—</span></p>
     <p><strong>Trial Ends:</strong> <span id="displayTrialEnd">—</span></p>
+    <button onclick="openBillingPortal()">
+  Manage Billing
+</button>
     <p class="muted">Your contractor listing will not go live until Revamp LEX approves your license and insurance.</p>
     <div class="plans">
       <div class="plan-card"><h4>Basic — $29/mo</h4><p>Up to 5 bids per month.</p><button class="btn" onclick="subscribe('basic')">Choose Basic</button></div>
@@ -248,6 +251,31 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+async function openBillingPortal() {
+  const customerId = profile.stripe_customer_id;
+
+  if (!customerId) {
+    alert("No Stripe customer account found yet.");
+    return;
+  }
+
+  const res = await fetch("/api/create-billing-portal-session", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ customerId })
+  });
+
+  const data = await res.json();
+
+  if (data.url) {
+    window.location.href = data.url;
+  } else {
+    alert(data.error || "Could not open billing portal.");
+  }
+}
+  
 const client = window.supabase.createClient(
   "https://dezvwoedboikshqttdqu.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E"
