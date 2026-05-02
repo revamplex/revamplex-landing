@@ -6,31 +6,29 @@ export default async function handler(req, res) {
       return res.status(405).json({ error: "Method not allowed" });
     }
 
-   const stripeSecretKey =
-  process.env.STRIPE_SECRET_KEY ||
-  process.env.STRIPE_SECRET_KEY_;
+    const stripeSecretKey =
+      process.env.STRIPE_SECRET_KEY ||
+      process.env.STRIPE_SECRET_KEY_;
 
-if (!stripeSecretKey) {
-  return res.status(500).json({ error: "Missing STRIPE_SECRET_KEY in Vercel" });
-}
-
-const stripe = new Stripe(stripeSecretKey);
-    const { plan, lookup_key } = req.body || {};
-
-    if (!lookup_key) {
-      return res.status(400).json({ error: "Missing lookup_key" });
+    if (!stripeSecretKey) {
+      return res.status(500).json({ error: "Missing STRIPE_SECRET_KEY in Vercel" });
     }
 
-    const prices = await stripe.prices.list({
-      lookup_keys: [lookup_key],
-      expand: ["data.product"]
-    });
+    const stripe = new Stripe(stripeSecretKey);
 
-    const price = prices.data[0];
+    const { plan } = req.body || {};
 
-    if (!price) {
-      return res.status(404).json({
-        error: "Stripe price not found: " + lookup_key
+    const priceIds = {
+      basic: process.env.STRIPE_PRICE_BASIC,
+      pro: process.env.STRIPE_PRICE_PRO || process.env.STRIPE_PRICE_PRO_,
+      elite: process.env.STRIPE_PRICE_ELITE || process.env.STRIPE_PRICE_ELITE_
+    };
+
+    const priceId = priceIds[plan];
+
+    if (!priceId) {
+      return res.status(400).json({
+        error: "Missing Stripe price ID for plan: " + plan
       });
     }
 
@@ -38,12 +36,16 @@ const stripe = new Stripe(stripeSecretKey);
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
-      line_items: [{ price: price.id, quantity: 1 }],
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1
+        }
+      ],
       success_url: `${origin}/dashboard.html?checkout=success&plan=${encodeURIComponent(plan)}`,
       cancel_url: `${origin}/dashboard.html?checkout=cancelled`,
       metadata: {
-        plan,
-        lookup_key
+        plan
       }
     });
 
