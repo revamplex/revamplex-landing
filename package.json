@@ -1,0 +1,8 @@
+{
+  "name": "revamplex",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "stripe": "^18.0.0"
+  }
+}
