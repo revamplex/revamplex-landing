@@ -41,6 +41,8 @@ export default async function handler(req, res) {
 
   try {
     if (event.type === "checkout.session.completed") {
+      customer.subscription.updated
+customer.subscription.deleted
       const session = event.data.object;
 
       const plan = session.metadata?.plan || "basic";
@@ -83,4 +85,63 @@ export default async function handler(req, res) {
     console.error("Webhook processing error:", err);
     return res.status(500).json({ error: err.message });
   }
+}
+if (event.type === "customer.subscription.updated") {
+  const subscription = event.data.object;
+
+  const customerId = subscription.customer;
+  const status = subscription.status;
+
+  const priceId = subscription.items.data[0]?.price?.id;
+
+  let plan = "basic";
+
+  if (priceId === process.env.STRIPE_PRICE_PRO) {
+    plan = "pro";
+  } else if (priceId === process.env.STRIPE_PRICE_ELITE) {
+    plan = "elite";
+  } else if (priceId === process.env.STRIPE_PRICE_BASIC) {
+    plan = "basic";
+  }
+
+  await fetch(
+    process.env.SUPABASE_URL + "/rest/v1/profiles?stripe_customer_id=eq." + customerId,
+    {
+      method: "PATCH",
+      headers: {
+        apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: "Bearer " + process.env.SUPABASE_SERVICE_ROLE_KEY,
+        "Content-Type": "application/json",
+        "Accept-Profile": "public",
+        "Content-Profile": "public"
+      },
+      body: JSON.stringify({
+        subscription_status: status,
+        plan: plan,
+        stripe_subscription_id: subscription.id
+      })
+    }
+  );
+}
+
+if (event.type === "customer.subscription.deleted") {
+  const subscription = event.data.object;
+
+  await fetch(
+    process.env.SUPABASE_URL + "/rest/v1/profiles?stripe_customer_id=eq." + subscription.customer,
+    {
+      method: "PATCH",
+      headers: {
+        apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: "Bearer " + process.env.SUPABASE_SERVICE_ROLE_KEY,
+        "Content-Type": "application/json",
+        "Accept-Profile": "public",
+        "Content-Profile": "public"
+      },
+      body: JSON.stringify({
+        subscription_status: "cancelled",
+        plan: "none"
+      })
+    }
+  );
 }
