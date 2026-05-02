@@ -4,7 +4,22 @@
   <meta charset="UTF-8" />
   <title>Revamp Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+.billing-btn {
+  background: #ff6a00;
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(255, 106, 0, 0.25);
+}
 
+.billing-btn:hover {
+  background: #e95f00;
+  transform: translateY(-1px);
+}
   <style>
     * { box-sizing: border-box; }
 
@@ -195,7 +210,7 @@
     <p><strong>Approval:</strong> <span id="displayApproval">—</span></p>
     <p><strong>Subscription:</strong> <span id="displaySubscription">—</span></p>
     <p><strong>Trial Ends:</strong> <span id="displayTrialEnd">—</span></p>
-    <button onclick="openBillingPortal()">
+    <button id="manageBillingBtn" class="billing-btn">
   Manage Billing
 </button>
     <p class="muted">Your contractor listing will not go live until Revamp LEX approves your license and insurance.</p>
@@ -319,7 +334,37 @@ function refreshDisplay() {
     el.style.display = isContractor ? "block" : "none";
   });
 }
+document.getElementById("manageBillingBtn")?.addEventListener("click", openBillingPortal);
 
+async function openBillingPortal() {
+  try {
+    const customerId = userProfile?.stripe_customer_id;
+
+    if (!customerId) {
+      alert("No Stripe customer account found yet.");
+      return;
+    }
+
+    const res = await fetch("/api/create-billing-portal-session", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ customerId })
+    });
+
+    const data = await res.json();
+
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert(data.error || "Could not open billing portal.");
+    }
+  } catch (err) {
+    console.error("Billing portal button error:", err);
+    alert("Billing portal error. Check console.");
+  }
+}
 async function loadDashboard() {
   const { data: { session }, error: sessionError } = await client.auth.getSession();
 
