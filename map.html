@@ -2062,25 +2062,37 @@ if (lockedRole === 'homeowner') {
   return;
 }
       
-  if (lockedRole === 'contractor') {
-
+ if (lockedRole === 'contractor') {
 
   detailTitle.textContent = "Dashboard";
 
   detailContent.innerHTML = `
     <div>
       <p>${user.email}</p>
-      <button onclick="goToDashboard()" class="mini-btn secondary">Edit Profile</button>
+
+      <button onclick="goToDashboard()" class="mini-btn secondary">
+        Edit Profile
+      </button>
     </div>
 
     <div class="detail-panel">
-      <h4>Active Bids</h4>
-      <p>Coming next</p>
+      <h4>Project Rooms</h4>
+      <p>Invites • Chat • Docs • Estimates</p>
+    </div>
+
+    <div class="detail-panel">
+      <h4>Submitted Bids</h4>
+      <p>Pending • Accepted • Revisions</p>
+    </div>
+
+    <div class="detail-panel">
+      <h4>Active Jobs</h4>
+      <p>Contracts • Schedule • Progress</p>
     </div>
 
     <div class="detail-panel">
       <h4>Completed Jobs</h4>
-      <p>Coming next</p>
+      <p>Signed Off • Reviews • History</p>
     </div>
   `;
 }
