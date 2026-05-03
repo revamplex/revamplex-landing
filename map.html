@@ -1071,6 +1071,40 @@
   gap: 10px;
   margin-top: 16px;
 }
+
+    .workflow-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: #f8fafc;
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+
+    .workflow-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(249,115,22,.35);
+      box-shadow: 0 10px 24px rgba(249,115,22,.13);
+    }
+
+    .workflow-card h4 {
+      margin: 0 0 6px;
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .workflow-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 13px;
+    }
+
+    .workflow-grid {
+      display: grid;
+      gap: 12px;
+    }
+
     .detail-stack { display:grid; gap:12px; }
     .detail-panel {
       border:1px solid var(--line);
@@ -2062,41 +2096,173 @@ if (lockedRole === 'homeowner') {
   return;
 }
       
- if (lockedRole === 'contractor') {
+  if (lockedRole === 'contractor') {
 
   detailTitle.textContent = "Dashboard";
 
   detailContent.innerHTML = `
     <div>
       <p>${user.email}</p>
-
-      <button onclick="goToDashboard()" class="mini-btn secondary">
-        Edit Profile
-      </button>
+      <button onclick="goToDashboard()" class="mini-btn secondary">Edit Profile</button>
     </div>
 
-    <div class="detail-panel">
-      <h4>Project Rooms</h4>
-      <p>Invites • Chat • Docs • Estimates</p>
-    </div>
+    <div class="workflow-grid">
+      <div class="workflow-card" onclick="openMapWorkflow('project_rooms')">
+        <h4>Project Rooms</h4>
+        <p>Invites • Chat • Docs • Estimates</p>
+      </div>
 
-    <div class="detail-panel">
-      <h4>Submitted Bids</h4>
-      <p>Pending • Accepted • Revisions</p>
-    </div>
+      <div class="workflow-card" onclick="openMapWorkflow('submitted_bids')">
+        <h4>Submitted Bids</h4>
+        <p>Pending • Accepted • Revisions</p>
+      </div>
 
-    <div class="detail-panel">
-      <h4>Active Jobs</h4>
-      <p>Contracts • Schedule • Progress</p>
-    </div>
+      <div class="workflow-card" onclick="openMapWorkflow('active_jobs')">
+        <h4>Active Jobs</h4>
+        <p>Contracts • Schedule • Progress</p>
+      </div>
 
-    <div class="detail-panel">
-      <h4>Completed Jobs</h4>
-      <p>Signed Off • Reviews • History</p>
+      <div class="workflow-card" onclick="openMapWorkflow('completed_jobs')">
+        <h4>Completed Jobs</h4>
+        <p>Signed Off • Reviews • History</p>
+      </div>
     </div>
   `;
 }
   }
+
+function getMapWorkflowStatus(value) {
+  return String(value || "pending").toLowerCase().trim();
+}
+
+function getMapProjectRoomUrl(jobId) {
+  return "project-room.html?mode=contractor&job=" + encodeURIComponent(jobId);
+}
+
+async function loadMapContractorBidRows() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+
+  if (!user) return [];
+
+  const { data: bidRows, error: bidsError } = await supabaseClient
+    .from("bids")
+    .select("*")
+    .eq("contractor_id", user.id)
+    .order("created_at", { ascending: false });
+
+  if (bidsError) {
+    console.error("Could not load contractor bids:", bidsError);
+    return [];
+  }
+
+  const bids = bidRows || [];
+  const jobIds = [...new Set(bids.map(b => b.job_id).filter(Boolean))];
+
+  let jobsById = {};
+
+  if (jobIds.length) {
+    const { data: jobRows, error: jobsError } = await supabaseClient
+      .from("jobs")
+      .select("*")
+      .in("id", jobIds);
+
+    if (!jobsError && jobRows) {
+      jobsById = jobRows.reduce((acc, job) => {
+        acc[String(job.id)] = job;
+        return acc;
+      }, {});
+    }
+  }
+
+  return bids.map(bid => ({
+    bid,
+    job: jobsById[String(bid.job_id)] || {}
+  }));
+}
+
+function renderMapWorkflowRows(rows, emptyText) {
+  if (!rows.length) {
+    detailContent.innerHTML = `<div class="detail-panel"><p>${emptyText}</p></div>`;
+    return;
+  }
+
+  detailContent.innerHTML = rows.map(({ bid, job }) => {
+    const status = getMapWorkflowStatus(bid.status || job.status);
+    const jobId = bid.job_id || job.id;
+
+    return `
+      <div class="detail-panel">
+        <h4>${job.title || "Untitled Project"}</h4>
+        <p>
+          ${job.trade || "Trade"} • ${job.city || "Location"} • ${job.budget || "Budget not listed"}<br>
+          Bid: ${bid.amount || "—"} • Status: ${status}
+        </p>
+        <div class="card-actions">
+          <button class="mini-btn primary" onclick="window.location.href='${getMapProjectRoomUrl(jobId)}'">
+            Open Project Room
+          </button>
+          <button class="mini-btn secondary" onclick="window.location.href='dashboard.html?section=project_rooms'">
+            Full Dashboard
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function openMapWorkflow(section) {
+  detailTitle.textContent = "Loading...";
+  detailContent.innerHTML = `<div class="detail-panel"><p>Loading...</p></div>`;
+
+  const rows = await loadMapContractorBidRows();
+
+  if (section === "project_rooms") {
+    detailTitle.textContent = "Project Rooms";
+    renderMapWorkflowRows(
+      rows,
+      "No project rooms yet. Once you submit a bid or get invited to a homeowner project, it will appear here."
+    );
+    return;
+  }
+
+  if (section === "submitted_bids") {
+    detailTitle.textContent = "Submitted Bids";
+    renderMapWorkflowRows(
+      rows,
+      "No submitted bids yet. Submit your first bid from the contractor map."
+    );
+    return;
+  }
+
+  if (section === "active_jobs") {
+    detailTitle.textContent = "Active Jobs";
+    const activeRows = rows.filter(({ bid, job }) => {
+      const status = getMapWorkflowStatus(bid.status || job.status);
+      return ["accepted", "approved", "contract_signed", "scheduled", "in_progress", "active"].includes(status);
+    });
+
+    renderMapWorkflowRows(
+      activeRows,
+      "No active jobs yet. Accepted bids, signed contracts, scheduled work, and in-progress jobs will appear here."
+    );
+    return;
+  }
+
+  if (section === "completed_jobs") {
+    detailTitle.textContent = "Completed Jobs";
+    const completedRows = rows.filter(({ bid, job }) => {
+      const status = getMapWorkflowStatus(bid.status || job.status);
+      return ["complete", "completed", "closed"].includes(status);
+    });
+
+    renderMapWorkflowRows(
+      completedRows,
+      "No completed jobs yet. Jobs will appear here after both homeowner and contractor confirm completion."
+    );
+  }
+}
+
+
 async function logout() {
   await supabaseClient.auth.signOut();
   localStorage.removeItem('revamplex_registered');
