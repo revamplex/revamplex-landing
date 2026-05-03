@@ -4354,50 +4354,104 @@ async function incrementMonthlyBidCount(profile) {
 }
 
 async function submitBid() {
-  const permission = await checkBidPermissionAndUpdateCycle();
+  try {
+    const amount = document.getElementById("grandOut")?.innerText || "";
+    const job = window.currentJob;
+    const jobId = getCurrentJobIdForBid();
 
-  if (!permission.allowed) {
-    return;
+    if (!job || !jobId) {
+      alert("Job not found.");
+      return;
+    }
+
+    const user = await getLoggedInUserForBid();
+    if (!user) return;
+
+    const profile = await getContractorProfileForBid(user.id);
+
+    const { data: existingBid } = await supabaseClient
+      .from("bids")
+      .select("*")
+      .eq("job_id", String(jobId))
+      .eq("contractor_id", user.id)
+      .maybeSingle();
+
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+
+    const { data: monthlyBids } = await supabaseClient
+      .from("bids")
+      .select("job_id")
+      .eq("contractor_id", user.id)
+      .gte("created_at", monthStart.toISOString());
+
+    const uniqueJobs = new Set((monthlyBids || []).map(x => String(x.job_id)));
+
+    const limits = {
+      trial: 5,
+      basic: 5,
+      pro: 10,
+      elite: 999999
+    };
+
+    const bidLimit = limits[(profile.plan || "basic").toLowerCase()] || 5;
+    const isNewJob = !existingBid;
+
+    if (isNewJob && uniqueJobs.size >= bidLimit) {
+      alert(
+        "You've reached your monthly bid limit.\n\n" +
+        "Upgrade to Pro for 10 bids/month or Upgrade to Elite for unlimited bids."
+      );
+      return;
+    }
+
+    const payload = {
+      job_id: String(jobId),
+      homeowner_id: job.user_id || job.homeowner_id || null,
+      contractor_id: user.id,
+      contractor_email: user.email || "",
+      contractor_name:
+        profile.company ||
+        profile.full_name ||
+        profile.name ||
+        "Verified Contractor",
+      amount: amount,
+      message: "Estimate generated through Revamp Project Room",
+      eta: "TBD",
+      updated_at: new Date().toISOString()
+    };
+
+    if (existingBid) {
+      const { error } = await supabaseClient
+        .from("bids")
+        .update(payload)
+        .eq("id", existingBid.id);
+
+      if (error) throw error;
+
+      alert("Bid updated privately. Still counts as 1 bid for this job.");
+    } else {
+      payload.status = "pending";
+
+      const { error } = await supabaseClient
+        .from("bids")
+        .insert([payload]);
+
+      if (error) throw error;
+
+      alert("Bid submitted privately to homeowner. Counts as 1 unique monthly bid.");
+    }
+
+    if (typeof loadBidDashboard === "function") {
+      await loadBidDashboard();
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert(err.message || "Could not submit bid.");
   }
-
-  const amount = document.getElementById("grandOut").innerText;
-  const job = window.currentJob;
-
-  if (!job) {
-    alert("Job not found");
-    return;
-  }
-
-  if (!job.bids) {
-    job.bids = [];
-  }
-
-  const maxBids = Number(job.max_bids || job.maxBids || 5);
-
-  if (job.bids.length >= maxBids) {
-    alert("This job already received the maximum number of bids.");
-    return;
-  }
-
-  const bid = {
-    contractor: "Verified Contractor",
-    amount: amount,
-    message: "Estimate generated through Revamp Project Room",
-    startDate: "TBD",
-    timestamp: Date.now()
-  };
-
-  job.bids.push(bid);
-
-  await incrementMonthlyBidCount(permission.profile);
-
-  if (job.bids.length >= maxBids) {
-    job.status = "closed";
-  }
-
-  alert("Bid submitted privately to homeowner.");
 }
-
 /* ---------- INIT ---------- */
 
 applyWorkspaceMode();
