@@ -223,6 +223,47 @@
       font-weight: 800;
     }
 
+    
+.workflow-list {
+  display: grid;
+  gap: 12px;
+  margin: 12px 0 16px;
+}
+
+.workflow-row {
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.workflow-row strong {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.workflow-row span {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.workflow-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.workflow-empty {
+  border: 1px dashed #fed7aa;
+  background: #fff7ed;
+  color: #9a3412;
+  border-radius: 14px;
+  padding: 14px;
+  font-weight: 700;
+}
+
     @media (max-width: 600px) {
       .header { padding-top: 52px; }
       .back-btn {
@@ -381,6 +422,16 @@
   </div>
 </div>
 
+
+<div class="modal" id="workflowModal">
+  <div class="modal-box">
+    <h3 id="workflowModalTitle">Workflow</h3>
+    <div id="workflowModalBody"></div>
+    <button class="btn secondary" type="button" onclick="closeWorkflowModal()">Close</button>
+  </div>
+</div>
+
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
@@ -462,20 +513,159 @@ async function openBillingPortal() {
 }
 
 
+
+function getWorkflowStatus(value) {
+  return String(value || "pending").toLowerCase().trim();
+}
+
 function openProjectRooms() {
-  alert("Project Rooms list coming next. This will show invited rooms, active chats, photos/docs, and estimate rooms.");
+  openDashboardWorkflow("project_rooms");
 }
 
 function openSubmittedBids() {
-  alert("Submitted bids list coming next. This will show pending, accepted, declined, and expired bids.");
+  openDashboardWorkflow("submitted_bids");
 }
 
 function openActiveJobs() {
-  alert("Active jobs list coming next. This will show accepted bids, signed contracts, deposits, schedule, and in-progress work.");
+  openDashboardWorkflow("active_jobs");
 }
 
 function openCompletedJobs() {
-  alert("Completed jobs list coming next. This will show jobs completed after both homeowner and contractor confirm completion.");
+  openDashboardWorkflow("completed_jobs");
+}
+
+function closeWorkflowModal() {
+  document.getElementById("workflowModal").classList.remove("active");
+}
+
+function projectRoomUrl(jobId) {
+  return "project-room.html?mode=contractor&job=" + encodeURIComponent(jobId);
+}
+
+async function loadMyBidRows() {
+  if (!currentUser) return [];
+
+  const { data: bids, error: bidsError } = await client
+    .from("bids")
+    .select("*")
+    .eq("contractor_id", currentUser.id)
+    .order("created_at", { ascending: false });
+
+  if (bidsError) {
+    console.error("Could not load contractor bids:", bidsError);
+    return [];
+  }
+
+  const bidRows = bids || [];
+  const jobIds = [...new Set(bidRows.map(b => b.job_id).filter(Boolean))];
+
+  let jobsById = {};
+
+  if (jobIds.length) {
+    const { data: jobRows, error: jobsError } = await client
+      .from("jobs")
+      .select("*")
+      .in("id", jobIds);
+
+    if (!jobsError && jobRows) {
+      jobsById = jobRows.reduce((acc, job) => {
+        acc[String(job.id)] = job;
+        return acc;
+      }, {});
+    }
+  }
+
+  return bidRows.map(bid => ({
+    bid,
+    job: jobsById[String(bid.job_id)] || {}
+  }));
+}
+
+function renderWorkflowRows(items, emptyText) {
+  const body = document.getElementById("workflowModalBody");
+
+  if (!items.length) {
+    body.innerHTML = `<div class="workflow-empty">${emptyText}</div>`;
+    return;
+  }
+
+  body.innerHTML = `
+    <div class="workflow-list">
+      ${items.map(({ bid, job }) => {
+        const status = getWorkflowStatus(bid.status || job.status);
+        const jobId = bid.job_id || job.id;
+        return `
+          <div class="workflow-row">
+            <strong>${job.title || "Untitled Project"}</strong>
+            <span>
+              ${job.trade || "Trade"} • ${job.city || "Location"} • ${job.budget || "Budget not listed"}<br>
+              Bid: ${bid.amount || "—"} • Status: ${status}
+            </span>
+            <div class="workflow-actions">
+              <button class="btn" onclick="window.location.href='${projectRoomUrl(jobId)}'">Open Project Room</button>
+              <button class="btn secondary" onclick="window.location.href='dashboard.html'">Full Dashboard</button>
+            </div>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+async function openDashboardWorkflow(section) {
+  const modal = document.getElementById("workflowModal");
+  const title = document.getElementById("workflowModalTitle");
+  const body = document.getElementById("workflowModalBody");
+
+  modal.classList.add("active");
+  body.innerHTML = `<p class="muted">Loading...</p>`;
+
+  const rows = await loadMyBidRows();
+
+  if (section === "project_rooms") {
+    title.innerText = "Project Rooms";
+    renderWorkflowRows(
+      rows,
+      "No project rooms yet. Once you submit a bid or get invited to a homeowner project, it will appear here."
+    );
+    return;
+  }
+
+  if (section === "submitted_bids") {
+    title.innerText = "Submitted Bids";
+    renderWorkflowRows(
+      rows,
+      "No submitted bids yet. Submit your first bid from the contractor map."
+    );
+    return;
+  }
+
+  if (section === "active_jobs") {
+    title.innerText = "Active Jobs";
+    const activeRows = rows.filter(({ bid, job }) => {
+      const status = getWorkflowStatus(bid.status || job.status);
+      return ["accepted", "approved", "contract_signed", "scheduled", "in_progress", "active"].includes(status);
+    });
+
+    renderWorkflowRows(
+      activeRows,
+      "No active jobs yet. Accepted bids, signed contracts, scheduled work, and in-progress jobs will appear here."
+    );
+    return;
+  }
+
+  if (section === "completed_jobs") {
+    title.innerText = "Completed Jobs";
+    const completedRows = rows.filter(({ bid, job }) => {
+      const status = getWorkflowStatus(bid.status || job.status);
+      return ["complete", "completed", "closed"].includes(status);
+    });
+
+    renderWorkflowRows(
+      completedRows,
+      "No completed jobs yet. Jobs will appear here after both homeowner and contractor confirm completion."
+    );
+  }
 }
 
 async function loadDashboard() {
@@ -750,7 +940,13 @@ window.onload = function () {
   document.getElementById("closeProfileBtn").onclick = closeEditProfile;
   document.getElementById("saveProfileBtn").onclick = saveProfile;
   document.getElementById("manageBillingBtn").onclick = openBillingPortal;
-  loadDashboard();
+  loadDashboard().then(() => {
+    const params = new URLSearchParams(window.location.search);
+    const section = params.get("section");
+    if (section) {
+      setTimeout(() => openDashboardWorkflow(section), 300);
+    }
+  });
 };
 </script>
 
