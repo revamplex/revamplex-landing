@@ -3,207 +3,502 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RevampLEX — How It Works</title>
+  <title>About RevampLEX</title>
 
   <style>
-    *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif;}
-
-    body{
-      background:#0f172a;
-      color:white;
-      line-height:1.5;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
     }
 
-    .hero{
-      text-align:center;
-      padding:90px 20px 70px;
-      max-width:1100px;
-      margin:auto;
+    body {
+      background: #f8fafc;
+      color: #0f172a;
+      line-height: 1.55;
     }
 
-    .hero h1{
-      font-size:52px;
-      margin-bottom:20px;
-      font-weight:700;
+    .page {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 34px 0 70px;
     }
 
-    .hero p{
-      font-size:22px;
-      opacity:.9;
-      max-width:760px;
-      margin:auto;
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 28px;
     }
 
-    .button-row{
-      margin-top:40px;
-      display:flex;
-      justify-content:center;
-      gap:18px;
-      flex-wrap:wrap;
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      font-size: 22px;
     }
 
-    .btn{
-      text-decoration:none;
-      padding:16px 28px;
-      border-radius:14px;
-      font-weight:bold;
-      transition:.2s;
-      display:inline-block;
+    .logo-mark {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 900;
+      box-shadow: 0 12px 28px rgba(249, 115, 22, 0.28);
     }
 
-    .btn-primary{
-      background:#f97316;
-      color:white;
+    .nav-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
     }
 
-    .btn-secondary{
-      background:#1e293b;
-      color:white;
-      border:1px solid rgba(255,255,255,.15);
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      border-radius: 999px;
+      padding: 13px 22px;
+      font-weight: 900;
+      transition: 0.18s ease;
+      border: 1px solid transparent;
     }
 
-    .btn:hover{
-      transform:translateY(-2px);
+    .btn:hover {
+      transform: translateY(-2px);
     }
 
-    .section{
-      max-width:1200px;
-      margin:auto;
-      padding:70px 20px;
+    .btn-primary {
+      background: #f97316;
+      color: #fff;
+      box-shadow: 0 16px 34px rgba(249, 115, 22, 0.25);
     }
 
-    .section-title{
-      text-align:center;
-      font-size:38px;
-      margin-bottom:45px;
+    .btn-soft {
+      background: #fff;
+      color: #0f172a;
+      border-color: #e2e8f0;
     }
 
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-      gap:25px;
+    .hero {
+      background:
+        radial-gradient(circle at top right, rgba(249, 115, 22, 0.25), transparent 34%),
+        linear-gradient(135deg, #0f172a, #1e293b);
+      color: white;
+      border-radius: 34px;
+      padding: 66px 54px;
+      box-shadow: 0 28px 70px rgba(15, 23, 42, 0.22);
+      overflow: hidden;
     }
 
-    .card{
-      background:#1e293b;
-      border-radius:22px;
-      padding:30px;
-      border:1px solid rgba(255,255,255,.08);
+    .eyebrow {
+      color: #fed7aa;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
     }
 
-    .card h3{
-      font-size:26px;
-      margin-bottom:20px;
-      color:#f97316;
+    .hero h1 {
+      font-size: clamp(38px, 6vw, 68px);
+      line-height: 1.02;
+      max-width: 880px;
+      margin-bottom: 22px;
     }
 
-    .step{
-      margin-bottom:14px;
-      font-size:18px;
+    .hero p {
+      font-size: clamp(18px, 2.2vw, 24px);
+      color: #cbd5e1;
+      max-width: 850px;
+      margin-bottom: 34px;
     }
 
-    .cta{
-      text-align:center;
-      padding:90px 20px;
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
     }
 
-    .cta h2{
-      font-size:42px;
-      margin-bottom:30px;
+    .section {
+      padding: 70px 0 0;
     }
 
-    @media(max-width:768px){
-      .hero h1{font-size:36px;}
-      .hero p{font-size:18px;}
+    .section-title {
+      font-size: clamp(30px, 4vw, 46px);
+      line-height: 1.1;
+      margin-bottom: 18px;
+      text-align: center;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      color: #64748b;
+      font-size: 19px;
+      max-width: 820px;
+      margin: 0 auto 38px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 26px;
+      padding: 28px;
+      box-shadow: 0 18px 46px rgba(15, 23, 42, 0.07);
+    }
+
+    .card h3 {
+      font-size: 23px;
+      margin-bottom: 12px;
+    }
+
+    .card p {
+      color: #64748b;
+      font-size: 16px;
+    }
+
+    .orange {
+      color: #f97316;
+    }
+
+    .story-box {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 30px;
+      padding: 42px;
+      box-shadow: 0 20px 54px rgba(15, 23, 42, 0.08);
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 34px;
+      align-items: center;
+    }
+
+    .story-box h2 {
+      font-size: clamp(30px, 4vw, 44px);
+      line-height: 1.12;
+      margin-bottom: 18px;
+    }
+
+    .story-box p {
+      color: #475569;
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+
+    .stat-box {
+      background: linear-gradient(180deg, #fff7ed, #ffffff);
+      border: 1px solid #fed7aa;
+      border-radius: 26px;
+      padding: 28px;
+    }
+
+    .stat-row {
+      border-bottom: 1px dashed #fdba74;
+      padding: 18px 0;
+    }
+
+    .stat-row:first-child {
+      padding-top: 0;
+    }
+
+    .stat-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .stat-row strong {
+      display: block;
+      font-size: 28px;
+      color: #ea580c;
+      margin-bottom: 4px;
+    }
+
+    .stat-row span {
+      color: #64748b;
+      font-weight: 700;
+    }
+
+    .split-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .value-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .value-item {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 20px;
+    }
+
+    .value-item strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 18px;
+    }
+
+    .value-item span {
+      color: #64748b;
+    }
+
+    .cta {
+      margin-top: 70px;
+      background: linear-gradient(135deg, #111827, #241a15);
+      color: white;
+      border-radius: 34px;
+      padding: 56px 30px;
+      text-align: center;
+      box-shadow: 0 22px 60px rgba(15, 23, 42, 0.18);
+    }
+
+    .cta h2 {
+      font-size: clamp(32px, 5vw, 52px);
+      margin-bottom: 14px;
+    }
+
+    .cta p {
+      color: #cbd5e1;
+      font-size: 19px;
+      margin: 0 auto 28px;
+      max-width: 760px;
+    }
+
+    .footer {
+      margin-top: 34px;
+      color: #64748b;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    @media (max-width: 900px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .hero {
+        padding: 46px 28px;
+        border-radius: 26px;
+      }
+
+      .grid,
+      .story-box,
+      .split-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .page {
+        width: min(100% - 20px, 1180px);
+        padding-top: 16px;
+      }
+
+      .nav-actions,
+      .hero-actions {
+        width: 100%;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .card,
+      .story-box {
+        padding: 22px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <section class="hero">
-    <h1>How RevampLEX Works</h1>
-    <p>
-      The smarter way for homeowners and contractors to connect,
-      estimate, collaborate, and complete projects privately.
-    </p>
+  <main class="page">
 
-    <div class="button-row">
-      <a href="map.html?view=homeowner" class="btn btn-primary">I'm a Homeowner</a>
-      <a href="map.html?view=contractor" class="btn btn-primary">I'm a Contractor</a>
-      <a href="map.html?demo=true" class="btn btn-secondary">Explore Demo</a>
-    </div>
-  </section>
-
-
-  <section class="section">
-    <h2 class="section-title">For Homeowners</h2>
-
-    <div class="grid">
-      <div class="card">
-        <h3>Post Your Project</h3>
-        <div class="step">1. Describe your renovation project</div>
-        <div class="step">2. Upload photos and measurements</div>
-        <div class="step">3. Set your budget and location</div>
+    <header class="topbar">
+      <div class="logo-wrap">
+        <div class="logo-mark">R</div>
+        <span>RevampLEX</span>
       </div>
 
-      <div class="card">
-        <h3>Receive Private Bids</h3>
-        <div class="step">4. Verified contractors submit bids privately</div>
-        <div class="step">5. Compare pricing and timelines</div>
-        <div class="step">6. Approve your preferred contractor</div>
+      <nav class="nav-actions">
+        <a href="how-it-works.html" class="btn btn-soft">How It Works</a>
+        <a href="map.html" class="btn btn-primary">Open Map</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow">About RevampLEX</div>
+      <h1>Built to make renovation projects easier, clearer, and more connected.</h1>
+      <p>
+        RevampLEX connects homeowners and contractors through a map-based platform with private project rooms, estimates, bids, documents, video, scheduling, and approvals in one place.
+      </p>
+      <div class="hero-actions">
+        <a href="map.html?view=homeowner" class="btn btn-primary">Start as Homeowner</a>
+        <a href="map.html?view=contractor" class="btn btn-soft">Start as Contractor</a>
       </div>
-    </div>
-  </section>
+    </section>
 
+    <section class="section">
+      <div class="story-box">
+        <div>
+          <h2>The renovation process should not feel scattered.</h2>
+          <p>
+            Homeowners often struggle to find the right contractor, compare bids, keep track of photos, review estimates, approve work, and manage communication across texts, emails, phone calls, and paper proposals.
+          </p>
+          <p>
+            Contractors also need a better way to find serious local projects, create estimates, submit proposals, schedule appointments, and keep project conversations organized.
+          </p>
+          <p>
+            RevampLEX was created to bring both sides into one clean, private workspace designed around real construction workflow.
+          </p>
+        </div>
 
-  <section class="section">
-    <h2 class="section-title">For Contractors</h2>
-
-    <div class="grid">
-      <div class="card">
-        <h3>Find Local Jobs</h3>
-        <div class="step">1. Browse homeowner projects near you</div>
-        <div class="step">2. Filter by trade and budget</div>
-        <div class="step">3. Submit private estimates</div>
+        <aside class="stat-box">
+          <div class="stat-row">
+            <strong>Location</strong>
+            <span>Find projects and contractors on a map.</span>
+          </div>
+          <div class="stat-row">
+            <strong>Estimation</strong>
+            <span>Build cleaner bids, proposals, and invoices.</span>
+          </div>
+          <div class="stat-row">
+            <strong>eXecution</strong>
+            <span>Manage communication, documents, signatures, and scheduling.</span>
+          </div>
+        </aside>
       </div>
+    </section>
 
-      <div class="card">
-        <h3>Win More Work</h3>
-        <div class="step">4. Use AI estimates and proposals</div>
-        <div class="step">5. Video chat with homeowners</div>
-        <div class="step">6. Manage jobs in one workspace</div>
+    <section class="section">
+      <h2 class="section-title">What RevampLEX is designed to do</h2>
+      <p class="section-subtitle">
+        The goal is simple: help homeowners choose with confidence and help contractors manage better project opportunities.
+      </p>
+
+      <div class="grid">
+        <div class="card">
+          <h3><span class="orange">For</span> Homeowners</h3>
+          <p>Post renovation projects, receive private bids, compare contractors, share photos and documents, approve proposals, and keep everything organized in one room.</p>
+        </div>
+
+        <div class="card">
+          <h3><span class="orange">For</span> Contractors</h3>
+          <p>Browse local project opportunities, submit private estimates, use proposal tools, communicate with customers, and manage active jobs without scattered paperwork.</p>
+        </div>
+
+        <div class="card">
+          <h3><span class="orange">For</span> Projects</h3>
+          <p>Every project can have its own private room with chat, video, photos, PDFs, invoices, appointments, signatures, and project history.</p>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
+    <section class="section">
+      <h2 class="section-title">Our approach</h2>
+      <p class="section-subtitle">
+        RevampLEX is being built around practical jobsite needs, not just another directory listing.
+      </p>
 
-  <section class="section">
-    <h2 class="section-title">Private Project Room</h2>
+      <div class="split-grid">
+        <div class="value-list">
+          <div class="value-item">
+            <strong>Private bidding</strong>
+            <span>Bids are designed to stay private between the homeowner and the submitting contractor.</span>
+          </div>
+          <div class="value-item">
+            <strong>One project room</strong>
+            <span>Photos, documents, estimates, invoices, chat, video, schedule, and approvals live in one workspace.</span>
+          </div>
+          <div class="value-item">
+            <strong>Better contractor tools</strong>
+            <span>Estimating, proposal generation, calculators, and customer communication are built into the contractor workflow.</span>
+          </div>
+        </div>
 
-    <div class="grid">
-      <div class="card">
-        <div class="step">✓ Photos + Documents</div>
-        <div class="step">✓ Private Messaging</div>
-        <div class="step">✓ Live Estimates</div>
+        <div class="value-list">
+          <div class="value-item">
+            <strong>Map-based discovery</strong>
+            <span>Homeowners and contractors can browse opportunities visually by location, trade, and project type.</span>
+          </div>
+          <div class="value-item">
+            <strong>Clearer decisions</strong>
+            <span>Homeowners can compare bids, review scopes, and approve work from the same place.</span>
+          </div>
+          <div class="value-item">
+            <strong>Built for growth</strong>
+            <span>RevampLEX is designed to grow into a full renovation marketplace and project management system.</span>
+          </div>
+        </div>
       </div>
+    </section>
 
-      <div class="card">
-        <div class="step">✓ Proposals + Invoices</div>
-        <div class="step">✓ Customer Approvals</div>
-        <div class="step">✓ Payment Tracking</div>
+        <section class="section">
+      <h2 class="section-title">Privacy & Security First</h2>
+      <p class="section-subtitle">
+        RevampLEX was designed with privacy and personal security built into the platform from day one.
+      </p>
+
+      <div class="split-grid">
+        <div class="value-list">
+          <div class="value-item">
+            <strong>Approximate map locations only</strong>
+            <span>RevampLEX never displays a homeowner’s exact address or a contractor’s precise location on the public map. Pins are intentionally offset to show only an approximate service area or project vicinity.</span>
+          </div>
+
+          <div class="value-item">
+            <strong>Private information stays private</strong>
+            <span>Phone numbers, street addresses, personal emails, and other sensitive contact details are never automatically revealed through public job cards or contractor listings.</span>
+          </div>
+        </div>
+
+        <div class="value-list">
+          <div class="value-item">
+            <strong>Share only when you’re comfortable</strong>
+            <span>Homeowners and contractors decide when to exchange exact addresses, phone numbers, and other personal details as trust is built and both sides move closer to an agreement.</span>
+          </div>
+
+          <div class="value-item">
+            <strong>Secure private project rooms</strong>
+            <span>Bids, proposals, documents, approvals, photos, and conversations stay private between the homeowner and invited contractors inside secure project rooms.</span>
+          </div>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
+    <section class="cta">
+      <h2>Explore RevampLEX</h2>
+      <p>Open the map, choose your role, and see how the homeowner and contractor experience comes together.</p>
+      <div class="hero-actions" style="justify-content:center;">
+        <a href="map.html?view=homeowner" class="btn btn-primary">Homeowner View</a>
+        <a href="map.html?view=contractor" class="btn btn-soft">Contractor View</a>
+        <a href="map.html?demo=true" class="btn btn-soft">Explore Demo</a>
+      </div>
+    </section>
 
-  <section class="cta">
-    <h2>Ready to Get Started?</h2>
+    <footer class="footer">
+      © 2026 RevampLEX. Location • Estimation • eXecution.
+    </footer>
 
-    <div class="button-row">
-      <a href="map.html?view=homeowner" class="btn btn-primary">Start as Homeowner</a>
-      <a href="map.html?view=contractor" class="btn btn-primary">Start as Contractor</a>
-    </div>
-  </section>
+  </main>
 
 </body>
 </html>
