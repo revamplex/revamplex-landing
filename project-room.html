@@ -2229,7 +2229,35 @@ body.homeowner-room .nav-item[data-target="photoDocsPanel"] {
           <div class="nav-item" data-target="smartCalculatorPanel"><span>Trade Calculators</span><span>Tools</span></div>
           <div class="nav-item" data-target="estimateProposalPanel"><span>Estimate + Proposal</span><span>v3.2</span></div>
           <div class="nav-item" data-target="photoDocsPanel" onclick="scrollToSection('photoDocsPanel')"><span>Photos + Docs</span><span>Upload</span></div>
-          <div class="nav-item homeowner-only-nav" data-target="receivedBidsSection"><span>Received Bids</span><span>Private</span></div>
+          <div class="workspace-section homeowner-only" id="receivedBidsSection">
+
+  <h3>Received Private Bids</h3>
+
+  <table style="width:100%;margin-top:12px;">
+
+    <thead>
+      <tr>
+        <th>Contractor</th>
+        <th>Amount</th>
+        <th>ETA</th>
+        <th>Message</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody id="bidTableBody">
+
+      <tr>
+        <td colspan="5">
+          No bids received yet.
+        </td>
+      </tr>
+
+    </tbody>
+
+  </table>
+
+</div>
           <div class="nav-item" data-target="signaturePanel"><span>Customer Signature</span><span>Pending</span></div>
         </div>
       </aside>
@@ -2645,36 +2673,6 @@ body.homeowner-room .nav-item[data-target="photoDocsPanel"] {
             </div>
           </div>
         </section>
-
-<section class="panel homeowner-only" id="receivedBidsSection">
-  <div class="panel-header">
-    <div>
-      <h3>Received Private Bids</h3>
-      <p>Private contractor bids submitted for this project.</p>
-    </div>
-  </div>
-
-  <div class="estimate-table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Contractor</th>
-          <th>Amount</th>
-          <th>ETA</th>
-          <th>Message</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-
-      <tbody id="bidTableBody">
-        <tr>
-          <td colspan="5">No bids received yet.</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
 <section class="panel" id="signaturePanel">
           <div class="panel-header">
             <div>
@@ -2945,13 +2943,9 @@ console.log("PROJECT ROOM JOB ID:", jobId);
   function renderJob(job){
 
   window.currentJob = job;
-
-  setTimeout(function(){
-    if (typeof loadBidDashboard === "function") {
-      loadBidDashboard();
-    }
-  }, 250);
-
+    if (mode === "homeowner") {
+  loadBidDashboard();
+}
   console.log("RENDERING JOB:", job);
 
   document.getElementById("jobTitle").innerText = job.title || "Untitled Job";
@@ -3158,20 +3152,6 @@ function applyWorkspaceMode() {
     item.classList.toggle("contractor-only-nav", isContractorOnly);
     item.style.display = isHomeownerRoom && isContractorOnly ? "none" : "";
   });
-
-
-  // homeowner-only bid panel visibility
-  const receivedBidsSection = document.getElementById("receivedBidsSection");
-  const receivedBidsNav = document.querySelector('.nav-item[data-target="receivedBidsSection"]');
-
-  if (receivedBidsSection) {
-    receivedBidsSection.style.display = isHomeownerRoom ? "block" : "none";
-    receivedBidsSection.hidden = !isHomeownerRoom;
-  }
-
-  if (receivedBidsNav) {
-    receivedBidsNav.style.display = isHomeownerRoom ? "" : "none";
-  }
 
   // Photos + Docs must stay available for homeowners and contractors.
   const photoNav = document.querySelector('.nav-item[data-target="photoDocsPanel"]');
@@ -4548,6 +4528,105 @@ async function submitBid() {
     alert(err.message || "Could not submit bid.");
   }
 }
+
+/* ---------- AUTO-FILL CONTRACTOR INFO FOR PROPOSALS ---------- */
+
+async function autoFillContractorProposalInfo() {
+  try {
+    const role =
+      typeof getWorkspaceRole === "function"
+        ? getWorkspaceRole()
+        : (new URLSearchParams(window.location.search).get("mode") || mode || "contractor");
+
+    if (role !== "contractor") return;
+
+    if (!window.supabaseClient) {
+      console.warn("Supabase client not found for contractor auto-fill.");
+      return;
+    }
+
+    const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+
+    if (userError || !userData?.user) {
+      console.warn("No logged-in contractor found for proposal auto-fill.");
+      return;
+    }
+
+    const user = userData.user;
+
+    const { data: profile, error } = await supabaseClient
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (error) {
+      console.warn("Could not load contractor profile for proposal auto-fill:", error);
+      return;
+    }
+
+    if (!profile) return;
+
+    const company =
+      profile.company ||
+      profile.company_name ||
+      profile.business_name ||
+      "";
+
+    const name =
+      profile.full_name ||
+      profile.name ||
+      profile.contact_name ||
+      user.user_metadata?.full_name ||
+      "";
+
+    const email =
+      profile.email ||
+      user.email ||
+      "";
+
+    const phone =
+      profile.phone ||
+      profile.phone_number ||
+      profile.business_phone ||
+      "";
+
+    const address =
+      profile.address ||
+      profile.business_address ||
+      profile.company_address ||
+      "";
+
+    const fields = {
+      contractorCompany: company,
+      contractorName: name,
+      contractorEmail: email,
+      contractorPhone: phone,
+      contractorAddress: address
+    };
+
+    Object.entries(fields).forEach(([id, value]) => {
+      const el = document.getElementById(id);
+      if (el && value && !el.value) {
+        el.value = value;
+      }
+    });
+
+    console.log("Contractor proposal info auto-filled.");
+  } catch (err) {
+    console.warn("Contractor proposal auto-fill failed:", err);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  setTimeout(autoFillContractorProposalInfo, 800);
+});
+
+window.addEventListener("load", function () {
+  setTimeout(autoFillContractorProposalInfo, 800);
+});
+
+
 /* ---------- INIT ---------- */
 
 applyWorkspaceMode();
@@ -4564,124 +4643,61 @@ recalcEstimate();
 document.addEventListener("DOMContentLoaded", setupChat);
 
 setupBackButton();
+  
+
+
+
+  
+loadBidDashboard();
+
 
 function saveJobs(jobs){
   localStorage.setItem("revampJobs",JSON.stringify(jobs));
 }
 
-  /* ---------- LOAD SUPABASE BIDS FOR HOMEOWNER ---------- */
+  /* ---------- LOAD BIDS ---------- */
 
-async function loadBidDashboard() {
-  const workspaceRole =
-    typeof getWorkspaceRole === "function"
-      ? getWorkspaceRole()
-      : (new URLSearchParams(window.location.search).get("mode") || mode || "contractor");
+function loadBidDashboard(){
 
-  const section = document.getElementById("receivedBidsSection");
-  const nav = document.querySelector('.nav-item[data-target="receivedBidsSection"]');
+  if(mode!=="homeowner") return;
 
-  if (section) {
-    const show = workspaceRole === "homeowner";
-    section.style.display = show ? "block" : "none";
-    section.hidden = !show;
-  }
 
-  if (nav) {
-    nav.style.display = workspaceRole === "homeowner" ? "" : "none";
-  }
+  const job = window.currentJob;
 
-  if (workspaceRole !== "homeowner") return;
+  if(!job || !job.bids) return;
 
-  const tbody = document.getElementById("bidTableBody");
-  if (!tbody) return;
+  const tbody=document.getElementById("bidTableBody");
 
-  const jobId = typeof getCurrentJobIdForBid === "function"
-    ? getCurrentJobIdForBid()
-    : (new URLSearchParams(window.location.search).get("job") || window.currentJob?.id || "");
+  if(!tbody) return;
 
-  if (!jobId) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="5">No job found for this project room.</td>
-      </tr>
-    `;
-    return;
-  }
+  tbody.innerHTML="";
 
-  tbody.innerHTML = `
-    <tr>
-      <td colspan="5">Loading private bids...</td>
-    </tr>
-  `;
+  job.bids.forEach((bid,i)=>{
 
-  const { data, error } = await supabaseClient
-    .from("bids")
-    .select("*")
-    .eq("job_id", String(jobId))
-    .order("created_at", { ascending: false });
+    const tr=document.createElement("tr");
 
-  if (error) {
-    console.error("Bid dashboard load error:", error);
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="5">Could not load bids: ${error.message}</td>
-      </tr>
-    `;
-    return;
-  }
-
-  const bids = data || [];
-
-  if (!bids.length) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="5">No bids received yet.</td>
-      </tr>
-    `;
-    return;
-  }
-
-  tbody.innerHTML = "";
-
-  bids.forEach((bid) => {
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td>${escapeHTML(bid.contractor_name || "Verified Contractor")}</td>
-      <td>${escapeHTML(bid.amount || "—")}</td>
-      <td>${escapeHTML(bid.eta || "TBD")}</td>
-      <td>${escapeHTML(bid.message || "")}</td>
-      <td>
-        <button class="btn btn-primary" type="button" onclick="acceptBid('${bid.id}')">
-          Accept
-        </button>
-      </td>
-    `;
+    tr.innerHTML=`
+<td>Verified Contractor</td>
+<td>${bid.amount}</td>
+<td>${bid.startDate}</td>
+<td>${bid.message}</td>
+<td>
+<button class="btn btn-primary" onclick="acceptBid(${i})">
+Accept
+</button>
+</td>
+`;
 
     tbody.appendChild(tr);
+
   });
+
 }
 
-async function acceptBid(bidId) {
-  const confirmed = confirm("Accept this contractor's bid?");
-  if (!confirmed) return;
+function acceptBid(index){
 
-  const { error } = await supabaseClient
-    .from("bids")
-    .update({
-      status: "accepted",
-      updated_at: new Date().toISOString()
-    })
-    .eq("id", bidId);
+  alert("Contractor accepted. Contract generation coming next.");
 
-  if (error) {
-    console.error("Accept bid error:", error);
-    alert("Could not accept bid: " + error.message);
-    return;
-  }
-
-  alert("Bid accepted. This project is now an active job.");
-  await loadBidDashboard();
 }
 
 
@@ -6744,18 +6760,6 @@ window.addEventListener("load", function(){
     if (typeof loadProjectFiles === "function") loadProjectFiles();
     if (typeof loadProjectDocuments === "function") loadProjectDocuments();
   }, 1600);
-});
-</script>
-
-
-<script>
-/* ===== RECEIVED BIDS FINAL REFRESH ===== */
-window.addEventListener("load", function(){
-  setTimeout(function(){
-    if (typeof loadBidDashboard === "function") {
-      loadBidDashboard();
-    }
-  }, 1000);
 });
 </script>
 
