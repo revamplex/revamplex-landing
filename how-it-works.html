@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RevampLEX — How It Works</title>
+
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif;}
+
+    body{
+      background:#0f172a;
+      color:white;
+      line-height:1.5;
+    }
+
+    .hero{
+      text-align:center;
+      padding:90px 20px 70px;
+      max-width:1100px;
+      margin:auto;
+    }
+
+    .hero h1{
+      font-size:52px;
+      margin-bottom:20px;
+      font-weight:700;
+    }
+
+    .hero p{
+      font-size:22px;
+      opacity:.9;
+      max-width:760px;
+      margin:auto;
+    }
+
+    .button-row{
+      margin-top:40px;
+      display:flex;
+      justify-content:center;
+      gap:18px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      text-decoration:none;
+      padding:16px 28px;
+      border-radius:14px;
+      font-weight:bold;
+      transition:.2s;
+      display:inline-block;
+    }
+
+    .btn-primary{
+      background:#f97316;
+      color:white;
+    }
+
+    .btn-secondary{
+      background:#1e293b;
+      color:white;
+      border:1px solid rgba(255,255,255,.15);
+    }
+
+    .btn:hover{
+      transform:translateY(-2px);
+    }
+
+    .section{
+      max-width:1200px;
+      margin:auto;
+      padding:70px 20px;
+    }
+
+    .section-title{
+      text-align:center;
+      font-size:38px;
+      margin-bottom:45px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+      gap:25px;
+    }
+
+    .card{
+      background:#1e293b;
+      border-radius:22px;
+      padding:30px;
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .card h3{
+      font-size:26px;
+      margin-bottom:20px;
+      color:#f97316;
+    }
+
+    .step{
+      margin-bottom:14px;
+      font-size:18px;
+    }
+
+    .cta{
+      text-align:center;
+      padding:90px 20px;
+    }
+
+    .cta h2{
+      font-size:42px;
+      margin-bottom:30px;
+    }
+
+    @media(max-width:768px){
+      .hero h1{font-size:36px;}
+      .hero p{font-size:18px;}
+    }
+  </style>
+</head>
+<body>
+
+  <section class="hero">
+    <h1>How RevampLEX Works</h1>
+    <p>
+      The smarter way for homeowners and contractors to connect,
+      estimate, collaborate, and complete projects privately.
+    </p>
+
+    <div class="button-row">
+      <a href="map.html?view=homeowner" class="btn btn-primary">I'm a Homeowner</a>
+      <a href="map.html?view=contractor" class="btn btn-primary">I'm a Contractor</a>
+      <a href="map.html?demo=true" class="btn btn-secondary">Explore Demo</a>
+    </div>
+  </section>
+
+
+  <section class="section">
+    <h2 class="section-title">For Homeowners</h2>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Post Your Project</h3>
+        <div class="step">1. Describe your renovation project</div>
+        <div class="step">2. Upload photos and measurements</div>
+        <div class="step">3. Set your budget and location</div>
+      </div>
+
+      <div class="card">
+        <h3>Receive Private Bids</h3>
+        <div class="step">4. Verified contractors submit bids privately</div>
+        <div class="step">5. Compare pricing and timelines</div>
+        <div class="step">6. Approve your preferred contractor</div>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="section">
+    <h2 class="section-title">For Contractors</h2>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Find Local Jobs</h3>
+        <div class="step">1. Browse homeowner projects near you</div>
+        <div class="step">2. Filter by trade and budget</div>
+        <div class="step">3. Submit private estimates</div>
+      </div>
+
+      <div class="card">
+        <h3>Win More Work</h3>
+        <div class="step">4. Use AI estimates and proposals</div>
+        <div class="step">5. Video chat with homeowners</div>
+        <div class="step">6. Manage jobs in one workspace</div>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="section">
+    <h2 class="section-title">Private Project Room</h2>
+
+    <div class="grid">
+      <div class="card">
+        <div class="step">✓ Photos + Documents</div>
+        <div class="step">✓ Private Messaging</div>
+        <div class="step">✓ Live Estimates</div>
+      </div>
+
+      <div class="card">
+        <div class="step">✓ Proposals + Invoices</div>
+        <div class="step">✓ Customer Approvals</div>
+        <div class="step">✓ Payment Tracking</div>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="cta">
+    <h2>Ready to Get Started?</h2>
+
+    <div class="button-row">
+      <a href="map.html?view=homeowner" class="btn btn-primary">Start as Homeowner</a>
+      <a href="map.html?view=contractor" class="btn btn-primary">Start as Contractor</a>
+    </div>
+  </section>
+
+</body>
+</html>
