@@ -6329,54 +6329,107 @@ async function uploadOne(file,cat,note,name){ const r=await room(), u=await user
 window.uploadProjectFiles=async function(){ const input=document.getElementById('projectFileUpload'), cat=document.getElementById('projectFileCategory')?.value||'document', note=document.getElementById('projectFileNote')?.value||''; if(!input)return alert('Upload field not found.'); const files=[...(input.files||[])]; if(!files.length)return alert('Choose at least one project file first.'); stat('uploadStatus','Uploading private room files...'); try{for(const f of files) await uploadOne(f,cat,note); input.value=''; const ni=document.getElementById('projectFileNote'); if(ni)ni.value=''; stat('uploadStatus','Upload complete ✔ Shared only in this private room.'); await loadProjectRoomFiles();}catch(e){console.error(e); stat('uploadStatus','Upload failed: '+(e.message||e));} };
 window.loadProjectRoomFiles=async function(){ const list=document.getElementById('privateFileList'); if(!list)return; const r=await room(); if(!r){list.innerHTML='<div class="appointment-empty">Private room not ready yet.</div>';return;} const {data,error}=await supabaseClient.from('project_room_files').select('*').eq('project_room_id',r).order('created_at',{ascending:false}); if(error){list.innerHTML='<div class="appointment-empty">File table not connected yet. Run the Supabase SQL below.</div>';return;} if(!data?.length){list.innerHTML='<div class="appointment-empty">No files shared yet.</div>';return;} const rows=await Promise.all(data.map(async f=>`<div class="exchange-item"><strong>${escapeHTML(f.file_name||'Project file')}</strong><span>${escapeHTML(f.file_category||'document')} • Sent by ${escapeHTML(f.sender_role||'user')} • ${escapeHTML(when(f.created_at))}</span>${f.note?`<span>Note: ${escapeHTML(f.note)}</span>`:''}<div class="exchange-actions"><a class="btn btn-soft" href="${await fileUrl(f.file_path)}" target="_blank" rel="noopener">Open / Download</a></div></div>`)); list.innerHTML=rows.join(''); };
 async function docRecord(blob,fileName,type,title,amount,note){ const r=await room(), u=await user(), a=actor(); const file=new File([blob],fileName,{type:'application/pdf'}); const fr=await uploadOne(file,type,note||title,fileName); const {data,error}=await supabaseClient.from('project_documents').insert({project_room_id:r,job_id:jobId(),created_by:u?.id||null,sender_role:a.role,document_type:type,status:'sent',title,amount:amount||null,file_path:fr.file_path,file_name:fileName,note:note||''}).select().single(); if(error) throw error; return data; }
-window.sendProposalToPrivateRoom=async function(){ if(typeof generateProposalPDF!=='function')return alert('Proposal generator not found.'); stat('proposalSendStatus','Generating and sending proposal...'); try{generateProposalPDF(); if(!lastProposalPdfBlob) throw new Error('Proposal PDF was not generated.'); const j=window.currentJob||{}, title='Proposal - '+(j.title||'Revamp Project'), amount=Number((document.getElementById('grandOut')?.innerText||'').replace(/[^0-9.]/g,''))||null; await docRecord(lastProposalPdfBlob,`${safe(title).toLowerCase()}-${Date.now()}.pdf`,'proposal',title,amount,'Contractor sent proposal to homeowner.'); stat('proposalSendStatus','Proposal sent privately ✔ Homeowner can view it under Photos + Docs → Sent Proposals + Invoices.'); await loadProjectDocuments(); await loadProjectRoomFiles();}catch(e){console.error(e); stat('proposalSendStatus','Proposal send failed: '+(e.message||e));} };
-function invoiceBlob(amount,note){ const C=window.jspdf&&window.jspdf.jsPDF; if(!C) throw new Error('PDF library is still loading.'); const j=window.currentJob||{}, doc=new C({unit:'pt',format:'letter'}); let y=42; doc.setFont('helvetica','bold'); doc.setFontSize(20); doc.text('Revamp Project Room Invoice',42,y); y+=32; doc.setFont('helvetica','normal'); doc.setFontSize(11); ['Project: '+(j.title||'Revamp Project'),'Trade: '+(j.trade||'General Renovation'),'Location: '+(j.city||'NJ Area'),'Project ID: '+(j.id||'Preview'),'Date: '+new Date().toLocaleDateString('en-US'),'','Invoice Amount: '+amount,'','Invoice Note:',note||'Invoice generated from Revamp Project Room.','','This invoice is attached to the private homeowner + contractor project room.'].forEach(line=>{doc.splitTextToSize(line,520).forEach(s=>{doc.text(s,42,y); y+=16;}); if(line==='')y+=4;}); return doc.output('blob'); }
-window.sendInvoiceToPrivateRoom=async function(){ const amount=(document.getElementById('invoiceAmountInput')?.value||document.getElementById('grandOut')?.innerText||'$0.00').trim(), note=(document.getElementById('invoiceNoteInput')?.value||'Invoice generated from current estimate total.').trim(); stat('invoiceSendStatus','Generating and sending invoice...'); try{const blob=invoiceBlob(amount,note), j=window.currentJob||{}, title='Invoice - '+(j.title||'Revamp Project'), val=Number(amount.replace(/[^0-9.]/g,''))||null; await docRecord(blob,`${safe(title).toLowerCase()}-${Date.now()}.pdf`,'invoice',title,val,note); stat('invoiceSendStatus','Invoice sent privately ✔'); await loadProjectDocuments(); await loadProjectRoomFiles();}catch(e){console.error(e); stat('invoiceSendStatus','Invoice send failed: '+(e.message||e));} };
-window.loadProjectDocuments=async function(){
- const lists=[...document.querySelectorAll('#privateDocumentList,#privateDocumentListShared')];
 
- if(!lists.length)return;
+/* ===== PATCH NOTE =====
+   This version mirrors sent proposal PDFs into BOTH:
+   1) project_documents = proposal/invoice document history
+   2) project_room_files = Shared Private Room Files list
 
- function setAll(html){
-   lists.forEach(list=>{ list.innerHTML=html; });
+   So homeowners can see the proposal under:
+   Photos + Docs → Shared Private Room Files
+   and also:
+   Photos + Docs → Sent Proposals + Invoices
+*/
+
+window.sendProposalToPrivateRoom=async function(){
+ try{
+   if(!lastProposalPdfBlob){
+     generateProposalPDF();
+   }
+
+   if(!lastProposalPdfBlob){
+     alert('Generate the proposal PDF first.');
+     return;
+   }
+
+   const r=await room();
+   const u=await user();
+   const a=actor();
+   const job=window.currentJob||{};
+
+   if(!r||!u){
+     alert('Private project room is not ready yet. Make sure this is a real logged-in project room.');
+     return;
+   }
+
+   const safeTitle=String(job.title||'revamp-proposal').replace(/[^a-zA-Z0-9-_]/g,'-').toLowerCase();
+   const filePath=`rooms/${r}/documents/${Date.now()}-${safeTitle}-proposal.pdf`;
+
+   const upload=await supabaseClient.storage
+     .from('project-files')
+     .upload(filePath,lastProposalPdfBlob,{
+       contentType:'application/pdf',
+       upsert:false
+     });
+
+   if(upload.error){
+     throw upload.error;
+   }
+
+   const amountText=document.getElementById('grandOut')?.innerText||'';
+   const amount=Number(String(amountText).replace(/[^0-9.]/g,''))||null;
+
+   // 1) Proposal/invoice history
+   const docInsert=await supabaseClient
+     .from('project_documents')
+     .insert({
+       project_room_id:r,
+       job_id:jobId(),
+       created_by:u.id,
+       created_by_role:a.role,
+       document_type:'proposal',
+       title:`Proposal — ${job.title||'Revamp Project'}`,
+       file_path:filePath,
+       amount:amount,
+       status:'sent',
+       note:'Generated proposal PDF sent from contractor estimate room.'
+     });
+
+   if(docInsert.error){
+     console.warn('project_documents insert failed:', docInsert.error);
+   }
+
+   // 2) Shared Private Room Files list
+   const fileInsert=await supabaseClient
+     .from('project_room_files')
+     .insert({
+       project_room_id:r,
+       job_id:jobId(),
+       uploaded_by:u.id,
+       uploaded_by_role:a.role,
+       file_category:'proposal',
+       file_name:`${safeTitle}-proposal.pdf`,
+       file_path:filePath,
+       file_type:'application/pdf',
+       file_size:lastProposalPdfBlob.size || null,
+       note:'Proposal PDF sent to homeowner.'
+     });
+
+   if(fileInsert.error){
+     console.warn('project_room_files insert failed:', fileInsert.error);
+     alert('Proposal was uploaded, but it did not appear in Shared Private Room Files: ' + fileInsert.error.message);
+     return;
+   }
+
+   stat('proposalSendStatus','Proposal sent privately ✔ Homeowner can view it under Photos + Docs → Shared Private Room Files.');
+
+   if(typeof loadProjectFiles==='function') await loadProjectFiles();
+   if(typeof loadProjectDocuments==='function') await loadProjectDocuments();
+
+ }catch(e){
+   console.error(e);
+   alert('Could not send proposal: '+(e.message||e));
  }
-
- const r=await room();
-
- if(!r){
-   setAll('<div class="appointment-empty">Private room not ready yet.</div>');
-   return;
- }
-
- const {data,error}=await supabaseClient
-   .from('project_documents')
-   .select('*')
-   .eq('project_room_id',r)
-   .order('created_at',{ascending:false});
-
- if(error){
-   setAll('<div class="appointment-empty">Document table not connected yet. Check Supabase project_documents table and RLS policies.</div>');
-   return;
- }
-
- if(!data?.length){
-   setAll('<div class="appointment-empty">No proposals or invoices sent yet.</div>');
-   return;
- }
-
- const rows=await Promise.all(data.map(async d=>`
-   <div class="exchange-item">
-     <strong>${escapeHTML(d.title||d.document_type||'Document')}</strong>
-     <span>${escapeHTML(String(d.document_type||'document').toUpperCase())} • ${escapeHTML(d.status||'sent')} • ${escapeHTML(when(d.created_at))}</span>
-     ${d.amount?`<span>Amount: ${escapeHTML(currency(Number(d.amount)))}</span>`:''}
-     ${d.note?`<span>Note: ${escapeHTML(d.note)}</span>`:''}
-     <div class="exchange-actions">
-       <a class="btn btn-soft" href="${await fileUrl(d.file_path)}" target="_blank" rel="noopener">Open PDF</a>
-     </div>
-   </div>
- `));
-
- setAll(rows.join(''));
 };
 function resize(c){ if(!c)return; const r=c.getBoundingClientRect(), ratio=devicePixelRatio||1; c.width=Math.max(1,r.width*ratio); c.height=Math.max(1,r.height*ratio); const ctx=c.getContext('2d'); ctx.scale(ratio,ratio); ctx.lineWidth=2.4; ctx.lineCap='round'; ctx.strokeStyle='#0f172a'; }
 function pad(role){ const c=document.getElementById(role+'SignatureCanvas'); if(!c)return; resize(c); const ctx=c.getContext('2d'); let on=false; const p=e=>{const r=c.getBoundingClientRect(), t=e.touches?.[0]||e; return {x:t.clientX-r.left,y:t.clientY-r.top};}; const st=e=>{e.preventDefault(); on=true; drawn[role]=true; const q=p(e); ctx.beginPath(); ctx.moveTo(q.x,q.y);}; const mv=e=>{if(!on)return; e.preventDefault(); const q=p(e); ctx.lineTo(q.x,q.y); ctx.stroke();}; const en=e=>{if(!on)return; e.preventDefault(); on=false;}; c.addEventListener('mousedown',st); c.addEventListener('mousemove',mv); window.addEventListener('mouseup',en); c.addEventListener('touchstart',st,{passive:false}); c.addEventListener('touchmove',mv,{passive:false}); c.addEventListener('touchend',en,{passive:false}); }
@@ -6461,6 +6514,23 @@ window.addEventListener("load", function(){
       loadProjectDocuments();
     }
   }, 1400);
+});
+</script>
+
+
+<script>
+/* ===== REFRESH SHARED FILES + PROPOSALS ON BOTH ROLES ===== */
+document.addEventListener("DOMContentLoaded", function(){
+  setTimeout(function(){
+    if (typeof loadProjectFiles === "function") loadProjectFiles();
+    if (typeof loadProjectDocuments === "function") loadProjectDocuments();
+  }, 1600);
+});
+window.addEventListener("load", function(){
+  setTimeout(function(){
+    if (typeof loadProjectFiles === "function") loadProjectFiles();
+    if (typeof loadProjectDocuments === "function") loadProjectDocuments();
+  }, 1600);
 });
 </script>
 
