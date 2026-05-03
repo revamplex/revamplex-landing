@@ -178,6 +178,51 @@
       margin: 0;
     }
 
+
+    .dash-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .dash-card {
+      border: 1px solid #e5e7eb;
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .dash-card:hover {
+      transform: translateY(-2px);
+      border-color: #fed7aa;
+      box-shadow: 0 10px 24px rgba(249,115,22,.13);
+    }
+
+    .dash-card h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+
+    .dash-card p {
+      margin: 0;
+      color: #64748b;
+      font-size: 15px;
+      line-height: 1.4;
+    }
+
+    .dash-card .dash-tag {
+      display: inline-flex;
+      margin-top: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #fff7ed;
+      color: #9a3412;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
     @media (max-width: 600px) {
       .header { padding-top: 52px; }
       .back-btn {
@@ -186,6 +231,7 @@
       }
       .container { padding: 14px; }
       .trade-grid { grid-template-columns: 1fr; }
+      .dash-grid { grid-template-columns: 1fr; }
     }
   </style>
 
@@ -260,6 +306,40 @@
 </div>
 </div>
 
+
+  <div class="card contractor-display" id="workflowCard">
+    <h3>Contractor Workflow</h3>
+    <div class="dash-grid">
+
+      <div class="dash-card" onclick="openProjectRooms()">
+        <h3>Project Rooms</h3>
+        <p id="projectRoomsCount">Invites, chats, photos/docs, appointments, and estimate rooms.</p>
+        <span class="dash-tag">Open rooms</span>
+      </div>
+
+      <div class="dash-card" onclick="openSubmittedBids()">
+        <h3>Submitted Bids</h3>
+        <p id="submittedBidsCount">Bids pending homeowner review, accepted, declined, or expired.</p>
+        <span class="dash-tag">Bid history</span>
+      </div>
+
+      <div class="dash-card" onclick="openActiveJobs()">
+        <h3>Active Jobs</h3>
+        <p id="activeJobsCount">Accepted bids, signed contracts, deposits, schedules, and in-progress work.</p>
+        <span class="dash-tag">In progress</span>
+      </div>
+
+      <div class="dash-card" onclick="openCompletedJobs()">
+        <h3>Completed Jobs</h3>
+        <p id="completedJobsCount">Jobs marked complete after both homeowner and contractor confirm completion.</p>
+        <span class="dash-tag">Completed</span>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
 <div class="modal" id="profileModal">
   <div class="modal-box">
     <h3>Edit Profile</h3>
@@ -304,31 +384,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-async function openBillingPortal() {
-  const customerId = profile.stripe_customer_id;
-
-  if (!customerId) {
-    alert("No Stripe customer account found yet.");
-    return;
-  }
-
-  const res = await fetch("/api/create-billing-portal-session", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ customerId })
-  });
-
-  const data = await res.json();
-
-  if (data.url) {
-    window.location.href = data.url;
-  } else {
-    alert(data.error || "Could not open billing portal.");
-  }
-}
-  
 const client = window.supabase.createClient(
   "https://dezvwoedboikshqttdqu.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E"
@@ -404,6 +459,23 @@ async function openBillingPortal() {
     console.error("Billing portal error:", err);
     alert("Billing portal error. Check console.");
   }
+}
+
+
+function openProjectRooms() {
+  alert("Project Rooms list coming next. This will show invited rooms, active chats, photos/docs, and estimate rooms.");
+}
+
+function openSubmittedBids() {
+  alert("Submitted bids list coming next. This will show pending, accepted, declined, and expired bids.");
+}
+
+function openActiveJobs() {
+  alert("Active jobs list coming next. This will show accepted bids, signed contracts, deposits, schedule, and in-progress work.");
+}
+
+function openCompletedJobs() {
+  alert("Completed jobs list coming next. This will show jobs completed after both homeowner and contractor confirm completion.");
 }
 
 async function loadDashboard() {
