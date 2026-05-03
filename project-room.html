@@ -2143,6 +2143,17 @@ body.homeowner-room .nav-item[data-target="photoDocsPanel"] {
   display: flex !important;
 }
 
+
+/* ===== HOMEOWNER RECEIVED BIDS PANEL ===== */
+body.contractor-room #receivedBidsPanel,
+body.contractor-room .homeowner-only-nav {
+  display: none !important;
+}
+
+body.homeowner-room #receivedBidsPanel {
+  display: block !important;
+}
+
 /* ===== PRIVATE PROJECT CHAT ===== */
 #videoChatPanel .messages {
   max-height: 360px;
@@ -2225,6 +2236,7 @@ body.homeowner-room .nav-item[data-target="photoDocsPanel"] {
           <div class="nav-item active" data-target="projectOverviewPanel"><span>Project Overview</span><span>Top</span></div>
           <div class="nav-item" data-target="schedulePanel"><span>Schedule Calendar</span><span>4 items</span></div>
           <div class="nav-item" data-target="jobListPanel"><span>Active Job List</span><span>Live</span></div>
+          <div class="nav-item homeowner-only-nav" data-target="receivedBidsPanel"><span>Received Bids</span><span>Private</span></div>
           <div class="nav-item" data-target="videoChatPanel"><span>Video + Chat</span><span>2 alerts</span></div>
           <div class="nav-item" data-target="smartCalculatorPanel"><span>Trade Calculators</span><span>Tools</span></div>
           <div class="nav-item" data-target="estimateProposalPanel"><span>Estimate + Proposal</span><span>v3.2</span></div>
@@ -2357,6 +2369,40 @@ body.homeowner-room .nav-item[data-target="photoDocsPanel"] {
     </table>
   </div>
 </section>
+
+<section class="panel" id="receivedBidsPanel">
+  <div class="panel-header">
+    <div>
+      <h3>Received Contractor Bids</h3>
+      <p>Private bids submitted by contractors for this project. Only this homeowner and the submitting contractor should see bid details.</p>
+    </div>
+    <button class="btn btn-soft" type="button" onclick="loadBidDashboard()">Refresh Bids</button>
+  </div>
+
+  <div class="private-room-alert">
+    <strong>Private bid inbox:</strong> bids appear here after a contractor submits from their Project Room estimate screen.
+  </div>
+
+  <div class="estimate-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Contractor</th>
+          <th>Bid Amount</th>
+          <th>ETA</th>
+          <th>Message</th>
+          <th>Status / Action</th>
+        </tr>
+      </thead>
+      <tbody id="bidTableBody">
+        <tr>
+          <td colspan="5">No bids loaded yet.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
 <section class="panel" id="videoChatPanel">
           <div class="panel-header">
             <div>
@@ -2940,6 +2986,10 @@ console.log("PROJECT ROOM JOB ID:", jobId);
   if (topJobTrade) topJobTrade.innerText = job.trade || "General";
   if (topJobCity) topJobCity.innerText = job.city || "NJ Area";
   if (topJobBudget) topJobBudget.innerText = job.budget || "$0";
+
+  if (typeof loadBidDashboard === "function") {
+    setTimeout(loadBidDashboard, 250);
+  }
 
 }
   loadJob();
@@ -4353,6 +4403,30 @@ async function incrementMonthlyBidCount(profile) {
   }
 }
 
+function getCurrentJobIdForBid() {
+  const params = new URLSearchParams(window.location.search);
+  return (
+    params.get("job") ||
+    window.currentJob?.id ||
+    window.currentJob?.job_id ||
+    ""
+  ).toString();
+}
+
+async function getFreshBidCountForJob(jobId) {
+  const { data, error } = await supabaseClient
+    .from("bids")
+    .select("id")
+    .eq("job_id", String(jobId));
+
+  if (error) {
+    console.warn("Could not check current bid count:", error);
+    return 0;
+  }
+
+  return data?.length || 0;
+}
+
 async function submitBid() {
   const permission = await checkBidPermissionAndUpdateCycle();
 
@@ -4360,42 +4434,71 @@ async function submitBid() {
     return;
   }
 
-  const amount = document.getElementById("grandOut").innerText;
+  const amount = document.getElementById("grandOut")?.innerText || "";
   const job = window.currentJob;
+  const jobId = getCurrentJobIdForBid();
 
-  if (!job) {
-    alert("Job not found");
+  if (!job || !jobId) {
+    alert("Job not found. Refresh the page and try again.");
     return;
   }
 
-  if (!job.bids) {
-    job.bids = [];
+  const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+
+  if (userError || !userData?.user) {
+    alert("Please log in as a contractor before submitting a bid.");
+    return;
+  }
+
+  const user = userData.user;
+  const profile = permission.profile;
+
+  if (!profile || profile.role !== "contractor") {
+    alert("Only contractor accounts can submit bids.");
+    return;
   }
 
   const maxBids = Number(job.max_bids || job.maxBids || 5);
+  const currentBidCount = await getFreshBidCountForJob(jobId);
 
-  if (job.bids.length >= maxBids) {
+  if (currentBidCount >= maxBids) {
     alert("This job already received the maximum number of bids.");
     return;
   }
 
-  const bid = {
-    contractor: "Verified Contractor",
+  const bidPayload = {
+    job_id: String(jobId),
+    homeowner_id: job.user_id || job.homeowner_id || job.customer_id || null,
+    contractor_id: user.id,
+    contractor_email: user.email || "",
+    contractor_name:
+      profile.company ||
+      profile.full_name ||
+      profile.name ||
+      "Verified Contractor",
     amount: amount,
     message: "Estimate generated through Revamp Project Room",
-    startDate: "TBD",
-    timestamp: Date.now()
+    eta: "TBD",
+    status: "pending"
   };
 
-  job.bids.push(bid);
+  const { error } = await supabaseClient
+    .from("bids")
+    .insert([bidPayload]);
+
+  if (error) {
+    console.error("Bid insert error:", error);
+    alert("Bid was not saved: " + error.message);
+    return;
+  }
 
   await incrementMonthlyBidCount(permission.profile);
 
-  if (job.bids.length >= maxBids) {
-    job.status = "closed";
-  }
-
   alert("Bid submitted privately to homeowner.");
+
+  if (typeof loadBidDashboard === "function") {
+    await loadBidDashboard();
+  }
 }
 
 /* ---------- INIT ---------- */
@@ -4419,7 +4522,7 @@ setupBackButton();
 
 
   
-loadBidDashboard();
+document.addEventListener("DOMContentLoaded", function(){ setTimeout(loadBidDashboard, 800); });
 
 
 function saveJobs(jobs){
@@ -4428,47 +4531,101 @@ function saveJobs(jobs){
 
   /* ---------- LOAD BIDS ---------- */
 
-function loadBidDashboard(){
+async function loadBidDashboard() {
+  if (mode !== "homeowner") return;
 
-  if(mode!=="homeowner") return;
+  const tbody = document.getElementById("bidTableBody");
+  if (!tbody) return;
 
+  const jobId = getCurrentJobIdForBid();
 
-  const job = window.currentJob;
+  if (!jobId) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5">No job found for this project room.</td>
+      </tr>
+    `;
+    return;
+  }
 
-  if(!job || !job.bids) return;
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="5">Loading bids...</td>
+    </tr>
+  `;
 
-  const tbody=document.getElementById("bidTableBody");
+  const { data, error } = await supabaseClient
+    .from("bids")
+    .select("*")
+    .eq("job_id", String(jobId))
+    .order("created_at", { ascending: false });
 
-  if(!tbody) return;
+  if (error) {
+    console.error("Bid dashboard load error:", error);
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5">Could not load bids: ${error.message}</td>
+      </tr>
+    `;
+    return;
+  }
 
-  tbody.innerHTML="";
+  const bids = data || [];
 
-  job.bids.forEach((bid,i)=>{
+  if (!bids.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5">No bids received yet.</td>
+      </tr>
+    `;
+    return;
+  }
 
-    const tr=document.createElement("tr");
+  tbody.innerHTML = "";
 
-    tr.innerHTML=`
-<td>Verified Contractor</td>
-<td>${bid.amount}</td>
-<td>${bid.startDate}</td>
-<td>${bid.message}</td>
-<td>
-<button class="btn btn-primary" onclick="acceptBid(${i})">
-Accept
-</button>
-</td>
-`;
+  bids.forEach((bid) => {
+    const tr = document.createElement("tr");
+    const status = String(bid.status || "pending").toLowerCase();
+
+    tr.innerHTML = `
+      <td>${escapeHTML(bid.contractor_name || "Verified Contractor")}</td>
+      <td>${escapeHTML(bid.amount || "—")}</td>
+      <td>${escapeHTML(bid.eta || "TBD")}</td>
+      <td>${escapeHTML(bid.message || "")}</td>
+      <td>
+        <strong>${escapeHTML(status)}</strong><br>
+        ${
+          status === "accepted"
+            ? "Accepted"
+            : `<button class="btn btn-primary" type="button" onclick="acceptBid('${bid.id}')">Accept</button>`
+        }
+      </td>
+    `;
 
     tbody.appendChild(tr);
-
   });
-
 }
 
-function acceptBid(index){
+async function acceptBid(bidId) {
+  const confirmed = confirm("Accept this contractor's bid?");
+  if (!confirmed) return;
 
-  alert("Contractor accepted. Contract generation coming next.");
+  const { error } = await supabaseClient
+    .from("bids")
+    .update({
+      status: "accepted",
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", bidId);
 
+  if (error) {
+    console.error("Accept bid error:", error);
+    alert("Could not accept bid: " + error.message);
+    return;
+  }
+
+  alert("Bid accepted. This project is now an active job.");
+  await loadBidDashboard();
 }
 
 
