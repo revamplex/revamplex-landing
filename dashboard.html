@@ -5,6 +5,26 @@
   <title>Revamp Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
+    .active-plan-box {
+  border: 1px solid #fed7aa;
+  background: #fff7ed;
+  border-radius: 14px;
+  padding: 16px;
+  margin: 12px 0;
+}
+
+.billing-btn {
+  background: #f97316;
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+    
     .billing-btn {
       background: #f97316;
       color: #fff;
@@ -214,12 +234,30 @@
   Manage Billing
 </button>
     <p class="muted">Your contractor listing will not go live until Revamp LEX approves your license and insurance.</p>
-    <div class="plans">
-      <div class="plan-card"><h4>Basic — $29/mo</h4><p>Up to 5 bids per month.</p><button class="btn" onclick="subscribe('basic')">Choose Basic</button></div>
-      <div class="plan-card"><h4>Pro — $59/mo</h4><p>Unlimited bids and better visibility.</p><button class="btn" onclick="subscribe('pro')">Choose Pro</button></div>
-      <div class="plan-card"><h4>Elite — $99/mo</h4><p>Priority placement and premium tools.</p><button class="btn" onclick="subscribe('elite')">Choose Elite</button></div>
-    </div>
+   <div id="activePlanBox" class="active-plan-box" style="display:none;">
+  <p><strong>Current Plan:</strong> <span id="displayCurrentPlan">—</span></p>
+  <button id="manageBillingBtn" class="billing-btn">Manage Billing</button>
+</div>
+
+<div class="plans" id="planCards">
+  <div class="plan-card">
+    <h4>Basic — $29/mo</h4>
+    <p>Up to 5 bids per month.</p>
+    <button class="btn" onclick="subscribe('basic')">Choose Basic</button>
   </div>
+
+  <div class="plan-card">
+    <h4>Pro — $59/mo</h4>
+    <p>Up to 10 bids per month.</p>
+    <button class="btn" onclick="subscribe('pro')">Choose Pro</button>
+  </div>
+
+  <div class="plan-card">
+    <h4>Elite — $99/mo</h4>
+    <p>Unlimited bids per month.</p>
+    <button class="btn" onclick="subscribe('elite')">Choose Elite</button>
+  </div>
+</div>
 </div>
 
 <div class="modal" id="profileModal">
@@ -686,6 +724,19 @@ refreshDisplay = function(){
   if (isContractor) {
     setText("displayApproval", currentProfile.is_approved ? "Approved" : "Pending Review");
     setText("displaySubscription", currentProfile.subscription_status || "trial");
+    const isActiveSub = currentProfile.subscription_status === "active";
+const planCards = document.getElementById("planCards");
+const activePlanBox = document.getElementById("activePlanBox");
+
+if (planCards) planCards.style.display = isActiveSub ? "none" : "grid";
+if (activePlanBox) activePlanBox.style.display = isActiveSub ? "block" : "none";
+
+setText(
+  "displayCurrentPlan",
+  currentProfile.plan
+    ? currentProfile.plan.charAt(0).toUpperCase() + currentProfile.plan.slice(1)
+    : "Active"
+);
     setText("displayTrialEnd", currentProfile.trial_end ? new Date(currentProfile.trial_end).toLocaleDateString() : "—");
   }
 };
