@@ -2229,6 +2229,35 @@ body.homeowner-room .nav-item[data-target="photoDocsPanel"] {
           <div class="nav-item" data-target="smartCalculatorPanel"><span>Trade Calculators</span><span>Tools</span></div>
           <div class="nav-item" data-target="estimateProposalPanel"><span>Estimate + Proposal</span><span>v3.2</span></div>
           <div class="nav-item" data-target="photoDocsPanel" onclick="scrollToSection('photoDocsPanel')"><span>Photos + Docs</span><span>Upload</span></div>
+          <div class="workspace-section homeowner-only" id="receivedBidsSection">
+
+  <h3>Received Private Bids</h3>
+
+  <table style="width:100%;margin-top:12px;">
+
+    <thead>
+      <tr>
+        <th>Contractor</th>
+        <th>Amount</th>
+        <th>ETA</th>
+        <th>Message</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody id="bidTableBody">
+
+      <tr>
+        <td colspan="5">
+          No bids received yet.
+        </td>
+      </tr>
+
+    </tbody>
+
+  </table>
+
+</div>
           <div class="nav-item" data-target="signaturePanel"><span>Customer Signature</span><span>Pending</span></div>
         </div>
       </aside>
@@ -2914,6 +2943,9 @@ console.log("PROJECT ROOM JOB ID:", jobId);
   function renderJob(job){
 
   window.currentJob = job;
+    if (mode === "homeowner") {
+  loadBidDashboard();
+}
   console.log("RENDERING JOB:", job);
 
   document.getElementById("jobTitle").innerText = job.title || "Untitled Job";
