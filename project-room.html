@@ -4352,7 +4352,18 @@ async function incrementMonthlyBidCount(profile) {
     console.warn("Bid submitted, but monthly bid count did not update:", error);
   }
 }
+function getCurrentJobIdForBid() {
 
+  const params = new URLSearchParams(window.location.search);
+
+  return (
+    params.get("job") ||
+    window.currentJob?.id ||
+    window.currentJob?.job_id ||
+    ""
+  ).toString();
+
+}
 async function submitBid() {
   try {
     const amount = document.getElementById("grandOut")?.innerText || "";
