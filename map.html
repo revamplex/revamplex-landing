@@ -398,6 +398,71 @@
   position: relative;
 }
 
+
+/* ===== PREMIUM LOWER MAP CARDS LAYOUT ===== */
+/* Keeps card photos/logo unchanged, but lowers the horizontal results rail so the map has more breathing room. */
+@media (min-width: 641px) {
+  .results-shell {
+    bottom: -138px !important;
+    padding: 16px 0 18px !important;
+    background: rgba(255, 255, 255, 0.94);
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 -18px 42px rgba(15, 23, 42, 0.10);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .results-shell:hover {
+    bottom: -28px !important;
+  }
+
+  .results-header {
+    padding: 0 12px 8px !important;
+  }
+
+  .results-title {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    font-size: 16px !important;
+    font-weight: 900 !important;
+    padding: 4px 2px !important;
+  }
+
+  .cards-row {
+    padding: 0 10px 12px !important;
+  }
+
+  .fab-wrap {
+    bottom: 130px !important;
+  }
+
+  .leaflet-control-zoom {
+    margin-bottom: 150px !important;
+  }
+}
+
+/* Mobile keeps cards usable and visible. */
+@media (max-width: 640px) {
+  .results-shell {
+    bottom: -92px !important;
+    padding: 14px 0 14px !important;
+    background: rgba(255, 255, 255, 0.96);
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 -14px 34px rgba(15, 23, 42, 0.10);
+  }
+
+  .results-shell:hover,
+  .results-shell:focus-within {
+    bottom: 0 !important;
+  }
+
+  .fab-wrap {
+    bottom: 128px !important;
+  }
+}
+
 </style>
   <style>
     :root {
@@ -3501,7 +3566,7 @@ function renderCards(items) {
       const marker = markerIndex.get(id);
       if (marker) {
         const coords = marker.getLatLng();
-        map.flyTo(coords, 13, { duration: 0.4 });
+        map.flyTo(coords, 12, { duration: 0.4 });
       }
     };
 
@@ -3528,7 +3593,7 @@ function setActive(id, fromMap = false) {
 
   const [displayLat, displayLng] = getDisplayCoords(item);
 
-  map.flyTo([displayLat, displayLng], 12, {
+  map.flyTo([displayLat, displayLng], 11, {
     duration: 0.6,
     easeLinearity: 0.25
   });
