@@ -2143,17 +2143,6 @@ body.homeowner-room .nav-item[data-target="photoDocsPanel"] {
   display: flex !important;
 }
 
-
-/* ===== HOMEOWNER RECEIVED BIDS PANEL ===== */
-body.contractor-room #receivedBidsPanel,
-body.contractor-room .homeowner-only-nav {
-  display: none !important;
-}
-
-body.homeowner-room #receivedBidsPanel {
-  display: block !important;
-}
-
 /* ===== PRIVATE PROJECT CHAT ===== */
 #videoChatPanel .messages {
   max-height: 360px;
@@ -2236,7 +2225,6 @@ body.homeowner-room #receivedBidsPanel {
           <div class="nav-item active" data-target="projectOverviewPanel"><span>Project Overview</span><span>Top</span></div>
           <div class="nav-item" data-target="schedulePanel"><span>Schedule Calendar</span><span>4 items</span></div>
           <div class="nav-item" data-target="jobListPanel"><span>Active Job List</span><span>Live</span></div>
-          <div class="nav-item homeowner-only-nav" data-target="receivedBidsPanel"><span>Received Bids</span><span>Private</span></div>
           <div class="nav-item" data-target="videoChatPanel"><span>Video + Chat</span><span>2 alerts</span></div>
           <div class="nav-item" data-target="smartCalculatorPanel"><span>Trade Calculators</span><span>Tools</span></div>
           <div class="nav-item" data-target="estimateProposalPanel"><span>Estimate + Proposal</span><span>v3.2</span></div>
@@ -2369,40 +2357,6 @@ body.homeowner-room #receivedBidsPanel {
     </table>
   </div>
 </section>
-
-<section class="panel" id="receivedBidsPanel">
-  <div class="panel-header">
-    <div>
-      <h3>Received Contractor Bids</h3>
-      <p>Private bids submitted by contractors for this project. Only this homeowner and the submitting contractor should see bid details.</p>
-    </div>
-    <button class="btn btn-soft" type="button" onclick="loadBidDashboard()">Refresh Bids</button>
-  </div>
-
-  <div class="private-room-alert">
-    <strong>Private bid inbox:</strong> bids appear here after a contractor submits from their Project Room estimate screen.
-  </div>
-
-  <div class="estimate-table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Contractor</th>
-          <th>Bid Amount</th>
-          <th>ETA</th>
-          <th>Message</th>
-          <th>Status / Action</th>
-        </tr>
-      </thead>
-      <tbody id="bidTableBody">
-        <tr>
-          <td colspan="5">No bids loaded yet.</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
 <section class="panel" id="videoChatPanel">
           <div class="panel-header">
             <div>
@@ -2986,10 +2940,6 @@ console.log("PROJECT ROOM JOB ID:", jobId);
   if (topJobTrade) topJobTrade.innerText = job.trade || "General";
   if (topJobCity) topJobCity.innerText = job.city || "NJ Area";
   if (topJobBudget) topJobBudget.innerText = job.budget || "$0";
-
-  if (typeof loadBidDashboard === "function") {
-    setTimeout(loadBidDashboard, 250);
-  }
 
 }
   loadJob();
@@ -4403,30 +4353,6 @@ async function incrementMonthlyBidCount(profile) {
   }
 }
 
-function getCurrentJobIdForBid() {
-  const params = new URLSearchParams(window.location.search);
-  return (
-    params.get("job") ||
-    window.currentJob?.id ||
-    window.currentJob?.job_id ||
-    ""
-  ).toString();
-}
-
-async function getFreshBidCountForJob(jobId) {
-  const { data, error } = await supabaseClient
-    .from("bids")
-    .select("id")
-    .eq("job_id", String(jobId));
-
-  if (error) {
-    console.warn("Could not check current bid count:", error);
-    return 0;
-  }
-
-  return data?.length || 0;
-}
-
 async function submitBid() {
   const permission = await checkBidPermissionAndUpdateCycle();
 
@@ -4434,71 +4360,42 @@ async function submitBid() {
     return;
   }
 
-  const amount = document.getElementById("grandOut")?.innerText || "";
+  const amount = document.getElementById("grandOut").innerText;
   const job = window.currentJob;
-  const jobId = getCurrentJobIdForBid();
 
-  if (!job || !jobId) {
-    alert("Job not found. Refresh the page and try again.");
+  if (!job) {
+    alert("Job not found");
     return;
   }
 
-  const { data: userData, error: userError } = await supabaseClient.auth.getUser();
-
-  if (userError || !userData?.user) {
-    alert("Please log in as a contractor before submitting a bid.");
-    return;
-  }
-
-  const user = userData.user;
-  const profile = permission.profile;
-
-  if (!profile || profile.role !== "contractor") {
-    alert("Only contractor accounts can submit bids.");
-    return;
+  if (!job.bids) {
+    job.bids = [];
   }
 
   const maxBids = Number(job.max_bids || job.maxBids || 5);
-  const currentBidCount = await getFreshBidCountForJob(jobId);
 
-  if (currentBidCount >= maxBids) {
+  if (job.bids.length >= maxBids) {
     alert("This job already received the maximum number of bids.");
     return;
   }
 
-  const bidPayload = {
-    job_id: String(jobId),
-    homeowner_id: job.user_id || job.homeowner_id || job.customer_id || null,
-    contractor_id: user.id,
-    contractor_email: user.email || "",
-    contractor_name:
-      profile.company ||
-      profile.full_name ||
-      profile.name ||
-      "Verified Contractor",
+  const bid = {
+    contractor: "Verified Contractor",
     amount: amount,
     message: "Estimate generated through Revamp Project Room",
-    eta: "TBD",
-    status: "pending"
+    startDate: "TBD",
+    timestamp: Date.now()
   };
 
-  const { error } = await supabaseClient
-    .from("bids")
-    .insert([bidPayload]);
-
-  if (error) {
-    console.error("Bid insert error:", error);
-    alert("Bid was not saved: " + error.message);
-    return;
-  }
+  job.bids.push(bid);
 
   await incrementMonthlyBidCount(permission.profile);
 
-  alert("Bid submitted privately to homeowner.");
-
-  if (typeof loadBidDashboard === "function") {
-    await loadBidDashboard();
+  if (job.bids.length >= maxBids) {
+    job.status = "closed";
   }
+
+  alert("Bid submitted privately to homeowner.");
 }
 
 /* ---------- INIT ---------- */
@@ -4522,7 +4419,7 @@ setupBackButton();
 
 
   
-document.addEventListener("DOMContentLoaded", function(){ setTimeout(loadBidDashboard, 800); });
+loadBidDashboard();
 
 
 function saveJobs(jobs){
@@ -4531,101 +4428,47 @@ function saveJobs(jobs){
 
   /* ---------- LOAD BIDS ---------- */
 
-async function loadBidDashboard() {
-  if (mode !== "homeowner") return;
+function loadBidDashboard(){
 
-  const tbody = document.getElementById("bidTableBody");
-  if (!tbody) return;
+  if(mode!=="homeowner") return;
 
-  const jobId = getCurrentJobIdForBid();
 
-  if (!jobId) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="5">No job found for this project room.</td>
-      </tr>
-    `;
-    return;
-  }
+  const job = window.currentJob;
 
-  tbody.innerHTML = `
-    <tr>
-      <td colspan="5">Loading bids...</td>
-    </tr>
-  `;
+  if(!job || !job.bids) return;
 
-  const { data, error } = await supabaseClient
-    .from("bids")
-    .select("*")
-    .eq("job_id", String(jobId))
-    .order("created_at", { ascending: false });
+  const tbody=document.getElementById("bidTableBody");
 
-  if (error) {
-    console.error("Bid dashboard load error:", error);
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="5">Could not load bids: ${error.message}</td>
-      </tr>
-    `;
-    return;
-  }
+  if(!tbody) return;
 
-  const bids = data || [];
+  tbody.innerHTML="";
 
-  if (!bids.length) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="5">No bids received yet.</td>
-      </tr>
-    `;
-    return;
-  }
+  job.bids.forEach((bid,i)=>{
 
-  tbody.innerHTML = "";
+    const tr=document.createElement("tr");
 
-  bids.forEach((bid) => {
-    const tr = document.createElement("tr");
-    const status = String(bid.status || "pending").toLowerCase();
-
-    tr.innerHTML = `
-      <td>${escapeHTML(bid.contractor_name || "Verified Contractor")}</td>
-      <td>${escapeHTML(bid.amount || "—")}</td>
-      <td>${escapeHTML(bid.eta || "TBD")}</td>
-      <td>${escapeHTML(bid.message || "")}</td>
-      <td>
-        <strong>${escapeHTML(status)}</strong><br>
-        ${
-          status === "accepted"
-            ? "Accepted"
-            : `<button class="btn btn-primary" type="button" onclick="acceptBid('${bid.id}')">Accept</button>`
-        }
-      </td>
-    `;
+    tr.innerHTML=`
+<td>Verified Contractor</td>
+<td>${bid.amount}</td>
+<td>${bid.startDate}</td>
+<td>${bid.message}</td>
+<td>
+<button class="btn btn-primary" onclick="acceptBid(${i})">
+Accept
+</button>
+</td>
+`;
 
     tbody.appendChild(tr);
+
   });
+
 }
 
-async function acceptBid(bidId) {
-  const confirmed = confirm("Accept this contractor's bid?");
-  if (!confirmed) return;
+function acceptBid(index){
 
-  const { error } = await supabaseClient
-    .from("bids")
-    .update({
-      status: "accepted",
-      updated_at: new Date().toISOString()
-    })
-    .eq("id", bidId);
+  alert("Contractor accepted. Contract generation coming next.");
 
-  if (error) {
-    console.error("Accept bid error:", error);
-    alert("Could not accept bid: " + error.message);
-    return;
-  }
-
-  alert("Bid accepted. This project is now an active job.");
-  await loadBidDashboard();
 }
 
 
@@ -6469,7 +6312,7 @@ function when(v){const d=v?new Date(v):new Date(); return isNaN(d)?'Just now':d.
 async function fileUrl(path){ if(!path)return '#'; try{const {data,error}=await supabaseClient.storage.from('project-files').createSignedUrl(path,3600); if(!error&&data?.signedUrl)return data.signedUrl;}catch(e){} try{return supabaseClient.storage.from('project-files').getPublicUrl(path).data?.publicUrl||'#';}catch(e){return '#';}}
 function inject(){
  const photo=document.getElementById('photoDocsPanel');
- if(photo&&!document.getElementById('privateFileExchangeUI')){ const box=photo.querySelector('.summary-box')||photo; box.insertAdjacentHTML('afterend',`<div id="privateFileExchangeUI" class="exchange-grid"><div class="exchange-card"><h4>Send Files Privately</h4><p>Homeowners and contractors can exchange photos, videos, PDFs, proposals, invoices, permits, and job documents inside only this private project room.</p><label>File Category</label><select id="projectFileCategory"><option value="photo">Photo</option><option value="video">Video</option><option value="document">Document</option><option value="proposal">Proposal</option><option value="invoice">Invoice</option><option value="permit">Permit / Approval</option><option value="other">Other</option></select><label style="margin-top:10px;display:block;">Message / Note</label><input id="projectFileNote" type="text" placeholder="Example: Updated shower tile layout / signed invoice / before photos"><div id="uploadStatus" class="exchange-status"></div></div><div class="exchange-card"><h4>Shared Private Room Files</h4><p>Files listed here are attached only to this homeowner + contractor room.</p><div id="privateFileList" class="exchange-list"><div class="appointment-empty">No files shared yet.</div></div></div></div>`); }
+ if(photo&&!document.getElementById('privateFileExchangeUI')){ const box=photo.querySelector('.summary-box')||photo; box.insertAdjacentHTML('afterend',`<div id="privateFileExchangeUI" class="exchange-grid"><div class="exchange-card"><h4>Send Files Privately</h4><p>Homeowners and contractors can exchange photos, videos, PDFs, proposals, invoices, permits, and job documents inside only this private project room.</p><label>File Category</label><select id="projectFileCategory"><option value="photo">Photo</option><option value="video">Video</option><option value="document">Document</option><option value="proposal">Proposal</option><option value="invoice">Invoice</option><option value="permit">Permit / Approval</option><option value="other">Other</option></select><label style="margin-top:10px;display:block;">Message / Note</label><input id="projectFileNote" type="text" placeholder="Example: Updated shower tile layout / signed invoice / before photos"><div id="uploadStatus" class="exchange-status"></div></div><div class="exchange-card"><h4>Shared Private Room Files</h4><p>Files listed here are attached only to this homeowner + contractor room.</p><div id="privateFileList" class="exchange-list"><div class="appointment-empty">No files shared yet.</div></div></div></div><div id="sharedProposalInvoiceDocumentsUI" class="exchange-card" style="margin-top:14px;"><h4>Sent Proposals + Invoices</h4><p>Customer-ready PDFs sent by the contractor will appear here for the homeowner and contractor.</p><div id="privateDocumentListShared" class="exchange-list"><div class="appointment-empty">No proposals or invoices sent yet.</div></div></div>`); }
  const prop=document.getElementById('estimateProposalPanel');
  if(prop&&!document.getElementById('proposalInvoiceExchangeUI')){ prop.insertAdjacentHTML('beforeend',`<div id="proposalInvoiceExchangeUI" class="exchange-grid"><div class="exchange-card"><h4>Send Proposal to Homeowner</h4><p>Generates the current proposal PDF, uploads it to this private room, and adds it to the shared document list.</p><button class="btn btn-primary" type="button" onclick="sendProposalToPrivateRoom()">Send Proposal</button><div id="proposalSendStatus" class="exchange-status"></div></div><div class="exchange-card"><h4>Send Invoice to Homeowner</h4><p>Creates an invoice from the current estimate total and stores it privately in this project room.</p><label>Invoice Amount</label><input id="invoiceAmountInput" type="text" placeholder="Example: $2,500 deposit or full balance"><label style="margin-top:10px;display:block;">Invoice Note</label><input id="invoiceNoteInput" type="text" placeholder="Example: Deposit due to schedule start date"><button class="btn btn-primary" type="button" onclick="sendInvoiceToPrivateRoom()" style="margin-top:10px;">Send Invoice</button><div id="invoiceSendStatus" class="exchange-status"></div></div></div><div class="exchange-card" style="margin-top:14px;"><h4>Sent Proposals + Invoices</h4><div id="privateDocumentList" class="exchange-list"><div class="appointment-empty">No proposals or invoices sent yet.</div></div></div>`); }
  const sig=document.getElementById('signaturePanel');
@@ -6486,10 +6329,55 @@ async function uploadOne(file,cat,note,name){ const r=await room(), u=await user
 window.uploadProjectFiles=async function(){ const input=document.getElementById('projectFileUpload'), cat=document.getElementById('projectFileCategory')?.value||'document', note=document.getElementById('projectFileNote')?.value||''; if(!input)return alert('Upload field not found.'); const files=[...(input.files||[])]; if(!files.length)return alert('Choose at least one project file first.'); stat('uploadStatus','Uploading private room files...'); try{for(const f of files) await uploadOne(f,cat,note); input.value=''; const ni=document.getElementById('projectFileNote'); if(ni)ni.value=''; stat('uploadStatus','Upload complete ✔ Shared only in this private room.'); await loadProjectRoomFiles();}catch(e){console.error(e); stat('uploadStatus','Upload failed: '+(e.message||e));} };
 window.loadProjectRoomFiles=async function(){ const list=document.getElementById('privateFileList'); if(!list)return; const r=await room(); if(!r){list.innerHTML='<div class="appointment-empty">Private room not ready yet.</div>';return;} const {data,error}=await supabaseClient.from('project_room_files').select('*').eq('project_room_id',r).order('created_at',{ascending:false}); if(error){list.innerHTML='<div class="appointment-empty">File table not connected yet. Run the Supabase SQL below.</div>';return;} if(!data?.length){list.innerHTML='<div class="appointment-empty">No files shared yet.</div>';return;} const rows=await Promise.all(data.map(async f=>`<div class="exchange-item"><strong>${escapeHTML(f.file_name||'Project file')}</strong><span>${escapeHTML(f.file_category||'document')} • Sent by ${escapeHTML(f.sender_role||'user')} • ${escapeHTML(when(f.created_at))}</span>${f.note?`<span>Note: ${escapeHTML(f.note)}</span>`:''}<div class="exchange-actions"><a class="btn btn-soft" href="${await fileUrl(f.file_path)}" target="_blank" rel="noopener">Open / Download</a></div></div>`)); list.innerHTML=rows.join(''); };
 async function docRecord(blob,fileName,type,title,amount,note){ const r=await room(), u=await user(), a=actor(); const file=new File([blob],fileName,{type:'application/pdf'}); const fr=await uploadOne(file,type,note||title,fileName); const {data,error}=await supabaseClient.from('project_documents').insert({project_room_id:r,job_id:jobId(),created_by:u?.id||null,sender_role:a.role,document_type:type,status:'sent',title,amount:amount||null,file_path:fr.file_path,file_name:fileName,note:note||''}).select().single(); if(error) throw error; return data; }
-window.sendProposalToPrivateRoom=async function(){ if(typeof generateProposalPDF!=='function')return alert('Proposal generator not found.'); stat('proposalSendStatus','Generating and sending proposal...'); try{generateProposalPDF(); if(!lastProposalPdfBlob) throw new Error('Proposal PDF was not generated.'); const j=window.currentJob||{}, title='Proposal - '+(j.title||'Revamp Project'), amount=Number((document.getElementById('grandOut')?.innerText||'').replace(/[^0-9.]/g,''))||null; await docRecord(lastProposalPdfBlob,`${safe(title).toLowerCase()}-${Date.now()}.pdf`,'proposal',title,amount,'Contractor sent proposal to homeowner.'); stat('proposalSendStatus','Proposal sent privately ✔'); await loadProjectDocuments(); await loadProjectRoomFiles();}catch(e){console.error(e); stat('proposalSendStatus','Proposal send failed: '+(e.message||e));} };
+window.sendProposalToPrivateRoom=async function(){ if(typeof generateProposalPDF!=='function')return alert('Proposal generator not found.'); stat('proposalSendStatus','Generating and sending proposal...'); try{generateProposalPDF(); if(!lastProposalPdfBlob) throw new Error('Proposal PDF was not generated.'); const j=window.currentJob||{}, title='Proposal - '+(j.title||'Revamp Project'), amount=Number((document.getElementById('grandOut')?.innerText||'').replace(/[^0-9.]/g,''))||null; await docRecord(lastProposalPdfBlob,`${safe(title).toLowerCase()}-${Date.now()}.pdf`,'proposal',title,amount,'Contractor sent proposal to homeowner.'); stat('proposalSendStatus','Proposal sent privately ✔ Homeowner can view it under Photos + Docs → Sent Proposals + Invoices.'); await loadProjectDocuments(); await loadProjectRoomFiles();}catch(e){console.error(e); stat('proposalSendStatus','Proposal send failed: '+(e.message||e));} };
 function invoiceBlob(amount,note){ const C=window.jspdf&&window.jspdf.jsPDF; if(!C) throw new Error('PDF library is still loading.'); const j=window.currentJob||{}, doc=new C({unit:'pt',format:'letter'}); let y=42; doc.setFont('helvetica','bold'); doc.setFontSize(20); doc.text('Revamp Project Room Invoice',42,y); y+=32; doc.setFont('helvetica','normal'); doc.setFontSize(11); ['Project: '+(j.title||'Revamp Project'),'Trade: '+(j.trade||'General Renovation'),'Location: '+(j.city||'NJ Area'),'Project ID: '+(j.id||'Preview'),'Date: '+new Date().toLocaleDateString('en-US'),'','Invoice Amount: '+amount,'','Invoice Note:',note||'Invoice generated from Revamp Project Room.','','This invoice is attached to the private homeowner + contractor project room.'].forEach(line=>{doc.splitTextToSize(line,520).forEach(s=>{doc.text(s,42,y); y+=16;}); if(line==='')y+=4;}); return doc.output('blob'); }
 window.sendInvoiceToPrivateRoom=async function(){ const amount=(document.getElementById('invoiceAmountInput')?.value||document.getElementById('grandOut')?.innerText||'$0.00').trim(), note=(document.getElementById('invoiceNoteInput')?.value||'Invoice generated from current estimate total.').trim(); stat('invoiceSendStatus','Generating and sending invoice...'); try{const blob=invoiceBlob(amount,note), j=window.currentJob||{}, title='Invoice - '+(j.title||'Revamp Project'), val=Number(amount.replace(/[^0-9.]/g,''))||null; await docRecord(blob,`${safe(title).toLowerCase()}-${Date.now()}.pdf`,'invoice',title,val,note); stat('invoiceSendStatus','Invoice sent privately ✔'); await loadProjectDocuments(); await loadProjectRoomFiles();}catch(e){console.error(e); stat('invoiceSendStatus','Invoice send failed: '+(e.message||e));} };
-window.loadProjectDocuments=async function(){ const list=document.getElementById('privateDocumentList'); if(!list)return; const r=await room(); if(!r){list.innerHTML='<div class="appointment-empty">Private room not ready yet.</div>';return;} const {data,error}=await supabaseClient.from('project_documents').select('*').eq('project_room_id',r).order('created_at',{ascending:false}); if(error){list.innerHTML='<div class="appointment-empty">Document table not connected yet. Run the Supabase SQL below.</div>';return;} if(!data?.length){list.innerHTML='<div class="appointment-empty">No proposals or invoices sent yet.</div>';return;} const rows=await Promise.all(data.map(async d=>`<div class="exchange-item"><strong>${escapeHTML(d.title||d.document_type||'Document')}</strong><span>${escapeHTML(String(d.document_type||'document').toUpperCase())} • ${escapeHTML(d.status||'sent')} • ${escapeHTML(when(d.created_at))}</span>${d.amount?`<span>Amount: ${escapeHTML(currency(Number(d.amount)))}</span>`:''}${d.note?`<span>Note: ${escapeHTML(d.note)}</span>`:''}<div class="exchange-actions"><a class="btn btn-soft" href="${await fileUrl(d.file_path)}" target="_blank" rel="noopener">Open PDF</a></div></div>`)); list.innerHTML=rows.join(''); };
+window.loadProjectDocuments=async function(){
+ const lists=[...document.querySelectorAll('#privateDocumentList,#privateDocumentListShared')];
+
+ if(!lists.length)return;
+
+ function setAll(html){
+   lists.forEach(list=>{ list.innerHTML=html; });
+ }
+
+ const r=await room();
+
+ if(!r){
+   setAll('<div class="appointment-empty">Private room not ready yet.</div>');
+   return;
+ }
+
+ const {data,error}=await supabaseClient
+   .from('project_documents')
+   .select('*')
+   .eq('project_room_id',r)
+   .order('created_at',{ascending:false});
+
+ if(error){
+   setAll('<div class="appointment-empty">Document table not connected yet. Check Supabase project_documents table and RLS policies.</div>');
+   return;
+ }
+
+ if(!data?.length){
+   setAll('<div class="appointment-empty">No proposals or invoices sent yet.</div>');
+   return;
+ }
+
+ const rows=await Promise.all(data.map(async d=>`
+   <div class="exchange-item">
+     <strong>${escapeHTML(d.title||d.document_type||'Document')}</strong>
+     <span>${escapeHTML(String(d.document_type||'document').toUpperCase())} • ${escapeHTML(d.status||'sent')} • ${escapeHTML(when(d.created_at))}</span>
+     ${d.amount?`<span>Amount: ${escapeHTML(currency(Number(d.amount)))}</span>`:''}
+     ${d.note?`<span>Note: ${escapeHTML(d.note)}</span>`:''}
+     <div class="exchange-actions">
+       <a class="btn btn-soft" href="${await fileUrl(d.file_path)}" target="_blank" rel="noopener">Open PDF</a>
+     </div>
+   </div>
+ `));
+
+ setAll(rows.join(''));
+};
 function resize(c){ if(!c)return; const r=c.getBoundingClientRect(), ratio=devicePixelRatio||1; c.width=Math.max(1,r.width*ratio); c.height=Math.max(1,r.height*ratio); const ctx=c.getContext('2d'); ctx.scale(ratio,ratio); ctx.lineWidth=2.4; ctx.lineCap='round'; ctx.strokeStyle='#0f172a'; }
 function pad(role){ const c=document.getElementById(role+'SignatureCanvas'); if(!c)return; resize(c); const ctx=c.getContext('2d'); let on=false; const p=e=>{const r=c.getBoundingClientRect(), t=e.touches?.[0]||e; return {x:t.clientX-r.left,y:t.clientY-r.top};}; const st=e=>{e.preventDefault(); on=true; drawn[role]=true; const q=p(e); ctx.beginPath(); ctx.moveTo(q.x,q.y);}; const mv=e=>{if(!on)return; e.preventDefault(); const q=p(e); ctx.lineTo(q.x,q.y); ctx.stroke();}; const en=e=>{if(!on)return; e.preventDefault(); on=false;}; c.addEventListener('mousedown',st); c.addEventListener('mousemove',mv); window.addEventListener('mouseup',en); c.addEventListener('touchstart',st,{passive:false}); c.addEventListener('touchmove',mv,{passive:false}); c.addEventListener('touchend',en,{passive:false}); }
 function currentSignatureRole(){ const a=actor(); return a.role==='homeowner'?'homeowner':'contractor'; }
@@ -6557,5 +6445,24 @@ document.addEventListener('DOMContentLoaded',()=>setTimeout(init,900));
 window.addEventListener('resize',()=>{ if(!padsReady)return; resize(document.getElementById(currentSignatureRole()+'SignatureCanvas')); });
 })();
 </script>
+
+<script>
+/* ===== SHARED HOMEOWNER PROPOSAL LIST REFRESH ===== */
+document.addEventListener("DOMContentLoaded", function(){
+  setTimeout(function(){
+    if (typeof loadProjectDocuments === "function") {
+      loadProjectDocuments();
+    }
+  }, 1400);
+});
+window.addEventListener("load", function(){
+  setTimeout(function(){
+    if (typeof loadProjectDocuments === "function") {
+      loadProjectDocuments();
+    }
+  }, 1400);
+});
+</script>
+
 </body>
 </html>
