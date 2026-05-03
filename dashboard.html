@@ -230,10 +230,10 @@
     <p><strong>Approval:</strong> <span id="displayApproval">—</span></p>
     <p><strong>Subscription:</strong> <span id="displaySubscription">—</span></p>
     <p><strong>Trial Ends:</strong> <span id="displayTrialEnd">—</span></p>
-    <button id="manageBillingBtn" class="billing-btn">
-  Manage Billing
-</button>
-    <p class="muted">Your contractor listing will not go live until Revamp LEX approves your license and insurance.</p>
+   
+    <p class="muted" id="approvalWarning">
+  Your contractor listing will not go live until Revamp LEX approves your license and insurance.
+</p>
    <div id="activePlanBox" class="active-plan-box" style="display:none;">
   <p><strong>Current Plan:</strong> <span id="displayCurrentPlan">—</span></p>
   <button id="manageBillingBtn" class="billing-btn">Manage Billing</button>
@@ -723,6 +723,10 @@ refreshDisplay = function(){
   const isContractor = isContractorProfile();
   if (isContractor) {
     setText("displayApproval", currentProfile.is_approved ? "Approved" : "Pending Review");
+    const approvalWarning = document.getElementById("approvalWarning");
+if (approvalWarning) {
+  approvalWarning.style.display = currentProfile.is_approved ? "none" : "block";
+}
     setText("displaySubscription", currentProfile.subscription_status || "trial");
     const isActiveSub = currentProfile.subscription_status === "active";
 const planCards = document.getElementById("planCards");
