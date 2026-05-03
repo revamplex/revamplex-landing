@@ -4168,59 +4168,234 @@ function setupChat(){
   loadPrivateChatMessages();
 }
 
-/* ---------- SUBMIT BID ---------- */
+/* ---------- SUBMIT BID WITH REVAMPLEX PLAN LIMITS ---------- */
 
-function submitBid(){
+function normalizePlanName(plan) {
+  return String(plan || "trial").toLowerCase().trim();
+}
 
-  const amount=document.getElementById("grandOut").innerText;
+function isTrialStillActive(profile) {
+  const status = String(profile?.subscription_status || "").toLowerCase();
+  const plan = normalizePlanName(profile?.plan);
 
+  if (status === "active") return false;
+  if (plan !== "trial" && status !== "trial") return false;
+
+  if (!profile?.trial_end) return true;
+
+  const trialEnd = new Date(profile.trial_end);
+  if (isNaN(trialEnd.getTime())) return true;
+
+  return trialEnd.getTime() >= Date.now();
+}
+
+function getMonthlyBidLimit(profile) {
+  const plan = normalizePlanName(profile?.plan);
+  const status = String(profile?.subscription_status || "").toLowerCase();
+
+  if (isTrialStillActive(profile)) {
+    return Infinity;
+  }
+
+  if (status !== "active") {
+    return 0;
+  }
+
+  if (plan === "elite") return Infinity;
+  if (plan === "pro") return 10;
+  if (plan === "basic") return 5;
+
+  return 0;
+}
+
+function getBidLimitMessage(profile) {
+  const plan = normalizePlanName(profile?.plan);
+  const status = String(profile?.subscription_status || "").toLowerCase();
+
+  if (!isTrialStillActive(profile) && status !== "active") {
+    return [
+      "Your free trial has ended.",
+      "",
+      "Choose a plan to continue bidding:",
+      "Basic — 5 bids/month",
+      "Pro — 10 bids/month",
+      "Elite — Unlimited bids"
+    ].join("\n");
+  }
+
+  if (plan === "basic") {
+    return [
+      "You've reached your monthly bid limit.",
+      "",
+      "Upgrade to Pro for 10 bids/month",
+      "or Upgrade to Elite for unlimited bids."
+    ].join("\n");
+  }
+
+  if (plan === "pro") {
+    return [
+      "You've reached your monthly bid limit.",
+      "",
+      "Upgrade to Elite for unlimited bids."
+    ].join("\n");
+  }
+
+  return [
+    "You've reached your monthly bid limit.",
+    "",
+    "Upgrade to Pro for 10 bids/month or Upgrade to Elite for unlimited bids."
+  ].join("\n");
+}
+
+function isNewBidCycle(profile) {
+  if (!profile?.bid_cycle_start) return true;
+
+  const start = new Date(profile.bid_cycle_start);
+  if (isNaN(start.getTime())) return true;
+
+  const now = new Date();
+  return (
+    start.getMonth() !== now.getMonth() ||
+    start.getFullYear() !== now.getFullYear()
+  );
+}
+
+async function getCurrentContractorProfileForBid() {
+  const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+
+  if (userError || !userData?.user) {
+    alert("Please log in as a contractor before submitting a bid.");
+    return null;
+  }
+
+  const user = userData.user;
+
+  const { data: profile, error } = await supabaseClient
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Could not load contractor profile:", error);
+    alert("Could not check your subscription plan. Please try again.");
+    return null;
+  }
+
+  if (!profile) {
+    alert("No contractor profile found. Please complete your profile first.");
+    return null;
+  }
+
+  return profile;
+}
+
+async function checkBidPermissionAndUpdateCycle() {
+  const profile = await getCurrentContractorProfileForBid();
+
+  if (!profile) {
+    return { allowed: false, profile: null };
+  }
+
+  let cleanProfile = { ...profile };
+
+  if (isNewBidCycle(cleanProfile)) {
+    cleanProfile.monthly_bid_count = 0;
+    cleanProfile.bid_cycle_start = new Date().toISOString();
+
+    const { data, error } = await supabaseClient
+      .from("profiles")
+      .update({
+        monthly_bid_count: 0,
+        bid_cycle_start: cleanProfile.bid_cycle_start
+      })
+      .eq("id", cleanProfile.id)
+      .select("*")
+      .single();
+
+    if (!error && data) {
+      cleanProfile = data;
+    }
+  }
+
+  const limit = getMonthlyBidLimit(cleanProfile);
+  const used = Number(cleanProfile.monthly_bid_count || 0);
+
+  if (limit !== Infinity && used >= limit) {
+    alert(getBidLimitMessage(cleanProfile));
+
+    const goToBilling = confirm("Open your dashboard billing page now?");
+    if (goToBilling) {
+      window.location.href = "dashboard.html";
+    }
+
+    return { allowed: false, profile: cleanProfile };
+  }
+
+  return { allowed: true, profile: cleanProfile };
+}
+
+async function incrementMonthlyBidCount(profile) {
+  if (!profile || isTrialStillActive(profile)) return;
+  if (getMonthlyBidLimit(profile) === Infinity) return;
+
+  const newCount = Number(profile.monthly_bid_count || 0) + 1;
+
+  const { error } = await supabaseClient
+    .from("profiles")
+    .update({
+      monthly_bid_count: newCount
+    })
+    .eq("id", profile.id);
+
+  if (error) {
+    console.warn("Bid submitted, but monthly bid count did not update:", error);
+  }
+}
+
+async function submitBid() {
+  const permission = await checkBidPermissionAndUpdateCycle();
+
+  if (!permission.allowed) {
+    return;
+  }
+
+  const amount = document.getElementById("grandOut").innerText;
   const job = window.currentJob;
 
-  if(!job){
+  if (!job) {
     alert("Job not found");
     return;
   }
 
-  if(!job.bids){
-    job.bids=[];
+  if (!job.bids) {
+    job.bids = [];
   }
 
-  const plan=getPlan();
-  const limit=BID_PLANS[plan];
+  const maxBids = Number(job.max_bids || job.maxBids || 5);
 
-  if(getBidCount()>=limit){
-    alert("You reached your monthly bid limit.");
-    return;
-  }
-
-  const maxBids=Number(job.max_bids || job.maxBids || 5);
-
-  if(job.bids.length>=maxBids){
+  if (job.bids.length >= maxBids) {
     alert("This job already received the maximum number of bids.");
     return;
   }
 
-  const bid={
-    contractor:"Verified Contractor",
-    amount:amount,
-    message:"Estimate generated through Revamp Project Room",
-    startDate:"TBD",
-    timestamp:Date.now()
+  const bid = {
+    contractor: "Verified Contractor",
+    amount: amount,
+    message: "Estimate generated through Revamp Project Room",
+    startDate: "TBD",
+    timestamp: Date.now()
   };
 
   job.bids.push(bid);
 
-  incrementBid();
+  await incrementMonthlyBidCount(permission.profile);
 
-  /* AUTO CLOSE JOB */
-
-  if(job.bids.length>=maxBids){
-    job.status="closed";
+  if (job.bids.length >= maxBids) {
+    job.status = "closed";
   }
 
-
   alert("Bid submitted privately to homeowner.");
-
 }
 
 /* ---------- INIT ---------- */
@@ -4245,27 +4420,6 @@ setupBackButton();
 
   
 loadBidDashboard();
-/* ---------- BID SYSTEM ---------- */
-
-const BID_PLANS = {
-  trial:5,
-  bronze:5,
-  silver:10,
-  gold:15
-};
-
-function getPlan(){
-  return localStorage.getItem("revamp_plan") || "trial";
-}
-
-function getBidCount(){
-  return Number(localStorage.getItem("revamp_bid_count") || 0);
-}
-
-function incrementBid(){
-  const count=getBidCount()+1;
-  localStorage.setItem("revamp_bid_count",count);
-}
 
 
 function saveJobs(jobs){
