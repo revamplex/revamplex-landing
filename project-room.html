@@ -4364,6 +4364,39 @@ function getCurrentJobIdForBid() {
   ).toString();
 
 }
+  async function getLoggedInUserForBid() {
+
+  const { data, error } =
+    await supabaseClient.auth.getUser();
+
+  if (error || !data?.user) {
+    alert("Please log in as a contractor.");
+    return null;
+  }
+
+  return data.user;
+
+}
+
+
+async function getContractorProfileForBid(userId) {
+
+  const { data, error } =
+    await supabaseClient
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    alert("Could not load contractor profile.");
+    return null;
+  }
+
+  return data;
+
+}
 async function submitBid() {
   try {
     const amount = document.getElementById("grandOut")?.innerText || "";
