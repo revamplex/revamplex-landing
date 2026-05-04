@@ -735,6 +735,56 @@
   }
 }
 
+
+/* ===== MOBILE FIX: KEEP CENTER MAP FROM COVERING CARD ARROWS ===== */
+@media (max-width: 640px) {
+  .fab-wrap {
+    right: 10px !important;
+    bottom: 96px !important;
+    transform: scale(0.86);
+    transform-origin: bottom right;
+    gap: 6px !important;
+  }
+
+  .fab {
+    height: 40px !important;
+    padding: 0 12px !important;
+    font-size: 12px !important;
+    box-shadow: 0 10px 20px rgba(15,23,42,0.18) !important;
+  }
+
+  .map-results-section .results-header-map-float {
+    top: -54px !important;
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    transform: none !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+  }
+
+  .map-results-section .results-header-map-float .results-title {
+    flex: 1;
+    min-width: 0;
+    font-size: 11px !important;
+    padding: 8px 9px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .map-results-section .results-header-map-float .results-actions {
+    flex: 0 0 auto;
+    z-index: 2000 !important;
+  }
+
+  .map-results-section .results-header-map-float .action-btn {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 20px !important;
+  }
+}
+
 </style>
   <style>
     :root {
