@@ -3095,6 +3095,76 @@ body.command-room .appointment-empty {
 }
 
 
+/* ===== COMMAND BAR FIX: ALWAYS VISIBLE ABOVE ACTIVE TOOL ===== */
+body.command-room .app-shell {
+  grid-template-rows: auto auto minmax(0, 1fr) !important;
+}
+
+body.command-room .command-deck {
+  position: sticky !important;
+  top: 10px !important;
+  z-index: 500 !important;
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+body.command-room .dashboard {
+  grid-template-columns: 1fr !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  min-height: 0 !important;
+}
+
+body.command-room .command-active-panel {
+  max-height: calc(100vh - 300px) !important;
+}
+
+body.command-room #photoDocsPanel .summary-box,
+body.command-room .exchange-card,
+body.command-room .exchange-item,
+body.command-room .exchange-list,
+body.command-room #privateFileExchangeUI > div,
+body.command-room #sharedProposalInvoiceDocumentsUI {
+  background: rgba(15,23,42,0.84) !important;
+  border-color: rgba(148,163,184,0.22) !important;
+  color: #e5e7eb !important;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.24) !important;
+}
+
+body.command-room .exchange-card h4,
+body.command-room .exchange-item strong,
+body.command-room #photoDocsPanel .summary-box h4 {
+  color: #f8fafc !important;
+}
+
+body.command-room .exchange-card p,
+body.command-room .exchange-item span,
+body.command-room #photoDocsPanel .summary-box,
+body.command-room #photoDocsPanel p {
+  color: #cbd5e1 !important;
+}
+
+body.command-room .exchange-card input,
+body.command-room .exchange-card select,
+body.command-room #projectFileUpload {
+  background: rgba(2,6,23,0.62) !important;
+  color: #f8fafc !important;
+  border-color: rgba(148,163,184,0.28) !important;
+}
+
+body.command-room .exchange-card a.btn,
+body.command-room .exchange-actions .btn {
+  background: rgba(249,115,22,0.16) !important;
+  color: #fed7aa !important;
+  border: 1px solid rgba(249,115,22,0.25) !important;
+}
+
+@media (max-width: 980px) {
+  body.command-room .command-active-panel {
+    max-height: none !important;
+  }
+}
+
+
 /* ===== ROLE-BASED PROJECT ROOM VISIBILITY ===== */
 body.homeowner-room .contractor-tools {
   display: none !important;
@@ -3172,6 +3242,196 @@ body.homeowner-room .homeowner-only-nav {
 
 body.homeowner-room .homeowner-only-nav {
   display: inline-flex !important;
+}
+
+
+
+/* ===== COMMAND STAGE: SELECTED TOOL OPENS UNDER STATION BAR ===== */
+body.command-room .command-stage {
+  grid-column: 1 / -1;
+  min-height: min(620px, calc(100vh - 236px));
+  overflow: visible;
+}
+
+body.command-room .command-stage > .command-active-panel {
+  display: block !important;
+  width: 100%;
+}
+
+body.command-room #projectOverviewPanel.command-active-panel {
+  margin: 0 !important;
+}
+
+
+
+/* ===== BLACK CARD SYSTEM: REMOVE WHITE TOOL CARDS ===== */
+body.command-room .command-active-panel,
+body.command-room .command-stage > .command-active-panel {
+  color: #e5e7eb !important;
+  background:
+    radial-gradient(circle at top right, rgba(249,115,22,0.14), transparent 32%),
+    linear-gradient(180deg, rgba(15,23,42,0.98), rgba(2,6,23,0.98)) !important;
+  border-color: rgba(249,115,22,0.28) !important;
+}
+
+body.command-room .command-active-panel .hero-grid,
+body.command-room .command-active-panel .mini-stats,
+body.command-room .command-active-panel .stat,
+body.command-room .command-active-panel .side-summary,
+body.command-room .command-active-panel .summary-line,
+body.command-room .command-active-panel .panel,
+body.command-room .command-active-panel .card,
+body.command-room .command-active-panel .exchange-card,
+body.command-room .command-active-panel .exchange-item,
+body.command-room .command-active-panel .selected-date-box,
+body.command-room .command-active-panel .trade-select-card,
+body.command-room .command-active-panel .trade-current-card,
+body.command-room .command-active-panel .trade-menu-details,
+body.command-room .command-active-panel .guided-mini-step,
+body.command-room .command-active-panel .summary-box,
+body.command-room .command-active-panel .contractor-info-card,
+body.command-room .command-active-panel .estimate-output-card,
+body.command-room .command-active-panel .proposal-preview-card,
+body.command-room .command-active-panel .ai-chat-card,
+body.command-room .command-active-panel .result-card,
+body.command-room .command-active-panel .photo-card,
+body.command-room .command-active-panel .signature-box,
+body.command-room .command-active-panel .calendar-box,
+body.command-room .command-active-panel .schedule-list,
+body.command-room .command-active-panel .private-room-alert,
+body.command-room .command-active-panel .appointment-empty,
+body.command-room .command-active-panel .estimate-table-wrap,
+body.command-room .command-active-panel .ai-chat-window,
+body.command-room .command-active-panel .chat-box,
+body.command-room .command-active-panel #proposalPreview,
+body.command-room .command-active-panel #privateFileExchangeUI > div,
+body.command-room .command-active-panel #sharedProposalInvoiceDocumentsUI {
+  background:
+    linear-gradient(180deg, rgba(15,23,42,0.94), rgba(2,6,23,0.9)) !important;
+  border-color: rgba(148,163,184,0.22) !important;
+  color: #e5e7eb !important;
+  box-shadow: 0 18px 42px rgba(0,0,0,0.28) !important;
+}
+
+body.command-room .command-active-panel h1,
+body.command-room .command-active-panel h2,
+body.command-room .command-active-panel h3,
+body.command-room .command-active-panel h4,
+body.command-room .command-active-panel strong,
+body.command-room .command-active-panel label,
+body.command-room .command-active-panel th,
+body.command-room .command-active-panel .value,
+body.command-room .command-active-panel .lineTotal,
+body.command-room .command-active-panel .money-line:last-child {
+  color: #f8fafc !important;
+}
+
+body.command-room .command-active-panel p,
+body.command-room .command-active-panel span,
+body.command-room .command-active-panel small,
+body.command-room .command-active-panel div,
+body.command-room .command-active-panel td,
+body.command-room .command-active-panel .label,
+body.command-room .command-active-panel .card-sub,
+body.command-room .command-active-panel .calendar-today-label,
+body.command-room .command-active-panel .appointment-empty,
+body.command-room .command-active-panel .ai-status,
+body.command-room .command-active-panel .exchange-item span,
+body.command-room .command-active-panel .exchange-card p {
+  color: #cbd5e1 !important;
+}
+
+body.command-room .command-active-panel input,
+body.command-room .command-active-panel select,
+body.command-room .command-active-panel textarea,
+body.command-room .command-active-panel .table-input,
+body.command-room #projectFileUpload {
+  background: rgba(2,6,23,0.72) !important;
+  border-color: rgba(249,115,22,0.26) !important;
+  color: #f8fafc !important;
+}
+
+body.command-room .command-active-panel input::placeholder,
+body.command-room .command-active-panel textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+body.command-room .command-active-panel .btn-primary,
+body.command-room .command-active-panel .btn-primary * {
+  color: #ffffff !important;
+}
+
+body.command-room .command-active-panel .btn-soft {
+  background: rgba(249,115,22,0.13) !important;
+  border-color: rgba(249,115,22,0.26) !important;
+}
+
+body.command-room .command-active-panel .btn-soft,
+body.command-room .command-active-panel .btn-soft * {
+  color: #fed7aa !important;
+}
+
+
+
+/* ===== HARD BLACK PANELS: KILL LIGHT SECTION BACKGROUNDS ===== */
+body.command-room .command-stage > section,
+body.command-room .command-active-panel,
+body.command-room #photoDocsPanel,
+body.command-room #projectOverviewPanel,
+body.command-room #receivedBidsSection,
+body.command-room #schedulePanel,
+body.command-room #videoChatPanel,
+body.command-room #signaturePanel,
+body.command-room #smartCalculatorPanel,
+body.command-room #estimateProposalPanel {
+  background: radial-gradient(circle at top right, rgba(249,115,22,0.12), transparent 34%), linear-gradient(180deg, #101827, #020617) !important;
+  color: #e5e7eb !important;
+  border-color: rgba(249,115,22,0.32) !important;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.45) !important;
+}
+
+body.command-room .command-active-panel::after,
+body.command-room #photoDocsPanel::after,
+body.command-room #photoDocsPanel .panel-bg,
+body.command-room #photoDocsPanel .panel-background {
+  background: transparent !important;
+}
+
+body.command-room #photoDocsPanel > *,
+body.command-room .command-active-panel > * {
+  color: inherit !important;
+}
+
+body.command-room #photoDocsPanel .panel-header,
+body.command-room #photoDocsPanel .panel-header *,
+body.command-room #photoDocsPanel > h1,
+body.command-room #photoDocsPanel > h2,
+body.command-room #photoDocsPanel > h3,
+body.command-room #photoDocsPanel > p {
+  color: #f8fafc !important;
+  opacity: 1 !important;
+}
+
+
+
+/* ===== COMMAND DECK PANEL SWITCH FIX ===== */
+body.command-room .command-stage > section:not(.command-active-panel),
+body.command-room .command-stage > .panel:not(.command-active-panel),
+body.command-room #projectOverviewPanel:not(.command-active-panel),
+body.command-room #receivedBidsSection:not(.command-active-panel),
+body.command-room #photoDocsPanel:not(.command-active-panel),
+body.command-room #schedulePanel:not(.command-active-panel),
+body.command-room #videoChatPanel:not(.command-active-panel),
+body.command-room #signaturePanel:not(.command-active-panel),
+body.command-room #smartCalculatorPanel:not(.command-active-panel),
+body.command-room #estimateProposalPanel:not(.command-active-panel) {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+body.command-room .command-stage > .command-active-panel {
+  display: block !important;
+  visibility: visible !important;
 }
 
 </style>
@@ -4020,9 +4280,10 @@ function buildCommandDeck() {
     deck = document.createElement('section');
     deck.id = 'commandDeck';
     deck.className = 'command-deck';
-    dashboard.insertBefore(deck, dashboard.firstElementChild);
+    dashboard.parentNode.insertBefore(deck, dashboard);
   }
 
+  const activePanel = deck ? deck.querySelector('.command-active-panel') : null;
   const steps = getCommandSteps();
   const role = getCommandRole();
   const cards = steps.map((step, index) => [
@@ -4040,8 +4301,14 @@ function buildCommandDeck() {
     '<p class="command-subtitle">Choose a station. The right tool loads beside you while everything else stays tucked away.</p>',
     '<div class="command-progress"><span id="commandProgressBar"></span></div>',
     '</div>',
-    '<div class="command-card-list">' + cards + '</div>'
+    '<div class="command-card-list">' + cards + '</div>',
+    '<div class="command-stage" id="commandStage"></div>'
   ].join('');
+
+  if (activePanel) {
+    const stage = deck.querySelector('#commandStage');
+    if (stage) stage.appendChild(activePanel);
+  }
 
   deck.querySelectorAll('[data-command-target]').forEach(button => {
     button.addEventListener('click', () => showCommandStage(button.dataset.commandTarget));
@@ -4052,6 +4319,7 @@ function showCommandStage(targetId) {
   const steps = getCommandSteps();
   const fallback = steps[0]?.id || 'projectOverviewPanel';
   const target = document.getElementById(targetId || fallback) || document.getElementById(fallback);
+  const stage = document.getElementById('commandStage');
   if (!target) return;
 
   document.body.classList.add('command-room');
@@ -4061,11 +4329,28 @@ function showCommandStage(targetId) {
     const panel = document.getElementById(id);
     if (!panel) return;
     panel.classList.remove('command-active-panel', 'guided-active-panel');
+    if (panel !== target) {
+      panel.hidden = true;
+      panel.style.display = 'none';
+    }
   });
+
+  if (stage) {
+    Array.from(stage.children).forEach(child => {
+      if (child !== target) {
+        child.hidden = true;
+        child.style.display = 'none';
+        child.classList.remove('command-active-panel', 'guided-active-panel');
+      }
+    });
+  }
 
   target.hidden = false;
   target.style.display = 'block';
   target.classList.add('command-active-panel');
+  if (stage && target.parentNode !== stage) {
+    stage.appendChild(target);
+  }
 
   const contractorTools = document.querySelector('.contractor-tools');
   if (contractorTools && getCommandRole() !== 'homeowner') {
