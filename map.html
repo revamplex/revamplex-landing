@@ -558,6 +558,98 @@
   }
 }
 
+
+/* ===== CARD RAIL REFINEMENT — CONTROLS BELOW + 10% SMALLER CARDS ===== */
+.map-results-section .results-shell-inner {
+  max-width: 1480px;
+}
+
+.map-results-section .cards-row {
+  padding: 8px 0 8px !important;
+  align-items: flex-start;
+}
+
+.map-results-section .results-header-bottom {
+  margin-top: 8px;
+  padding: 8px 4px 0 !important;
+  justify-content: center;
+}
+
+.map-results-section .results-header-bottom .results-title {
+  text-align: center;
+  font-size: 15px !important;
+}
+
+.map-results-section .results-header-bottom .results-actions {
+  position: absolute;
+  right: 24px;
+  display: flex;
+  gap: 8px;
+}
+
+/* 10% smaller card footprint while keeping the same shape/aspect style */
+.map-results-section .listing-card {
+  flex-basis: 216px !important;
+  max-width: 216px !important;
+}
+
+.map-results-section .card-image-wrap {
+  height: 106px !important;
+}
+
+.map-results-section .card-top {
+  padding: 8px 10px 5px !important;
+}
+
+.map-results-section .card-body {
+  padding: 0 10px 9px !important;
+}
+
+.map-results-section .card-title {
+  font-size: 14px !important;
+}
+
+.map-results-section .card-sub {
+  font-size: 11px !important;
+}
+
+.map-results-section .meta-box {
+  min-height: 38px !important;
+  padding: 5px 8px !important;
+}
+
+.map-results-section .meta-value {
+  font-size: 13px !important;
+}
+
+.map-results-section .info-row {
+  font-size: 11px !important;
+}
+
+.map-results-section .card-actions .mini-btn,
+.map-results-section .mini-btn {
+  height: 34px !important;
+  min-height: 34px !important;
+  font-size: 12px !important;
+}
+
+@media (max-width: 640px) {
+  .map-results-section .listing-card {
+    flex: 0 0 70vw !important;
+    max-width: 70vw !important;
+  }
+
+  .map-results-section .results-header-bottom {
+    display: grid;
+    gap: 10px;
+  }
+
+  .map-results-section .results-header-bottom .results-actions {
+    position: static;
+    justify-content: center;
+  }
+}
+
 </style>
   <style>
     :root {
@@ -1771,14 +1863,14 @@
 <section class="map-results-section">
   <div class="results-shell">
     <div class="results-shell-inner">
-      <div class="results-header">
+      <div class="cards-row" id="cardsRow"></div>
+      <div class="results-header results-header-bottom">
         <div class="results-title" id="resultsTitle">Swipe left ↔ right to browse contractors</div>
         <div class="results-actions">
           <button class="action-btn" id="scrollLeftBtn">‹</button>
           <button class="action-btn" id="scrollRightBtn">›</button>
         </div>
       </div>
-      <div class="cards-row" id="cardsRow"></div>
     </div>
   </div>
 </section>
