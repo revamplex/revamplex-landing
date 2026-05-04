@@ -650,6 +650,91 @@
   }
 }
 
+
+/* ===== CARD BAR TIGHT + MAP-FLOATING SWIPE CONTROLS ===== */
+.map-results-section {
+  padding: 6px 12px 8px !important;
+  background: #ffffff !important;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.map-results-section .results-shell-inner {
+  padding: 0 12px !important;
+}
+
+.map-results-section .cards-row {
+  padding: 4px 0 5px !important;
+}
+
+.map-results-section .results-header-map-float {
+  position: absolute;
+  left: 50%;
+  top: -54px;
+  transform: translateX(-50%);
+  z-index: 60;
+  width: min(720px, calc(100vw - 32px));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  padding: 0 !important;
+  pointer-events: auto;
+}
+
+.map-results-section .results-header-map-float .results-title {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border-radius: 999px !important;
+  padding: 9px 14px !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  text-align: center;
+}
+
+.map-results-section .results-header-map-float .results-actions {
+  display: flex;
+  gap: 8px;
+  position: static !important;
+}
+
+.map-results-section .results-header-map-float .action-btn {
+  width: 38px !important;
+  height: 38px !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Remove old bottom-header spacing from previous version */
+.map-results-section .results-header-bottom {
+  margin-top: 0 !important;
+  padding: 0 !important;
+}
+
+@media (max-width: 640px) {
+  .map-results-section {
+    padding: 6px 8px 8px !important;
+  }
+
+  .map-results-section .results-header-map-float {
+    top: -50px;
+    width: calc(100vw - 18px);
+    gap: 8px;
+  }
+
+  .map-results-section .results-header-map-float .results-title {
+    font-size: 12px !important;
+    padding: 8px 10px !important;
+  }
+
+  .map-results-section .results-header-map-float .action-btn {
+    width: 36px !important;
+    height: 36px !important;
+  }
+}
+
 </style>
   <style>
     :root {
@@ -1863,14 +1948,14 @@
 <section class="map-results-section">
   <div class="results-shell">
     <div class="results-shell-inner">
-      <div class="cards-row" id="cardsRow"></div>
-      <div class="results-header results-header-bottom">
+      <div class="results-header results-header-map-float">
         <div class="results-title" id="resultsTitle">Swipe left ↔ right to browse contractors</div>
         <div class="results-actions">
           <button class="action-btn" id="scrollLeftBtn">‹</button>
           <button class="action-btn" id="scrollRightBtn">›</button>
         </div>
       </div>
+      <div class="cards-row" id="cardsRow"></div>
     </div>
   </div>
 </section>
