@@ -3452,6 +3452,9 @@ body.command-room .command-stage > .command-active-panel {
       <div class="top-actions">
         <button id="backToFeed" class="btn btn-soft">Back to Project Feed</button>
         <button id="inviteBtn" class="btn btn-primary">Invite Customer</button>
+        <button id="themeToggleBtn" class="btn btn-soft" type="button">
+    Light Theme
+  </button>
       </div>
     </div>
 
@@ -8291,6 +8294,49 @@ function getProjectRoomName() {
 
 <style>
 .exchange-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}.exchange-card{border:1px solid var(--line);border-radius:18px;background:#fff;padding:14px}.exchange-card h4{margin:0 0 8px}.exchange-card p{margin:0 0 12px;color:var(--muted);font-size:.9rem;line-height:1.4}.exchange-list{display:grid;gap:10px;margin-top:12px}.exchange-item{border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#fff,#f8fafc);padding:12px}.exchange-item strong{display:block;margin-bottom:5px}.exchange-item span{display:block;color:var(--muted);font-size:.86rem;line-height:1.35}.exchange-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.signature-live-pad{width:100%;height:170px;border:2px dashed #fdba74;border-radius:16px;background:#fff7ed;touch-action:none;display:block}.signature-status-pill{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;background:#f8fafc;border:1px solid var(--line);color:var(--muted);font-weight:800;font-size:.8rem;margin-top:8px}.signature-status-pill.signed{background:#ecfdf5;border-color:#bbf7d0;color:#15803d}.exchange-status{color:var(--brand-dark);font-weight:800;font-size:.9rem;margin-top:8px}@media(max-width:760px){.exchange-grid{grid-template-columns:1fr}}
+  /* ===== PROJECT ROOM LIGHT THEME OPTION ===== */
+body.light-room {
+  background: linear-gradient(180deg, #fff7ed 0%, #f8fafc 260px) !important;
+  color: #0f172a !important;
+}
+
+body.light-room .topbar,
+body.light-room .command-deck,
+body.light-room .command-active-panel,
+body.light-room .command-stage > section,
+body.light-room #photoDocsPanel,
+body.light-room #projectOverviewPanel,
+body.light-room #receivedBidsSection,
+body.light-room #schedulePanel,
+body.light-room #videoChatPanel,
+body.light-room #signaturePanel,
+body.light-room #smartCalculatorPanel,
+body.light-room #estimateProposalPanel {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+
+body.light-room .command-active-panel *,
+body.light-room #photoDocsPanel *,
+body.light-room #projectOverviewPanel *,
+body.light-room #receivedBidsSection *,
+body.light-room #schedulePanel *,
+body.light-room #videoChatPanel *,
+body.light-room #signaturePanel *,
+body.light-room #smartCalculatorPanel *,
+body.light-room #estimateProposalPanel * {
+  color: inherit !important;
+}
+
+body.light-room input,
+body.light-room select,
+body.light-room textarea,
+body.light-room .table-input {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
 </style>
 <script>
 (function(){
@@ -8491,7 +8537,33 @@ document.addEventListener('DOMContentLoaded',()=>setTimeout(init,900));
 window.addEventListener('resize',()=>{ if(!padsReady)return; resize(document.getElementById(currentSignatureRole()+'SignatureCanvas')); });
 })();
 </script>
+<script>
+function applyProjectRoomTheme(theme) {
+  const isLight = theme === "light";
 
+  document.body.classList.toggle("light-room", isLight);
+  localStorage.setItem("revamplex_project_room_theme", isLight ? "light" : "dark");
+
+  const btn = document.getElementById("themeToggleBtn");
+  if (btn) btn.textContent = isLight ? "Dark Theme" : "Light Theme";
+}
+
+function setupProjectRoomThemeToggle() {
+  const savedTheme = localStorage.getItem("revamplex_project_room_theme") || "dark";
+  applyProjectRoomTheme(savedTheme);
+
+  const btn = document.getElementById("themeToggleBtn");
+  if (!btn) return;
+
+  btn.onclick = function () {
+    const nextTheme = document.body.classList.contains("light-room") ? "dark" : "light";
+    applyProjectRoomTheme(nextTheme);
+  };
+}
+
+document.addEventListener("DOMContentLoaded", setupProjectRoomThemeToggle);
+window.addEventListener("load", setupProjectRoomThemeToggle);
+</script>
 <script>
 /* ===== SHARED HOMEOWNER PROPOSAL LIST REFRESH ===== */
 document.addEventListener("DOMContentLoaded", function(){
