@@ -463,6 +463,101 @@
   }
 }
 
+
+/* ===== RESULTS BELOW MAP — NO OVERLAY ===== */
+.map-results-section {
+  position: relative;
+  z-index: 20;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  padding: 18px 12px 24px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.map-results-section .results-shell {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  z-index: 1 !important;
+  padding: 0 !important;
+  transform: none !important;
+  pointer-events: auto !important;
+  overflow: visible !important;
+  background: transparent !important;
+  border-top: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.map-results-section .results-shell:hover {
+  bottom: auto !important;
+}
+
+.map-results-section .results-shell-inner {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 12px;
+}
+
+.map-results-section .results-header {
+  padding: 0 0 12px !important;
+}
+
+.map-results-section .results-title {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  padding: 0 !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+}
+
+.map-results-section .cards-row {
+  padding: 8px 0 10px !important;
+}
+
+#app {
+  height: 76vh !important;
+  min-height: 560px !important;
+}
+
+.fab-wrap {
+  bottom: 24px !important;
+}
+
+.leaflet-control-zoom {
+  margin-bottom: 24px !important;
+}
+
+.ui-collapsed .results-shell {
+  transform: none !important;
+}
+
+@media (max-width: 900px) {
+  #app {
+    height: 70vh !important;
+    min-height: 520px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  #app {
+    height: 68vh !important;
+    min-height: 500px !important;
+  }
+
+  .map-results-section {
+    padding: 14px 8px 20px;
+  }
+
+  .listing-card {
+    flex: 0 0 78vw !important;
+    max-width: 78vw !important;
+  }
+}
+
 </style>
   <style>
     :root {
@@ -1669,20 +1764,24 @@
   <button class="fab secondary" id="locateBtn">📍 Center Map</button>
 
 </div>
+</div>
 
-    <div class="results-shell">
-      <div class="results-shell-inner">
-        <div class="results-header">
-          <div class="results-title" id="resultsTitle">Swipe left ↔ right to browse contractors</div>
-          <div class="results-actions">
-            <button class="action-btn" id="scrollLeftBtn">‹</button>
-            <button class="action-btn" id="scrollRightBtn">›</button>
-          </div>
+
+<!-- MAP RESULTS SECTION BELOW MAP -->
+<section class="map-results-section">
+  <div class="results-shell">
+    <div class="results-shell-inner">
+      <div class="results-header">
+        <div class="results-title" id="resultsTitle">Swipe left ↔ right to browse contractors</div>
+        <div class="results-actions">
+          <button class="action-btn" id="scrollLeftBtn">‹</button>
+          <button class="action-btn" id="scrollRightBtn">›</button>
         </div>
-        <div class="cards-row" id="cardsRow"></div>
       </div>
+      <div class="cards-row" id="cardsRow"></div>
     </div>
   </div>
+</section>
 
 
   <section class="map-footer-section">
