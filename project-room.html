@@ -4741,8 +4741,16 @@ function showCommandStage(targetId) {
     const isActive = button.dataset.commandTarget === target.id;
     button.classList.toggle('is-active', isActive);
     if (isActive) {
-      button.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-    }
+  button.scrollIntoView({
+    behavior: 'smooth',
+    inline: 'center',
+    block: 'nearest'
+  });
+
+  setTimeout(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, 80);
+}
   });
 
   const progress = document.getElementById('commandProgressBar');
