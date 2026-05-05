@@ -3806,7 +3806,7 @@ body.light-room.command-room .footer-note { color: #64748b !important; }
 
 </style>
 </head>
-<body>
+<body class="command-room contractor-room">
 <div class="app-shell">
     <div class="topbar">
       <div class="brand">
@@ -4762,8 +4762,8 @@ function initCommandRoom() {
   showCommandStage('projectOverviewPanel');
 }
 
-document.addEventListener('DOMContentLoaded', () => setTimeout(initCommandRoom, 500));
-window.addEventListener('load', () => setTimeout(initCommandRoom, 800));
+document.addEventListener('DOMContentLoaded', initCommandRoom);
+window.addEventListener('load', initCommandRoom);
 
 function setupCalculatorMiniSteps() {
   document.querySelectorAll('[data-calc-focus]').forEach(button => {
