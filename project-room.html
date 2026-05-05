@@ -4498,15 +4498,6 @@ body.light-room.command-room .footer-note { color: #64748b !important; }
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script>
 function scrollToSection(id) {
-  const el = document.getElementById(id);
-  if (!el) {
-    console.warn("Section not found:", id);
-    return;
-  }
-  el.style.display = "block";
-  el.hidden = false;
-  el.scrollIntoView({ behavior: "smooth", block: "start" });
-}
 </script>
 <script>
 function getGuideRole() {
@@ -4723,6 +4714,11 @@ function showCommandStage(targetId) {
     if (panel !== target) {
       panel.hidden = true;
       panel.style.display = 'none';
+      setTimeout(() => {
+  window.scrollTo(0, 0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+}, 0);
     }
   });
 
