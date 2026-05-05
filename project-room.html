@@ -3803,7 +3803,11 @@ body.light-room.command-room .footer-note { color: #64748b !important; }
     background: linear-gradient(135deg, #f97316, #ea580c) !important;
   }
 }
-
+/* Photos + Documentation text = black */
+#photoDocsPanel h3,
+#photoDocsPanel p{
+  color:#000 !important;
+}
 </style>
 </head>
 <body class="command-room contractor-room" style="overflow:hidden;">
@@ -4559,8 +4563,17 @@ function showGuidedStage(targetId, options = {}) {
   });
 
   if (options.scroll) {
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  const panel = document.querySelector(".command-active-panel");
+
+  if (panel && target) {
+    panel.scrollTo({
+      top: target.offsetTop - 20,
+      behavior: "smooth"
+    });
   }
+
+  return;
+}
 }
 
 function scrollGuidedSection(button) {
