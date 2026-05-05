@@ -3436,13 +3436,131 @@ body.command-room .command-stage > .command-active-panel {
 
 
 
-/* ===== TRUE LIGHT THEME OVERRIDE — MUST BE LAST ===== */
-body.light-room.command-room,
-body.light-room {
-  background: #f8fafc !important;
+/* ===== TRUE LIGHT THEME OVERRIDE — MUST BE LAST BEFORE 
+
+/* =========================================================
+   FINAL PREMIUM LIGHT MODE FIX — WHITE PANELS + BLACK TEXT
+   Keep this as the LAST CSS block before </style>
+   ========================================================= */
+body.light-room.command-room {
+  background:
+    linear-gradient(90deg,
+      #e2e8f0 0,
+      #e2e8f0 calc((100vw - 1220px) / 2),
+      transparent calc((100vw - 1220px) / 2),
+      transparent calc(100vw - ((100vw - 1220px) / 2)),
+      #e2e8f0 calc(100vw - ((100vw - 1220px) / 2)),
+      #e2e8f0 100%),
+    linear-gradient(180deg, #fff7ed 0%, #f8fafc 260px) !important;
   color: #0f172a !important;
 }
 
+body.light-room.command-room .topbar {
+  background: rgba(255,255,255,0.98) !important;
+  border: 1px solid rgba(226,232,240,0.96) !important;
+  box-shadow: 0 18px 44px rgba(15,23,42,0.10) !important;
+}
+
+body.light-room.command-room .main-logo {
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+body.light-room.command-room #inviteBtn,
+body.light-room.command-room .top-actions .btn-primary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: linear-gradient(135deg, #f97316, #ea580c) !important;
+  color: #ffffff !important;
+  border: 0 !important;
+  box-shadow: 0 16px 30px rgba(249,115,22,0.28) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+body.light-room.command-room #inviteBtn *,
+body.light-room.command-room .top-actions .btn-primary * {
+  color: #ffffff !important;
+}
+
+body.light-room.command-room #themeToggleBtn,
+body.light-room.command-room #backToFeed,
+body.light-room.command-room .top-actions .btn-soft {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #fff1e8 !important;
+  color: #ea580c !important;
+  border: 1px solid rgba(249,115,22,0.12) !important;
+  box-shadow: 0 10px 22px rgba(15,23,42,0.04) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+body.light-room.command-room .command-deck {
+  background: rgba(255,255,255,0.96) !important;
+  border: 1px solid rgba(226,232,240,0.95) !important;
+  box-shadow: 0 22px 54px rgba(15,23,42,0.12) !important;
+}
+
+body.light-room.command-room .command-orbit {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.88), rgba(255,247,237,0.70)),
+    url('https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=900&q=80') center / cover !important;
+  border-color: rgba(249,115,22,0.45) !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.55), 0 18px 44px rgba(15,23,42,0.12) !important;
+}
+
+body.light-room.command-room .command-eyebrow {
+  color: #c2410c !important;
+  text-shadow: none !important;
+}
+
+body.light-room.command-room .command-title,
+body.light-room.command-room .command-subtitle {
+  color: #0f172a !important;
+  text-shadow: none !important;
+}
+
+body.light-room.command-room .command-progress {
+  background: rgba(15,23,42,0.10) !important;
+}
+
+body.light-room.command-room .command-card {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 16px 34px rgba(15,23,42,0.08) !important;
+}
+
+body.light-room.command-room .command-card strong,
+body.light-room.command-room .command-card small {
+  color: #0f172a !important;
+}
+
+body.light-room.command-room .command-card small {
+  color: #334155 !important;
+}
+
+body.light-room.command-room .command-card.is-active {
+  background: linear-gradient(135deg, #fff7ed, #ffffff) !important;
+  border-color: rgba(249,115,22,0.65) !important;
+  box-shadow: 0 22px 44px rgba(249,115,22,0.16), 0 18px 34px rgba(15,23,42,0.10) !important;
+}
+
+body.light-room.command-room .command-index {
+  background: #fff7ed !important;
+  color: #ea580c !important;
+}
+
+body.light-room.command-room .command-card.is-active .command-index {
+  background: linear-gradient(135deg, #f97316, #ea580c) !important;
+  color: #ffffff !important;
+}
+
+/* Main active panels */
+body.light-room.command-room .command-stage,
 body.light-room.command-room .command-active-panel,
 body.light-room.command-room .command-stage > section,
 body.light-room.command-room #projectOverviewPanel,
@@ -3452,14 +3570,256 @@ body.light-room.command-room #schedulePanel,
 body.light-room.command-room #videoChatPanel,
 body.light-room.command-room #signaturePanel,
 body.light-room.command-room #smartCalculatorPanel,
-body.light-room.command-room #estimateProposalPanel,
+body.light-room.command-room #estimateProposalPanel {
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 24px 58px rgba(15,23,42,0.10) !important;
+}
+
+body.light-room.command-room .command-active-panel::before {
+  background: linear-gradient(135deg, #f97316, #ea580c) !important;
+  color: #ffffff !important;
+  box-shadow: 0 12px 24px rgba(249,115,22,0.24) !important;
+}
+
+/* Every nested card/box that was staying navy */
+body.light-room.command-room .hero-grid,
+body.light-room.command-room .mini-stats,
+body.light-room.command-room .stat,
+body.light-room.command-room .side-summary,
+body.light-room.command-room .summary-line,
+body.light-room.command-room .summary-box,
+body.light-room.command-room .money-line,
+body.light-room.command-room .result-metric,
+body.light-room.command-room .task-item,
+body.light-room.command-room .appointment-empty,
+body.light-room.command-room .appointment-note,
+body.light-room.command-room .selected-date-box,
+body.light-room.command-room .private-room-alert,
+body.light-room.command-room .labor-explainer,
+body.light-room.command-room .guided-helper-card,
+body.light-room.command-room .guided-mini-step,
+body.light-room.command-room .trade-select-card,
+body.light-room.command-room .trade-current-card,
+body.light-room.command-room .trade-menu-details,
+body.light-room.command-room .result-card,
+body.light-room.command-room .estimate-table-wrap,
+body.light-room.command-room .estimate-output-card,
+body.light-room.command-room .proposal-preview-card,
+body.light-room.command-room #proposalPreview,
+body.light-room.command-room .ai-chat-card,
+body.light-room.command-room .ai-chat-window,
+body.light-room.command-room .contractor-info-card,
+body.light-room.command-room .calendar-box,
+body.light-room.command-room .schedule-list,
+body.light-room.command-room .signature-box,
+body.light-room.command-room .signature-pad,
+body.light-room.command-room .photo-card,
+body.light-room.command-room .photo-placeholder,
+body.light-room.command-room .chat-box,
+body.light-room.command-room .video-call-box,
+body.light-room.command-room .exchange-card,
+body.light-room.command-room .exchange-item,
+body.light-room.command-room .exchange-list,
+body.light-room.command-room .invoice-card,
+body.light-room.command-room .proposal-card,
+body.light-room.command-room #privateFileExchangeUI,
+body.light-room.command-room #privateFileExchangeUI > div,
+body.light-room.command-room #sharedProposalInvoiceDocumentsUI,
+body.light-room.command-room details,
+body.light-room.command-room summary {
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 14px 34px rgba(15,23,42,0.08) !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+}
+
+body.light-room.command-room .private-room-alert,
+body.light-room.command-room .labor-explainer,
+body.light-room.command-room .guided-helper-card,
+body.light-room.command-room .photo-card,
+body.light-room.command-room .selected-date-box,
+body.light-room.command-room .result-card,
+body.light-room.command-room .side-summary {
+  background: linear-gradient(180deg, #ffffff, #fff7ed) !important;
+  border-color: rgba(249,115,22,0.22) !important;
+}
+
+body.light-room.command-room .summary-line,
+body.light-room.command-room .money-line,
+body.light-room.command-room .result-metric {
+  box-shadow: none !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+
+/* Text force */
+body.light-room.command-room .command-active-panel h1,
+body.light-room.command-room .command-active-panel h2,
+body.light-room.command-room .command-active-panel h3,
+body.light-room.command-room .command-active-panel h4,
+body.light-room.command-room .command-active-panel h5,
+body.light-room.command-room .command-active-panel strong,
+body.light-room.command-room .command-active-panel label,
+body.light-room.command-room .command-active-panel .value,
+body.light-room.command-room .command-active-panel .lineTotal,
+body.light-room.command-room .command-active-panel .money-line:last-child,
+body.light-room.command-room .command-active-panel .ai-heading {
+  color: #0f172a !important;
+  opacity: 1 !important;
+}
+
+body.light-room.command-room .command-active-panel p,
+body.light-room.command-room .command-active-panel span,
+body.light-room.command-room .command-active-panel small,
+body.light-room.command-room .command-active-panel div,
+body.light-room.command-room .command-active-panel td,
+body.light-room.command-room .command-active-panel .label,
+body.light-room.command-room .command-active-panel .card-sub,
+body.light-room.command-room .command-active-panel .calendar-today-label,
+body.light-room.command-room .command-active-panel .ai-status,
+body.light-room.command-room .command-active-panel .exchange-item span,
+body.light-room.command-room .command-active-panel .exchange-card p {
+  color: #334155 !important;
+  opacity: 1 !important;
+}
+
+body.light-room.command-room .command-active-panel .project-title h2,
+body.light-room.command-room .command-active-panel .panel-header h3,
+body.light-room.command-room .command-active-panel .side-summary h3,
+body.light-room.command-room .command-active-panel .summary-box h4,
+body.light-room.command-room .command-active-panel .photo-card strong,
+body.light-room.command-room .command-active-panel .exchange-card h4,
+body.light-room.command-room .command-active-panel .exchange-item strong {
+  color: #0f172a !important;
+}
+
+body.light-room.command-room th {
+  background: #fff7ed !important;
+  color: #9a3412 !important;
+  border-bottom-color: #fed7aa !important;
+}
+
+body.light-room.command-room td {
+  color: #0f172a !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+
+body.light-room.command-room input,
+body.light-room.command-room select,
+body.light-room.command-room textarea,
+body.light-room.command-room .table-input,
+body.light-room.command-room #projectFileUpload {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: inset 0 1px 0 rgba(15,23,42,0.02) !important;
+}
+
+body.light-room.command-room input::placeholder,
+body.light-room.command-room textarea::placeholder {
+  color: #64748b !important;
+  opacity: 1 !important;
+}
+
+body.light-room.command-room .status-pill {
+  background: #ecfdf5 !important;
+  color: #0f172a !important;
+  border-color: #bbf7d0 !important;
+  box-shadow: 0 14px 28px rgba(22,163,74,0.10) !important;
+}
+
+body.light-room.command-room .guided-mini-step span {
+  background: #0f172a !important;
+  color: #ffffff !important;
+}
+
+body.light-room.command-room .guided-mini-step.is-active span {
+  background: linear-gradient(135deg, #f97316, #ea580c) !important;
+  color: #ffffff !important;
+}
+
+body.light-room.command-room .btn-primary,
+body.light-room.command-room .command-active-panel .btn-primary {
+  background: linear-gradient(135deg, #f97316, #ea580c) !important;
+  color: #ffffff !important;
+  border: 0 !important;
+  box-shadow: 0 14px 28px rgba(249,115,22,0.24) !important;
+}
+
+body.light-room.command-room .btn-primary *,
+body.light-room.command-room .command-active-panel .btn-primary * {
+  color: #ffffff !important;
+}
+
+body.light-room.command-room .btn-soft,
+body.light-room.command-room .command-active-panel .btn-soft,
+body.light-room.command-room .exchange-card a.btn,
+body.light-room.command-room .exchange-actions .btn {
+  background: #fff1e8 !important;
+  color: #ea580c !important;
+  border: 1px solid rgba(249,115,22,0.18) !important;
+  box-shadow: 0 10px 22px rgba(15,23,42,0.04) !important;
+}
+
+body.light-room.command-room .btn-soft *,
+body.light-room.command-room .command-active-panel .btn-soft * {
+  color: #ea580c !important;
+}
+
+body.light-room.command-room .video-call-box {
+  background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
+}
+
+body.light-room.command-room .ai-msg.assistant,
+body.light-room.command-room .message.contractor {
+  background: #fff7ed !important;
+  color: #0f172a !important;
+}
+
+body.light-room.command-room .ai-msg.user,
+body.light-room.command-room .message.customer {
+  background: #eff6ff !important;
+  color: #0f172a !important;
+}
+
+body.light-room.command-room .footer-note {
+  color: #64748b !important;
+}
+
+</style> ===== */
+body.light-room.command-room,
+body.light-room.command-room * {
+  background-image: none !important;
+  text-shadow: none !important;
+}
+
+body.light-room.command-room {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+body.light-room.command-room .command-active-panel,
+body.light-room.command-room .command-stage,
+body.light-room.command-room .command-stage *,
+body.light-room.command-room section,
+body.light-room.command-room .panel,
 body.light-room.command-room .stat,
 body.light-room.command-room .side-summary,
 body.light-room.command-room .summary-box,
+body.light-room.command-room .trade-select-card,
+body.light-room.command-room .trade-current-card,
+body.light-room.command-room .trade-menu-details,
+body.light-room.command-room .guided-mini-step,
+body.light-room.command-room .guided-helper-card,
 body.light-room.command-room .contractor-info-card,
+body.light-room.command-room .ai-chat-card,
 body.light-room.command-room .estimate-output-card,
 body.light-room.command-room .proposal-preview-card,
-body.light-room.command-room .ai-chat-card,
 body.light-room.command-room .result-card,
 body.light-room.command-room .calendar-box,
 body.light-room.command-room .schedule-list,
@@ -3468,35 +3828,31 @@ body.light-room.command-room .photo-card,
 body.light-room.command-room .chat-box,
 body.light-room.command-room .estimate-table-wrap,
 body.light-room.command-room .ai-chat-window,
-body.light-room.command-room .guided-helper-card,
-body.light-room.command-room .guided-mini-step {
+body.light-room.command-room #proposalPreview,
+body.light-room.command-room #privateFileExchangeUI,
+body.light-room.command-room #privateFileExchangeUI *,
+body.light-room.command-room #sharedProposalInvoiceDocumentsUI,
+body.light-room.command-room #sharedProposalInvoiceDocumentsUI * {
   background: #ffffff !important;
   color: #0f172a !important;
   border-color: #e2e8f0 !important;
-  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08) !important;
-}
-
-body.light-room.command-room .command-active-panel *,
-body.light-room.command-room .command-stage > section *,
-body.light-room.command-room #projectOverviewPanel *,
-body.light-room.command-room #receivedBidsSection *,
-body.light-room.command-room #photoDocsPanel *,
-body.light-room.command-room #schedulePanel *,
-body.light-room.command-room #videoChatPanel *,
-body.light-room.command-room #signaturePanel *,
-body.light-room.command-room #smartCalculatorPanel *,
-body.light-room.command-room #estimateProposalPanel * {
-  color: #0f172a !important;
   opacity: 1 !important;
 }
 
+body.light-room.command-room h1,
+body.light-room.command-room h2,
+body.light-room.command-room h3,
+body.light-room.command-room h4,
 body.light-room.command-room p,
-body.light-room.command-room small,
 body.light-room.command-room span,
-body.light-room.command-room td,
+body.light-room.command-room small,
+body.light-room.command-room div,
+body.light-room.command-room strong,
 body.light-room.command-room label,
-body.light-room.command-room .label {
-  color: #334155 !important;
+body.light-room.command-room td,
+body.light-room.command-room th {
+  color: #0f172a !important;
+  opacity: 1 !important;
 }
 
 body.light-room.command-room input,
@@ -3522,7 +3878,6 @@ body.light-room.command-room .btn-soft,
 body.light-room.command-room .btn-soft * {
   color: #ea580c !important;
 }
-
 </style>
 </head>
 <body>
@@ -8422,354 +8777,149 @@ body.light-room .table-input {
   color: #0f172a !important;
   border-color: #e2e8f0 !important;
 }
-  /* ===== PREMIUM LIGHT COMMAND ROOM THEME — MUST BE LAST BEFORE </style> ===== */
+  /* ===== TRUE LIGHT THEME OVERRIDE — MUST STAY LAST ===== */
+body.light-room,
 body.light-room.command-room {
-  background:
-    radial-gradient(circle at 18% 8%, rgba(249, 115, 22, 0.12), transparent 28%),
-    radial-gradient(circle at 78% 18%, rgba(251, 146, 60, 0.10), transparent 26%),
-    linear-gradient(180deg, #fff7ed 0%, #f8fafc 260px) !important;
+  background: linear-gradient(180deg, #fff7ed 0%, #f8fafc 260px) !important;
   color: #0f172a !important;
 }
 
-body.light-room.command-room .topbar {
-  background: rgba(255, 255, 255, 0.96) !important;
-  border: 1px solid rgba(226, 232, 240, 0.95) !important;
-  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.10) !important;
-}
-
-body.light-room.command-room .topbar .btn-primary,
-body.light-room.command-room .topbar .btn-primary * {
-  background: linear-gradient(135deg, #f97316, #ea580c) !important;
-  color: #ffffff !important;
-  border-color: transparent !important;
-  box-shadow: 0 14px 26px rgba(249, 115, 22, 0.26) !important;
-}
-
-body.light-room.command-room .topbar .btn-soft,
-body.light-room.command-room .topbar .btn-soft * {
-  background: rgba(249, 115, 22, 0.12) !important;
-  color: #ea580c !important;
-}
-
-body.light-room.command-room .command-deck {
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,250,252,0.94)) !important;
-  border: 1px solid rgba(226, 232, 240, 0.95) !important;
-  box-shadow: 0 28px 60px rgba(15, 23, 42, 0.12) !important;
-}
-
-/* Keep the construction image in light mode */
-body.light-room.command-room .command-orbit {
-  background:
-    linear-gradient(90deg, rgba(255,255,255,0.94), rgba(255,247,237,0.72)),
-    url('https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=900&q=80') center / cover !important;
-  border-color: rgba(249, 115, 22, 0.42) !important;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.72), 0 18px 38px rgba(249,115,22,0.10) !important;
-}
-
-body.light-room.command-room .command-orbit .command-eyebrow {
-  color: #9a3412 !important;
-  text-shadow: none !important;
-}
-
-body.light-room.command-room .command-orbit .command-title,
-body.light-room.command-room .command-orbit .command-subtitle {
-  color: #0f172a !important;
-  text-shadow: none !important;
-}
-
-body.light-room.command-room .command-orbit .command-progress {
-  background: rgba(15, 23, 42, 0.08) !important;
-}
-
-body.light-room.command-room .command-orbit .command-progress span {
-  background: linear-gradient(90deg, #f97316, #fb923c) !important;
-  box-shadow: 0 0 22px rgba(249,115,22,0.45) !important;
-}
-
-body.light-room.command-room .command-card {
-  background: linear-gradient(180deg, #ffffff, #f8fafc) !important;
-  color: #0f172a !important;
-  border-color: rgba(226, 232, 240, 0.95) !important;
-  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.10) !important;
-}
-
-body.light-room.command-room .command-card:hover,
-body.light-room.command-room .command-card.is-active {
-  background: linear-gradient(135deg, #fff7ed, #ffffff) !important;
-  border-color: rgba(249, 115, 22, 0.72) !important;
-  box-shadow: 0 22px 42px rgba(249, 115, 22, 0.16), 0 16px 28px rgba(15, 23, 42, 0.10) !important;
-}
-
-body.light-room.command-room .command-card strong,
-body.light-room.command-room .command-card small {
-  color: #0f172a !important;
-}
-
-body.light-room.command-room .command-card small {
-  color: #334155 !important;
-}
-
-body.light-room.command-room .command-index {
-  background: #f1f5f9 !important;
-  color: #334155 !important;
-}
-
-body.light-room.command-room .command-card.is-active .command-index {
-  background: linear-gradient(135deg, #f97316, #ea580c) !important;
-  color: #ffffff !important;
-}
-
-body.light-room.command-room .command-arrow {
-  color: #ea580c !important;
-}
-
-body.light-room.command-room .command-active-panel,
-body.light-room.command-room .command-stage > .command-active-panel,
-body.light-room.command-room .command-stage > section {
-  background:
-    radial-gradient(circle at top right, rgba(249,115,22,0.10), transparent 34%),
-    linear-gradient(180deg, #ffffff, #f8fafc) !important;
-  color: #0f172a !important;
-  border-color: rgba(226, 232, 240, 0.95) !important;
-  box-shadow: 0 30px 70px rgba(15, 23, 42, 0.14) !important;
-}
-
-body.light-room.command-room .command-active-panel::before {
-  background: linear-gradient(135deg, #f97316, #ea580c) !important;
-  color: #ffffff !important;
-  box-shadow: 0 10px 22px rgba(249,115,22,0.22) !important;
-}
-
-body.light-room.command-room .status-pill {
-  background: #ecfdf5 !important;
-  color: #14532d !important;
-  border-color: #bbf7d0 !important;
-  box-shadow: 0 12px 24px rgba(22, 163, 74, 0.10) !important;
-}
-
-body.light-room.command-room .stat,
-body.light-room.command-room .side-summary,
-body.light-room.command-room .summary-box,
-body.light-room.command-room .trade-select-card,
-body.light-room.command-room .trade-current-card,
-body.light-room.command-room .trade-menu-details,
-body.light-room.command-room .guided-mini-step,
-body.light-room.command-room .guided-helper-card,
-body.light-room.command-room .contractor-info-card,
-body.light-room.command-room .ai-chat-card,
-body.light-room.command-room .estimate-output-card,
-body.light-room.command-room .proposal-preview-card,
-body.light-room.command-room .result-card,
-body.light-room.command-room .calendar-box,
-body.light-room.command-room .schedule-list,
-body.light-room.command-room .signature-box,
-body.light-room.command-room .photo-card,
-body.light-room.command-room .chat-box,
-body.light-room.command-room .estimate-table-wrap,
-body.light-room.command-room .ai-chat-window,
-body.light-room.command-room .selected-date-box,
-body.light-room.command-room .private-room-alert,
-body.light-room.command-room .labor-explainer,
-body.light-room.command-room .exchange-card,
-body.light-room.command-room .exchange-item,
-body.light-room.command-room .exchange-list,
-body.light-room.command-room #proposalPreview,
-body.light-room.command-room #privateFileExchangeUI > div,
-body.light-room.command-room #sharedProposalInvoiceDocumentsUI {
+body.light-room .topbar,
+body.light-room .command-deck,
+body.light-room .command-active-panel,
+body.light-room .command-stage,
+body.light-room .command-stage > section,
+body.light-room .command-stage > .panel,
+body.light-room #projectOverviewPanel,
+body.light-room #receivedBidsSection,
+body.light-room #photoDocsPanel,
+body.light-room #schedulePanel,
+body.light-room #videoChatPanel,
+body.light-room #signaturePanel,
+body.light-room #smartCalculatorPanel,
+body.light-room #estimateProposalPanel,
+body.light-room .contractor-info-card,
+body.light-room .ai-chat-card,
+body.light-room .estimate-output-card,
+body.light-room .proposal-preview-card,
+body.light-room .guided-helper-card,
+body.light-room .guided-mini-step,
+body.light-room .summary-box,
+body.light-room .result-card,
+body.light-room .calendar-box,
+body.light-room .schedule-list,
+body.light-room .signature-box,
+body.light-room .photo-card,
+body.light-room .chat-box,
+body.light-room .estimate-table-wrap,
+body.light-room .ai-chat-window,
+body.light-room #proposalPreview {
   background: #ffffff !important;
   color: #0f172a !important;
   border-color: #e2e8f0 !important;
-  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.08) !important;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08) !important;
 }
 
-body.light-room.command-room .guided-helper-card,
-body.light-room.command-room .private-room-alert,
-body.light-room.command-room .labor-explainer,
-body.light-room.command-room .result-card {
-  background: linear-gradient(180deg, #fff7ed, #ffffff) !important;
-  border-color: rgba(249,115,22,0.28) !important;
-}
-
-body.light-room.command-room h1,
-body.light-room.command-room h2,
-body.light-room.command-room h3,
-body.light-room.command-room h4,
-body.light-room.command-room strong,
-body.light-room.command-room label,
-body.light-room.command-room .value,
-body.light-room.command-room .lineTotal,
-body.light-room.command-room .money-line:last-child {
+body.light-room .command-active-panel *,
+body.light-room .command-stage *,
+body.light-room #projectOverviewPanel *,
+body.light-room #receivedBidsSection *,
+body.light-room #photoDocsPanel *,
+body.light-room #schedulePanel *,
+body.light-room #videoChatPanel *,
+body.light-room #signaturePanel *,
+body.light-room #smartCalculatorPanel *,
+body.light-room #estimateProposalPanel * {
   color: #0f172a !important;
-  opacity: 1 !important;
 }
 
-body.light-room.command-room p,
-body.light-room.command-room span,
-body.light-room.command-room small,
-body.light-room.command-room div,
-body.light-room.command-room td,
-body.light-room.command-room .label,
-body.light-room.command-room .card-sub,
-body.light-room.command-room .calendar-today-label,
-body.light-room.command-room .appointment-empty,
-body.light-room.command-room .ai-status,
-body.light-room.command-room .exchange-item span,
-body.light-room.command-room .exchange-card p {
+body.light-room p,
+body.light-room small,
+body.light-room span,
+body.light-room label,
+body.light-room td,
+body.light-room .label,
+body.light-room .card-sub {
   color: #334155 !important;
-  opacity: 1 !important;
-}
-
-body.light-room.command-room .project-title h2,
-body.light-room.command-room .panel-header h3,
-body.light-room.command-room .side-summary h3,
-body.light-room.command-room .summary-box h4 {
-  color: #0f172a !important;
-}
-
-body.light-room.command-room input,
-body.light-room.command-room select,
-body.light-room.command-room textarea,
-body.light-room.command-room .table-input,
-body.light-room.command-room #projectFileUpload {
-  background: #ffffff !important;
-  color: #0f172a !important;
-  border-color: #cbd5e1 !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8) !important;
-}
-
-body.light-room.command-room input::placeholder,
-body.light-room.command-room textarea::placeholder {
-  color: #64748b !important;
-}
-
-body.light-room.command-room th {
-  background: #fff7ed !important;
-  color: #9a3412 !important;
-  border-bottom-color: #fed7aa !important;
-}
-
-body.light-room.command-room td {
-  border-bottom-color: #e2e8f0 !important;
-}
-
-body.light-room.command-room .summary-line,
-body.light-room.command-room .money-line,
-body.light-room.command-room .result-metric {
-  border-bottom-color: #e2e8f0 !important;
-}
-
-body.light-room.command-room .ai-msg.assistant,
-body.light-room.command-room .message.contractor {
-  background: rgba(249,115,22,0.13) !important;
-  color: #9a3412 !important;
-}
-
-body.light-room.command-room .ai-msg.user,
-body.light-room.command-room .message.customer {
-  background: #eff6ff !important;
-  color: #1e3a8a !important;
-}
-
-body.light-room.command-room .photo-placeholder,
-body.light-room.command-room .signature-pad,
-body.light-room.command-room .appointment-empty {
-  background: #f8fafc !important;
-  border-color: #e2e8f0 !important;
-  color: #334155 !important;
-}
-
-body.light-room.command-room .btn-primary,
-body.light-room.command-room .btn-primary * {
-  background: linear-gradient(135deg, #f97316, #ea580c) !important;
-  color: #ffffff !important;
-  border-color: transparent !important;
-}
-
-body.light-room.command-room .btn-soft,
-body.light-room.command-room .btn-soft * {
-  background: rgba(249,115,22,0.12) !important;
-  color: #ea580c !important;
-}
-
-body.light-room.command-room .btn-dark,
-body.light-room.command-room .btn-dark * {
-  background: #0f172a !important;
-  color: #ffffff !important;
-}
-  /* ===== PREMIUM LIGHT THEME FINAL HARD OVERRIDE ===== */
-body.light-room .summary-line,
-body.light-room .summary-line *,
-
-body.light-room .appointment-note,
-body.light-room .appointment-note *,
-
-body.light-room .exchange-card,
-body.light-room .exchange-card *,
-
-body.light-room .exchange-item,
-body.light-room .exchange-item *,
-
-body.light-room .invoice-card,
-body.light-room .invoice-card *,
-
-body.light-room .proposal-card,
-body.light-room .proposal-card *,
-
-body.light-room .trade-current-card,
-body.light-room .trade-current-card *,
-
-body.light-room .trade-select-card,
-body.light-room .trade-select-card *,
-
-body.light-room .trade-menu-details,
-body.light-room .trade-menu-details *,
-
-body.light-room .side-summary,
-body.light-room .side-summary *,
-
-body.light-room details,
-body.light-room details *,
-
-body.light-room summary,
-body.light-room summary *,
-
-body.light-room [class*="summary"],
-body.light-room [class*="summary"] *,
-
-body.light-room [class*="calculator"],
-body.light-room [class*="calculator"] *,
-
-body.light-room [class*="tool"],
-body.light-room [class*="tool"] *,
-
-body.light-room [class*="proposal"],
-body.light-room [class*="proposal"] *,
-
-body.light-room [class*="invoice"],
-body.light-room [class*="invoice"] *,
-
-body.light-room [class*="exchange"],
-body.light-room [class*="exchange"] * {
-
-  background: #ffffff !important;
-  background-image: none !important;
-  color: #0f172a !important;
-  border-color: #cbd5e1 !important;
-  text-shadow: none !important;
-  opacity: 1 !important;
 }
 
 body.light-room input,
 body.light-room select,
-body.light-room textarea {
+body.light-room textarea,
+body.light-room .table-input {
   background: #ffffff !important;
   color: #0f172a !important;
+  border-color: #cbd5e1 !important;
 }
 
 body.light-room input::placeholder,
 body.light-room textarea::placeholder {
   color: #64748b !important;
+}
+
+body.light-room th {
+  background: #fff7ed !important;
+  color: #9a3412 !important;
+}
+
+body.light-room .btn-primary,
+body.light-room .btn-primary * {
+  color: #ffffff !important;
+}
+
+body.light-room .btn-soft,
+body.light-room .btn-soft * {
+  color: #ea580c !important;
+}
+  /* ===== LIGHT THEME FINAL CLEANUP FOR NESTED DARK CARDS ===== */
+body.light-room.command-room .trade-current-card,
+body.light-room.command-room .trade-select-card,
+body.light-room.command-room .trade-menu-details,
+body.light-room.command-room .private-room-alert,
+body.light-room.command-room .labor-explainer,
+body.light-room.command-room .exchange-card,
+body.light-room.command-room .exchange-item,
+body.light-room.command-room .invoice-card,
+body.light-room.command-room .proposal-card,
+body.light-room.command-room #proposalPreview,
+body.light-room.command-room #privateFileExchangeUI > div,
+body.light-room.command-room #sharedProposalInvoiceDocumentsUI,
+body.light-room.command-room [class*="card"],
+body.light-room.command-room [class*="box"],
+body.light-room.command-room [class*="panel"] {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+
+body.light-room.command-room .trade-current-card *,
+body.light-room.command-room .trade-select-card *,
+body.light-room.command-room .trade-menu-details *,
+body.light-room.command-room .private-room-alert *,
+body.light-room.command-room .labor-explainer *,
+body.light-room.command-room .exchange-card *,
+body.light-room.command-room .exchange-item *,
+body.light-room.command-room .invoice-card *,
+body.light-room.command-room .proposal-card *,
+body.light-room.command-room #proposalPreview *,
+body.light-room.command-room #privateFileExchangeUI *,
+body.light-room.command-room #sharedProposalInvoiceDocumentsUI * {
+  color: #0f172a !important;
+  opacity: 1 !important;
+}
+
+body.light-room.command-room details,
+body.light-room.command-room summary {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+
+body.light-room.command-room textarea,
+body.light-room.command-room input,
+body.light-room.command-room select {
+  background: #ffffff !important;
+  color: #0f172a !important;
 }
 </style>
 <script>
