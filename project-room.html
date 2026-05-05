@@ -8752,6 +8752,188 @@ body.light-room.command-room #themeToggleBtn {
   }
 }
 
+
+/* =========================================================
+   FINAL LIGHT MODE + MOBILE APP WIDTH PATCH
+   Put after all dark-mode CSS so light mode wins.
+   ========================================================= */
+
+/* Light mode: every card/panel inside active station should be light */
+body.light-room.command-room .command-active-panel,
+body.light-room.command-room .command-active-panel .hero-grid,
+body.light-room.command-room .command-active-panel .mini-stats,
+body.light-room.command-room .command-active-panel .stat,
+body.light-room.command-room .command-active-panel .side-summary,
+body.light-room.command-room .command-active-panel .summary-line,
+body.light-room.command-room .command-active-panel .panel,
+body.light-room.command-room .command-active-panel .card,
+body.light-room.command-room .command-active-panel .summary-box,
+body.light-room.command-room .command-active-panel .contractor-info-card,
+body.light-room.command-room .command-active-panel .estimate-output-card,
+body.light-room.command-room .command-active-panel .proposal-preview-card,
+body.light-room.command-room .command-active-panel .ai-chat-card,
+body.light-room.command-room .command-active-panel .result-card,
+body.light-room.command-room .command-active-panel .calendar-box,
+body.light-room.command-room .command-active-panel .schedule-list,
+body.light-room.command-room .command-active-panel .signature-box,
+body.light-room.command-room .command-active-panel .photo-card,
+body.light-room.command-room .command-active-panel .chat-box,
+body.light-room.command-room .command-active-panel .estimate-table-wrap,
+body.light-room.command-room .command-active-panel .ai-chat-window,
+body.light-room.command-room .command-active-panel .guided-helper-card,
+body.light-room.command-room .command-active-panel .guided-mini-step,
+body.light-room.command-room .command-active-panel .trade-select-card,
+body.light-room.command-room .command-active-panel .trade-current-card,
+body.light-room.command-room .command-active-panel .trade-menu-details,
+body.light-room.command-room .command-active-panel .exchange-card,
+body.light-room.command-room .command-active-panel .exchange-item,
+body.light-room.command-room .command-active-panel .exchange-list,
+body.light-room.command-room .command-active-panel .selected-date-box,
+body.light-room.command-room .command-active-panel .private-room-alert,
+body.light-room.command-room .command-active-panel .labor-explainer,
+body.light-room.command-room .command-active-panel .appointment-empty,
+body.light-room.command-room .command-active-panel .task-item,
+body.light-room.command-room .command-active-panel .tool-card,
+body.light-room.command-room .command-active-panel .photo-placeholder,
+body.light-room.command-room .command-active-panel .signature-pad,
+body.light-room.command-room .command-active-panel .video-call-box,
+body.light-room.command-room .command-active-panel #proposalPreview,
+body.light-room.command-room .command-active-panel #privateFileExchangeUI,
+body.light-room.command-room .command-active-panel #privateFileExchangeUI > div,
+body.light-room.command-room .command-active-panel #sharedProposalInvoiceDocumentsUI,
+body.light-room.command-room #photoDocsPanel .summary-box,
+body.light-room.command-room #photoDocsPanel .photo-card,
+body.light-room.command-room #photoDocsPanel #projectFileUpload,
+body.light-room.command-room #smartCalculatorPanel .trade-select-card,
+body.light-room.command-room #smartCalculatorPanel .trade-current-card,
+body.light-room.command-room #smartCalculatorPanel .trade-menu-details,
+body.light-room.command-room #smartCalculatorPanel .result-card,
+body.light-room.command-room #smartCalculatorPanel .summary-box,
+body.light-room.command-room #smartCalculatorPanel .estimate-table-wrap {
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 14px 30px rgba(15,23,42,0.08) !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+
+body.light-room.command-room .command-active-panel h1,
+body.light-room.command-room .command-active-panel h2,
+body.light-room.command-room .command-active-panel h3,
+body.light-room.command-room .command-active-panel h4,
+body.light-room.command-room .command-active-panel strong,
+body.light-room.command-room .command-active-panel label,
+body.light-room.command-room .command-active-panel th,
+body.light-room.command-room .command-active-panel .value,
+body.light-room.command-room .command-active-panel .lineTotal,
+body.light-room.command-room .command-active-panel .money-line:last-child,
+body.light-room.command-room .command-active-panel p,
+body.light-room.command-room .command-active-panel span,
+body.light-room.command-room .command-active-panel small,
+body.light-room.command-room .command-active-panel div,
+body.light-room.command-room .command-active-panel td,
+body.light-room.command-room .command-active-panel .label,
+body.light-room.command-room .command-active-panel .card-sub,
+body.light-room.command-room .command-active-panel .calendar-today-label,
+body.light-room.command-room .command-active-panel .appointment-empty,
+body.light-room.command-room .command-active-panel .ai-status,
+body.light-room.command-room .command-active-panel .exchange-item span,
+body.light-room.command-room .command-active-panel .exchange-card p,
+body.light-room.command-room #photoDocsPanel h3,
+body.light-room.command-room #photoDocsPanel h4,
+body.light-room.command-room #photoDocsPanel p,
+body.light-room.command-room #photoDocsPanel strong {
+  color: #0f172a !important;
+  opacity: 1 !important;
+}
+
+body.light-room.command-room .command-active-panel input,
+body.light-room.command-room .command-active-panel select,
+body.light-room.command-room .command-active-panel textarea,
+body.light-room.command-room .command-active-panel .table-input,
+body.light-room.command-room #projectFileUpload {
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+  opacity: 1 !important;
+}
+
+body.light-room.command-room .command-active-panel input::placeholder,
+body.light-room.command-room .command-active-panel textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Mobile: stop every active station from widening the page */
+@media (max-width: 980px) {
+  body.command-room,
+  body.command-room .app-shell,
+  body.command-room .dashboard,
+  body.command-room .command-stage,
+  body.command-room .workspace,
+  body.command-room .contractor-tools,
+  body.command-room .command-active-panel,
+  body.command-room .command-active-panel * {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body.command-room .command-active-panel {
+    width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  body.command-room .command-active-panel .panel-header,
+  body.command-room .command-active-panel .guided-mini-steps,
+  body.command-room .command-active-panel .trade-tool-shell,
+  body.command-room .command-active-panel .calc-layout,
+  body.command-room .command-active-panel .form-grid,
+  body.command-room .command-active-panel .estimate-summary,
+  body.command-room .command-active-panel .schedule-layout,
+  body.command-room .command-active-panel .signature-layout,
+  body.command-room .command-active-panel .photo-strip,
+  body.command-room .command-active-panel .contractor-info-grid,
+  body.command-room .command-active-panel .ai-chat-shell,
+  body.command-room .command-active-panel .ai-compose,
+  body.command-room .command-active-panel .tool-grid,
+  body.command-room .command-active-panel .mini-stats {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    gap: 12px !important;
+  }
+
+  body.command-room .command-active-panel .estimate-table-wrap,
+  body.command-room .command-active-panel table,
+  body.command-room .command-active-panel #calcEstimateTableWrap {
+    max-width: 100% !important;
+  }
+
+  body.command-room .command-active-panel .estimate-table-wrap,
+  body.command-room .command-active-panel #calcEstimateTableWrap {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  body.command-room #smartCalculatorPanel table,
+  body.command-room #calcEstimateTableWrap table {
+    min-width: 680px !important;
+    width: 680px !important;
+  }
+
+  body.command-room .command-active-panel input,
+  body.command-room .command-active-panel select,
+  body.command-room .command-active-panel textarea,
+  body.command-room .command-active-panel button {
+    max-width: 100% !important;
+  }
+}
+
 </style>
 
 <script>
