@@ -4741,15 +4741,19 @@ function showCommandStage(targetId) {
     const isActive = button.dataset.commandTarget === target.id;
     button.classList.toggle('is-active', isActive);
     if (isActive) {
-  button.scrollIntoView({
-    behavior: 'smooth',
-    inline: 'center',
-    block: 'nearest'
-  });
+  const list = button.closest(".command-card-list");
 
-  setTimeout(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, 80);
+  if (list) {
+    const left =
+      button.offsetLeft -
+      list.clientWidth / 2 +
+      button.clientWidth / 2;
+
+    list.scrollTo({
+      left,
+      behavior: "smooth"
+    });
+  }
 }
   });
 
