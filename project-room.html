@@ -4775,8 +4775,6 @@ function initCommandRoom() {
 
 function unlockProjectRoomAfterInit() {
   initCommandRoom();
-  document.body.style.overflow = "";
-  window.scrollTo(0, 0);
 }
 
 document.addEventListener('DOMContentLoaded', unlockProjectRoomAfterInit);
@@ -8992,6 +8990,39 @@ function getProjectRoomName() {
     overflow-y: auto !important;
     overscroll-behavior: contain !important;
     -webkit-overflow-scrolling: touch !important;
+  }
+}
+  /* ===== FINAL FIX: FILES + EVIDENCE MUST NOT MOVE WHOLE PAGE ===== */
+@media (max-width: 980px) {
+  html,
+  body,
+  body.command-room {
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    max-height: 100dvh !important;
+    overflow: hidden !important;
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+  }
+
+  body.command-room .app-shell {
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    max-height: 100dvh !important;
+    overflow: hidden !important;
+  }
+
+  body.command-room .command-stage,
+  body.command-room .dashboard {
+    overflow: hidden !important;
+    min-height: 0 !important;
+  }
+
+  body.command-room .command-active-panel {
+    overflow-y: auto !important;
+    max-height: calc(100dvh - 265px) !important;
+    overscroll-behavior: contain !important;
   }
 }
 </style>
