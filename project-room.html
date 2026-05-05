@@ -3308,6 +3308,7 @@ body .topbar .main-logo {
       <div class="top-actions">
         <button id="backToFeed" class="btn btn-soft">Back to Project Feed</button>
         <button id="inviteBtn" class="btn btn-primary">Invite Customer</button>
+        <button id="themeToggleBtn" class="btn btn-soft" type="button">Light Theme</button>
       </div>
     </div>
 
@@ -8427,7 +8428,153 @@ body.light-room.command-room .message.customer {
     -webkit-overflow-scrolling: touch !important;
   }
 }
+
+/* =========================================================
+   REVAMPLEX DARK MODE REPAIR + THEME TOGGLE RESTORE
+   Keeps dark theme dark, while light mode still overrides it.
+   ========================================================= */
+body.command-room:not(.light-room) .command-active-panel .hero-grid,
+body.command-room:not(.light-room) .command-active-panel .mini-stats,
+body.command-room:not(.light-room) .command-active-panel .stat,
+body.command-room:not(.light-room) .command-active-panel .side-summary,
+body.command-room:not(.light-room) .command-active-panel .summary-line,
+body.command-room:not(.light-room) .command-active-panel .panel,
+body.command-room:not(.light-room) .command-active-panel .card,
+body.command-room:not(.light-room) .command-active-panel .summary-box,
+body.command-room:not(.light-room) .command-active-panel .contractor-info-card,
+body.command-room:not(.light-room) .command-active-panel .estimate-output-card,
+body.command-room:not(.light-room) .command-active-panel .proposal-preview-card,
+body.command-room:not(.light-room) .command-active-panel .ai-chat-card,
+body.command-room:not(.light-room) .command-active-panel .result-card,
+body.command-room:not(.light-room) .command-active-panel .calendar-box,
+body.command-room:not(.light-room) .command-active-panel .schedule-list,
+body.command-room:not(.light-room) .command-active-panel .signature-box,
+body.command-room:not(.light-room) .command-active-panel .photo-card,
+body.command-room:not(.light-room) .command-active-panel .chat-box,
+body.command-room:not(.light-room) .command-active-panel .estimate-table-wrap,
+body.command-room:not(.light-room) .command-active-panel .ai-chat-window,
+body.command-room:not(.light-room) .command-active-panel .guided-helper-card,
+body.command-room:not(.light-room) .command-active-panel .guided-mini-step,
+body.command-room:not(.light-room) .command-active-panel .trade-select-card,
+body.command-room:not(.light-room) .command-active-panel .trade-current-card,
+body.command-room:not(.light-room) .command-active-panel .trade-menu-details,
+body.command-room:not(.light-room) .command-active-panel .exchange-card,
+body.command-room:not(.light-room) .command-active-panel .exchange-item,
+body.command-room:not(.light-room) .command-active-panel .exchange-list,
+body.command-room:not(.light-room) .command-active-panel .selected-date-box,
+body.command-room:not(.light-room) .command-active-panel .private-room-alert,
+body.command-room:not(.light-room) .command-active-panel .labor-explainer,
+body.command-room:not(.light-room) .command-active-panel .appointment-empty,
+body.command-room:not(.light-room) .command-active-panel .task-item,
+body.command-room:not(.light-room) .command-active-panel .tool-card,
+body.command-room:not(.light-room) .command-active-panel .photo-placeholder,
+body.command-room:not(.light-room) .command-active-panel .signature-pad,
+body.command-room:not(.light-room) .command-active-panel .video-call-box,
+body.command-room:not(.light-room) .command-active-panel #proposalPreview,
+body.command-room:not(.light-room) .command-active-panel #privateFileExchangeUI,
+body.command-room:not(.light-room) .command-active-panel #privateFileExchangeUI > div,
+body.command-room:not(.light-room) .command-active-panel #sharedProposalInvoiceDocumentsUI {
+  background:
+    linear-gradient(180deg, rgba(15,23,42,0.94), rgba(2,6,23,0.90)) !important;
+  background-image:
+    linear-gradient(180deg, rgba(15,23,42,0.94), rgba(2,6,23,0.90)) !important;
+  color: #e5e7eb !important;
+  border-color: rgba(148,163,184,0.24) !important;
+  box-shadow: 0 18px 42px rgba(0,0,0,0.28) !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+
+body.command-room:not(.light-room) .command-active-panel h1,
+body.command-room:not(.light-room) .command-active-panel h2,
+body.command-room:not(.light-room) .command-active-panel h3,
+body.command-room:not(.light-room) .command-active-panel h4,
+body.command-room:not(.light-room) .command-active-panel strong,
+body.command-room:not(.light-room) .command-active-panel label,
+body.command-room:not(.light-room) .command-active-panel th,
+body.command-room:not(.light-room) .command-active-panel .value,
+body.command-room:not(.light-room) .command-active-panel .lineTotal,
+body.command-room:not(.light-room) .command-active-panel .money-line:last-child {
+  color: #f8fafc !important;
+  opacity: 1 !important;
+}
+
+body.command-room:not(.light-room) .command-active-panel p,
+body.command-room:not(.light-room) .command-active-panel span,
+body.command-room:not(.light-room) .command-active-panel small,
+body.command-room:not(.light-room) .command-active-panel div,
+body.command-room:not(.light-room) .command-active-panel td,
+body.command-room:not(.light-room) .command-active-panel .label,
+body.command-room:not(.light-room) .command-active-panel .card-sub,
+body.command-room:not(.light-room) .command-active-panel .calendar-today-label,
+body.command-room:not(.light-room) .command-active-panel .appointment-empty,
+body.command-room:not(.light-room) .command-active-panel .ai-status,
+body.command-room:not(.light-room) .command-active-panel .exchange-item span,
+body.command-room:not(.light-room) .command-active-panel .exchange-card p {
+  color: #cbd5e1 !important;
+  opacity: 1 !important;
+}
+
+body.command-room:not(.light-room) .command-active-panel input,
+body.command-room:not(.light-room) .command-active-panel select,
+body.command-room:not(.light-room) .command-active-panel textarea,
+body.command-room:not(.light-room) .command-active-panel .table-input,
+body.command-room:not(.light-room) #projectFileUpload {
+  background: rgba(2,6,23,0.72) !important;
+  color: #f8fafc !important;
+  border-color: rgba(249,115,22,0.26) !important;
+}
+
+body.command-room:not(.light-room) #themeToggleBtn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(249,115,22,0.13) !important;
+  color: #fed7aa !important;
+  border: 1px solid rgba(249,115,22,0.26) !important;
+}
+
+body.light-room.command-room #themeToggleBtn {
+  display: inline-flex !important;
+}
+
 </style>
+
+<script>
+(function () {
+  const THEME_KEY = "revamplex_project_room_theme";
+
+  function applyProjectRoomTheme(theme) {
+    const isLight = theme === "light";
+    document.body.classList.toggle("light-room", isLight);
+
+    const btn = document.getElementById("themeToggleBtn");
+    if (btn) {
+      btn.textContent = isLight ? "Dark Theme" : "Light Theme";
+    }
+  }
+
+  function initProjectRoomThemeToggle() {
+    const savedTheme = localStorage.getItem(THEME_KEY) || "dark";
+    applyProjectRoomTheme(savedTheme);
+
+    const btn = document.getElementById("themeToggleBtn");
+    if (!btn || btn.dataset.themeToggleBound === "true") return;
+
+    btn.dataset.themeToggleBound = "true";
+    btn.addEventListener("click", function () {
+      const nextTheme = document.body.classList.contains("light-room") ? "dark" : "light";
+      localStorage.setItem(THEME_KEY, nextTheme);
+      applyProjectRoomTheme(nextTheme);
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", initProjectRoomThemeToggle);
+  window.addEventListener("load", initProjectRoomThemeToggle);
+  setTimeout(initProjectRoomThemeToggle, 250);
+})();
+</script>
+
 <script>
 (function(){
 let exchangeRoomId=null,filesChannel=null,docsChannel=null,sigsChannel=null,padsReady=false,drawn={};
