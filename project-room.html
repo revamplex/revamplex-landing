@@ -3276,6 +3276,7 @@ body.command-room #schedulePanel:not(.command-active-panel),
 body.command-room #videoChatPanel:not(.command-active-panel),
 body.command-room #signaturePanel:not(.command-active-panel),
 body.command-room #smartCalculatorPanel:not(.command-active-panel),
+body.command-room #takeoffLabPanel:not(.command-active-panel),
 body.command-room #estimateProposalPanel:not(.command-active-panel) {
   display: none !important;
   visibility: hidden !important;
@@ -3463,6 +3464,135 @@ body.command-room .tier-btn.active {
   }
 }
 
+
+/* ===== AI TAKE-OFF LAB PHASE 2 ===== */
+.takeoff-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.takeoff-card {
+  border: 1px solid rgba(249, 115, 22, 0.24);
+  border-radius: 20px;
+  background: linear-gradient(180deg, #fff7ed, #ffffff);
+  padding: 14px;
+}
+
+.takeoff-card h4 {
+  margin: 0 0 8px;
+}
+
+.takeoff-card p {
+  color: var(--muted);
+  line-height: 1.45;
+  margin: 0 0 12px;
+}
+
+.takeoff-preview-box {
+  min-height: 280px;
+  border: 1px dashed rgba(249, 115, 22, 0.38);
+  border-radius: 18px;
+  background: rgba(249, 115, 22, 0.08);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  text-align: center;
+  padding: 12px;
+}
+
+.takeoff-preview-box img,
+.takeoff-preview-box canvas {
+  max-width: 100%;
+  max-height: 520px;
+  border-radius: 14px;
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.14);
+}
+
+.takeoff-tool-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+
+.takeoff-status {
+  min-height: 24px;
+  color: var(--brand-dark);
+  font-weight: 900;
+  margin-top: 8px;
+}
+
+.takeoff-result-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.takeoff-result-item {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  padding: 12px;
+}
+
+.takeoff-result-top {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: start;
+}
+
+.takeoff-result-item strong {
+  display: block;
+}
+
+.takeoff-result-item small {
+  display: block;
+  color: var(--muted);
+  margin-top: 4px;
+  line-height: 1.35;
+}
+
+.takeoff-confidence {
+  border-radius: 999px;
+  padding: 5px 8px;
+  background: rgba(249, 115, 22, 0.12);
+  color: var(--brand-dark);
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.takeoff-json-box {
+  white-space: pre-wrap;
+  max-height: 260px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #f8fafc;
+  padding: 12px;
+  font-size: 0.86rem;
+}
+
+body.command-room .takeoff-card,
+body.command-room .takeoff-result-item {
+  background: rgba(15,23,42,0.78) !important;
+  border-color: rgba(249,115,22,0.24) !important;
+  color: #e5e7eb !important;
+}
+
+body.command-room .takeoff-preview-box,
+body.command-room .takeoff-json-box {
+  background: rgba(2,6,23,0.48) !important;
+  border-color: rgba(148,163,184,0.24) !important;
+  color: #cbd5e1 !important;
+}
+
+@media (max-width: 900px) {
+  .takeoff-grid { grid-template-columns: 1fr !important; }
+}
+
 </style>
 </head>
 <body class="command-room contractor-room">
@@ -3532,6 +3662,7 @@ body.command-room .tier-btn.active {
           <div class="nav-item" data-target="jobListPanel"><span>Active Job List</span><span>Live</span></div>
           <div class="nav-item" data-target="videoChatPanel"><span>Video + Chat</span><span>2 alerts</span></div>
           <div class="nav-item" data-target="smartCalculatorPanel"><span>Build Estimate</span><span>Step 2</span></div>
+          <div class="nav-item" data-target="takeoffLabPanel"><span>AI Take-Off Lab</span><span>Phase 2</span></div>
           <div class="nav-item" data-target="estimateProposalPanel"><span>AI + Proposal</span><span>Step 3</span></div>
           <div class="nav-item" data-target="photoDocsPanel"><span>Photos + Docs</span><span>Upload</span></div>
           <div class="nav-item homeowner-only-nav" data-target="receivedBidsSection"><span>Review Bids</span><span>Private</span></div>
@@ -3777,6 +3908,89 @@ body.command-room .tier-btn.active {
           </div>
         </section>
 <div class="contractor-tools">
+
+<section class="panel" id="takeoffLabPanel">
+  <div class="panel-header">
+    <div>
+      <h3>Phase 2: Complete AI Take-Off Lab</h3>
+      <p>Upload a plan, blueprint screenshot, marked drawing, or job photo. AI reads visible dimensions, counts, rooms, openings, surfaces, and returns estimate-ready quantities.</p>
+    </div>
+    <div class="estimate-toolbar">
+      <button class="btn btn-primary" type="button" onclick="runAITakeoff()">Run AI Take-Off</button>
+      <button class="btn btn-soft" type="button" onclick="sendSelectedTakeoffToEstimate()">Send Selected to Estimate</button>
+    </div>
+  </div>
+
+  <div class="guided-helper-card contractor-guide">
+    <strong>AI take-off reads the drawing, but contractor review is required.</strong>
+    <p>Use this for fast measurements and quantity suggestions. Check scale, dimensions, walls, openings, and materials before submitting a bid.</p>
+  </div>
+
+  <div class="takeoff-grid">
+    <div class="takeoff-card">
+      <h4>1. Upload Plan / Photo</h4>
+      <p>Best results: upload a clear plan screenshot, PDF page, or photo with measurements visible. For PDFs, this tool reads the first page as an image.</p>
+      <input id="takeoffFileInput" type="file" accept="image/*,.pdf,application/pdf" onchange="handleTakeoffFileChange(event)">
+
+      <div class="form-grid" style="margin-top:12px;">
+        <div>
+          <label>Known Scale / Reference</label>
+          <input id="takeoffScaleInput" type="text" placeholder="Example: 1/4 inch = 1 ft, or door = 36 inches">
+        </div>
+        <div>
+          <label>Trade Focus</label>
+          <select id="takeoffTradeInput">
+            <option>General Renovation</option>
+            <option>Kitchen Renovation</option>
+            <option>Bathroom Renovation</option>
+            <option>Tile & Stone</option>
+            <option>Flooring</option>
+            <option>Drywall & Insulation</option>
+            <option>Painting</option>
+            <option>Roofing</option>
+            <option>Siding</option>
+            <option>Decks & Porches</option>
+            <option>Electrical</option>
+            <option>Plumbing</option>
+            <option>Concrete & Masonry</option>
+          </select>
+        </div>
+        <div class="full">
+          <label>Instructions for AI</label>
+          <textarea id="takeoffInstructionsInput" placeholder="Example: Measure flooring sqft, wall tile sqft, baseboard linear ft, doors/windows count, and anything missing."></textarea>
+        </div>
+      </div>
+
+      <div class="takeoff-tool-row">
+        <button class="btn btn-soft" type="button" onclick="fillTakeoffFromJob()">Use Job Info</button>
+        <button class="btn btn-soft" type="button" onclick="clearTakeoffLab()">Clear</button>
+      </div>
+      <div id="takeoffStatus" class="takeoff-status">No take-off file loaded yet.</div>
+    </div>
+
+    <div class="takeoff-card">
+      <h4>2. Drawing Preview</h4>
+      <div id="takeoffPreview" class="takeoff-preview-box">Upload a PDF, image, plan, or job photo to preview it here.</div>
+    </div>
+
+    <div class="takeoff-card">
+      <h4>3. AI Quantity Results</h4>
+      <p>Select the quantities you want to push into the Estimate Line Items table.</p>
+      <div id="takeoffResults" class="takeoff-result-list">No AI take-off results yet.</div>
+    </div>
+
+    <div class="takeoff-card">
+      <h4>4. Take-Off Summary / Notes</h4>
+      <p>AI will include assumptions, missing info, risks, and confidence notes here.</p>
+      <div id="takeoffSummary" class="takeoff-json-box">Waiting for AI take-off...</div>
+      <div class="takeoff-tool-row">
+        <button class="btn btn-soft" type="button" onclick="copyTakeoffSummaryToProposalNotes()">Copy Summary to Proposal Notes</button>
+        <button class="btn btn-soft" type="button" onclick="downloadTakeoffJSON()">Download Take-Off JSON</button>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="panel" id="smartCalculatorPanel">
   <div class="panel-header">
     <div>
@@ -4221,6 +4435,7 @@ body.command-room .tier-btn.active {
 
     <p class="footer-note">Revamp Project Room prototype • Private homeowner + contractor workspace • Ready to connect to Supabase / auth / database next</p>
   </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script>
 function scrollToSection(id) {
@@ -4258,6 +4473,7 @@ function getGuideTargetPanelIds() {
     "jobListPanel",
     "videoChatPanel",
     "smartCalculatorPanel",
+    "takeoffLabPanel",
     "estimateProposalPanel",
     "photoDocsPanel",
     "receivedBidsSection",
@@ -4364,6 +4580,7 @@ function getCommandSteps() {
   return [
     { id: 'projectOverviewPanel', title: 'Job Information', text: 'Scope, budget, location, status, and next action.' },
     { id: 'smartCalculatorPanel', title: '3D Estimate Lab', text: 'Pick one trade calculator and build line items.' },
+    { id: 'takeoffLabPanel', title: 'AI Take-Off Lab', text: 'Read plans and push quantities into estimate.' },
     { id: 'estimateProposalPanel', title: 'AI Proposal Studio', text: 'Clean the scope, notes, and PDF proposal.' },
     { id: 'photoDocsPanel', title: 'Files + Evidence', text: 'Photos, videos, docs, permits, and project files.' },
     { id: 'schedulePanel', title: 'Schedule', text: 'Set visits, estimate calls, and job milestones.' },
@@ -4379,6 +4596,7 @@ function getCommandPanelIds() {
     'jobListPanel',
     'videoChatPanel',
     'smartCalculatorPanel',
+    'takeoffLabPanel',
     'estimateProposalPanel',
     'photoDocsPanel',
     'receivedBidsSection',
@@ -4947,6 +5165,7 @@ function applyWorkspaceMode() {
   // Hide/show nav links that point to contractor-only tools.
   const contractorOnlyTargets = new Set([
     "smartCalculatorPanel",
+    "takeoffLabPanel",
     "estimateProposalPanel"
   ]);
 
@@ -4986,6 +5205,7 @@ function applyWorkspaceMode() {
       !isPhotoDocsAction &&
       (
         onclick.includes("smartCalculatorPanel") ||
+        onclick.includes("takeoffLabPanel") ||
         onclick.includes("estimateProposalPanel") ||
         onclick.includes("pushCalcResultsToEstimate") ||
         onclick.includes("submitBid()") ||
@@ -5035,6 +5255,256 @@ function setupBackButton(){
 
   });
 
+}
+
+
+
+/* ---------- AI TAKE-OFF LAB PHASE 2 ---------- */
+
+let takeoffImageDataUrl = "";
+let takeoffFileName = "";
+let latestTakeoffResult = null;
+
+function setTakeoffStatus(message){
+  const el = document.getElementById("takeoffStatus");
+  if (el) el.textContent = message || "";
+}
+
+function getTakeoffProjectContext(){
+  const job = window.currentJob || {};
+  return {
+    job_title: job.title || document.getElementById("jobTitle")?.innerText || "Revamp Project",
+    trade: document.getElementById("takeoffTradeInput")?.value || job.trade || "General Renovation",
+    city: job.city || "NJ Area",
+    budget: job.budget || document.getElementById("jobBudget")?.innerText || "",
+    description: job.description || "",
+    known_scale: document.getElementById("takeoffScaleInput")?.value || "",
+    contractor_instructions: document.getElementById("takeoffInstructionsInput")?.value || ""
+  };
+}
+
+function fileToDataUrl(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function renderPdfFirstPageToDataUrl(file){
+  if (!window.pdfjsLib) {
+    throw new Error("PDF.js did not load. Upload a screenshot/image of the plan instead.");
+  }
+
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  const buffer = await file.arrayBuffer();
+  const pdf = await window.pdfjsLib.getDocument({ data: buffer }).promise;
+  const page = await pdf.getPage(1);
+  const viewport = page.getViewport({ scale: 1.75 });
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  await page.render({ canvasContext: context, viewport }).promise;
+  return canvas.toDataURL("image/png", 0.92);
+}
+
+function showTakeoffPreview(dataUrl){
+  const preview = document.getElementById("takeoffPreview");
+  if (!preview) return;
+  preview.innerHTML = `<img alt="Take-off preview" src="${dataUrl}">`;
+}
+
+async function handleTakeoffFileChange(event){
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  takeoffFileName = file.name || "takeoff-file";
+  setTakeoffStatus("Preparing drawing preview...");
+
+  try {
+    if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+      takeoffImageDataUrl = await renderPdfFirstPageToDataUrl(file);
+      setTakeoffStatus("PDF first page converted for AI take-off. Run AI Take-Off when ready.");
+    } else {
+      takeoffImageDataUrl = await fileToDataUrl(file);
+      setTakeoffStatus("Image loaded. Run AI Take-Off when ready.");
+    }
+
+    showTakeoffPreview(takeoffImageDataUrl);
+  } catch (err) {
+    console.error(err);
+    setTakeoffStatus(err.message || "Could not prepare this file.");
+  }
+}
+
+function fillTakeoffFromJob(){
+  const job = window.currentJob || {};
+  const tradeInput = document.getElementById("takeoffTradeInput");
+  const instructions = document.getElementById("takeoffInstructionsInput");
+
+  if (tradeInput && job.trade) tradeInput.value = job.trade;
+  if (instructions) {
+    instructions.value = [
+      "Read this plan/photo for estimate-ready quantities.",
+      "Focus on: square footage, linear footage, fixture/opening counts, materials, assumptions, missing measurements, and risks.",
+      job.description ? "Job notes: " + job.description : ""
+    ].filter(Boolean).join("\n");
+  }
+}
+
+function clearTakeoffLab(){
+  takeoffImageDataUrl = "";
+  takeoffFileName = "";
+  latestTakeoffResult = null;
+  const input = document.getElementById("takeoffFileInput");
+  const preview = document.getElementById("takeoffPreview");
+  const results = document.getElementById("takeoffResults");
+  const summary = document.getElementById("takeoffSummary");
+  if (input) input.value = "";
+  if (preview) preview.innerHTML = "Upload a PDF, image, plan, or job photo to preview it here.";
+  if (results) results.innerHTML = "No AI take-off results yet.";
+  if (summary) summary.textContent = "Waiting for AI take-off...";
+  setTakeoffStatus("No take-off file loaded yet.");
+}
+
+function normalizeTakeoffItems(data){
+  const items = Array.isArray(data?.items) ? data.items : [];
+  return items.map((item, index) => ({
+    id: item.id || `takeoff-${index + 1}`,
+    name: item.name || item.item || "Take-off item",
+    qty: Number(item.quantity || item.qty || 1) || 1,
+    unit: item.unit || "unit",
+    unitCost: Number(item.suggested_material_unit_cost || item.unitCost || item.material_unit_cost || 0) || 0,
+    laborHours: Number(item.suggested_labor_hours || item.laborHours || 0) || 0,
+    laborRate: Number(item.suggested_labor_rate || item.laborRate || 75) || 75,
+    confidence: item.confidence || "review",
+    notes: item.notes || item.assumption || "Review before bidding."
+  }));
+}
+
+function renderTakeoffResults(data){
+  latestTakeoffResult = data || {};
+  const results = document.getElementById("takeoffResults");
+  const summary = document.getElementById("takeoffSummary");
+  const items = normalizeTakeoffItems(data);
+
+  if (!results) return;
+
+  if (!items.length) {
+    results.innerHTML = "AI did not return estimate-ready quantities. Try a clearer drawing or add a known scale/reference.";
+  } else {
+    results.innerHTML = items.map((item, index) => `
+      <div class="takeoff-result-item">
+        <div class="takeoff-result-top">
+          <input type="checkbox" class="takeoff-select" data-index="${index}" checked>
+          <div>
+            <strong>${escapeHTML(item.name)}</strong>
+            <small>${escapeHTML(item.qty + " " + item.unit)} • ${escapeHTML(item.notes)}</small>
+          </div>
+          <span class="takeoff-confidence">${escapeHTML(item.confidence)}</span>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  if (summary) {
+    const cleanSummary = {
+      summary: data?.summary || "Review all AI quantities before submitting a bid.",
+      assumptions: data?.assumptions || [],
+      missing_info: data?.missing_info || [],
+      risks: data?.risks || [],
+      source_file: takeoffFileName || "uploaded drawing"
+    };
+    summary.textContent = JSON.stringify(cleanSummary, null, 2);
+  }
+}
+
+async function runAITakeoff(){
+  if (!takeoffImageDataUrl) {
+    alert("Upload a plan, PDF, drawing, or photo first.");
+    return;
+  }
+
+  setTakeoffStatus("AI is reading the drawing and extracting quantities...");
+
+  try {
+    const response = await fetch("/api/ai-takeoff", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        imageDataUrl: takeoffImageDataUrl,
+        fileName: takeoffFileName,
+        projectContext: getTakeoffProjectContext()
+      })
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data?.error || "AI take-off failed.");
+    }
+
+    renderTakeoffResults(data);
+    setTakeoffStatus("AI take-off complete. Review quantities, then send selected items to the estimate.");
+  } catch (err) {
+    console.error(err);
+    setTakeoffStatus(err.message || "AI take-off failed.");
+    alert(err.message || "AI take-off failed.");
+  }
+}
+
+function sendSelectedTakeoffToEstimate(){
+  const items = normalizeTakeoffItems(latestTakeoffResult);
+  if (!items.length) {
+    alert("Run AI Take-Off first.");
+    return;
+  }
+
+  const selected = Array.from(document.querySelectorAll(".takeoff-select:checked"))
+    .map(box => items[Number(box.dataset.index)])
+    .filter(Boolean);
+
+  if (!selected.length) {
+    alert("Select at least one take-off item.");
+    return;
+  }
+
+  selected.forEach(item => {
+    addEstimateLine(item.name, item.qty, item.unit, item.unitCost, item.laborHours, item.laborRate);
+  });
+
+  recalcEstimate();
+  alert("Selected AI take-off items were added to the Estimate Line Items table.");
+
+  if (document.body.classList.contains("command-room") && typeof showCommandStage === "function") {
+    showCommandStage("smartCalculatorPanel");
+  }
+}
+
+function copyTakeoffSummaryToProposalNotes(){
+  const notes = document.getElementById("estimateNotes");
+  const summary = document.getElementById("takeoffSummary")?.textContent || "";
+  if (!notes || !summary) return;
+  notes.value = (notes.value ? notes.value + "\n\n" : "") + "AI Take-Off Summary:\n" + summary;
+  alert("AI take-off summary copied to proposal notes.");
+}
+
+function downloadTakeoffJSON(){
+  if (!latestTakeoffResult) {
+    alert("Run AI Take-Off first.");
+    return;
+  }
+
+  const blob = new Blob([JSON.stringify(latestTakeoffResult, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "revamplex-ai-takeoff.json";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 /* ---------- SMART TRADE CALCULATORS ---------- */
