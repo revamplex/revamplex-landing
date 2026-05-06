@@ -3294,6 +3294,175 @@ body .topbar .main-logo {
   filter: brightness(0) invert(1) drop-shadow(0 10px 24px rgba(255,255,255,0.08)) !important;
 }
 
+
+/* ===== HOUZZ-PRO STYLE ESTIMATE STUDIO ADD-ON ===== */
+.estimate-studio-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 14px;
+  margin: 14px 0 16px;
+}
+
+.estimate-studio-card {
+  border: 1px solid rgba(249, 115, 22, 0.24);
+  border-radius: 20px;
+  background: linear-gradient(180deg, #fff7ed, #ffffff);
+  padding: 14px;
+}
+
+.estimate-studio-card h4 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+}
+
+.estimate-studio-card p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.template-button-grid,
+.price-book-grid,
+.tier-button-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.template-btn,
+.price-book-btn,
+.tier-btn {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--text);
+  padding: 10px;
+  font-weight: 850;
+  cursor: pointer;
+  text-align: left;
+  min-height: 48px;
+}
+
+.template-btn:hover,
+.price-book-btn:hover,
+.tier-btn:hover,
+.tier-btn.active {
+  border-color: rgba(249, 115, 22, 0.46);
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+}
+
+.estimate-settings-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0 0;
+}
+
+.estimate-settings-row label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: var(--muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.estimate-version-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.version-pill {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  padding: 12px;
+}
+
+.version-pill span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 850;
+  margin-bottom: 4px;
+}
+
+.version-pill strong {
+  display: block;
+  font-size: 0.96rem;
+}
+
+.approval-status-card {
+  border: 1px solid rgba(22, 163, 74, 0.28);
+  background: linear-gradient(180deg, #ecfdf5, #ffffff);
+  border-radius: 20px;
+  padding: 14px;
+  margin-top: 14px;
+}
+
+.approval-status-card h4 {
+  margin: 0 0 8px;
+}
+
+.approval-status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+body.command-room .estimate-studio-card,
+body.command-room .version-pill,
+body.command-room .approval-status-card {
+  background: rgba(15,23,42,0.78) !important;
+  border-color: rgba(249,115,22,0.24) !important;
+  color: #e5e7eb !important;
+}
+
+body.command-room .template-btn,
+body.command-room .price-book-btn,
+body.command-room .tier-btn {
+  background: rgba(2,6,23,0.48) !important;
+  color: #f8fafc !important;
+  border-color: rgba(148,163,184,0.24) !important;
+}
+
+body.command-room .template-btn:hover,
+body.command-room .price-book-btn:hover,
+body.command-room .tier-btn:hover,
+body.command-room .tier-btn.active {
+  background: rgba(249,115,22,0.18) !important;
+  border-color: rgba(249,115,22,0.48) !important;
+  color: #fed7aa !important;
+}
+
+@media (max-width: 900px) {
+  .estimate-studio-grid,
+  .estimate-settings-row,
+  .estimate-version-strip {
+    grid-template-columns: 1fr !important;
+  }
+
+  .template-button-grid,
+  .price-book-grid,
+  .tier-button-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .template-button-grid,
+  .price-book-grid,
+  .tier-button-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 </style>
 </head>
 <body class="command-room contractor-room">
@@ -3623,6 +3792,63 @@ body .topbar .main-logo {
     <p>Choose the trade that best matches the job. Fill in the few fields shown, review the calculated material/labor hints, then use Push Results to Estimate. You can ignore every other calculator until you need it.</p>
   </div>
 
+  <div class="estimate-studio-grid contractor-guide">
+    <div class="estimate-studio-card">
+      <h4>Estimate Templates</h4>
+      <p>Start with a real project template, then adjust quantities and pricing.</p>
+      <div class="template-button-grid">
+        <button class="template-btn" type="button" onclick="loadEstimateTemplate('bathroom')">Bathroom Remodel</button>
+        <button class="template-btn" type="button" onclick="loadEstimateTemplate('kitchen')">Kitchen Remodel</button>
+        <button class="template-btn" type="button" onclick="loadEstimateTemplate('roofing')">Roofing</button>
+        <button class="template-btn" type="button" onclick="loadEstimateTemplate('flooring')">Flooring</button>
+        <button class="template-btn" type="button" onclick="loadEstimateTemplate('deck')">Deck Build</button>
+        <button class="template-btn" type="button" onclick="loadEstimateTemplate('painting')">Painting</button>
+      </div>
+    </div>
+
+    <div class="estimate-studio-card">
+      <h4>Good / Better / Best Pricing</h4>
+      <p>Quickly create price levels so the homeowner can compare options.</p>
+      <div class="tier-button-grid">
+        <button class="tier-btn" id="tierGoodBtn" type="button" onclick="applyEstimateTier('good')">Good</button>
+        <button class="tier-btn active" id="tierBetterBtn" type="button" onclick="applyEstimateTier('better')">Better</button>
+        <button class="tier-btn" id="tierBestBtn" type="button" onclick="applyEstimateTier('best')">Best</button>
+      </div>
+      <div class="estimate-settings-row">
+        <div>
+          <label>Markup %</label>
+          <input id="estimateMarkupInput" type="number" value="15" step="0.5" oninput="recalcEstimate()">
+        </div>
+        <div>
+          <label>Tax %</label>
+          <input id="estimateTaxInput" type="number" value="6.625" step="0.001" oninput="recalcEstimate()">
+        </div>
+        <div>
+          <label>Deposit %</label>
+          <input id="estimateDepositInput" type="number" value="30" step="1" oninput="recalcEstimate()">
+        </div>
+        <div>
+          <label>Version</label>
+          <input id="estimateVersionInput" type="text" value="v1.0">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="estimate-studio-card contractor-guide" style="margin-bottom:16px;">
+    <h4>Saved Price Book</h4>
+    <p>Add common contractor items fast. Later this can be saved per contractor profile in Supabase.</p>
+    <div class="price-book-grid">
+      <button class="price-book-btn" type="button" onclick="addPriceBookItem('Demo Labor',1,'lot',450,6,65)">Demo Labor</button>
+      <button class="price-book-btn" type="button" onclick="addPriceBookItem('Dumpster / Disposal',1,'allowance',650,0,75)">Dumpster</button>
+      <button class="price-book-btn" type="button" onclick="addPriceBookItem('Site Protection',1,'allowance',175,2,65)">Site Protection</button>
+      <button class="price-book-btn" type="button" onclick="addPriceBookItem('Drywall Sheet',1,'sheet',18,0.5,65)">Drywall Sheet</button>
+      <button class="price-book-btn" type="button" onclick="addPriceBookItem('Tile Install',1,'sqft',3.25,0.12,75)">Tile / Sq Ft</button>
+      <button class="price-book-btn" type="button" onclick="addPriceBookItem('Interior Painting',1,'sqft',0.65,0.06,60)">Paint / Sq Ft</button>
+    </div>
+  </div>
+
+
   <div class="guided-mini-steps contractor-guide">
     <button class="guided-mini-step" type="button" data-calc-focus="calcPickTrade"><span>1</span><strong>Pick trade</strong><p>The dropdown changes the form to only the fields for that trade.</p></button>
     <button class="guided-mini-step" type="button" data-calc-focus="calculatorFields"><span>2</span><strong>Enter basics</strong><p>Use rough dimensions first. You can fine tune line items afterward.</p></button>
@@ -3743,6 +3969,8 @@ body .topbar .main-logo {
               <div class="money-line"><span>Markup (15%)</span><strong id="markupOut">$600.90</strong></div>
               <div class="money-line"><span>Tax (6.625%)</span><strong id="taxOut">$305.16</strong></div>
               <div class="money-line"><span>Grand Total</span><strong id="grandOut">$4,912.06</strong></div>
+              <div class="money-line"><span>Suggested Deposit</span><strong id="depositOut">$0.00</strong></div>
+              <div class="money-line"><span>Active Price Level</span><strong id="priceTierOut">Better</strong></div>
             </div>
           </div>
 
@@ -3754,7 +3982,7 @@ body .topbar .main-logo {
       <p>Use AI to clean up the scope, then preview and send a proposal the homeowner can understand.</p>
     </div>
     <div class="estimate-toolbar">
-      <button class="btn btn-soft" type="button">Save Version</button>
+      <button class="btn btn-soft" type="button" onclick="saveEstimateVersion()">Save Version</button>
       <button class="btn btn-primary" id="generateProposalBtn" type="button" onclick="generateProposalPDF()">Generate Proposal PDF</button>
       <button class="btn btn-primary" type="button" onclick="submitBid()">Submit Bid to Customer</button>
     </div>
@@ -3826,6 +4054,26 @@ body .topbar .main-logo {
               </div>
             </div>
           </div>
+
+
+
+  <div class="estimate-version-strip contractor-guide">
+    <div class="version-pill"><span>Estimate Version</span><strong id="estimateVersionOut">v1.0</strong></div>
+    <div class="version-pill"><span>Price Level</span><strong id="proposalTierOut">Better</strong></div>
+    <div class="version-pill"><span>Deposit Target</span><strong id="proposalDepositOut">$0.00</strong></div>
+    <div class="version-pill"><span>Approval Status</span><strong id="proposalApprovalOut">Pending</strong></div>
+  </div>
+
+  <div class="approval-status-card">
+    <h4>Estimate Approval Tracker</h4>
+    <p style="margin:0;color:var(--muted);">Track whether the estimate is still a draft, sent, approved, or needs changes.</p>
+    <div class="approval-status-actions">
+      <button class="btn btn-soft" type="button" onclick="setEstimateApprovalStatus('Draft')">Draft</button>
+      <button class="btn btn-soft" type="button" onclick="setEstimateApprovalStatus('Sent to Homeowner')">Sent</button>
+      <button class="btn btn-primary" type="button" onclick="setEstimateApprovalStatus('Approved')">Approved</button>
+      <button class="btn btn-dark" type="button" onclick="setEstimateApprovalStatus('Changes Requested')">Changes Requested</button>
+    </div>
+  </div>
 
   <div class="estimate-output-card">
             <h4>Customer Proposal Notes</h4>
@@ -5333,6 +5581,158 @@ function pushCalcResultsToEstimate(){
   );
 }
 
+
+/* ---------- HOUZZ-PRO STYLE ESTIMATE STUDIO ADD-ON ---------- */
+
+let activeEstimateTier = "better";
+let estimateApprovalStatus = "Pending";
+const savedEstimateVersions = [];
+
+const estimateTemplates = {
+  bathroom: [
+    ["Bathroom Demo", 1, "lot", 650, 8, 75],
+    ["Plumbing Rough-In", 3, "fixtures", 220, 8, 95],
+    ["Shower Waterproofing", 1, "allowance", 550, 5, 75],
+    ["Tile Floor Install", 80, "sqft", 3.25, 10, 75],
+    ["Vanity / Toilet / Fixtures Install", 1, "allowance", 1200, 8, 85],
+    ["Paint + Final Touches", 1, "lot", 325, 5, 60]
+  ],
+  kitchen: [
+    ["Kitchen Demo", 1, "lot", 950, 12, 75],
+    ["Cabinet Installation", 1, "allowance", 2800, 18, 85],
+    ["Countertop Coordination", 1, "allowance", 450, 2, 75],
+    ["Electrical / Lighting Updates", 1, "allowance", 750, 8, 95],
+    ["Plumbing Hookups", 1, "allowance", 525, 5, 95],
+    ["Backsplash Tile", 35, "sqft", 4.25, 7, 75]
+  ],
+  roofing: [
+    ["Tear-Off + Disposal", 1, "lot", 1250, 14, 75],
+    ["Architectural Shingles", 18, "squares", 145, 20, 85],
+    ["Underlayment + Ice Shield", 18, "squares", 48, 6, 85],
+    ["Drip Edge / Flashing", 1, "allowance", 525, 5, 85],
+    ["Ridge Vent + Caps", 1, "allowance", 425, 4, 85]
+  ],
+  flooring: [
+    ["Remove Existing Flooring", 300, "sqft", 0.85, 8, 65],
+    ["Floor Prep / Leveling", 1, "allowance", 450, 5, 70],
+    ["New Flooring Install", 300, "sqft", 4.25, 18, 70],
+    ["Transitions + Trim", 1, "allowance", 275, 4, 65]
+  ],
+  deck: [
+    ["Deck Demo / Site Prep", 1, "lot", 850, 10, 75],
+    ["Footings + Posts", 8, "posts", 95, 12, 80],
+    ["Framing Lumber", 192, "sqft", 8.5, 18, 80],
+    ["Deck Boards", 192, "sqft", 9.75, 14, 80],
+    ["Railing System", 48, "linear ft", 38, 10, 80]
+  ],
+  painting: [
+    ["Wall Prep / Patching", 1, "allowance", 275, 5, 60],
+    ["Primer", 1, "allowance", 180, 3, 60],
+    ["Paint Walls + Ceiling", 650, "sqft", 0.65, 14, 60],
+    ["Trim Paint", 160, "linear ft", 0.85, 6, 60],
+    ["Cleanup", 1, "lot", 125, 2, 60]
+  ]
+};
+
+function clearEstimateRows(){
+  const tbody = document.querySelector("#estimateTable tbody");
+  if (tbody) tbody.innerHTML = "";
+}
+
+function loadEstimateTemplate(type){
+  const rows = estimateTemplates[type] || estimateTemplates.bathroom;
+  clearEstimateRows();
+  rows.forEach(row => addEstimateLine(row[0], row[1], row[2], row[3], row[4], row[5]));
+  applyEstimateTier(activeEstimateTier, true);
+  const label = String(type || "template").replace(/([A-Z])/g, " $1").replace(/^./, c => c.toUpperCase());
+  const notes = document.getElementById("estimateNotes");
+  if (notes) {
+    notes.value = `Estimate template loaded: ${label}. Includes starter scope, editable line items, markup, tax, and deposit target. Review all quantities, selections, exclusions, permits, and field conditions before sending to the homeowner.`;
+  }
+}
+
+function addPriceBookItem(item, qty, unit, unitCost, laborHours, laborRate){
+  addEstimateLine(item, qty, unit, unitCost, laborHours, laborRate);
+}
+
+function applyEstimateTier(tier, skipReprice){
+  activeEstimateTier = tier || "better";
+  const multipliers = { good: 0.9, better: 1, best: 1.18 };
+  const label = activeEstimateTier.charAt(0).toUpperCase() + activeEstimateTier.slice(1);
+
+  document.querySelectorAll(".tier-btn").forEach(btn => btn.classList.remove("active"));
+  const activeBtn = document.getElementById("tier" + label + "Btn");
+  if (activeBtn) activeBtn.classList.add("active");
+
+  if (!skipReprice) {
+    document.querySelectorAll("#estimateTable tbody tr").forEach(row => {
+      const unit = row.querySelector(".unitCost");
+      if (!unit) return;
+      const base = parseFloat(unit.dataset.baseCost || unit.value || "0") || 0;
+      unit.dataset.baseCost = base;
+      unit.value = (base * (multipliers[activeEstimateTier] || 1)).toFixed(2);
+    });
+  }
+
+  updateEstimateMetaOutputs();
+  recalcEstimate();
+}
+
+function getEstimateMeta(){
+  return {
+    markupPct: parseFloat(document.getElementById("estimateMarkupInput")?.value || "15") || 0,
+    taxPct: parseFloat(document.getElementById("estimateTaxInput")?.value || "6.625") || 0,
+    depositPct: parseFloat(document.getElementById("estimateDepositInput")?.value || "30") || 0,
+    version: document.getElementById("estimateVersionInput")?.value || "v1.0",
+    tier: activeEstimateTier.charAt(0).toUpperCase() + activeEstimateTier.slice(1),
+    approval: estimateApprovalStatus
+  };
+}
+
+function parseMoneyText(text){
+  return parseFloat(String(text || "0").replace(/[^0-9.-]/g, "")) || 0;
+}
+
+function updateEstimateMetaOutputs(){
+  const meta = getEstimateMeta();
+  const grand = parseMoneyText(document.getElementById("grandOut")?.innerText);
+  const deposit = grand * (meta.depositPct / 100);
+
+  const fields = {
+    priceTierOut: meta.tier,
+    proposalTierOut: meta.tier,
+    estimateVersionOut: meta.version,
+    proposalApprovalOut: meta.approval,
+    depositOut: currency(deposit),
+    proposalDepositOut: currency(deposit)
+  };
+
+  Object.entries(fields).forEach(([id, value]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  });
+}
+
+function setEstimateApprovalStatus(status){
+  estimateApprovalStatus = status || "Pending";
+  updateEstimateMetaOutputs();
+}
+
+function saveEstimateVersion(){
+  recalcEstimate();
+  const meta = getEstimateMeta();
+  const version = {
+    version: meta.version,
+    tier: meta.tier,
+    approval: meta.approval,
+    grand: document.getElementById("grandOut")?.innerText || "$0.00",
+    rows: getEstimateRowsForProposal(),
+    savedAt: new Date().toLocaleString()
+  };
+  savedEstimateVersions.push(version);
+  alert(`Estimate ${version.version} saved locally for this session. Total: ${version.grand}`);
+}
+
 /* ---------- ESTIMATE ---------- */
 
 function recalcEstimate(){
@@ -5358,14 +5758,19 @@ function recalcEstimate(){
 
   });
 
-  const markup=subtotal*0.15;
-  const tax=(subtotal+markup)*0.06625;
+  const meta = typeof getEstimateMeta === "function" ? getEstimateMeta() : { markupPct: 15, taxPct: 6.625 };
+  const markup=subtotal*(meta.markupPct/100);
+  const tax=(subtotal+markup)*(meta.taxPct/100);
   const grand=subtotal+markup+tax;
 
   document.getElementById('subtotalOut').textContent=currency(subtotal);
   document.getElementById('markupOut').textContent=currency(markup);
   document.getElementById('taxOut').textContent=currency(tax);
   document.getElementById('grandOut').textContent=currency(grand);
+
+  if (typeof updateEstimateMetaOutputs === "function") {
+    updateEstimateMetaOutputs();
+  }
 
 }
 
@@ -6209,6 +6614,7 @@ calculateMaterials();
 attachEstimateListeners();
 
 recalcEstimate();
+if (typeof updateEstimateMetaOutputs === "function") updateEstimateMetaOutputs();
 
 document.addEventListener("DOMContentLoaded", setupChat);
 
@@ -6647,6 +7053,7 @@ function buildProposalText(){
   const contractor = getContractorInfoForProposal();
   const notes = document.getElementById("estimateNotes")?.value || "";
   const rows = getEstimateRowsForProposal();
+  const meta = typeof getEstimateMeta === "function" ? getEstimateMeta() : { version: "v1.0", tier: "Better", depositPct: 30, approval: "Pending" };
 
   const lineItems = rows.map((row, index) => {
     return `${index + 1}. ${row.item} — Qty: ${row.qty} ${row.unit} | Material/Unit: $${row.unitCost} | Labor: ${row.laborHours} hrs × $${row.laborRate}/hr | Total: ${row.total}`;
@@ -6667,6 +7074,9 @@ function buildProposalText(){
     "Trade: " + (job.trade || "General Renovation"),
     "Location: " + (job.city || "NJ Area"),
     "Project ID: " + (job.id || "Preview"),
+    "Estimate Version: " + meta.version,
+    "Price Level: " + meta.tier,
+    "Approval Status: " + meta.approval,
     "",
     "SCOPE / ESTIMATE NOTES:",
     notes || "No notes provided.",
@@ -6679,6 +7089,7 @@ function buildProposalText(){
     "Markup: " + (document.getElementById("markupOut")?.innerText || "$0.00"),
     "Tax: " + (document.getElementById("taxOut")?.innerText || "$0.00"),
     "Grand Total: " + (document.getElementById("grandOut")?.innerText || "$0.00"),
+    "Suggested Deposit (" + meta.depositPct + "%): " + (document.getElementById("depositOut")?.innerText || "$0.00"),
     "",
     "PAYMENT / APPROVAL:",
     "This proposal is subject to final contractor review, customer approval, signed agreement, and any change orders required after field verification.",
