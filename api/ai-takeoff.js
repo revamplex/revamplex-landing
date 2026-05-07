@@ -1,6 +1,4 @@
-const OpenAI = require("openai");
-
-module.exports.config = {
+export const config = {
   api: {
     bodyParser: {
       sizeLimit: "25mb"
@@ -8,139 +6,196 @@ module.exports.config = {
   }
 };
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
-
-function safeJsonParse(text) {
-  if (!text) return null;
-  const cleaned = String(text)
-    .replace(/^```json\s*/i, "")
-    .replace(/^```\s*/i, "")
-    .replace(/```$/i, "")
-    .trim();
-  try { return JSON.parse(cleaned); } catch (err) { return null; }
-}
-
-function fallbackResult(rawText) {
-  return {
-    summary: rawText || "AI returned text but not valid JSON. Review manually.",
-    assumptions: ["AI response could not be parsed into structured take-off items."],
-    missing_info: ["Try a clearer plan image or provide a known scale/reference."],
-    risks: ["Contractor must verify all take-off quantities before bidding."],
-    items: []
-  };
-}
-
-function normalizeImageDataUrl(value) {
+function cleanDataUrl(value) {
   if (!value || typeof value !== "string") return "";
-  const cleaned = value.trim();
-
-  // OpenAI image inputs accept fully qualified URLs or base64 data URLs.
-  // Keep this strict so bad PDF/file strings do not create vague pattern errors.
-  const valid = /^data:image\/(png|jpeg|jpg|webp);base64,[A-Za-z0-9+/=\r\n]+$/i.test(cleaned);
-  if (!valid) return "";
-
-  // Normalize jpg -> jpeg and remove line breaks from the base64 body.
-  const commaIndex = cleaned.indexOf(",");
-  const header = cleaned.slice(0, commaIndex).replace("image/jpg", "image/jpeg");
-  const body = cleaned.slice(commaIndex + 1).replace(/[\r\n\s]/g, "");
-  return `${header},${body}`;
+  return value.trim().replace(/\s/g, "");
 }
 
-module.exports = async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+function getMimeFromDataUrl(dataUrl) {
+  const match = String(dataUrl || "").match(/^data:([^;]+);base64,/i);
+  return match ? match[1].toLowerCase() : "";
+}
+
+function getBase64FromDataUrl(dataUrl) {
+  return String(dataUrl || "").replace(/^data:[^;]+;base64,/i, "");
+}
+
+function isImageMime(mime) {
+  return ["image/png", "image/jpeg", "image/jpg", "image/webp"].includes(String(mime || "").toLowerCase());
+}
+
+function isPdfMime(mime) {
+  return String(mime || "").toLowerCase() === "application/pdf";
+}
+
+function extractOutputText(responseJson) {
+  if (typeof responseJson?.output_text === "string") return responseJson.output_text;
+
+  const parts = [];
+  const output = Array.isArray(responseJson?.output) ? responseJson.output : [];
+
+  for (const item of output) {
+    const content = Array.isArray(item?.content) ? item.content : [];
+    for (const c of content) {
+      if (typeof c?.text === "string") parts.push(c.text);
+    }
   }
 
+  return parts.join("\n").trim();
+}
+
+export default async function handler(req, res) {
   try {
+    if (req.method !== "POST") {
+      return res.status(405).json({ error: "Method not allowed" });
+    }
+
     if (!process.env.OPENAI_API_KEY) {
       return res.status(500).json({ error: "Missing OPENAI_API_KEY in Vercel Environment Variables." });
     }
 
-    const { imageDataUrl, fileName, projectContext } = req.body || {};
-    const cleanImageDataUrl = normalizeImageDataUrl(imageDataUrl);
+    const body = req.body || {};
 
-    if (!cleanImageDataUrl) {
+    // Accept several possible names so this works with your current front-end.
+    const rawFile =
+      body.fileData ||
+      body.file_data ||
+      body.dataUrl ||
+      body.data_url ||
+      body.imageDataUrl ||
+      body.image_url ||
+      body.base64 ||
+      "";
+
+    const fileName = body.fileName || body.filename || "revamplex-plan-upload";
+    let dataUrl = cleanDataUrl(rawFile);
+
+    // If the browser only sent raw base64, rebuild a data URL using mimeType.
+    const providedMime = String(body.mimeType || body.mime || "").toLowerCase();
+    if (dataUrl && !dataUrl.startsWith("data:") && providedMime) {
+      dataUrl = `data:${providedMime};base64,${dataUrl}`;
+    }
+
+    const mime = getMimeFromDataUrl(dataUrl) || providedMime;
+
+    if (!dataUrl || !dataUrl.startsWith("data:")) {
       return res.status(400).json({
-        error: "The uploaded file was not converted into a valid PNG/JPG/WebP image. Re-upload as a screenshot/image, or use the updated project-room file that converts PDFs/photos before sending."
+        error: "Upload did not arrive as a valid base64 data URL.",
+        hint: "Expected format like data:image/jpeg;base64,... or data:application/pdf;base64,..."
       });
     }
 
-    const context = projectContext || {};
-
-    const prompt = `
-You are RevampLEX AI Take-Off Assistant for construction estimating.
-
-Read the uploaded drawing, blueprint page, marked plan, sketch, or site photo.
-Extract contractor-reviewed estimate-ready quantities.
-
-Project context:
-- Job title: ${context.job_title || "Unknown"}
-- Trade focus: ${context.trade || "General Renovation"}
-- City: ${context.city || ""}
-- Budget: ${context.budget || ""}
-- Known scale/reference: ${context.known_scale || "Not provided"}
-- Job description: ${context.description || ""}
-- Contractor instructions: ${context.contractor_instructions || ""}
-
-Return ONLY valid JSON with this exact shape:
-{
-  "summary": "plain English take-off summary",
-  "assumptions": ["assumption 1"],
-  "missing_info": ["missing measurement or unclear item"],
-  "risks": ["risk or warning"],
-  "items": [
-    {
-      "name": "Floor tile area",
-      "quantity": 120,
-      "unit": "sqft",
-      "suggested_material_unit_cost": 3.25,
-      "suggested_labor_hours": 8,
-      "suggested_labor_rate": 75,
-      "confidence": "high | medium | low | review",
-      "notes": "how you got this quantity or what to verify"
+    if (!isImageMime(mime) && !isPdfMime(mime)) {
+      return res.status(400).json({
+        error: `Unsupported file type for AI Take-Off: ${mime || "unknown"}. Use PDF, JPG, PNG, or WEBP.`
+      });
     }
-  ]
-}
 
-Rules:
-- If scale is unclear, estimate only from visible dimensions and flag confidence low/review.
-- Do not invent exact hidden dimensions.
-- Prefer construction units: sqft, linear ft, cubic yd, pieces, fixtures, openings, squares, bags, rolls.
-- Include doors, windows, fixtures, baseboard, wall area, floor area, ceiling area, roofing squares, siding squares, concrete volume, or trade-specific quantities when visible.
-- Suggested costs are starter placeholders only and should be conservative.
-`;
+    const takeoffPrompt = [
+      "You are RevampLEX AI Take-Off Assistant for construction estimating.",
+      "Analyze the uploaded plan, drawing, sketch, or site photo.",
+      "Return practical construction take-off quantities.",
+      "",
+      "Important:",
+      "- If the drawing has no scale, clearly say measurements are approximate.",
+      "- Do not pretend exact measurements if scale is missing.",
+      "- Extract visible rooms, wall lengths, floor areas, tile areas, doors, windows, fixtures, cabinetry, roofing/siding/flooring quantities when possible.",
+      "- Output valid JSON only.",
+      "",
+      "JSON shape:",
+      "{",
+      '  "summary": "short plain English summary",',
+      '  "scale_found": true,',
+      '  "confidence": "low | medium | high",',
+      '  "items": [',
+      '    { "item": "Floor tile", "qty": 120, "unit": "sqft", "trade": "Tile", "notes": "approximate" }',
+      "  ],",
+      '  "warnings": ["missing scale", "photo angle may distort measurements"]',
+      "}"
+    ].join("\n");
 
-    const response = await client.responses.create({
-      model: process.env.OPENAI_TAKEOFF_MODEL || "gpt-4.1-mini",
-      input: [
-        {
-          role: "user",
-          content: [
-            { type: "input_text", text: prompt },
-            { type: "input_image", image_url: cleanImageDataUrl, detail: "high" }
-          ]
-        }
-      ],
-      temperature: 0.2
+    const content = [
+      {
+        type: "input_text",
+        text: takeoffPrompt
+      }
+    ];
+
+    if (isImageMime(mime)) {
+      // Images use input_image + image_url.
+      content.push({
+        type: "input_image",
+        image_url: dataUrl,
+        detail: "high"
+      });
+    } else if (isPdfMime(mime)) {
+      // PDFs must NOT be sent as input_image. They go as input_file.
+      content.push({
+        type: "input_file",
+        filename: fileName.toLowerCase().endsWith(".pdf") ? fileName : `${fileName}.pdf`,
+        file_data: dataUrl
+      });
+    }
+
+    const openaiResponse = await fetch("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "gpt-4.1-mini",
+        input: [
+          {
+            role: "user",
+            content
+          }
+        ],
+        max_output_tokens: 1800
+      })
     });
 
-    const text = response.output_text || "";
-    const parsed = safeJsonParse(text);
+    const responseJson = await openaiResponse.json();
 
-    if (!parsed) return res.status(200).json(fallbackResult(text));
+    if (!openaiResponse.ok) {
+      console.error("OpenAI AI Take-Off error:", responseJson);
+      return res.status(openaiResponse.status).json({
+        error: responseJson?.error?.message || "OpenAI AI Take-Off request failed.",
+        details: responseJson
+      });
+    }
 
-    return res.status(200).json({
-      summary: parsed.summary || "AI take-off complete. Review before bidding.",
-      assumptions: Array.isArray(parsed.assumptions) ? parsed.assumptions : [],
-      missing_info: Array.isArray(parsed.missing_info) ? parsed.missing_info : [],
-      risks: Array.isArray(parsed.risks) ? parsed.risks : [],
-      items: Array.isArray(parsed.items) ? parsed.items : [],
-      source_file: fileName || "uploaded drawing"
-    });
+    const text = extractOutputText(responseJson);
+
+    let parsed = null;
+    try {
+      parsed = JSON.parse(text);
+    } catch (err) {
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          parsed = JSON.parse(jsonMatch[0]);
+        } catch (_) {}
+      }
+    }
+
+    if (!parsed) {
+      return res.status(200).json({
+        summary: text || "AI Take-Off completed, but no structured JSON was returned.",
+        scale_found: false,
+        confidence: "low",
+        items: [],
+        warnings: ["AI response was not valid JSON."],
+        raw: text
+      });
+    }
+
+    return res.status(200).json(parsed);
+
   } catch (err) {
-    console.error("AI take-off error:", err);
-    return res.status(500).json({ error: err.message || "AI take-off failed." });
+    console.error("AI Take-Off server error:", err);
+    return res.status(500).json({
+      error: err.message || "AI Take-Off server error."
+    });
   }
-};
+}
