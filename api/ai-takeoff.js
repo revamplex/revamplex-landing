@@ -1,14 +1,14 @@
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: "25mb"
+      sizeLimit: "35mb"
     }
   }
 };
 
 function cleanDataUrl(value) {
   if (!value || typeof value !== "string") return "";
-  return value.trim().replace(/\s/g, "");
+  return value.trim();
 }
 
 function getMimeFromDataUrl(dataUrl) {
@@ -18,6 +18,15 @@ function getMimeFromDataUrl(dataUrl) {
 
 function getBase64FromDataUrl(dataUrl) {
   return String(dataUrl || "").replace(/^data:[^;]+;base64,/i, "");
+}
+
+function safeFileName(name, fallback = "revamplex-plan.pdf") {
+  const clean = String(name || fallback)
+    .replace(/[^\w.\-() ]+/g, "-")
+    .trim()
+    .slice(0, 120);
+
+  return clean || fallback;
 }
 
 function isImageMime(mime) {
@@ -44,19 +53,55 @@ function extractOutputText(responseJson) {
   return parts.join("\n").trim();
 }
 
+async function uploadPdfToOpenAI({ dataUrl, fileName, apiKey }) {
+  const base64 = getBase64FromDataUrl(dataUrl);
+  if (!base64) {
+    throw new Error("PDF upload failed: missing base64 PDF data.");
+  }
+
+  const buffer = Buffer.from(base64, "base64");
+  const blob = new Blob([buffer], { type: "application/pdf" });
+
+  const form = new FormData();
+  form.append("purpose", "user_data");
+  form.append("file", blob, safeFileName(fileName, "revamplex-plan.pdf"));
+
+  const uploadRes = await fetch("https://api.openai.com/v1/files", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`
+    },
+    body: form
+  });
+
+  const uploadJson = await uploadRes.json();
+
+  if (!uploadRes.ok) {
+    console.error("OpenAI file upload error:", uploadJson);
+    throw new Error(uploadJson?.error?.message || "Could not upload PDF to OpenAI Files API.");
+  }
+
+  if (!uploadJson?.id) {
+    throw new Error("OpenAI file upload did not return a file ID.");
+  }
+
+  return uploadJson.id;
+}
+
 export default async function handler(req, res) {
   try {
     if (req.method !== "POST") {
       return res.status(405).json({ error: "Method not allowed" });
     }
 
-    if (!process.env.OPENAI_API_KEY) {
+    const apiKey = process.env.OPENAI_API_KEY;
+
+    if (!apiKey) {
       return res.status(500).json({ error: "Missing OPENAI_API_KEY in Vercel Environment Variables." });
     }
 
     const body = req.body || {};
 
-    // Accept several possible names so this works with your current front-end.
     const rawFile =
       body.fileData ||
       body.file_data ||
@@ -67,11 +112,11 @@ export default async function handler(req, res) {
       body.base64 ||
       "";
 
-    const fileName = body.fileName || body.filename || "revamplex-plan-upload";
+    const providedMime = String(body.mimeType || body.mime || "").toLowerCase();
+    const fileName = safeFileName(body.fileName || body.filename || "revamplex-upload");
+
     let dataUrl = cleanDataUrl(rawFile);
 
-    // If the browser only sent raw base64, rebuild a data URL using mimeType.
-    const providedMime = String(body.mimeType || body.mime || "").toLowerCase();
     if (dataUrl && !dataUrl.startsWith("data:") && providedMime) {
       dataUrl = `data:${providedMime};base64,${dataUrl}`;
     }
@@ -81,7 +126,7 @@ export default async function handler(req, res) {
     if (!dataUrl || !dataUrl.startsWith("data:")) {
       return res.status(400).json({
         error: "Upload did not arrive as a valid base64 data URL.",
-        hint: "Expected format like data:image/jpeg;base64,... or data:application/pdf;base64,..."
+        hint: "Expected data:image/jpeg;base64,... or data:application/pdf;base64,..."
       });
     }
 
@@ -93,14 +138,14 @@ export default async function handler(req, res) {
 
     const takeoffPrompt = [
       "You are RevampLEX AI Take-Off Assistant for construction estimating.",
-      "Analyze the uploaded plan, drawing, sketch, or site photo.",
+      "Analyze the uploaded construction plan, drawing, sketch, blueprint, or site photo.",
       "Return practical construction take-off quantities.",
       "",
-      "Important:",
-      "- If the drawing has no scale, clearly say measurements are approximate.",
-      "- Do not pretend exact measurements if scale is missing.",
-      "- Extract visible rooms, wall lengths, floor areas, tile areas, doors, windows, fixtures, cabinetry, roofing/siding/flooring quantities when possible.",
-      "- Output valid JSON only.",
+      "Rules:",
+      "- If the drawing has no readable scale, say measurements are approximate.",
+      "- Do not invent exact measurements if scale is missing.",
+      "- Extract visible rooms, walls, floor areas, tile areas, linear feet, doors, windows, fixtures, cabinetry, roofing, siding, flooring, concrete, drywall, paint, or trade-specific counts when possible.",
+      "- Output valid JSON only. No markdown.",
       "",
       "JSON shape:",
       "{",
@@ -122,36 +167,43 @@ export default async function handler(req, res) {
     ];
 
     if (isImageMime(mime)) {
-      // Images use input_image + image_url.
+      // Images can be sent directly as data URLs.
       content.push({
         type: "input_image",
         image_url: dataUrl,
         detail: "high"
       });
-    } else if (isPdfMime(mime)) {
-      // PDFs must NOT be sent as input_image. They go as input_file.
+    }
+
+    if (isPdfMime(mime)) {
+      // Safer PDF path: upload to OpenAI Files API first, then reference file_id.
+      const fileId = await uploadPdfToOpenAI({
+        dataUrl,
+        fileName: fileName.toLowerCase().endsWith(".pdf") ? fileName : `${fileName}.pdf`,
+        apiKey
+      });
+
       content.push({
         type: "input_file",
-        filename: fileName.toLowerCase().endsWith(".pdf") ? fileName : `${fileName}.pdf`,
-        file_data: dataUrl
+        file_id: fileId
       });
     }
 
     const openaiResponse = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "gpt-4.1-mini",
+        model: "gpt-4.1",
         input: [
           {
             role: "user",
             content
           }
         ],
-        max_output_tokens: 1800
+        max_output_tokens: 2200
       })
     });
 
@@ -191,7 +243,6 @@ export default async function handler(req, res) {
     }
 
     return res.status(200).json(parsed);
-
   } catch (err) {
     console.error("AI Take-Off server error:", err);
     return res.status(500).json({
