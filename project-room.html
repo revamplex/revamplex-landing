@@ -5446,7 +5446,98 @@ function renderTakeoffResults(data){
     summary.textContent = JSON.stringify(cleanSummary, null, 2);
   }
 }
+/* =========================================================
+   REVAMPLEX AI TAKE-OFF PDF FIX
+   Converts PDFs to JPEG page images in the browser before AI.
+   Add this before your runAITakeoff function.
+   ========================================================= */
 
+async function ensureRevampPdfJsLoaded() {
+  if (window.pdfjsLib) return;
+
+  await new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+    script.onload = resolve;
+    script.onerror = () => reject(new Error("Could not load PDF.js"));
+    document.head.appendChild(script);
+  });
+
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+}
+
+function readFileAsDataURLRevamp(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(reader.error || new Error("Could not read file"));
+    reader.readAsDataURL(file);
+  });
+}
+
+function readFileAsArrayBufferRevamp(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error || new Error("Could not read PDF"));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+async function convertPdfToTakeoffImages(file, maxPages = 5) {
+  await ensureRevampPdfJsLoaded();
+
+  const buffer = await readFileAsArrayBufferRevamp(file);
+  const pdf = await window.pdfjsLib.getDocument({ data: buffer }).promise;
+  const pageCount = Math.min(pdf.numPages, maxPages);
+  const pages = [];
+
+  for (let pageNumber = 1; pageNumber <= pageCount; pageNumber++) {
+    const page = await pdf.getPage(pageNumber);
+    const viewport = page.getViewport({ scale: 2.0 });
+
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d", { alpha: false });
+
+    canvas.width = Math.floor(viewport.width);
+    canvas.height = Math.floor(viewport.height);
+
+    await page.render({
+      canvasContext: context,
+      viewport
+    }).promise;
+
+    pages.push({
+      pageNumber,
+      imageDataUrl: canvas.toDataURL("image/jpeg", 0.86)
+    });
+  }
+
+  return pages;
+}
+
+async function getRevampTakeoffPayloadFromFile(file) {
+  const isPdf =
+    file.type === "application/pdf" ||
+    String(file.name || "").toLowerCase().endsWith(".pdf");
+
+  if (isPdf) {
+    const pages = await convertPdfToTakeoffImages(file, 5);
+    return {
+      fileName: file.name,
+      mimeType: "application/pdf-rendered-to-jpeg",
+      pages
+    };
+  }
+
+  const imageDataUrl = await readFileAsDataURLRevamp(file);
+  return {
+    fileName: file.name,
+    mimeType: file.type || "image/jpeg",
+    pages: [{ pageNumber: 1, imageDataUrl }]
+  };
+}
 async function runAITakeoff(){
   if (!takeoffImageDataUrl) {
     alert("Upload a plan, PDF, drawing, or photo first.");
