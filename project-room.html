@@ -5538,28 +5538,33 @@ async function getRevampTakeoffPayloadFromFile(file) {
     pages: [{ pageNumber: 1, imageDataUrl }]
   };
 }
-async function runAITakeoff(){
-  if (!takeoffImageDataUrl) {
-    alert("Upload a plan, PDF, drawing, or photo first.");
-    return;
-  }
-
-  setTakeoffStatus("AI is reading the drawing and extracting quantities...");
-
+async function runAITakeoff() {
   try {
+    const input = document.getElementById("takeoffFileInput");
+
+    if (!input || !input.files || !input.files[0]) {
+      alert("Upload a PDF, JPG, or PNG plan first.");
+      return;
+    }
+
+    setTakeoffStatus("Reading plan and preparing AI take-off...");
+
+    const payload = await getRevampTakeoffPayloadFromFile(input.files[0]);
+    payload.projectContext = getTakeoffProjectContext();
+
+    setTakeoffStatus("Plan converted. AI is reading the take-off...");
+
     const response = await fetch("/api/ai-takeoff", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        imageDataUrl: takeoffImageDataUrl,
-        fileName: takeoffFileName,
-        projectContext: getTakeoffProjectContext()
-      })
+      body: JSON.stringify(payload)
     });
 
     const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data?.error || "AI take-off failed.");
+
+    if (!response.ok || data.error) {
+      console.error("AI Take-Off error:", data);
+      throw new Error(data.error || "AI take-off failed.");
     }
 
     renderTakeoffResults(data);
