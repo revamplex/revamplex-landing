@@ -5523,7 +5523,10 @@ async function getRevampTakeoffPayloadFromFile(file) {
     String(file.name || "").toLowerCase().endsWith(".pdf");
 
   if (isPdf) {
-    const pages = await convertPdfToTakeoffImages(file, 5);
+    const pages = await convertPdfToTakeoffImages(
+  file,
+  Number.MAX_SAFE_INTEGER
+);
     return {
       fileName: file.name,
       mimeType: "application/pdf-rendered-to-jpeg",
@@ -5542,40 +5545,56 @@ async function runAITakeoff() {
   try {
     const input = document.getElementById("takeoffFileInput");
 
-    if (!input || !input.files || !input.files[0]) {
-      alert("Upload a PDF, JPG, or PNG plan first.");
+    if (!input?.files?.[0]) {
+      alert("Upload plans first.");
       return;
     }
 
-    setTakeoffStatus("Reading plan and preparing AI take-off...");
+    setTakeoffStatus("Reading blueprint set...");
 
-    const payload = await getRevampTakeoffPayloadFromFile(input.files[0]);
-    payload.projectContext = getTakeoffProjectContext();
+    const allPages = await getRevampTakeoffPayloadFromFile(
+      input.files[0]
+    );
 
-    setTakeoffStatus("Plan converted. AI is reading the take-off...");
+    const batchSize = 3;
+    const combinedItems = [];
 
-    const response = await fetch("/api/ai-takeoff", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    for (let i = 0; i < allPages.pages.length; i += batchSize) {
 
-    const data = await response.json();
+      const batch = {
+        pages: allPages.pages.slice(i, i + batchSize)
+      };
 
-    if (!response.ok || data.error) {
-      console.error("AI Take-Off error:", data);
-      throw new Error(data.error || "AI take-off failed.");
+      setTakeoffStatus(
+        `AI analyzing pages ${i+1}-${Math.min(i+batchSize, allPages.pages.length)}...`
+      );
+
+      const response = await fetch("/api/ai-takeoff", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(batch)
+      });
+
+      const result = await response.json();
+
+      if (result.items) {
+        combinedItems.push(...result.items);
+      }
     }
 
-    renderTakeoffResults(data);
-    setTakeoffStatus("AI take-off complete. Review quantities, then send selected items to the estimate.");
+    renderTakeoffResults({
+      items: combinedItems
+    });
+
+    setTakeoffStatus("Blueprint analysis complete.");
+
   } catch (err) {
     console.error(err);
-    setTakeoffStatus(err.message || "AI take-off failed.");
-    alert(err.message || "AI take-off failed.");
+    alert(err.message);
   }
 }
-
 function sendSelectedTakeoffToEstimate(){
   const items = normalizeTakeoffItems(latestTakeoffResult);
   if (!items.length) {
