@@ -4198,9 +4198,9 @@ body.command-room .takeoff-json-box {
     <div class="estimate-toolbar">
       <button class="btn btn-soft" type="button" onclick="saveEstimateVersion()">Save Version</button>
       <button class="btn btn-primary" id="generateProposalBtn" type="button" onclick="generateProposalPDF()">Generate Proposal PDF</button>
-      <button onclick="acceptProjectRoom(job.id)">
-  Accept & Open Project Room
-</button>
+      <button class="btn btn-primary" type="button" onclick="acceptProjectRoom(window.currentJob?.id || jobId)">
+        Accept & Open Project Room
+      </button>
     </div>
   </div>
 
@@ -4457,57 +4457,131 @@ function scrollToSection(id) {
   el.hidden = false;
   el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
- <button 
-  class="btn btn-primary" 
-  type="button"
-  onclick="acceptProjectRoom(window.currentJob?.id || jobId)">
-  Accept & Open Project Room
-</button>
+async function acceptProjectRoom(jobId){
+  try{
+    const resolvedJobId = jobId || window.currentJob?.id || new URLSearchParams(window.location.search).get("job");
 
-<script>
-async function acceptProjectRoom(jobId) {
-  try {
-
-    // Get logged-in user
-    const { data:{ user } } = await supabaseClient.auth.getUser();
-
-    if (!user) {
-      alert("Please log in first");
+    if(!resolvedJobId){
+      alert("No job ID found for this project room.");
       return;
     }
 
-    // Check if project room already exists
-    const { data: existingRoom } = await supabaseClient
-      .from("project_rooms")
-      .select("*")
-      .eq("job_id", jobId)
-      .maybeSingle();
-
-    // If room doesn't exist, create it
-    if (!existingRoom) {
-
-      const { error } = await supabaseClient
-        .from("project_rooms")
-        .insert([{
-          job_id: jobId,
-          contractor_id: user.id,
-          status: "active"
-        }]);
-
-      if (error) {
-        console.error(error);
-        alert("Error creating project room");
-        return;
-      }
+    if(!window.supabaseClient){
+      alert("Supabase is not ready yet. Refresh the page and try again.");
+      return;
     }
 
-    // Open room
-    window.location.href =
-      `project-room.html?jobId=${jobId}&mode=contractor`;
+    const { data:{ user }, error:userError } = await supabaseClient.auth.getUser();
 
-  } catch(err) {
-    console.error(err);
-    alert("Something went wrong");
+    if(userError){
+      throw userError;
+    }
+
+    if(!user){
+      alert("Please sign in first.");
+      return;
+    }
+
+    // Get current job.
+    const { data:job, error:jobError } = await supabaseClient
+      .from("jobs")
+      .select("*")
+      .eq("id", resolvedJobId)
+      .single();
+
+    if(jobError) throw jobError;
+
+    const currentBids = Number(job.bids_received || 0);
+    const maxBids = Number(job.max_bids || 3);
+
+    if(currentBids >= maxBids){
+      alert("Maximum contractor connections reached.");
+      return;
+    }
+
+    // Avoid duplicate bid usage if this contractor already opened this room.
+    const { data:existingRoom, error:existingRoomError } = await supabaseClient
+      .from("project_rooms")
+      .select("*")
+      .eq("job_id", job.id)
+      .eq("contractor_id", user.id)
+      .maybeSingle();
+
+    if(existingRoomError) throw existingRoomError;
+
+    if(existingRoom){
+      window.location.href = `project-room.html?job=${encodeURIComponent(job.id)}&room=${encodeURIComponent(existingRoom.id)}&mode=contractor`;
+      return;
+    }
+
+    const homeownerId = job.user_id || job.homeowner_id || job.customer_id || null;
+
+    // Create active room immediately. No pending access stage.
+    const { data:room, error:roomError } = await supabaseClient
+      .from("project_rooms")
+      .insert({
+        job_id: job.id,
+        homeowner_id: homeownerId,
+        contractor_id: user.id,
+        status: "active",
+        identities_revealed: true,
+        accepted_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if(roomError) throw roomError;
+
+    // Create bid/connection record.
+    const { error:bidError } = await supabaseClient
+      .from("bids")
+      .insert({
+        contractor_id: user.id,
+        homeowner_id: homeownerId,
+        project_room_id: room.id,
+        job_id: job.id,
+        status: "active"
+      });
+
+    if(bidError) throw bidError;
+
+    // Increment homeowner/job bid count.
+    const { error:updateJobError } = await supabaseClient
+      .from("jobs")
+      .update({
+        bids_received: currentBids + 1
+      })
+      .eq("id", job.id);
+
+    if(updateJobError) throw updateJobError;
+
+    // Increment contractor usage.
+    const { data:profile, error:profileError } = await supabaseClient
+      .from("profiles")
+      .select("bids_used")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if(profileError) {
+      console.warn("Could not load contractor profile bid count:", profileError);
+    }
+
+    const { error:updateProfileError } = await supabaseClient
+      .from("profiles")
+      .update({
+        bids_used: Number(profile?.bids_used || 0) + 1
+      })
+      .eq("id", user.id);
+
+    if(updateProfileError) {
+      console.warn("Could not update contractor bid usage:", updateProfileError);
+    }
+
+    window.location.href = `project-room.html?job=${encodeURIComponent(job.id)}&room=${encodeURIComponent(room.id)}&mode=contractor`;
+
+  } catch(err){
+    console.error("Accept project room failed:", err);
+    alert(err.message || "Could not accept and open this project room.");
   }
 }
 </script>
