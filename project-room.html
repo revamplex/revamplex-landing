@@ -4198,9 +4198,9 @@ body.command-room .takeoff-json-box {
     <div class="estimate-toolbar">
       <button class="btn btn-soft" type="button" onclick="saveEstimateVersion()">Save Version</button>
       <button class="btn btn-primary" id="generateProposalBtn" type="button" onclick="generateProposalPDF()">Generate Proposal PDF</button>
-      <button onclick="acceptProjectRoom(job.id)">
-  Accept & Open Project Room
-</button>
+      <button class="btn btn-primary" type="button" onclick="acceptProjectRoom(window.currentJob?.id || jobId)">
+        Accept & Open Project Room
+      </button>
     </div>
   </div>
 
@@ -4945,10 +4945,16 @@ console.log("PROJECT ROOM JOB ID:", jobId);
 
 async function loadRevealedIdentityInfo(job) {
   try {
-    if (!window.supabaseClient || !job) return;
+    if (!job) job = window.currentJob || {};
+    if (!window.supabaseClient) return;
 
     function firstRealValue(...values) {
       return values.find(v => typeof v === "string" && v.trim()) || "";
+    }
+
+    function domValue(id) {
+      const el = document.getElementById(id);
+      return el ? String(el.value || el.textContent || "").trim() : "";
     }
 
     const params = new URLSearchParams(window.location.search);
@@ -5023,6 +5029,7 @@ async function loadRevealedIdentityInfo(job) {
     }
 
     // Contractor info may be stored in contractors instead of profiles.
+    // Try several safe lookups because your contractors table may use id, user_id, or email.
     if (contractorId) {
       const { data } = await supabaseClient
         .from("contractors")
@@ -5059,6 +5066,9 @@ async function loadRevealedIdentityInfo(job) {
         homeownerProfile?.email
       ) || "Homeowner";
 
+    // Very important fallback:
+    // Your console shows Contractor Proposal Info already auto-filled with Impact Construction.
+    // So if Supabase contractor lookup is blocked/missing, read the already-filled form fields.
     const contractorName =
       firstRealValue(
         contractorTable?.company_name,
@@ -5071,6 +5081,8 @@ async function loadRevealedIdentityInfo(job) {
         contractorProfile?.company,
         contractorProfile?.full_name,
         contractorProfile?.name,
+        domValue("contractorCompany"),
+        domValue("contractorName"),
         currentUser?.email
       ) || "Verified Contractor";
 
@@ -5080,11 +5092,38 @@ async function loadRevealedIdentityInfo(job) {
         `Project ID: ${job.id} • ${job.city || "NJ Area"} • Homeowner: ${homeownerName} • Contractor: ${contractorName}`;
     }
 
+    console.log("Identity meta updated:", {
+      homeownerName,
+      contractorName,
+      contractorTable,
+      contractorProfile,
+      room
+    });
+
   } catch (err) {
     console.warn("Identity reveal failed safely:", err);
   }
 }
 
+function refreshJobMetaFromVisibleContractorFields() {
+  const job = window.currentJob || {};
+  if (!job.id) return;
+
+  const meta = document.getElementById("jobMeta");
+  if (!meta) return;
+
+  const contractorCompany = document.getElementById("contractorCompany")?.value?.trim() || "";
+  const contractorName = document.getElementById("contractorName")?.value?.trim() || "";
+  const homeownerName = job.customer_name || job.homeowner_name || "Anonymous";
+
+  const visibleContractorName =
+    contractorCompany ||
+    contractorName ||
+    "Verified Contractor";
+
+  meta.textContent =
+    `Project ID: ${job.id} • ${job.city || "NJ Area"} • Homeowner: ${homeownerName} • Contractor: ${visibleContractorName}`;
+}
 
   async function loadJob() {
 
@@ -5228,6 +5267,9 @@ async function loadRevealedIdentityInfo(job) {
 
   if (typeof loadRevealedIdentityInfo === "function") {
     loadRevealedIdentityInfo(job);
+    setTimeout(() => loadRevealedIdentityInfo(job), 600);
+    setTimeout(() => refreshJobMetaFromVisibleContractorFields(), 1200);
+    setTimeout(() => refreshJobMetaFromVisibleContractorFields(), 2200);
   }
 
   document.getElementById("jobBudget").innerText = job.budget || "$0";
