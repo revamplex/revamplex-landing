@@ -1623,6 +1623,8 @@
       }
     }
 
+  
+
 /* =========================================================
    FINAL CLEAN OVERRIDE — LOGO + CENTERED LAYOUT + FLOATING MENU
    ========================================================= */
@@ -3163,69 +3165,6 @@ body.command-room .exchange-actions .btn {
 }
 
 
-
-
-/* ===== ACTIVE ROOM CONTACT DISCLOSURE ===== */
-.identity-reveal-card {
-  border: 1px solid rgba(249, 115, 22, 0.26);
-  border-radius: 18px;
-  background: linear-gradient(180deg, #fff7ed, #ffffff);
-  padding: 14px;
-  margin-top: 14px;
-}
-
-.identity-reveal-card h4 {
-  margin: 0 0 8px;
-  color: #9a3412;
-}
-
-.identity-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.identity-line {
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: #ffffff;
-  padding: 10px;
-}
-
-.identity-line span {
-  display: block;
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 4px;
-}
-
-.identity-line strong {
-  display: block;
-  color: var(--text);
-  overflow-wrap: anywhere;
-}
-
-body.command-room .identity-reveal-card,
-body.command-room .identity-line {
-  background: rgba(15,23,42,0.78) !important;
-  border-color: rgba(249,115,22,0.24) !important;
-  color: #e5e7eb !important;
-}
-
-body.command-room .identity-line strong {
-  color: #f8fafc !important;
-}
-
-@media (max-width: 760px) {
-  .identity-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-
 /* ===== ROLE-BASED PROJECT ROOM VISIBILITY ===== */
 body.homeowner-room .contractor-tools {
   display: none !important;
@@ -3710,20 +3649,6 @@ body.command-room .takeoff-json-box {
           <div class="summary-line"><span>Deposit Requested</span><strong id="jobDeposit">Loading...</strong></div>
           <div class="summary-line"><span>Proposal Version</span><strong>v3.2</strong></div>
           <div class="summary-line"><span>Private Bid Visibility</span><strong>Customer + Assigned Contractor Only</strong></div>
-
-          <div class="identity-reveal-card" id="identityRevealCard" style="display:none;">
-            <h4>Active Project Room Contact Info</h4>
-            <div class="identity-grid">
-              <div class="identity-line"><span>Homeowner Name</span><strong id="identityHomeownerName">Hidden until room is active</strong></div>
-              <div class="identity-line"><span>Homeowner Email</span><strong id="identityHomeownerEmail">Hidden until room is active</strong></div>
-              <div class="identity-line"><span>Homeowner Phone</span><strong id="identityHomeownerPhone">Hidden until room is active</strong></div>
-              <div class="identity-line"><span>Project Address</span><strong id="identityProjectAddress">Hidden until room is active</strong></div>
-              <div class="identity-line"><span>Contractor / Company</span><strong id="identityContractorName">Hidden until room is active</strong></div>
-              <div class="identity-line"><span>Contractor Email</span><strong id="identityContractorEmail">Hidden until room is active</strong></div>
-              <div class="identity-line"><span>Contractor Phone</span><strong id="identityContractorPhone">Hidden until room is active</strong></div>
-              <div class="identity-line"><span>Room Status</span><strong id="identityRoomStatus">Not active yet</strong></div>
-            </div>
-          </div>
         </aside>
       </div>
     </section>
@@ -4273,9 +4198,9 @@ body.command-room .takeoff-json-box {
     <div class="estimate-toolbar">
       <button class="btn btn-soft" type="button" onclick="saveEstimateVersion()">Save Version</button>
       <button class="btn btn-primary" id="generateProposalBtn" type="button" onclick="generateProposalPDF()">Generate Proposal PDF</button>
-      <button class="btn btn-primary" type="button" onclick="acceptProjectRoom(window.currentJob?.id || jobId)">
-        Accept & Open Project Room
-      </button>
+      <button onclick="acceptProjectRoom(job.id)">
+  Accept & Open Project Room
+</button>
     </div>
   </div>
 
@@ -4532,132 +4457,110 @@ function scrollToSection(id) {
   el.hidden = false;
   el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
-async function acceptProjectRoom(jobId){
-  try{
-    const resolvedJobId = jobId || window.currentJob?.id || new URLSearchParams(window.location.search).get("job");
+  async function acceptProjectRoom(jobId){
 
-    if(!resolvedJobId){
-      alert("No job ID found for this project room.");
-      return;
-    }
+try{
 
-    if(!window.supabaseClient){
-      alert("Supabase is not ready yet. Refresh the page and try again.");
-      return;
-    }
+const { data:{ user } } = await supabase.auth.getUser();
 
-    const { data:{ user }, error:userError } = await supabaseClient.auth.getUser();
+if(!user){
+   alert("Please sign in");
+   return;
+}
 
-    if(userError){
-      throw userError;
-    }
+setLoading(true);
 
-    if(!user){
-      alert("Please sign in first.");
-      return;
-    }
 
-    // Get current job.
-    const { data:job, error:jobError } = await supabaseClient
-      .from("jobs")
-      .select("*")
-      .eq("id", resolvedJobId)
-      .single();
+// get current job
+const { data:job, error:jobError } = await supabase
+.from('jobs')
+.select('*')
+.eq('id',jobId)
+.single();
 
-    if(jobError) throw jobError;
+if(jobError) throw jobError;
 
-    const currentBids = Number(job.bids_received || 0);
-    const maxBids = Number(job.max_bids || 3);
 
-    if(currentBids >= maxBids){
-      alert("Maximum contractor connections reached.");
-      return;
-    }
+// stop if bid limit reached
+if((job.bids_received || 0) >= (job.max_bids || 3)){
+   alert("Maximum contractor connections reached.");
+   return;
+}
 
-    // Avoid duplicate bid usage if this contractor already opened this room.
-    const { data:existingRoom, error:existingRoomError } = await supabaseClient
-      .from("project_rooms")
-      .select("*")
-      .eq("job_id", job.id)
-      .eq("contractor_id", user.id)
-      .maybeSingle();
 
-    if(existingRoomError) throw existingRoomError;
+// create room immediately
+const { data:room, error:roomError } =
+await supabase
+.from('project_rooms')
+.insert({
+    job_id:job.id,
+    homeowner_id:job.user_id,
+    contractor_id:user.id,
+    status:'active',
+    identities_revealed:true,
+    accepted_at:new Date()
+})
+.select()
+.single();
 
-    if(existingRoom){
-      window.location.href = `project-room.html?job=${encodeURIComponent(job.id)}&room=${encodeURIComponent(existingRoom.id)}&mode=contractor`;
-      return;
-    }
+if(roomError) throw roomError;
 
-    const homeownerId = job.user_id || job.homeowner_id || job.customer_id || null;
 
-    // Create active room immediately. No pending access stage.
-    const { data:room, error:roomError } = await supabaseClient
-      .from("project_rooms")
-      .insert({
-        job_id: job.id,
-        homeowner_id: homeownerId,
-        contractor_id: user.id,
-        status: "active",
-        identities_revealed: true,
-        accepted_at: new Date().toISOString()
-      })
-      .select()
-      .single();
+// create bid record
+const { error:bidError } =
+await supabase
+.from('bids')
+.insert({
+   contractor_id:user.id,
+   homeowner_id:job.user_id,
+   project_room_id:room.id,
+   job_id:job.id,
+   status:'active'
+});
 
-    if(roomError) throw roomError;
+if(bidError) throw bidError;
 
-    // Create bid/connection record.
-    const { error:bidError } = await supabaseClient
-      .from("bids")
-      .insert({
-        contractor_id: user.id,
-        homeowner_id: homeownerId,
-        project_room_id: room.id,
-        job_id: job.id,
-        status: "active"
-      });
 
-    if(bidError) throw bidError;
+// increment bid count
+await supabase
+.from('jobs')
+.update({
+   bids_received:(job.bids_received || 0)+1
+})
+.eq('id',job.id);
 
-    // Increment homeowner/job bid count.
-    const { error:updateJobError } = await supabaseClient
-      .from("jobs")
-      .update({
-        bids_received: currentBids + 1
-      })
-      .eq("id", job.id);
 
-    if(updateJobError) throw updateJobError;
+// increment contractor usage
+const { data:profile } =
+await supabase
+.from('profiles')
+.select('bids_used')
+.eq('id',user.id)
+.single();
 
-    // Increment contractor usage.
-    const { data:profile, error:profileError } = await supabaseClient
-      .from("profiles")
-      .select("bids_used")
-      .eq("id", user.id)
-      .maybeSingle();
+await supabase
+.from('profiles')
+.update({
+   bids_used:(profile?.bids_used || 0)+1
+})
+.eq('id',user.id);
 
-    if(profileError) {
-      console.warn("Could not load contractor profile bid count:", profileError);
-    }
 
-    const { error:updateProfileError } = await supabaseClient
-      .from("profiles")
-      .update({
-        bids_used: Number(profile?.bids_used || 0) + 1
-      })
-      .eq("id", user.id);
+// open project room
+window.location.href=
+`project-room.html?id=${room.id}&mode=contractor`;
 
-    if(updateProfileError) {
-      console.warn("Could not update contractor bid usage:", updateProfileError);
-    }
+}
+catch(err){
 
-    window.location.href = `project-room.html?job=${encodeURIComponent(job.id)}&room=${encodeURIComponent(room.id)}&mode=contractor`;
+console.error(err);
+alert(err.message);
 
-  } catch(err){
-    console.error("Accept project room failed:", err);
-    alert(err.message || "Could not accept and open this project room.");
-  }
+}
+finally{
+setLoading(false);
+}
+
 }
 </script>
 <script>
@@ -5042,48 +4945,64 @@ console.log("PROJECT ROOM JOB ID:", jobId);
 
 async function loadRevealedIdentityInfo(job) {
   try {
+    if (!window.supabaseClient || !job) return;
+
+    function firstRealValue(...values) {
+      return values.find(v => typeof v === "string" && v.trim()) || "";
+    }
+
     const params = new URLSearchParams(window.location.search);
-    const roomId = params.get("room") || params.get("project_room") || params.get("room_id");
-    const card = document.getElementById("identityRevealCard");
+    const roomId =
+      params.get("room") ||
+      params.get("project_room") ||
+      params.get("room_id") ||
+      params.get("id");
 
-    if (!card || !window.supabaseClient) return;
+    const { data: authData } = await supabaseClient.auth.getUser();
+    const currentUser = authData?.user || null;
 
-    function setIdentityText(id, value, fallback = "Not provided yet") {
-      const el = document.getElementById(id);
-      if (el) el.textContent = value || fallback;
+    let room = null;
+
+    if (roomId) {
+      const { data, error } = await supabaseClient
+        .from("project_rooms")
+        .select("*")
+        .eq("id", roomId)
+        .maybeSingle();
+
+      if (!error && data) room = data;
+      if (error) console.warn("Room lookup by id failed:", error);
     }
 
-    if (!roomId) {
-      card.style.display = "none";
-      return;
+    if (!room && job?.id && currentUser?.id) {
+      const { data, error } = await supabaseClient
+        .from("project_rooms")
+        .select("*")
+        .eq("job_id", job.id)
+        .or(`contractor_id.eq.${currentUser.id},homeowner_id.eq.${currentUser.id}`)
+        .order("accepted_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!error && data) room = data;
+      if (error) console.warn("Room lookup by job/user failed:", error);
     }
 
-    const { data: room, error: roomError } = await supabaseClient
-      .from("project_rooms")
-      .select("*")
-      .eq("id", roomId)
-      .maybeSingle();
+    const homeownerId =
+      room?.homeowner_id ||
+      job?.user_id ||
+      job?.homeowner_id ||
+      job?.customer_id ||
+      null;
 
-    if (roomError || !room) {
-      console.warn("Could not load active project room identity info:", roomError);
-      card.style.display = "none";
-      return;
-    }
-
-    const isActiveRoom = room.status === "active" || room.identities_revealed === true;
-
-    if (!isActiveRoom) {
-      card.style.display = "none";
-      return;
-    }
-
-    card.style.display = "block";
-
-    const homeownerId = room.homeowner_id || job?.user_id || job?.homeowner_id || job?.customer_id || null;
-    const contractorId = room.contractor_id || null;
+    const contractorId =
+      room?.contractor_id ||
+      currentUser?.id ||
+      null;
 
     let homeownerProfile = null;
     let contractorProfile = null;
+    let contractorTable = null;
 
     if (homeownerId) {
       const { data } = await supabaseClient
@@ -5103,60 +5022,72 @@ async function loadRevealedIdentityInfo(job) {
       contractorProfile = data || null;
     }
 
+    // Contractor info may be stored in contractors instead of profiles.
+    if (contractorId) {
+      const { data } = await supabaseClient
+        .from("contractors")
+        .select("*")
+        .eq("id", contractorId)
+        .maybeSingle();
+      contractorTable = data || contractorTable;
+    }
+
+    if (!contractorTable && currentUser?.id) {
+      const { data } = await supabaseClient
+        .from("contractors")
+        .select("*")
+        .eq("user_id", currentUser.id)
+        .maybeSingle();
+      contractorTable = data || contractorTable;
+    }
+
+    if (!contractorTable && currentUser?.email) {
+      const { data } = await supabaseClient
+        .from("contractors")
+        .select("*")
+        .eq("email", currentUser.email)
+        .maybeSingle();
+      contractorTable = data || contractorTable;
+    }
+
     const homeownerName =
-      job?.customer_name ||
-      job?.homeowner_name ||
-      homeownerProfile?.full_name ||
-      homeownerProfile?.name ||
-      homeownerProfile?.email ||
-      "Homeowner";
-
-    const homeownerEmail =
-      job?.customer_email ||
-      job?.homeowner_email ||
-      homeownerProfile?.email ||
-      "Not provided yet";
-
-    const homeownerPhone =
-      job?.customer_phone ||
-      job?.homeowner_phone ||
-      homeownerProfile?.phone ||
-      homeownerProfile?.phone_number ||
-      "Not provided yet";
-
-    const projectAddress =
-      job?.address ||
-      job?.project_address ||
-      job?.job_address ||
-      room?.job_address ||
-      "Exact address not provided yet";
+      firstRealValue(
+        job?.customer_name,
+        job?.homeowner_name,
+        homeownerProfile?.full_name,
+        homeownerProfile?.name,
+        homeownerProfile?.email
+      ) || "Homeowner";
 
     const contractorName =
-      contractorProfile?.company ||
-      contractorProfile?.company_name ||
-      contractorProfile?.business_name ||
-      contractorProfile?.full_name ||
-      contractorProfile?.name ||
-      "Contractor";
+      firstRealValue(
+        contractorTable?.company_name,
+        contractorTable?.business_name,
+        contractorTable?.company,
+        contractorTable?.name,
+        contractorTable?.full_name,
+        contractorProfile?.company_name,
+        contractorProfile?.business_name,
+        contractorProfile?.company,
+        contractorProfile?.full_name,
+        contractorProfile?.name,
+        currentUser?.email
+      ) || "Verified Contractor";
 
-    const contractorEmail = contractorProfile?.email || "Not provided yet";
-    const contractorPhone = contractorProfile?.phone || contractorProfile?.phone_number || "Not provided yet";
-
-    setIdentityText("identityHomeownerName", homeownerName);
-    setIdentityText("identityHomeownerEmail", homeownerEmail);
-    setIdentityText("identityHomeownerPhone", homeownerPhone);
-    setIdentityText("identityProjectAddress", projectAddress);
-    setIdentityText("identityContractorName", contractorName);
-    setIdentityText("identityContractorEmail", contractorEmail);
-    setIdentityText("identityContractorPhone", contractorPhone);
-    setIdentityText("identityRoomStatus", "Active — identities revealed");
+    const meta = document.getElementById("jobMeta");
+    if (meta) {
+      meta.textContent =
+        `Project ID: ${job.id} • ${job.city || "NJ Area"} • Homeowner: ${homeownerName} • Contractor: ${contractorName}`;
+    }
 
   } catch (err) {
     console.warn("Identity reveal failed safely:", err);
   }
 }
 
+
   async function loadJob() {
+
   const params = new URLSearchParams(window.location.search);
   const rawJobId = params.get('job');
   const modeParam = params.get('mode');
@@ -5277,15 +5208,10 @@ async function loadRevealedIdentityInfo(job) {
 
   window.currentJob = data[0];
   renderJob(data[0]);
-    await loadRevealedIdentityInfo();
 }
   function renderJob(job){
 
   window.currentJob = job;
-
-  if (typeof loadRevealedIdentityInfo === "function") {
-    loadRevealedIdentityInfo(job);
-  }
 
   setTimeout(function(){
     if (typeof loadBidDashboard === "function") {
@@ -5298,7 +5224,11 @@ async function loadRevealedIdentityInfo(job) {
   document.getElementById("jobTitle").innerText = job.title || "Untitled Job";
 
   document.getElementById("jobMeta").innerText =
-    `Project ID: ${job.id} • ${job.city || "NJ Area"} • Homeowner: ${job.customer_name || "Anonymous"} • Contractor: Verified Contractor`;
+    `Project ID: ${job.id} • ${job.city || "NJ Area"} • Homeowner: ${job.customer_name || job.homeowner_name || "Anonymous"} • Contractor: Verified Contractor`;
+
+  if (typeof loadRevealedIdentityInfo === "function") {
+    loadRevealedIdentityInfo(job);
+  }
 
   document.getElementById("jobBudget").innerText = job.budget || "$0";
 
@@ -10563,100 +10493,6 @@ window.addEventListener("load", function(){
     }
   }, 1000);
 });
-  async function loadRevealedIdentityInfo(){
-
-try{
-
-const params = new URLSearchParams(window.location.search);
-
-const roomId =
-params.get("id");
-
-if(!roomId) return;
-
-
-// get room
-const {data:room,error:roomError} =
-await supabase
-.from("project_rooms")
-.select("*")
-.eq("id",roomId)
-.single();
-
-if(roomError || !room) return;
-
-
-// get homeowner profile
-const {data:homeowner} =
-await supabase
-.from("profiles")
-.select("*")
-.eq("id",room.homeowner_id)
-.single();
-
-
-// get contractor profile
-// Try profile first
-let contractor = null;
-
-const {data:profileContractor} =
-await supabase
-.from("profiles")
-.select("*")
-.eq("id",room.contractor_id)
-.maybeSingle();
-
-contractor = profileContractor;
-
-
-// If missing company info, also check contractors table
-if(
-!contractor?.company_name &&
-!contractor?.full_name
-){
-
-const {data:contractorTable} =
-await supabaseClient
-.from("contractors")
-.select("*")
-.or(
-`id.eq.${room.contractor_id},
-user_id.eq.${user?.id},
-email.eq.${user?.email}`
-)
-.maybeSingle();
-
-if(contractorTable){
-
-contractor = {
-...contractor,
-...contractorTable
-};
-
-}
-
-}
-
-meta.innerHTML=`
-Project ID: ${room.job_id}
-• ${homeowner?.location || "NJ"}
-• Homeowner: ${homeowner?.full_name || homeowner?.email || "Customer"}
-• Contractor: ${contractor?.company_name || contractor?.full_name || contractor?.email || "Verified Contractor"}
-`;
-
-}
-
-}
-catch(err){
-
-console.error(
-"Identity load error:",
-err
-);
-
-}
-
-}
 </script>
 
 </body>
