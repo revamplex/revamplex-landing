@@ -4198,7 +4198,9 @@ body.command-room .takeoff-json-box {
     <div class="estimate-toolbar">
       <button class="btn btn-soft" type="button" onclick="saveEstimateVersion()">Save Version</button>
       <button class="btn btn-primary" id="generateProposalBtn" type="button" onclick="generateProposalPDF()">Generate Proposal PDF</button>
-      <button class="btn btn-primary" type="button" onclick="submitBid()">Submit Bid to Customer</button>
+      <button onclick="acceptProjectRoom(job.id)">
+  Accept & Open Project Room
+</button>
     </div>
   </div>
 
@@ -4454,6 +4456,111 @@ function scrollToSection(id) {
   el.style.display = "block";
   el.hidden = false;
   el.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+  async function acceptProjectRoom(jobId){
+
+try{
+
+const { data:{ user } } = await supabase.auth.getUser();
+
+if(!user){
+   alert("Please sign in");
+   return;
+}
+
+setLoading(true);
+
+
+// get current job
+const { data:job, error:jobError } = await supabase
+.from('jobs')
+.select('*')
+.eq('id',jobId)
+.single();
+
+if(jobError) throw jobError;
+
+
+// stop if bid limit reached
+if((job.bids_received || 0) >= (job.max_bids || 3)){
+   alert("Maximum contractor connections reached.");
+   return;
+}
+
+
+// create room immediately
+const { data:room, error:roomError } =
+await supabase
+.from('project_rooms')
+.insert({
+    job_id:job.id,
+    homeowner_id:job.user_id,
+    contractor_id:user.id,
+    status:'active',
+    identities_revealed:true,
+    accepted_at:new Date()
+})
+.select()
+.single();
+
+if(roomError) throw roomError;
+
+
+// create bid record
+const { error:bidError } =
+await supabase
+.from('bids')
+.insert({
+   contractor_id:user.id,
+   homeowner_id:job.user_id,
+   project_room_id:room.id,
+   job_id:job.id,
+   status:'active'
+});
+
+if(bidError) throw bidError;
+
+
+// increment bid count
+await supabase
+.from('jobs')
+.update({
+   bids_received:(job.bids_received || 0)+1
+})
+.eq('id',job.id);
+
+
+// increment contractor usage
+const { data:profile } =
+await supabase
+.from('profiles')
+.select('bids_used')
+.eq('id',user.id)
+.single();
+
+await supabase
+.from('profiles')
+.update({
+   bids_used:(profile?.bids_used || 0)+1
+})
+.eq('id',user.id);
+
+
+// open project room
+window.location.href=
+`project-room.html?id=${room.id}&mode=contractor`;
+
+}
+catch(err){
+
+console.error(err);
+alert(err.message);
+
+}
+finally{
+setLoading(false);
+}
+
 }
 </script>
 <script>
