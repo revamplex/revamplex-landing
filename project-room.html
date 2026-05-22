@@ -5277,6 +5277,7 @@ async function loadRevealedIdentityInfo(job) {
 
   window.currentJob = data[0];
   renderJob(data[0]);
+    await loadRevealedIdentityInfo();
 }
   function renderJob(job){
 
@@ -10562,6 +10563,72 @@ window.addEventListener("load", function(){
     }
   }, 1000);
 });
+  async function loadRevealedIdentityInfo(){
+
+try{
+
+const params = new URLSearchParams(window.location.search);
+
+const roomId =
+params.get("id");
+
+if(!roomId) return;
+
+
+// get room
+const {data:room,error:roomError} =
+await supabase
+.from("project_rooms")
+.select("*")
+.eq("id",roomId)
+.single();
+
+if(roomError || !room) return;
+
+
+// get homeowner profile
+const {data:homeowner} =
+await supabase
+.from("profiles")
+.select("*")
+.eq("id",room.homeowner_id)
+.single();
+
+
+// get contractor profile
+const {data:contractor} =
+await supabase
+.from("profiles")
+.select("*")
+.eq("id",room.contractor_id)
+.single();
+
+
+// update display text
+const meta=document.getElementById("jobMeta");
+
+if(meta){
+
+meta.innerHTML=`
+Project ID: ${room.job_id}
+• ${homeowner?.location || "NJ"}
+• Homeowner: ${homeowner?.full_name || homeowner?.email || "Customer"}
+• Contractor: ${contractor?.company_name || contractor?.full_name || contractor?.email || "Verified Contractor"}
+`;
+
+}
+
+}
+catch(err){
+
+console.error(
+"Identity load error:",
+err
+);
+
+}
+
+}
 </script>
 
 </body>
