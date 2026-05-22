@@ -1623,7 +1623,15 @@
       }
     }
 
-  
+  <div id="customerName"></div>
+<div id="customerPhone"></div>
+<div id="customerEmail"></div>
+<div id="customerAddress"></div>
+
+<div id="contractorName"></div>
+<div id="contractorCompany"></div>
+<div id="contractorPhone"></div>
+<div id="contractorEmail"></div>
 
 /* =========================================================
    FINAL CLEAN OVERRIDE — LOGO + CENTERED LAYOUT + FLOATING MENU
@@ -4965,7 +4973,37 @@ async function checkAuth(){
 }
 console.log("PROJECT ROOM JOB ID:", jobId);
   async function loadJob() {
+// Reveal identities once room is active
+if(room.identities_revealed){
 
+// homeowner info visible to contractor
+document.getElementById("customerName").textContent =
+room.homeowner_name || "Customer";
+
+document.getElementById("customerPhone").textContent =
+room.homeowner_phone || "";
+
+document.getElementById("customerEmail").textContent =
+room.customer_email || "";
+
+document.getElementById("customerAddress").textContent =
+room.job_address || "";
+
+
+// contractor info visible to homeowner
+document.getElementById("contractorName").textContent =
+room.contractor_name || "";
+
+document.getElementById("contractorCompany").textContent =
+room.contractor_company || "";
+
+document.getElementById("contractorPhone").textContent =
+room.contractor_phone || "";
+
+document.getElementById("contractorEmail").textContent =
+room.contractor_email || "";
+
+}
   const params = new URLSearchParams(window.location.search);
   const rawJobId = params.get('job');
   const modeParam = params.get('mode');
