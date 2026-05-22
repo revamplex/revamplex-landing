@@ -30,7 +30,7 @@
     .hero p{
       font-size:22px;
       opacity:.9;
-      max-width:760px;
+      max-width:820px;
       margin:auto;
     }
 
@@ -75,7 +75,15 @@
     .section-title{
       text-align:center;
       font-size:38px;
-      margin-bottom:45px;
+      margin-bottom:18px;
+    }
+
+    .section-subtitle{
+      text-align:center;
+      color:#cbd5e1;
+      font-size:19px;
+      max-width:820px;
+      margin:0 auto 45px;
     }
 
     .grid{
@@ -89,6 +97,7 @@
       border-radius:22px;
       padding:30px;
       border:1px solid rgba(255,255,255,.08);
+      box-shadow:0 18px 46px rgba(0,0,0,.18);
     }
 
     .card h3{
@@ -100,6 +109,53 @@
     .step{
       margin-bottom:14px;
       font-size:18px;
+      color:#e5e7eb;
+    }
+
+    .note{
+      margin-top:18px;
+      padding:18px;
+      border-radius:18px;
+      background:rgba(249,115,22,.12);
+      border:1px solid rgba(249,115,22,.28);
+      color:#fed7aa;
+      font-weight:700;
+    }
+
+    .flow{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:18px;
+    }
+
+    .flow-card{
+      background:linear-gradient(180deg,#1e293b,#111827);
+      border:1px solid rgba(249,115,22,.22);
+      border-radius:22px;
+      padding:24px;
+    }
+
+    .flow-num{
+      width:38px;
+      height:38px;
+      border-radius:999px;
+      display:grid;
+      place-items:center;
+      background:#f97316;
+      color:#fff;
+      font-weight:900;
+      margin-bottom:14px;
+    }
+
+    .flow-card h3{
+      color:#fff;
+      margin-bottom:10px;
+      font-size:22px;
+    }
+
+    .flow-card p{
+      color:#cbd5e1;
+      font-size:16px;
     }
 
     .cta{
@@ -109,12 +165,23 @@
 
     .cta h2{
       font-size:42px;
-      margin-bottom:30px;
+      margin-bottom:18px;
+    }
+
+    .cta p{
+      color:#cbd5e1;
+      font-size:19px;
+      max-width:720px;
+      margin:0 auto 30px;
     }
 
     @media(max-width:768px){
+      .hero{padding:70px 18px 50px;}
       .hero h1{font-size:36px;}
       .hero p{font-size:18px;}
+      .section{padding:52px 18px;}
+      .section-title{font-size:31px;}
+      .cta h2{font-size:32px;}
     }
   </style>
 </head>
@@ -123,8 +190,7 @@
   <section class="hero">
     <h1>How RevampLEX Works</h1>
     <p>
-      The smarter way for homeowners and contractors to connect,
-      estimate, collaborate, and complete projects privately.
+      RevampLEX helps homeowners and contractors connect through private Project Rooms with photos, documents, chat, video, AI Take-Off, estimates, proposals, scheduling, and approvals.
     </p>
 
     <div class="button-row">
@@ -136,21 +202,60 @@
 
 
   <section class="section">
+    <h2 class="section-title">The RevampLEX Connection Flow</h2>
+    <p class="section-subtitle">
+      RevampLEX keeps public browsing private. Exact contact information is not shown during map discovery. A direct project connection starts when a contractor accepts and opens the Project Room.
+    </p>
+
+    <div class="flow">
+      <div class="flow-card">
+        <div class="flow-num">1</div>
+        <h3>Homeowner Posts a Project</h3>
+        <p>The homeowner adds project details, approximate location, budget, photos, documents, and job notes.</p>
+      </div>
+
+      <div class="flow-card">
+        <div class="flow-num">2</div>
+        <h3>Contractors Discover Jobs</h3>
+        <p>Contractors browse nearby opportunities by trade, location, budget, and project type.</p>
+      </div>
+
+      <div class="flow-card">
+        <div class="flow-num">3</div>
+        <h3>Accept & Open Project Room</h3>
+        <p>When a contractor accepts, a direct project connection is created and may count as a project connection/bid usage.</p>
+      </div>
+
+      <div class="flow-card">
+        <div class="flow-num">4</div>
+        <h3>Collaborate Privately</h3>
+        <p>The connected homeowner and contractor can use chat, files, video, AI tools, estimates, proposals, scheduling, and approvals.</p>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="section">
     <h2 class="section-title">For Homeowners</h2>
+    <p class="section-subtitle">
+      Post your project, stay protected during public browsing, and work privately with connected contractors.
+    </p>
 
     <div class="grid">
       <div class="card">
         <h3>Post Your Project</h3>
-        <div class="step">1. Describe your renovation project</div>
-        <div class="step">2. Upload photos and measurements</div>
-        <div class="step">3. Set your budget and location</div>
+        <div class="step">1. Describe your renovation or repair project</div>
+        <div class="step">2. Upload photos, videos, plans, and measurements</div>
+        <div class="step">3. Add budget, trade type, and approximate project location</div>
+        <div class="step">4. Keep your exact address and contact details private during public discovery</div>
       </div>
 
       <div class="card">
-        <h3>Receive Private Bids</h3>
-        <div class="step">4. Verified contractors submit bids privately</div>
-        <div class="step">5. Compare pricing and timelines</div>
-        <div class="step">6. Approve your preferred contractor</div>
+        <h3>Use the Project Room</h3>
+        <div class="step">5. A contractor creates a connection by selecting "Accept & Open Project Room"</div>
+        <div class="step">6. Once connected, identity/contact information may become visible between both parties</div>
+        <div class="step">7. Share files, ask questions, schedule appointments, review proposals, and approve when ready</div>
+        <div class="note">Only connected parties should see that private Project Room's chat, files, estimates, and collaboration details.</div>
       </div>
     </div>
   </section>
@@ -158,39 +263,87 @@
 
   <section class="section">
     <h2 class="section-title">For Contractors</h2>
+    <p class="section-subtitle">
+      Find local projects, open a direct workspace connection, and build professional estimates and proposals faster.
+    </p>
 
     <div class="grid">
       <div class="card">
         <h3>Find Local Jobs</h3>
         <div class="step">1. Browse homeowner projects near you</div>
-        <div class="step">2. Filter by trade and budget</div>
-        <div class="step">3. Submit private estimates</div>
+        <div class="step">2. Filter by trade, project type, location, and budget</div>
+        <div class="step">3. Review visible job details before accepting</div>
+        <div class="step">4. Select "Accept & Open Project Room" when you want to connect</div>
       </div>
 
       <div class="card">
-        <h3>Win More Work</h3>
-        <div class="step">4. Use AI estimates and proposals</div>
-        <div class="step">5. Video chat with homeowners</div>
-        <div class="step">6. Manage jobs in one workspace</div>
+        <h3>Build and Manage the Job</h3>
+        <div class="step">5. Opening a Project Room may consume one project connection/bid allocation</div>
+        <div class="step">6. Use AI Take-Off, 3D Estimate Lab, price book items, and proposal tools</div>
+        <div class="step">7. Chat, video call, schedule, upload documents, and create customer-ready proposals</div>
+        <div class="note">AI-generated estimates and take-offs are helpful tools, but contractors must review all quantities, pricing, scope, and assumptions before sending a proposal.</div>
       </div>
     </div>
   </section>
 
 
   <section class="section">
-    <h2 class="section-title">Private Project Room</h2>
+    <h2 class="section-title">Private Project Room Tools</h2>
+    <p class="section-subtitle">
+      The Project Room is the private workspace for a connected homeowner and contractor.
+    </p>
 
     <div class="grid">
       <div class="card">
-        <div class="step">✓ Photos + Documents</div>
-        <div class="step">✓ Private Messaging</div>
-        <div class="step">✓ Live Estimates</div>
+        <h3>Communication</h3>
+        <div class="step">✓ Private messaging</div>
+        <div class="step">✓ Video meetings</div>
+        <div class="step">✓ Screen sharing and walkthrough notes</div>
       </div>
 
       <div class="card">
-        <div class="step">✓ Proposals + Invoices</div>
-        <div class="step">✓ Customer Approvals</div>
-        <div class="step">✓ Payment Tracking</div>
+        <h3>Files + Documentation</h3>
+        <div class="step">✓ Photos and videos</div>
+        <div class="step">✓ Plans and documents</div>
+        <div class="step">✓ Permits, approvals, and project files</div>
+      </div>
+
+      <div class="card">
+        <h3>Estimate Tools</h3>
+        <div class="step">✓ AI Take-Off analysis</div>
+        <div class="step">✓ 3D Estimate Lab</div>
+        <div class="step">✓ Line-item estimate builder</div>
+      </div>
+
+      <div class="card">
+        <h3>Proposal + Approval</h3>
+        <div class="step">✓ Customer-ready proposals</div>
+        <div class="step">✓ Scheduling tools</div>
+        <div class="step">✓ Electronic signatures and approvals</div>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="section">
+    <h2 class="section-title">Privacy During Discovery</h2>
+    <p class="section-subtitle">
+      RevampLEX is designed to protect users during browsing while still making it practical to move forward once both sides are connected.
+    </p>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Before Connection</h3>
+        <div class="step">✓ Approximate locations only</div>
+        <div class="step">✓ No public exact address display</div>
+        <div class="step">✓ No public phone or email display by default</div>
+      </div>
+
+      <div class="card">
+        <h3>After Connection</h3>
+        <div class="step">✓ Project Room becomes active</div>
+        <div class="step">✓ Identity/contact details may become visible</div>
+        <div class="step">✓ Both parties can collaborate directly on the project</div>
       </div>
     </div>
   </section>
@@ -198,10 +351,14 @@
 
   <section class="cta">
     <h2>Ready to Get Started?</h2>
+    <p>
+      Explore the map, post a project, or open contractor view to find local opportunities.
+    </p>
 
     <div class="button-row">
       <a href="map.html?view=homeowner" class="btn btn-primary">Start as Homeowner</a>
       <a href="map.html?view=contractor" class="btn btn-primary">Start as Contractor</a>
+      <a href="map.html?demo=true" class="btn btn-secondary">Explore Demo</a>
     </div>
   </section>
 
