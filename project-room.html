@@ -1623,16 +1623,6 @@
       }
     }
 
-  <div id="customerName"></div>
-<div id="customerPhone"></div>
-<div id="customerEmail"></div>
-<div id="customerAddress"></div>
-
-<div id="contractorName"></div>
-<div id="contractorCompany"></div>
-<div id="contractorPhone"></div>
-<div id="contractorEmail"></div>
-
 /* =========================================================
    FINAL CLEAN OVERRIDE — LOGO + CENTERED LAYOUT + FLOATING MENU
    ========================================================= */
@@ -3173,6 +3163,69 @@ body.command-room .exchange-actions .btn {
 }
 
 
+
+
+/* ===== ACTIVE ROOM CONTACT DISCLOSURE ===== */
+.identity-reveal-card {
+  border: 1px solid rgba(249, 115, 22, 0.26);
+  border-radius: 18px;
+  background: linear-gradient(180deg, #fff7ed, #ffffff);
+  padding: 14px;
+  margin-top: 14px;
+}
+
+.identity-reveal-card h4 {
+  margin: 0 0 8px;
+  color: #9a3412;
+}
+
+.identity-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.identity-line {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 10px;
+}
+
+.identity-line span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
+.identity-line strong {
+  display: block;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+body.command-room .identity-reveal-card,
+body.command-room .identity-line {
+  background: rgba(15,23,42,0.78) !important;
+  border-color: rgba(249,115,22,0.24) !important;
+  color: #e5e7eb !important;
+}
+
+body.command-room .identity-line strong {
+  color: #f8fafc !important;
+}
+
+@media (max-width: 760px) {
+  .identity-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
 /* ===== ROLE-BASED PROJECT ROOM VISIBILITY ===== */
 body.homeowner-room .contractor-tools {
   display: none !important;
@@ -3657,6 +3710,20 @@ body.command-room .takeoff-json-box {
           <div class="summary-line"><span>Deposit Requested</span><strong id="jobDeposit">Loading...</strong></div>
           <div class="summary-line"><span>Proposal Version</span><strong>v3.2</strong></div>
           <div class="summary-line"><span>Private Bid Visibility</span><strong>Customer + Assigned Contractor Only</strong></div>
+
+          <div class="identity-reveal-card" id="identityRevealCard" style="display:none;">
+            <h4>Active Project Room Contact Info</h4>
+            <div class="identity-grid">
+              <div class="identity-line"><span>Homeowner Name</span><strong id="identityHomeownerName">Hidden until room is active</strong></div>
+              <div class="identity-line"><span>Homeowner Email</span><strong id="identityHomeownerEmail">Hidden until room is active</strong></div>
+              <div class="identity-line"><span>Homeowner Phone</span><strong id="identityHomeownerPhone">Hidden until room is active</strong></div>
+              <div class="identity-line"><span>Project Address</span><strong id="identityProjectAddress">Hidden until room is active</strong></div>
+              <div class="identity-line"><span>Contractor / Company</span><strong id="identityContractorName">Hidden until room is active</strong></div>
+              <div class="identity-line"><span>Contractor Email</span><strong id="identityContractorEmail">Hidden until room is active</strong></div>
+              <div class="identity-line"><span>Contractor Phone</span><strong id="identityContractorPhone">Hidden until room is active</strong></div>
+              <div class="identity-line"><span>Room Status</span><strong id="identityRoomStatus">Not active yet</strong></div>
+            </div>
+          </div>
         </aside>
       </div>
     </section>
@@ -4972,38 +5039,124 @@ async function checkAuth(){
   console.log("Project Room user:", data.user.email || data.user.id);
 }
 console.log("PROJECT ROOM JOB ID:", jobId);
-  async function loadJob() {
-// Reveal identities once room is active
-if(room.identities_revealed){
 
-// homeowner info visible to contractor
-document.getElementById("customerName").textContent =
-room.homeowner_name || "Customer";
+async function loadRevealedIdentityInfo(job) {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const roomId = params.get("room") || params.get("project_room") || params.get("room_id");
+    const card = document.getElementById("identityRevealCard");
 
-document.getElementById("customerPhone").textContent =
-room.homeowner_phone || "";
+    if (!card || !window.supabaseClient) return;
 
-document.getElementById("customerEmail").textContent =
-room.customer_email || "";
+    function setIdentityText(id, value, fallback = "Not provided yet") {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value || fallback;
+    }
 
-document.getElementById("customerAddress").textContent =
-room.job_address || "";
+    if (!roomId) {
+      card.style.display = "none";
+      return;
+    }
 
+    const { data: room, error: roomError } = await supabaseClient
+      .from("project_rooms")
+      .select("*")
+      .eq("id", roomId)
+      .maybeSingle();
 
-// contractor info visible to homeowner
-document.getElementById("contractorName").textContent =
-room.contractor_name || "";
+    if (roomError || !room) {
+      console.warn("Could not load active project room identity info:", roomError);
+      card.style.display = "none";
+      return;
+    }
 
-document.getElementById("contractorCompany").textContent =
-room.contractor_company || "";
+    const isActiveRoom = room.status === "active" || room.identities_revealed === true;
 
-document.getElementById("contractorPhone").textContent =
-room.contractor_phone || "";
+    if (!isActiveRoom) {
+      card.style.display = "none";
+      return;
+    }
 
-document.getElementById("contractorEmail").textContent =
-room.contractor_email || "";
+    card.style.display = "block";
 
+    const homeownerId = room.homeowner_id || job?.user_id || job?.homeowner_id || job?.customer_id || null;
+    const contractorId = room.contractor_id || null;
+
+    let homeownerProfile = null;
+    let contractorProfile = null;
+
+    if (homeownerId) {
+      const { data } = await supabaseClient
+        .from("profiles")
+        .select("*")
+        .eq("id", homeownerId)
+        .maybeSingle();
+      homeownerProfile = data || null;
+    }
+
+    if (contractorId) {
+      const { data } = await supabaseClient
+        .from("profiles")
+        .select("*")
+        .eq("id", contractorId)
+        .maybeSingle();
+      contractorProfile = data || null;
+    }
+
+    const homeownerName =
+      job?.customer_name ||
+      job?.homeowner_name ||
+      homeownerProfile?.full_name ||
+      homeownerProfile?.name ||
+      homeownerProfile?.email ||
+      "Homeowner";
+
+    const homeownerEmail =
+      job?.customer_email ||
+      job?.homeowner_email ||
+      homeownerProfile?.email ||
+      "Not provided yet";
+
+    const homeownerPhone =
+      job?.customer_phone ||
+      job?.homeowner_phone ||
+      homeownerProfile?.phone ||
+      homeownerProfile?.phone_number ||
+      "Not provided yet";
+
+    const projectAddress =
+      job?.address ||
+      job?.project_address ||
+      job?.job_address ||
+      room?.job_address ||
+      "Exact address not provided yet";
+
+    const contractorName =
+      contractorProfile?.company ||
+      contractorProfile?.company_name ||
+      contractorProfile?.business_name ||
+      contractorProfile?.full_name ||
+      contractorProfile?.name ||
+      "Contractor";
+
+    const contractorEmail = contractorProfile?.email || "Not provided yet";
+    const contractorPhone = contractorProfile?.phone || contractorProfile?.phone_number || "Not provided yet";
+
+    setIdentityText("identityHomeownerName", homeownerName);
+    setIdentityText("identityHomeownerEmail", homeownerEmail);
+    setIdentityText("identityHomeownerPhone", homeownerPhone);
+    setIdentityText("identityProjectAddress", projectAddress);
+    setIdentityText("identityContractorName", contractorName);
+    setIdentityText("identityContractorEmail", contractorEmail);
+    setIdentityText("identityContractorPhone", contractorPhone);
+    setIdentityText("identityRoomStatus", "Active — identities revealed");
+
+  } catch (err) {
+    console.warn("Identity reveal failed safely:", err);
+  }
 }
+
+  async function loadJob() {
   const params = new URLSearchParams(window.location.search);
   const rawJobId = params.get('job');
   const modeParam = params.get('mode');
@@ -5128,6 +5281,10 @@ room.contractor_email || "";
   function renderJob(job){
 
   window.currentJob = job;
+
+  if (typeof loadRevealedIdentityInfo === "function") {
+    loadRevealedIdentityInfo(job);
+  }
 
   setTimeout(function(){
     if (typeof loadBidDashboard === "function") {
