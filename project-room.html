@@ -10616,10 +10616,14 @@ if(
 ){
 
 const {data:contractorTable} =
-await supabase
+await supabaseClient
 .from("contractors")
 .select("*")
-.eq("id",room.contractor_id)
+.or(
+`id.eq.${room.contractor_id},
+user_id.eq.${user?.id},
+email.eq.${user?.email}`
+)
 .maybeSingle();
 
 if(contractorTable){
