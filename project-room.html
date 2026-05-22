@@ -10596,18 +10596,42 @@ await supabase
 
 
 // get contractor profile
-const {data:contractor} =
+// Try profile first
+let contractor = null;
+
+const {data:profileContractor} =
 await supabase
 .from("profiles")
 .select("*")
 .eq("id",room.contractor_id)
-.single();
+.maybeSingle();
+
+contractor = profileContractor;
 
 
-// update display text
-const meta=document.getElementById("jobMeta");
+// If missing company info, also check contractors table
+if(
+!contractor?.company_name &&
+!contractor?.full_name
+){
 
-if(meta){
+const {data:contractorTable} =
+await supabase
+.from("contractors")
+.select("*")
+.eq("id",room.contractor_id)
+.maybeSingle();
+
+if(contractorTable){
+
+contractor = {
+...contractor,
+...contractorTable
+};
+
+}
+
+}
 
 meta.innerHTML=`
 Project ID: ${room.job_id}
