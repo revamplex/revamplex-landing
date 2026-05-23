@@ -1052,51 +1052,107 @@ function openClientList() {
 }
 
 function openProposalVault() {
-  const container = document.getElementById("clientResults");
-  if (!container) return;
-
-  container.innerHTML = `
-    <div class="workflow-list">
-      <div class="workflow-row">
-        <strong>Proposal Vault</strong>
-        <span>
-          This is the Revamp version of a Joist-style proposal center. It will hold drafts, sent proposals,
-          accepted proposals, contracts, revisions, photos, and signed documents.
-        </span>
-        <p class="vault-mini-note">
-          Next database table: <strong>client_documents</strong> or <strong>proposals</strong>.
-        </p>
-        <div class="workflow-actions">
-          <button class="btn" onclick="openClientList()">Choose Client</button>
-          <button class="btn secondary" onclick="alert('Next step: connect this to your project-room proposal builder.')">Create Blank Proposal</button>
-        </div>
-      </div>
-    </div>
-  `;
+  renderDocumentVault("proposal");
 }
 
 function openInvoiceVault() {
+  renderDocumentVault("invoice");
+}
+
+async function loadClientDocuments(type = "") {
+  if (!currentUser) return [];
+
+  let query = client
+    .from("client_documents")
+    .select("*")
+    .eq("contractor_id", currentUser.id)
+    .order("created_at", { ascending: false });
+
+  if (type) query = query.eq("document_type", type);
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.warn("Client documents could not load:", error);
+    return [];
+  }
+
+  return data || [];
+}
+
+async function renderDocumentVault(type) {
   const container = document.getElementById("clientResults");
   if (!container) return;
 
+  const label = type === "invoice" ? "Invoice" : "Proposal";
+
+  container.innerHTML = `<p class="muted">Loading ${label.toLowerCase()}s...</p>`;
+
+  const docs = await loadClientDocuments(type);
+
   container.innerHTML = `
-    <div class="workflow-list">
-      <div class="workflow-row">
-        <strong>Invoice Vault</strong>
-        <span>
-          Track invoices by Draft, Sent, Deposit Requested, Paid, Partial, and Overdue.
-          Later this can connect to Stripe payment links and payment history.
-        </span>
-        <p class="vault-mini-note">
-          Next database table: <strong>invoices</strong> and optional <strong>payments</strong>.
-        </p>
-        <div class="workflow-actions">
-          <button class="btn" onclick="openClientList()">Choose Client</button>
-          <button class="btn secondary" onclick="alert('Next step: build invoice form and Stripe payment link.')">Create Blank Invoice</button>
-        </div>
-      </div>
+    <div class="workflow-actions" style="margin-bottom:12px;">
+      <button class="btn" onclick="openBuilder('${type}')">+ Create Blank ${label}</button>
+      <button class="btn secondary" onclick="openClientList()">Choose Client</button>
+      <button class="btn secondary" onclick="renderDocumentVault('${type}')">Refresh</button>
     </div>
+
+    ${
+      docs.length
+        ? `<div class="workflow-list">
+            ${docs.map(doc => `
+              <div class="workflow-row">
+                <strong>${safeClientText(doc.title || label)}</strong>
+                <span>
+                  ${safeClientText(doc.document_number || "")} • ${safeClientText(doc.status || "draft")}<br>
+                  ${safeClientText(doc.client_name || "Client")} ${doc.client_email ? "• " + safeClientText(doc.client_email) : ""}<br>
+                  Total: $${Number(doc.total || 0).toFixed(2)}
+                </span>
+                <div class="workflow-actions">
+                  <button class="btn" onclick="previewSavedDocument('${safeClientText(doc.id)}')">Preview</button>
+                  <button class="btn secondary" onclick="deleteClientDocument('${safeClientText(doc.id)}', '${type}')">Delete</button>
+                </div>
+              </div>
+            `).join("")}
+          </div>`
+        : `<div class="workflow-empty">
+            No ${label.toLowerCase()} drafts yet. Click <strong>Create Blank ${label}</strong> or choose a client and create one from their row.
+          </div>`
+    }
   `;
+}
+
+async function deleteClientDocument(id, type) {
+  if (!confirm("Delete this draft?")) return;
+
+  const { error } = await client
+    .from("client_documents")
+    .delete()
+    .eq("id", id)
+    .eq("contractor_id", currentUser.id);
+
+  if (error) {
+    alert("Delete failed: " + error.message);
+    return;
+  }
+
+  renderDocumentVault(type);
+}
+
+async function previewSavedDocument(id) {
+  const { data, error } = await client
+    .from("client_documents")
+    .select("*")
+    .eq("id", id)
+    .eq("contractor_id", currentUser.id)
+    .maybeSingle();
+
+  if (error || !data) {
+    alert(error?.message || "Document not found.");
+    return;
+  }
+
+  previewDocumentPayload(data);
 }
 
 async function loadMaterialLibrary() {
@@ -1319,12 +1375,46 @@ async function seedStarterLineItems() {
   openMaterialLibrary();
 }
 
+function findClientVaultByJobId(jobId) {
+  return clientVault.find(item => {
+    const itemJobId = getVaultJobId(item);
+    return String(itemJobId) === String(jobId) || String(item.id) === String(jobId);
+  }) || null;
+}
+
 function startProposalForClient(jobId) {
-  onclick="openProposalBuilder(${job.id})"
+  openBuilderForClient("proposal", jobId);
 }
 
 function startInvoiceForClient(jobId) {
-  onclick="openInvoiceBuilder(${job.id})"
+  openBuilderForClient("invoice", jobId);
+}
+
+function openBuilderForClient(type, jobId) {
+  const item = findClientVaultByJobId(jobId);
+
+  openBuilder(type);
+
+  setTimeout(() => {
+    if (!item) return;
+
+    const titlePrefix = type === "invoice" ? "Invoice for " : "Proposal for ";
+    const projectTitle = item.project_title || item.job?.title || item.jobs?.title || "Project";
+
+    const titleEl = document.getElementById("builderTitle");
+    const nameEl = document.getElementById("builderClientName");
+    const emailEl = document.getElementById("builderClientEmail");
+    const notesEl = document.getElementById("builderNotes");
+    const clientSelect = document.getElementById("builderClientSelect");
+
+    if (titleEl) titleEl.value = titlePrefix + projectTitle;
+    if (nameEl) nameEl.value = item.customer_name || "Customer";
+    if (emailEl) emailEl.value = item.customer_email || "";
+    if (notesEl) notesEl.value = item.job?.description || item.jobs?.description || item.description || "";
+
+    const index = clientVault.findIndex(row => String(getVaultJobId(row)) === String(jobId));
+    if (clientSelect && index >= 0) clientSelect.value = String(index);
+  }, 50);
 }
 
 async function loadDashboard() {
@@ -1807,8 +1897,8 @@ function getBuilderPayload() {
     client_name: cleanText(document.getElementById("builderClientName")?.value),
     client_email: cleanText(document.getElementById("builderClientEmail")?.value),
     notes: cleanText(document.getElementById("builderNotes")?.value),
-    job_id: selectedJob?.id || selectedClient?.job_id || null,
-    project_room_id: selectedClient?.id || null,
+    job_id: selectedJob?.id || selectedClient?.job_id ? String(selectedJob?.id || selectedClient?.job_id) : null,
+    project_room_id: selectedClient?.id ? String(selectedClient.id) : null,
     status: "draft",
     line_items: activeBuilderLines,
     total: getBuilderTotal()
@@ -1847,10 +1937,11 @@ async function saveBuilderDocument() {
   closeBuilderModal();
 }
 
-function previewBuilderDocument() {
-  const payload = getBuilderPayload();
+function previewDocumentPayload(payload) {
+  const lines = Array.isArray(payload.line_items) ? payload.line_items : [];
+  const documentType = payload.document_type || activeBuilderType || "proposal";
 
-  const linesHtml = (payload.line_items || []).map(line => `
+  const linesHtml = lines.map(line => `
     <tr>
       <td>${safeClientText(line.name)}</td>
       <td>${Number(line.qty || 0)}</td>
@@ -1861,6 +1952,11 @@ function previewBuilderDocument() {
   `).join("");
 
   const win = window.open("", "_blank");
+  if (!win) {
+    alert("Popup blocked. Allow popups to preview.");
+    return;
+  }
+
   win.document.write(`
     <html>
       <head>
@@ -1875,7 +1971,7 @@ function previewBuilderDocument() {
         </style>
       </head>
       <body>
-        <h1>${activeBuilderType === "invoice" ? "Invoice" : "Proposal"}</h1>
+        <h1>${documentType === "invoice" ? "Invoice" : "Proposal"}</h1>
         <div class="muted">${safeClientText(payload.document_number || "")}</div>
         <h2>${safeClientText(payload.title || "")}</h2>
         <p><strong>Client:</strong> ${safeClientText(payload.client_name || "")}<br>
@@ -1899,68 +1995,17 @@ function previewBuilderDocument() {
   `);
   win.document.close();
 }
-function openProposalBuilder(jobId){
 
-const job = clientVault.find(
-j => String(j.job_id || j.id) === String(jobId)
-);
-
-openBuilder("proposal");
-
-setTimeout(()=>{
-
-if(job){
-
-document.getElementById(
-"builderClientName"
-).value =
-job.customer_name || "";
-
-document.getElementById(
-"builderClientEmail"
-).value =
-job.customer_email || "";
-
-document.getElementById(
-"builderTitle"
-).value =
-"Proposal for " +
-(job.jobs?.title || "Project");
-
+function previewBuilderDocument() {
+  previewDocumentPayload(getBuilderPayload());
 }
 
-},100);
-
+function openProposalBuilder(jobId) {
+  openBuilderForClient("proposal", jobId);
 }
 
-function openInvoiceBuilder(jobId){
-
-const job = clientVault.find(
-j => String(j.job_id || j.id) === String(jobId)
-);
-
-openBuilder("invoice");
-
-setTimeout(()=>{
-
-if(job){
-
-document.getElementById(
-"builderClientName"
-).value =
-job.customer_name || "";
-
-document.getElementById(
-"builderClientEmail"
-).value =
-job.customer_email || "";
-
-document.getElementById(
-"builderTitle"
-).value =
-"Invoice for " +
-(job.jobs?.title || "Project");
-
+function openInvoiceBuilder(jobId) {
+  openBuilderForClient("invoice", jobId);
 }
 
 },100);
