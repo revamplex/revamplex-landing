@@ -659,7 +659,7 @@ function refreshDisplay() {
   document.getElementById("userEmail").innerText = currentUser.email;
   document.getElementById("userRole").innerText = "Role: " + (currentProfile.role || "none");
 
-  setText("displayName", currentProfile.name);
+  setText("displayName", currentProfile.name || currentProfile.full_name);
   setText("displayCompany", currentProfile.company);
   setText("displayTrade", currentProfile.trade);
   setText("displayLocation", currentProfile.location);
@@ -947,7 +947,7 @@ async function loadClientVault() {
     const { data, error } = await client
       .from("project_rooms")
       .select("*, jobs(*)")
-      .or(`contractor_id.eq.${currentUser.id},contractor_user_id.eq.${currentUser.id}`)
+      .eq("contractor_id", currentUser.id)
       .order("created_at", { ascending: false });
 
     if (!error && Array.isArray(data)) rows = data;
@@ -1480,7 +1480,7 @@ function openEditProfile() {
 
   const isContractor = isContractorProfile();
 
-  document.getElementById("profileName").value = currentProfile.name || "";
+  document.getElementById("profileName").value = currentProfile.name || currentProfile.full_name || "";
   document.getElementById("profileCompany").value = currentProfile.company || "";
   document.getElementById("profileLocation").value = currentProfile.location || "";
   document.getElementById("profileBio").value = currentProfile.bio || "";
@@ -2008,10 +2008,6 @@ function openInvoiceBuilder(jobId) {
   openBuilderForClient("invoice", jobId);
 }
 
-},100);
-
-}
-
 window.onload = function () {
   document.getElementById("closeProfileBtn").onclick = closeEditProfile;
   document.getElementById("saveProfileBtn").onclick = saveProfile;
@@ -2022,6 +2018,12 @@ window.onload = function () {
     if (section) {
       setTimeout(() => openDashboardWorkflow(section), 300);
     }
+  }).catch(err => {
+    console.error("Dashboard failed to load:", err);
+    const emailBox = document.getElementById("userEmail");
+    if (emailBox) emailBox.innerText = "Dashboard load error";
+    const roleBox = document.getElementById("userRole");
+    if (roleBox) roleBox.innerText = err.message || "Check console.";
   });
 };
 </script>
