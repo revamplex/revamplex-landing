@@ -2451,7 +2451,7 @@ authContainer.innerHTML = `
   <div style="display:flex; align-items:center; gap:8px;">
     
     <button onclick="openDashboard()" class="auth-btn">
-      ${role === 'contractor' ? '🛠 Dash' : '👤 Account'}
+      ${role === 'contractor' ? 'Dashboard' : '👤 Account'}
     </button>
 
     <span style="font-weight:600; font-size:12px; color:white; background:#0f172a; padding:6px 10px; border-radius:8px; line-height:1;">
@@ -2485,7 +2485,7 @@ authContainer.innerHTML = `
   <div style="display:flex; align-items:center; gap:10px;">
     
     <button onclick="openDashboard()" class="auth-btn">
-     ${role === 'contractor' ? '🛠 Dash' : '👤 Account'}
+     ${role === 'contractor' ? 'Dashboard' : '👤 Account'}
     </button>
 
    <span style="font-weight:600; font-size:11px; color:white; background:#0f172a; padding:3px 7px; border-radius:6px; line-height:1;">
@@ -2497,9 +2497,9 @@ authContainer.innerHTML = `
 `;
 }
 
-    async function openDashboard() {
-  const { data: { user } } = await supabaseClient.auth.getUser();
-  if (!user) return;
+    function openDashboard(){
+window.location.href='dashboard.html';
+}
 
   expandUI();
   detailModal.classList.add('show');
@@ -2551,8 +2551,7 @@ if (lockedRole === 'homeowner') {
   detailTitle.textContent = "Dashboard";
 
   detailContent.innerHTML = `
-    <div class="dashboard-card command-center-card"
-onclick="window.location.href='dashboard.html'">
+    <!-- Dashboard popup removed -->
 
 <div class="command-tag">
 FULL DASHBOARD
