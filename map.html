@@ -3317,13 +3317,25 @@ async function getCurrentDataset() {
   return [Number(item.lat), Number(item.lng)];
 }
 // 🔥 SPREAD OVERLAPPING POINTS
-function offsetCoords(coords, index) {
-  const angle = (index * 45) * (Math.PI / 180);
-  const offset = 0.0015;
+function offsetCoords(coords, index, total = 1) {
+  if (total <= 1) return coords;
+
+  const zoom = map ? map.getZoom() : 10;
+
+  let offset = 0.0012;
+
+  if (zoom <= 8) offset = 0.018;
+  else if (zoom <= 10) offset = 0.009;
+  else if (zoom <= 12) offset = 0.0045;
+  else if (zoom <= 14) offset = 0.0022;
+
+  const ring = Math.floor(index / 8) + 1;
+  const position = index % 8;
+  const angle = ((360 / Math.min(total, 8)) * position) * (Math.PI / 180);
 
   return [
-    coords[0] + Math.cos(angle) * offset,
-    coords[1] + Math.sin(angle) * offset
+    coords[0] + Math.cos(angle) * offset * ring,
+    coords[1] + Math.sin(angle) * offset * ring
   ];
 }
 
@@ -3480,7 +3492,7 @@ function renderMarkers(items) {
   items.forEach((item, index) => {
     const key = `${item.type}-${item.id}`;
     const baseCoords = getDisplayCoords(item);
-    const coords = offsetCoords(baseCoords, index);
+    const coords = offsetCoords(baseCoords, index, items.length);
 
     const core = L.circle(coords, {
       radius: 400,
