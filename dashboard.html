@@ -309,6 +309,76 @@
   margin: 8px 0 0;
 }
 
+
+.builder-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.builder-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.builder-field.full {
+  grid-column: 1 / -1;
+}
+
+.builder-field label {
+  font-size: 13px;
+  font-weight: 800;
+  color: #111;
+}
+
+.builder-field input,
+.builder-field select,
+.builder-field textarea {
+  width: 100%;
+  padding: 11px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+}
+
+.builder-field textarea {
+  min-height: 95px;
+  resize: vertical;
+}
+
+.builder-line {
+  display: grid;
+  grid-template-columns: 1.4fr .7fr .7fr .7fr auto;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.builder-line input,
+.builder-line select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.builder-total-box {
+  border: 1px solid #fed7aa;
+  background: #fff7ed;
+  color: #9a3412;
+  border-radius: 14px;
+  padding: 14px;
+  margin: 12px 0;
+  font-weight: 800;
+}
+
+@media (max-width: 700px) {
+  .builder-grid { grid-template-columns: 1fr; }
+  .builder-line { grid-template-columns: 1fr; }
+}
+
     @media (max-width: 600px) {
       .header { padding-top: 52px; }
       .back-btn {
@@ -536,6 +606,19 @@
     <h3 id="workflowModalTitle">Workflow</h3>
     <div id="workflowModalBody"></div>
     <button class="btn secondary" type="button" onclick="closeWorkflowModal()">Close</button>
+  </div>
+</div>
+
+
+<div class="modal" id="builderModal">
+  <div class="modal-box" style="max-width:820px;">
+    <h3 id="builderModalTitle">Builder</h3>
+    <div id="builderModalBody"></div>
+    <div class="workflow-actions" style="margin-top:12px;">
+      <button class="btn" type="button" onclick="saveBuilderDocument()">Save</button>
+      <button class="btn secondary" type="button" onclick="previewBuilderDocument()">Preview</button>
+      <button class="btn secondary" type="button" onclick="closeBuilderModal()">Close</button>
+    </div>
   </div>
 </div>
 
@@ -1513,6 +1596,310 @@ async function saveProfile() {
   closeEditProfile();
   alert("Saved");
 }
+
+
+let activeBuilderType = "proposal";
+let activeBuilderLines = [];
+
+function closeBuilderModal() {
+  document.getElementById("builderModal").classList.remove("active");
+}
+
+function getClientOptionsHtml() {
+  const rows = clientVault || [];
+  if (!rows.length) {
+    return `<option value="">No saved clients yet</option>`;
+  }
+
+  return `<option value="">Select client / project</option>` + rows.map((row, index) => {
+    const job = row.jobs || row.job || {};
+    const label = [
+      row.customer_name || row.homeowner_name || job.customer_name || "Customer",
+      job.title || row.title || "Project"
+    ].join(" — ");
+
+    return `<option value="${index}">${safeClientText(label)}</option>`;
+  }).join("");
+}
+
+function getLineItemOptionsHtml() {
+  const rows = materialLibrary && materialLibrary.length ? materialLibrary : starterMaterialLibrary;
+  return `<option value="">Choose saved line item</option>` + rows.map((item, index) => {
+    const sourceId = item.id || ("starter-" + index);
+    return `<option value="${safeClientText(sourceId)}">${safeClientText(item.name)} — ${safeClientText(formatLineItemPrice(item))}</option>`;
+  }).join("");
+}
+
+function openBuilder(type) {
+  activeBuilderType = type;
+  activeBuilderLines = [];
+
+  const isInvoice = type === "invoice";
+  const title = isInvoice ? "Invoice Builder" : "Proposal Builder";
+
+  document.getElementById("builderModalTitle").innerText = title;
+
+  document.getElementById("builderModalBody").innerHTML = `
+    <div class="builder-grid">
+      <div class="builder-field full">
+        <label>Client / Project</label>
+        <select id="builderClientSelect" onchange="fillBuilderFromClient()">
+          ${getClientOptionsHtml()}
+        </select>
+      </div>
+
+      <div class="builder-field">
+        <label>${isInvoice ? "Invoice Title" : "Proposal Title"}</label>
+        <input id="builderTitle" placeholder="${isInvoice ? "Invoice for bathroom remodel" : "Proposal for kitchen renovation"}">
+      </div>
+
+      <div class="builder-field">
+        <label>${isInvoice ? "Invoice Number" : "Proposal Number"}</label>
+        <input id="builderDocNumber" value="${isInvoice ? "INV" : "PROP"}-${Date.now().toString().slice(-6)}">
+      </div>
+
+      <div class="builder-field">
+        <label>Client Name</label>
+        <input id="builderClientName" placeholder="Customer name">
+      </div>
+
+      <div class="builder-field">
+        <label>Client Email</label>
+        <input id="builderClientEmail" placeholder="customer@email.com">
+      </div>
+
+      <div class="builder-field full">
+        <label>Scope / Notes</label>
+        <textarea id="builderNotes" placeholder="Describe the work, exclusions, payment terms, schedule, warranty, etc."></textarea>
+      </div>
+    </div>
+
+    <h4>Line Items</h4>
+    <div class="workflow-actions" style="margin-bottom:10px;">
+      <select id="savedLineItemSelect" style="padding:10px;border-radius:8px;border:1px solid #ccc;min-width:220px;">
+        ${getLineItemOptionsHtml()}
+      </select>
+      <button class="btn" type="button" onclick="addSavedLineItemToBuilder()">Add Saved Item</button>
+      <button class="btn secondary" type="button" onclick="addBlankBuilderLine()">Add Blank Line</button>
+    </div>
+
+    <div id="builderLines"></div>
+
+    <div class="builder-total-box">
+      Total: <span id="builderTotal">$0.00</span>
+    </div>
+
+    <p class="muted">
+      ${isInvoice
+        ? "This creates an invoice draft. Next phase can connect Stripe payment links and paid/overdue status."
+        : "This creates a proposal draft. Next phase can convert it into contract/PDF/signature workflow."}
+    </p>
+  `;
+
+  document.getElementById("builderModal").classList.add("active");
+  addBlankBuilderLine();
+}
+
+function fillBuilderFromClient() {
+  const index = document.getElementById("builderClientSelect").value;
+  if (index === "") return;
+
+  const row = clientVault[Number(index)];
+  if (!row) return;
+
+  const job = row.jobs || row.job || {};
+
+  document.getElementById("builderTitle").value =
+    (activeBuilderType === "invoice" ? "Invoice for " : "Proposal for ") + (job.title || row.title || "Project");
+
+  document.getElementById("builderClientName").value =
+    row.customer_name || row.homeowner_name || job.customer_name || "Customer";
+
+  document.getElementById("builderClientEmail").value =
+    row.customer_email || job.customer_email || "";
+
+  document.getElementById("builderNotes").value =
+    job.description || row.description || "";
+}
+
+function addBlankBuilderLine() {
+  activeBuilderLines.push({
+    name: "",
+    qty: 1,
+    unit: "each",
+    price: 0
+  });
+  renderBuilderLines();
+}
+
+function addSavedLineItemToBuilder() {
+  const id = document.getElementById("savedLineItemSelect").value;
+  if (!id) return;
+
+  const item = getLineItemById(id);
+  if (!item) return;
+
+  activeBuilderLines.push({
+    name: item.name || "",
+    qty: 1,
+    unit: item.unit || "each",
+    price: Number(item.price || 0)
+  });
+
+  renderBuilderLines();
+}
+
+function updateBuilderLine(index, field, value) {
+  if (!activeBuilderLines[index]) return;
+
+  if (field === "qty" || field === "price") {
+    activeBuilderLines[index][field] = Number(value || 0);
+  } else {
+    activeBuilderLines[index][field] = value;
+  }
+
+  updateBuilderTotal();
+}
+
+function removeBuilderLine(index) {
+  activeBuilderLines.splice(index, 1);
+  renderBuilderLines();
+}
+
+function renderBuilderLines() {
+  const container = document.getElementById("builderLines");
+  if (!container) return;
+
+  container.innerHTML = activeBuilderLines.map((line, index) => `
+    <div class="builder-line">
+      <input placeholder="Description" value="${safeClientText(line.name)}" oninput="updateBuilderLine(${index}, 'name', this.value)">
+      <input type="number" step="0.01" placeholder="Qty" value="${Number(line.qty || 0)}" oninput="updateBuilderLine(${index}, 'qty', this.value)">
+      <input placeholder="Unit" value="${safeClientText(line.unit || "each")}" oninput="updateBuilderLine(${index}, 'unit', this.value)">
+      <input type="number" step="0.01" placeholder="Price" value="${Number(line.price || 0)}" oninput="updateBuilderLine(${index}, 'price', this.value)">
+      <button class="btn secondary" type="button" onclick="removeBuilderLine(${index})">×</button>
+    </div>
+  `).join("");
+
+  updateBuilderTotal();
+}
+
+function getBuilderTotal() {
+  return activeBuilderLines.reduce((sum, line) => {
+    return sum + (Number(line.qty || 0) * Number(line.price || 0));
+  }, 0);
+}
+
+function updateBuilderTotal() {
+  const el = document.getElementById("builderTotal");
+  if (el) el.innerText = "$" + getBuilderTotal().toFixed(2);
+}
+
+function getBuilderPayload() {
+  const selectedClientIndex = document.getElementById("builderClientSelect")?.value || "";
+  const selectedClient = selectedClientIndex !== "" ? clientVault[Number(selectedClientIndex)] : null;
+  const selectedJob = selectedClient?.jobs || selectedClient?.job || {};
+
+  return {
+    contractor_id: currentUser?.id,
+    document_type: activeBuilderType,
+    title: cleanText(document.getElementById("builderTitle")?.value),
+    document_number: cleanText(document.getElementById("builderDocNumber")?.value),
+    client_name: cleanText(document.getElementById("builderClientName")?.value),
+    client_email: cleanText(document.getElementById("builderClientEmail")?.value),
+    notes: cleanText(document.getElementById("builderNotes")?.value),
+    job_id: selectedJob?.id || selectedClient?.job_id || null,
+    project_room_id: selectedClient?.id || null,
+    status: "draft",
+    line_items: activeBuilderLines,
+    total: getBuilderTotal()
+  };
+}
+
+async function saveBuilderDocument() {
+  if (!currentUser) {
+    alert("Please log in first.");
+    return;
+  }
+
+  const payload = getBuilderPayload();
+
+  if (!payload.title) {
+    alert("Enter a title.");
+    return;
+  }
+
+  if (!payload.client_name && !payload.client_email) {
+    alert("Enter or select a client.");
+    return;
+  }
+
+  const { error } = await client
+    .from("client_documents")
+    .insert(payload);
+
+  if (error) {
+    alert("Save failed: " + error.message + "\\n\\nYou may need to run the client_documents Supabase SQL table first.");
+    console.error(error);
+    return;
+  }
+
+  alert((activeBuilderType === "invoice" ? "Invoice" : "Proposal") + " saved as draft.");
+  closeBuilderModal();
+}
+
+function previewBuilderDocument() {
+  const payload = getBuilderPayload();
+
+  const linesHtml = (payload.line_items || []).map(line => `
+    <tr>
+      <td>${safeClientText(line.name)}</td>
+      <td>${Number(line.qty || 0)}</td>
+      <td>${safeClientText(line.unit || "")}</td>
+      <td>$${Number(line.price || 0).toFixed(2)}</td>
+      <td>$${(Number(line.qty || 0) * Number(line.price || 0)).toFixed(2)}</td>
+    </tr>
+  `).join("");
+
+  const win = window.open("", "_blank");
+  win.document.write(`
+    <html>
+      <head>
+        <title>${safeClientText(payload.title || "Preview")}</title>
+        <style>
+          body{font-family:Arial,sans-serif;padding:30px;color:#111;}
+          h1{margin-bottom:4px;}
+          .muted{color:#666;}
+          table{width:100%;border-collapse:collapse;margin-top:20px;}
+          th,td{border-bottom:1px solid #ddd;padding:10px;text-align:left;}
+          .total{text-align:right;font-size:22px;font-weight:800;margin-top:20px;}
+        </style>
+      </head>
+      <body>
+        <h1>${activeBuilderType === "invoice" ? "Invoice" : "Proposal"}</h1>
+        <div class="muted">${safeClientText(payload.document_number || "")}</div>
+        <h2>${safeClientText(payload.title || "")}</h2>
+        <p><strong>Client:</strong> ${safeClientText(payload.client_name || "")}<br>
+        <strong>Email:</strong> ${safeClientText(payload.client_email || "")}</p>
+        <p>${safeClientText(payload.notes || "")}</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Qty</th>
+              <th>Unit</th>
+              <th>Price</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>${linesHtml}</tbody>
+        </table>
+        <div class="total">Total: $${Number(payload.total || 0).toFixed(2)}</div>
+      </body>
+    </html>
+  `);
+  win.document.close();
+}
+
 
 window.onload = function () {
   document.getElementById("closeProfileBtn").onclick = closeEditProfile;
