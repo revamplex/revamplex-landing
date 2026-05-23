@@ -1946,6 +1946,44 @@
       .welcomeTitle { font-size:24px; }
       .welcomeActions { flex-direction:column; }
     }
+    .command-center-card{
+background:linear-gradient(
+135deg,
+#ff7b00,
+#ff9a1f
+);
+
+color:white;
+cursor:pointer;
+position:relative;
+
+box-shadow:
+0 0 30px rgba(255,123,0,.35);
+
+transition:.3s;
+}
+
+.command-center-card:hover{
+transform:translateY(-4px);
+box-shadow:
+0 0 40px rgba(255,123,0,.55);
+}
+
+.command-tag{
+position:absolute;
+top:12px;
+right:12px;
+
+padding:5px 10px;
+
+border-radius:20px;
+
+background:rgba(255,255,255,.2);
+
+font-size:11px;
+font-weight:700;
+letter-spacing:1px;
+}
   </style>
 </head>
 <body>
@@ -2513,31 +2551,24 @@ if (lockedRole === 'homeowner') {
   detailTitle.textContent = "Dashboard";
 
   detailContent.innerHTML = `
-    <div>
-      <p>${user.email}</p>
-      <button onclick="goToDashboard()" class="mini-btn secondary">Edit Profile</button>
-    </div>
+    <div class="dashboard-card command-center-card"
+onclick="window.location.href='dashboard.html'">
 
-    <div class="workflow-grid">
-      <div class="workflow-card" onclick="openMapWorkflow('project_rooms')">
-        <h4>Project Rooms</h4>
-        <p>Invites • Chat • Docs • Estimates</p>
-      </div>
+<div class="command-tag">
+FULL DASHBOARD
+</div>
 
-      <div class="workflow-card" onclick="openMapWorkflow('submitted_bids')">
-        <h4>Submitted Bids</h4>
-        <p>Pending • Accepted • Revisions</p>
-      </div>
+<h3>🚀 Contractor Command Center</h3>
 
-      <div class="workflow-card" onclick="openMapWorkflow('active_jobs')">
-        <h4>Active Jobs</h4>
-        <p>Contracts • Schedule • Progress</p>
-      </div>
+<p>
+Profile • Client Vault • Proposals • Invoices
+</p>
 
-      <div class="workflow-card" onclick="openMapWorkflow('completed_jobs')">
-        <h4>Completed Jobs</h4>
-        <p>Signed Off • Reviews • History</p>
-      </div>
+<span>
+Project Rooms • Billing • Workflow
+</span>
+
+</div>
     </div>
   `;
 }
