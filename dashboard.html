@@ -1320,11 +1320,11 @@ async function seedStarterLineItems() {
 }
 
 function startProposalForClient(jobId) {
-  alert("Next step: open the proposal builder for job " + jobId + ".");
+  onclick="openProposalBuilder(${job.id})"
 }
 
 function startInvoiceForClient(jobId) {
-  alert("Next step: open the invoice builder for job " + jobId + ".");
+  onclick="openInvoiceBuilder(${job.id})"
 }
 
 async function loadDashboard() {
@@ -1899,7 +1899,73 @@ function previewBuilderDocument() {
   `);
   win.document.close();
 }
+function openProposalBuilder(jobId){
 
+const job = clientVault.find(
+j => String(j.job_id || j.id) === String(jobId)
+);
+
+openBuilder("proposal");
+
+setTimeout(()=>{
+
+if(job){
+
+document.getElementById(
+"builderClientName"
+).value =
+job.customer_name || "";
+
+document.getElementById(
+"builderClientEmail"
+).value =
+job.customer_email || "";
+
+document.getElementById(
+"builderTitle"
+).value =
+"Proposal for " +
+(job.jobs?.title || "Project");
+
+}
+
+},100);
+
+}
+
+function openInvoiceBuilder(jobId){
+
+const job = clientVault.find(
+j => String(j.job_id || j.id) === String(jobId)
+);
+
+openBuilder("invoice");
+
+setTimeout(()=>{
+
+if(job){
+
+document.getElementById(
+"builderClientName"
+).value =
+job.customer_name || "";
+
+document.getElementById(
+"builderClientEmail"
+).value =
+job.customer_email || "";
+
+document.getElementById(
+"builderTitle"
+).value =
+"Invoice for " +
+(job.jobs?.title || "Project");
+
+}
+
+},100);
+
+}
 
 window.onload = function () {
   document.getElementById("closeProfileBtn").onclick = closeEditProfile;
