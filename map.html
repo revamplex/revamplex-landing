@@ -2451,8 +2451,8 @@ authContainer.innerHTML = `
   <div style="display:flex; align-items:center; gap:8px;">
     
     <button onclick="openDashboard()" class="auth-btn">
- ${role === 'contractor' ? 'Dashboard' : 'Account'}
-</button>
+      ${role === 'contractor' ? '🛠 Dash' : '👤 Account'}
+    </button>
 
     <span style="font-weight:600; font-size:12px; color:white; background:#0f172a; padding:6px 10px; border-radius:8px; line-height:1;">
       ${role.charAt(0).toUpperCase() + role.slice(1)}
@@ -2485,8 +2485,8 @@ authContainer.innerHTML = `
   <div style="display:flex; align-items:center; gap:10px;">
     
     <button onclick="openDashboard()" class="auth-btn">
- ${role === 'contractor' ? 'Dashboard' : 'Account'}
-</button>
+     ${role === 'contractor' ? '🛠 Dash' : '👤 Account'}
+    </button>
 
    <span style="font-weight:600; font-size:11px; color:white; background:#0f172a; padding:3px 7px; border-radius:6px; line-height:1;">
       ${role.charAt(0).toUpperCase() + role.slice(1)}
@@ -2497,9 +2497,83 @@ authContainer.innerHTML = `
 `;
 }
 
-   async function openDashboard() {
-  window.location.href = "dashboard.html";
+    async function openDashboard() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) return;
+
+  expandUI();
+  detailModal.classList.add('show');
+
+if (lockedRole === 'homeowner') {
+
+  const myJobs = jobs.filter(j => String(j.user_id) === String(user.id));
+
+  detailTitle.textContent = "My Jobs";
+
+  detailContent.innerHTML = `
+    <div style="margin-bottom:12px;">
+      <button onclick="goToDashboard()" class="mini-btn secondary">Edit Profile</button>
+    </div>
+
+    <div class="detail-panel">
+      <h4>My Posted Jobs</h4>
+
+      ${
+        myJobs.length
+          ? myJobs.map(j => `
+              <div style="padding:12px 0; border-bottom:1px solid #e2e8f0;">
+                <strong>${j.title || 'Untitled Job'}</strong><br>
+                <span>${j.trade || 'Trade'} • ${j.city || 'Location'} • ${j.budget || '$0'}</span><br><br>
+
+                <button class="mini-btn secondary" onclick="openProjectRoom(${j.id})">
+                  Open Project Room
+                </button>
+
+                <button class="mini-btn secondary" onclick="openEditModal('${j.id}')">
+                  Edit
+                </button>
+
+                <button class="mini-btn primary" style="background:#dc2626;" data-action="delete-my-job" data-id="${j.id}">
+  Delete
+</button>
+              </div>
+            `).join('')
+          : '<p>No jobs posted yet.</p>'
+      }
+    </div>
+  `;
+
+  return;
 }
+      
+  if (lockedRole === 'contractor') {
+
+  detailTitle.textContent = "Dashboard";
+
+  detailContent.innerHTML = `
+    <div class="dashboard-card command-center-card"
+onclick="window.location.href='dashboard.html'">
+
+<div class="command-tag">
+FULL DASHBOARD
+</div>
+
+<h3>🚀 Contractor Command Center</h3>
+
+<p>
+Profile • Client Vault • Proposals • Invoices
+</p>
+
+<span>
+Project Rooms • Billing • Workflow
+</span>
+
+</div>
+    </div>
+  `;
+}
+  }
+
 function getMapWorkflowStatus(value) {
   return String(value || "pending").toLowerCase().trim();
 }
@@ -3097,6 +3171,67 @@ const DEMO_JOBS = [
 ];
 
 
+
+/* ===== TRI-STATE DEMO POPULATION ADD-ON ===== */
+const TRI_STATE_DEMO_CONTRACTORS = [
+  { id:"demo-nyc-kitchen", name:"MetroBuild Kitchens", company:"MetroBuild Kitchens", trade:"Kitchen Renovation", trades_full:"Kitchen Renovation, Tile & Stone, Electrical", city:"New York, NY", lat:40.7128, lng:-74.0060, rating:4.9, reviews:118, projects_completed:146, response_time:"Usually replies in 20 min", distance:5.8, image_url:"images/jobs/kitchen.jpg", bio:"Kitchen remodels, cabinetry, backsplash, lighting, and finish carpentry.", tags:["Kitchens","Cabinets","Tile"], licensed:true, insured:true, verified:true, featured:true, is_demo:true },
+  { id:"demo-brooklyn-bath", name:"Brownstone Bath Co.", company:"Brownstone Bath Co.", trade:"Bathroom Renovation", trades_full:"Bathroom Renovation, Plumbing, Tile & Stone", city:"Brooklyn, NY", lat:40.6782, lng:-73.9442, rating:4.8, reviews:91, projects_completed:112, response_time:"Usually replies in 35 min", distance:7.2, image_url:"images/jobs/bathroom.jpg", bio:"Bathroom renovations, tile, fixtures, vanities, and waterproofing.", tags:["Bathrooms","Tile","Plumbing"], licensed:true, insured:true, verified:true, is_demo:true },
+  { id:"demo-queens-electric", name:"Queens Volt Electric", company:"Queens Volt Electric", trade:"Electrical", trades_full:"Electrical, Lighting, Panels", city:"Queens, NY", lat:40.7282, lng:-73.7949, rating:4.9, reviews:134, projects_completed:168, response_time:"Usually replies in 15 min", distance:9.1, image_url:"images/jobs/electrical.jpg", bio:"Panel upgrades, outlets, lighting, troubleshooting, EV chargers.", tags:["Panels","Lighting","EV"], licensed:true, insured:true, verified:true, featured:true, is_demo:true },
+  { id:"demo-yonkers-paint", name:"Hudson Pro Painters", company:"Hudson Pro Painters", trade:"Painting", trades_full:"Painting, Drywall & Insulation", city:"Yonkers, NY", lat:40.9312, lng:-73.8988, rating:4.8, reviews:76, projects_completed:101, response_time:"Usually replies same day", distance:8.6, image_url:"images/jobs/painting.jpg", bio:"Interior painting, patching, trim, and apartment turnovers.", tags:["Interior","Trim","Patching"], licensed:true, insured:true, verified:true, is_demo:true },
+  { id:"demo-whiteplains-floor", name:"County Line Flooring", company:"County Line Flooring", trade:"Flooring", trades_full:"Flooring, Tile & Stone", city:"White Plains, NY", lat:41.0330, lng:-73.7629, rating:4.8, reviews:64, projects_completed:88, response_time:"Usually replies in 40 min", distance:16.2, image_url:"images/jobs/flooring.jpg", bio:"Hardwood, LVP, tile floors, leveling, and transitions.", tags:["LVP","Hardwood","Tile"], licensed:true, insured:true, verified:true, is_demo:true },
+  { id:"demo-longisland-siding", name:"Island Exterior Group", company:"Island Exterior Group", trade:"Siding", trades_full:"Siding, Windows, Gutters", city:"Garden City, NY", lat:40.7268, lng:-73.6343, rating:4.7, reviews:58, projects_completed:74, response_time:"Usually replies in 50 min", distance:21.5, image_url:"images/jobs/siding.jpg", bio:"Vinyl siding, trim, gutters, windows, and exterior repairs.", tags:["Siding","Windows","Gutters"], licensed:true, insured:true, verified:true, is_demo:true },
+
+  { id:"demo-newark-hvac", name:"Brick City HVAC", company:"Brick City HVAC", trade:"HVAC", trades_full:"HVAC, Electrical", city:"Newark, NJ", lat:40.7357, lng:-74.1724, rating:4.8, reviews:83, projects_completed:107, response_time:"Usually replies in 25 min", distance:6.4, image_url:"images/jobs/hvac.jpg", bio:"Mini-splits, condensers, furnaces, ductwork, and service calls.", tags:["Mini-split","Furnace","AC"], licensed:true, insured:true, verified:true, featured:true, is_demo:true },
+  { id:"demo-jerseycity-plumbing", name:"Liberty Plumbing", company:"Liberty Plumbing", trade:"Plumbing", trades_full:"Plumbing, Water Damage Restoration", city:"Jersey City, NJ", lat:40.7178, lng:-74.0431, rating:4.9, reviews:122, projects_completed:150, response_time:"Usually replies in 10 min", distance:4.9, image_url:"images/jobs/plumbing.jpg", bio:"Leak repair, fixture installs, rough plumbing, and drain service.", tags:["Leaks","Fixtures","Drains"], licensed:true, insured:true, verified:true, featured:true, is_demo:true },
+  { id:"demo-hoboken-handyman", name:"Mile Square Handyman", company:"Mile Square Handyman", trade:"Handyman Services", trades_full:"Handyman Services, Doors, Drywall & Insulation", city:"Hoboken, NJ", lat:40.7440, lng:-74.0324, rating:4.6, reviews:47, projects_completed:79, response_time:"Usually replies same day", distance:5.1, image_url:"images/jobs/handyman-services.jpg", bio:"Punch list work, small repairs, doors, drywall, and fixtures.", tags:["Repairs","Doors","Punch list"], licensed:true, insured:true, verified:true, is_demo:true },
+  { id:"demo-montclair-carpentry", name:"Essex Finish Carpentry", company:"Essex Finish Carpentry", trade:"Carpentry", trades_full:"Carpentry, Doors, Decks & Porches", city:"Montclair, NJ", lat:40.8259, lng:-74.2090, rating:4.9, reviews:72, projects_completed:96, response_time:"Usually replies in 30 min", distance:8.7, image_url:"images/jobs/carpentry.jpg", bio:"Trim, doors, built-ins, stairs, railings, and finish carpentry.", tags:["Trim","Doors","Built-ins"], licensed:true, insured:true, verified:true, is_demo:true },
+  { id:"demo-morristown-masonry", name:"Patriot Masonry", company:"Patriot Masonry", trade:"Concrete & Masonry", trades_full:"Concrete & Masonry, Patios, Pressure Washing", city:"Morristown, NJ", lat:40.7968, lng:-74.4815, rating:4.8, reviews:66, projects_completed:86, response_time:"Usually replies in 45 min", distance:19.8, image_url:"images/jobs/concrete-masonry.jpg", bio:"Steps, patios, walkways, pointing, block, and concrete repairs.", tags:["Masonry","Concrete","Patios"], licensed:true, insured:true, verified:true, is_demo:true },
+  { id:"demo-princeton-general", name:"Princeton Renovation Group", company:"Princeton Renovation Group", trade:"General Contractors", trades_full:"General Contractors, Additions & Remodeling, Kitchen Renovation", city:"Princeton, NJ", lat:40.3573, lng:-74.6672, rating:4.9, reviews:88, projects_completed:120, response_time:"Usually replies in 1 hr", distance:43.0, image_url:"images/jobs/general-contractors.jpg", bio:"Full renovations, additions, kitchens, baths, and project management.", tags:["Remodels","Additions","GC"], licensed:true, insured:true, verified:true, featured:true, is_demo:true },
+  { id:"demo-asbury-deck", name:"Shoreline Deck Builders", company:"Shoreline Deck Builders", trade:"Decks & Porches", trades_full:"Decks & Porches, Carpentry, Patios", city:"Asbury Park, NJ", lat:40.2204, lng:-74.0121, rating:4.7, reviews:54, projects_completed:70, response_time:"Usually replies in 35 min", distance:48.6, image_url:"images/jobs/decks-porches.jpg", bio:"Composite decks, porch repairs, railings, stairs, and framing.", tags:["Decks","Porches","Railings"], licensed:true, insured:true, verified:true, is_demo:true },
+
+  { id:"demo-stamford-windows", name:"Fairfield Window & Door", company:"Fairfield Window & Door", trade:"Windows", trades_full:"Windows, Doors, Siding", city:"Stamford, CT", lat:41.0534, lng:-73.5387, rating:4.8, reviews:59, projects_completed:89, response_time:"Usually replies in 45 min", distance:26.3, image_url:"images/jobs/windows.jpg", bio:"Replacement windows, doors, exterior trim, and weatherproofing.", tags:["Windows","Doors","Exterior"], licensed:true, insured:true, verified:true, featured:true, is_demo:true },
+  { id:"demo-newhaven-tile", name:"Elm City Tile Works", company:"Elm City Tile Works", trade:"Tile & Stone", trades_full:"Tile & Stone, Bathroom Renovation, Flooring", city:"New Haven, CT", lat:41.3083, lng:-72.9279, rating:4.9, reviews:71, projects_completed:93, response_time:"Usually replies same day", distance:58.3, image_url:"images/jobs/tile-stone.jpg", bio:"Showers, floors, backsplashes, waterproofing, and stone work.", tags:["Tile","Showers","Stone"], licensed:true, insured:true, verified:true, is_demo:true },
+  { id:"demo-hartford-basement", name:"Hartford Basement Pros", company:"Hartford Basement Pros", trade:"Additions & Remodeling", trades_full:"Additions & Remodeling, Drywall & Insulation, Flooring", city:"Hartford, CT", lat:41.7658, lng:-72.6734, rating:4.6, reviews:44, projects_completed:60, response_time:"Usually replies in 2 hrs", distance:78.0, image_url:"images/jobs/additions-remodeling.jpg", bio:"Basement finishing, framing, insulation, drywall, and floors.", tags:["Basements","Drywall","Flooring"], licensed:true, insured:true, verified:true, is_demo:true },
+
+  { id:"demo-philly-remodel", name:"Keystone Remodel Co.", company:"Keystone Remodel Co.", trade:"Additions & Remodeling", trades_full:"Additions & Remodeling, Kitchen Renovation, Bathroom Renovation", city:"Philadelphia, PA", lat:39.9526, lng:-75.1652, rating:4.8, reviews:96, projects_completed:118, response_time:"Usually replies in 1 hr", distance:82.4, image_url:"images/jobs/additions-remodeling.jpg", bio:"Kitchen, bath, basement, and whole-home remodel coordination.", tags:["Remodels","Kitchens","Baths"], licensed:true, insured:true, verified:true, featured:true, is_demo:true },
+  { id:"demo-allentown-floor", name:"Lehigh Valley Floors", company:"Lehigh Valley Floors", trade:"Flooring", trades_full:"Flooring, Tile & Stone", city:"Allentown, PA", lat:40.6023, lng:-75.4714, rating:4.7, reviews:57, projects_completed:77, response_time:"Usually replies same day", distance:70.2, image_url:"images/jobs/flooring.jpg", bio:"LVP, hardwood, tile, refinishing, and subfloor prep.", tags:["Flooring","Hardwood","LVP"], licensed:true, insured:true, verified:true, is_demo:true }
+];
+
+const TRI_STATE_DEMO_JOBS = [
+  { id:"demo-job-manhattan-kitchen", title:"Manhattan Galley Kitchen Remodel", trade:"Kitchen Renovation", budget:"$32,000", city:"New York, NY", lat:40.7580, lng:-73.9855, description:"Update cabinets, counters, backsplash, sink, under-cabinet lighting, and flooring.", customer_name:"Customer", rating:5.0, reviews:4, posted_ago:"Demo", max_bids:5, bids:[], verified:true, featured:true, is_demo:true },
+  { id:"demo-job-brooklyn-bath", title:"Brooklyn Bathroom Tile + Vanity", trade:"Bathroom Renovation", budget:"$14,500", city:"Brooklyn, NY", lat:40.6782, lng:-73.9442, description:"Replace tile floor, tub surround, vanity, lighting, toilet, and fixtures.", customer_name:"Customer", rating:4.9, reviews:3, posted_ago:"Demo", max_bids:5, bids:[{amount:"$13,900", eta:"3 weeks", message:"Tile and fixture package included."}], verified:true, is_demo:true },
+  { id:"demo-job-queens-panel", title:"Queens Electrical Panel Upgrade", trade:"Electrical", budget:"$4,800", city:"Queens, NY", lat:40.7282, lng:-73.7949, description:"Upgrade panel and add dedicated circuits for kitchen appliances.", customer_name:"Customer", rating:4.8, reviews:2, posted_ago:"Demo", max_bids:5, bids:[], verified:true, is_demo:true },
+  { id:"demo-job-whiteplains-floor", title:"Hardwood Refinish Main Level", trade:"Flooring", budget:"$7,200", city:"White Plains, NY", lat:41.0330, lng:-73.7629, description:"Sand and refinish existing hardwood floors on main level and stairs.", customer_name:"Customer", rating:4.9, reviews:5, posted_ago:"Demo", max_bids:5, bids:[{amount:"$6,950", eta:"10 days", message:"Includes stain samples and finish coats."}], verified:true, is_demo:true },
+  { id:"demo-job-longisland-siding", title:"Replace Damaged Vinyl Siding", trade:"Siding", budget:"$6,800", city:"Garden City, NY", lat:40.7268, lng:-73.6343, description:"Replace damaged siding sections, wrap trim, and repair corner posts.", customer_name:"Customer", rating:4.8, reviews:4, posted_ago:"Demo", max_bids:5, bids:[], verified:true, is_demo:true },
+
+  { id:"demo-job-newark-plumbing", title:"Rough Plumbing for Basement Bath", trade:"Plumbing", budget:"$6,500", city:"Newark, NJ", lat:40.7357, lng:-74.1724, description:"Rough plumbing for toilet, shower, vanity, and ejector pump in basement.", customer_name:"Customer", rating:4.8, reviews:3, posted_ago:"Demo", max_bids:5, bids:[], verified:true, featured:true, is_demo:true },
+  { id:"demo-job-jerseycity-hvac", title:"Mini-Split Installation", trade:"HVAC", budget:"$8,400", city:"Jersey City, NJ", lat:40.7178, lng:-74.0431, description:"Install ductless mini-split for finished attic office.", customer_name:"Customer", rating:4.9, reviews:6, posted_ago:"Demo", max_bids:5, bids:[{amount:"$8,100", eta:"2 weeks", message:"Includes equipment allowance and install."}], verified:true, is_demo:true },
+  { id:"demo-job-hoboken-door", title:"Replace Interior Doors", trade:"Doors", budget:"$3,200", city:"Hoboken, NJ", lat:40.7440, lng:-74.0324, description:"Replace six interior doors, hardware, and casing touch-ups.", customer_name:"Customer", rating:4.6, reviews:2, posted_ago:"Demo", max_bids:5, bids:[], verified:true, is_demo:true },
+  { id:"demo-job-montclair-addition", title:"Mudroom Addition Estimate", trade:"Additions & Remodeling", budget:"$42,000", city:"Montclair, NJ", lat:40.8259, lng:-74.2090, description:"Small rear mudroom addition with siding, roofing, windows, and interior finishes.", customer_name:"Customer", rating:5.0, reviews:7, posted_ago:"Demo", max_bids:5, bids:[], verified:true, featured:true, is_demo:true },
+  { id:"demo-job-morristown-patio", title:"Bluestone Patio Repair", trade:"Patios", budget:"$9,000", city:"Morristown, NJ", lat:40.7968, lng:-74.4815, description:"Reset bluestone patio sections, repair base, and point joints.", customer_name:"Customer", rating:4.7, reviews:3, posted_ago:"Demo", max_bids:5, bids:[], verified:true, is_demo:true },
+  { id:"demo-job-princeton-bath", title:"Primary Bathroom Remodel", trade:"Bathroom Renovation", budget:"$26,000", city:"Princeton, NJ", lat:40.3573, lng:-74.6672, description:"Demo and rebuild primary bath with tile shower, glass, vanity, lighting, and heated floor.", customer_name:"Customer", rating:4.9, reviews:8, posted_ago:"Demo", max_bids:5, bids:[{amount:"$25,500", eta:"5 weeks", message:"Includes shower waterproofing and tile labor."}], verified:true, is_demo:true },
+  { id:"demo-job-asbury-deck", title:"New Composite Deck Quote", trade:"Decks & Porches", budget:"$18,500", city:"Asbury Park, NJ", lat:40.2204, lng:-74.0121, description:"Build new composite deck with stairs, railing, and permit handling.", customer_name:"Customer", rating:4.8, reviews:4, posted_ago:"Demo", max_bids:5, bids:[], verified:true, is_demo:true },
+
+  { id:"demo-job-stamford-windows", title:"Replace 12 Windows", trade:"Windows", budget:"$19,000", city:"Stamford, CT", lat:41.0534, lng:-73.5387, description:"Replace twelve existing windows and repair exterior trim where needed.", customer_name:"Customer", rating:4.9, reviews:5, posted_ago:"Demo", max_bids:5, bids:[], verified:true, featured:true, is_demo:true },
+  { id:"demo-job-newhaven-tile", title:"Kitchen Backsplash Tile", trade:"Tile & Stone", budget:"$3,600", city:"New Haven, CT", lat:41.3083, lng:-72.9279, description:"Install tile backsplash, grout, caulk, and outlet extensions.", customer_name:"Customer", rating:4.8, reviews:3, posted_ago:"Demo", max_bids:5, bids:[{amount:"$3,450", eta:"1 week", message:"Includes tile labor and setting materials."}], verified:true, is_demo:true },
+  { id:"demo-job-hartford-basement", title:"Basement Finish Estimate", trade:"Additions & Remodeling", budget:"$38,000", city:"Hartford, CT", lat:41.7658, lng:-72.6734, description:"Frame, insulate, drywall, floor, lighting, and finish basement family room.", customer_name:"Customer", rating:4.7, reviews:6, posted_ago:"Demo", max_bids:5, bids:[], verified:true, is_demo:true },
+
+  { id:"demo-job-philly-kitchen", title:"Rowhome Kitchen Refresh", trade:"Kitchen Renovation", budget:"$22,000", city:"Philadelphia, PA", lat:39.9526, lng:-75.1652, description:"Cabinet paint/reface, counters, backsplash, sink, lighting, and flooring.", customer_name:"Customer", rating:4.8, reviews:4, posted_ago:"Demo", max_bids:5, bids:[], verified:true, featured:true, is_demo:true },
+  { id:"demo-job-allentown-concrete", title:"Concrete Walkway Replacement", trade:"Concrete & Masonry", budget:"$6,200", city:"Allentown, PA", lat:40.6023, lng:-75.4714, description:"Remove and replace front walkway and repair one step.", customer_name:"Customer", rating:4.6, reviews:2, posted_ago:"Demo", max_bids:5, bids:[], verified:true, is_demo:true }
+];
+
+function extendTriStateDemoData() {
+  const mergeById = (base, extra) => Array.from(
+    new Map([...base, ...extra].map(item => [String(item.id), item])).values()
+  );
+
+  DEMO_CONTRACTORS.splice(0, DEMO_CONTRACTORS.length, ...mergeById(DEMO_CONTRACTORS, TRI_STATE_DEMO_CONTRACTORS));
+  DEMO_JOBS.splice(0, DEMO_JOBS.length, ...mergeById(DEMO_JOBS, TRI_STATE_DEMO_JOBS));
+}
+
+extendTriStateDemoData();
+
+
     let map;
     let contractors = [];
     let jobs = [];
@@ -3329,9 +3464,10 @@ function offsetCoords(coords, index, total = 1) {
   else if (zoom <= 12) offset = 0.0045;
   else if (zoom <= 14) offset = 0.0022;
 
-  const ring = Math.floor(index / 8) + 1;
-  const position = index % 8;
-  const angle = ((360 / Math.min(total, 8)) * position) * (Math.PI / 180);
+  const perRing = 8;
+  const ring = Math.floor(index / perRing) + 1;
+  const position = index % perRing;
+  const angle = ((360 / Math.min(total, perRing)) * position) * (Math.PI / 180);
 
   return [
     coords[0] + Math.cos(angle) * offset * ring,
