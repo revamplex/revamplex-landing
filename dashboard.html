@@ -281,7 +281,7 @@
 .plans { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-top:12px; }
 .plan-card { border:1px solid #e5e7eb; border-radius:14px; padding:14px; background:#fff; }
 .plan-card h4 { margin:0 0 6px; }
-.plan-card p { margin:0 0 10px; color:#666; font-size:13px; }
+.plan-card p { margin:0 0 10px; color:#666; font-size:13px; line-height:1.45; }
 @media(max-width:700px){ .plans{grid-template-columns:1fr;} }
 </style>
 
@@ -314,6 +314,10 @@
 
   <div class="card contractor-display" id="billingCard">
     <h3>Billing & Approval</h3>
+    <p class="muted">
+      Project Connections are used when a contractor selects <strong>Accept & Open Project Room</strong>.
+      This opens a private workspace with the homeowner and may reveal connected-party contact information.
+    </p>
     <p><strong>Approval:</strong> <span id="displayApproval">—</span></p>
     <p><strong>Subscription:</strong> <span id="displaySubscription">—</span></p>
     <p><strong>Trial Ends:</strong> <span id="displayTrialEnd">—</span></p>
@@ -323,25 +327,30 @@
 </p>
    <div id="activePlanBox" class="active-plan-box" style="display:none;">
   <p><strong>Current Plan:</strong> <span id="displayCurrentPlan">—</span></p>
+  <p><strong>Project Connections Used:</strong> <span id="displayConnectionsUsed">—</span></p>
+  <p class="muted">A Project Connection is counted when you select <strong>Accept & Open Project Room</strong>.</p>
   <button id="manageBillingBtn" class="billing-btn">Manage Billing</button>
 </div>
 
 <div class="plans" id="planCards">
   <div class="plan-card">
     <h4>Basic — $29/mo</h4>
-    <p>Up to 5 bids per month.</p>
+    <p>Up to 5 Project Connections per month.</p>
+    <p>Includes Project Rooms, chat, files, scheduling, and proposal tools.</p>
     <button class="btn" onclick="subscribe('basic')">Choose Basic</button>
   </div>
 
   <div class="plan-card">
     <h4>Pro — $59/mo</h4>
-    <p>Up to 10 bids per month.</p>
+    <p>Up to 10 Project Connections per month.</p>
+    <p>Includes AI Take-Off Lab, 3D Estimate Lab, Project Rooms, and proposal tools.</p>
     <button class="btn" onclick="subscribe('pro')">Choose Pro</button>
   </div>
 
   <div class="plan-card">
     <h4>Elite — $99/mo</h4>
-    <p>Unlimited bids per month.</p>
+    <p>Unlimited Project Connections per month.</p>
+    <p>Includes full visibility, unlimited connection usage, AI tools, and premium project workflow access.</p>
     <button class="btn" onclick="subscribe('elite')">Choose Elite</button>
   </div>
 </div>
@@ -359,14 +368,14 @@
       </div>
 
       <div class="dash-card" onclick="openSubmittedBids()">
-        <h3>Submitted Bids</h3>
-        <p id="submittedBidsCount">Bids pending homeowner review, accepted, declined, or expired.</p>
-        <span class="dash-tag">Bid history</span>
+        <h3>Project Connections</h3>
+        <p id="submittedBidsCount">Project connections created when you select Accept & Open Project Room.</p>
+        <span class="dash-tag">Connection history</span>
       </div>
 
       <div class="dash-card" onclick="openActiveJobs()">
         <h3>Active Jobs</h3>
-        <p id="activeJobsCount">Accepted bids, signed contracts, deposits, schedules, and in-progress work.</p>
+        <p id="activeJobsCount">Connected project rooms, signed contracts, deposits, schedules, and in-progress work.</p>
         <span class="dash-tag">In progress</span>
       </div>
 
@@ -626,16 +635,16 @@ async function openDashboardWorkflow(section) {
     title.innerText = "Project Rooms";
     renderWorkflowRows(
       rows,
-      "No project rooms yet. Once you submit a bid or get invited to a homeowner project, it will appear here."
+      "No project rooms yet. Once you select Accept & Open Project Room or get invited to a homeowner project, it will appear here."
     );
     return;
   }
 
   if (section === "submitted_bids") {
-    title.innerText = "Submitted Bids";
+    title.innerText = "Project Connections";
     renderWorkflowRows(
       rows,
-      "No submitted bids yet. Submit your first bid from the contractor map."
+      "No project connections yet. Open the contractor map and select Accept & Open Project Room on a project you want to connect with."
     );
     return;
   }
@@ -1009,6 +1018,22 @@ setText(
     ? currentProfile.plan.charAt(0).toUpperCase() + currentProfile.plan.slice(1)
     : "Active"
 );
+
+const usedConnections =
+  currentProfile.project_connections_used ??
+  currentProfile.bids_used ??
+  0;
+
+const planLimits = {
+  trial: "Trial",
+  basic: "5",
+  pro: "10",
+  elite: "Unlimited"
+};
+
+const currentPlanKey = currentProfile.plan || "trial";
+const connectionLimit = planLimits[currentPlanKey] || "—";
+setText("displayConnectionsUsed", `${usedConnections} / ${connectionLimit}`);
     setText("displayTrialEnd", currentProfile.trial_end ? new Date(currentProfile.trial_end).toLocaleDateString() : "—");
   }
 };
