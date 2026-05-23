@@ -781,12 +781,13 @@ async function openDashboardWorkflow(section) {
 let clientVault = [];
 let proposalVault = [];
 let invoiceVault = [];
-let materialLibrary = [
-  { name: "Labor - Carpenter", type: "Labor", unit: "hour", price: "$75/hr" },
-  { name: "Labor - Helper", type: "Labor", unit: "hour", price: "$45/hr" },
-  { name: "Dumpster allowance", type: "Allowance", unit: "each", price: "$650" },
-  { name: "Permit allowance", type: "Allowance", unit: "each", price: "$350" },
-  { name: "General material allowance", type: "Material", unit: "allowance", price: "Custom" }
+let materialLibrary = [];
+const starterMaterialLibrary = [
+  { name: "Labor - Carpenter", type: "Labor", unit: "hour", price: 75, description: "Standard carpenter labor rate" },
+  { name: "Labor - Helper", type: "Labor", unit: "hour", price: 45, description: "Helper / apprentice labor rate" },
+  { name: "Dumpster allowance", type: "Allowance", unit: "each", price: 650, description: "Typical dumpster allowance" },
+  { name: "Permit allowance", type: "Allowance", unit: "each", price: 350, description: "Typical permit allowance" },
+  { name: "General material allowance", type: "Material", unit: "allowance", price: 0, description: "Custom material allowance" }
 ];
 
 function safeClientText(value) {
@@ -1015,23 +1016,224 @@ function openInvoiceVault() {
   `;
 }
 
+async function loadMaterialLibrary() {
+  if (!currentUser || !isContractorProfile()) return;
+
+  const { data, error } = await client
+    .from("line_items_library")
+    .select("*")
+    .eq("contractor_id", currentUser.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.warn("Line item library could not load. The table may not exist yet:", error);
+    materialLibrary = starterMaterialLibrary.map((item, index) => ({
+      id: "starter-" + index,
+      contractor_id: currentUser.id,
+      ...item
+    }));
+    return;
+  }
+
+  materialLibrary = data || [];
+}
+
+function formatLineItemPrice(item) {
+  const price = Number(item.price || 0);
+  const unit = item.unit || "each";
+  if (!Number.isFinite(price) || price <= 0) return "Custom";
+  return "$" + price.toFixed(2) + " / " + unit;
+}
+
 function openMaterialLibrary() {
   const container = document.getElementById("clientResults");
   if (!container) return;
 
+  const items = materialLibrary.length
+    ? materialLibrary
+    : starterMaterialLibrary.map((item, index) => ({ id: "starter-" + index, ...item }));
+
   container.innerHTML = `
+    <div class="workflow-actions" style="margin-bottom:12px;">
+      <button class="btn" onclick="openLineItemForm()">+ Add Line Item</button>
+      <button class="btn secondary" onclick="seedStarterLineItems()">Add Starter Items</button>
+      <button class="btn secondary" onclick="loadMaterialLibrary().then(openMaterialLibrary)">Refresh</button>
+    </div>
+
     <div class="workflow-list">
-      ${materialLibrary.map(item => `
+      ${items.map(item => `
         <div class="workflow-row">
           <strong>${safeClientText(item.name)}</strong>
-          <span>${safeClientText(item.type)} • ${safeClientText(item.unit)} • ${safeClientText(item.price)}</span>
+          <span>
+            ${safeClientText(item.type || "Item")} • ${safeClientText(item.unit || "each")} • ${safeClientText(formatLineItemPrice(item))}
+            ${item.description ? `<br>${safeClientText(item.description)}` : ""}
+          </span>
           <div class="workflow-actions">
-            <button class="btn secondary" onclick="alert('Next step: edit/save reusable line items in Supabase.')">Use Item</button>
+            <button class="btn" onclick="openLineItemForm('${safeClientText(item.id)}')">Edit</button>
+            <button class="btn secondary" onclick="duplicateLineItem('${safeClientText(item.id)}')">Duplicate</button>
+            <button class="btn secondary" onclick="deleteLineItem('${safeClientText(item.id)}')">Delete</button>
           </div>
         </div>
       `).join("")}
     </div>
   `;
+}
+
+function getLineItemById(id) {
+  return materialLibrary.find(item => String(item.id) === String(id)) ||
+         starterMaterialLibrary.map((item, index) => ({ id: "starter-" + index, ...item }))
+           .find(item => String(item.id) === String(id));
+}
+
+function openLineItemForm(id = "") {
+  const container = document.getElementById("clientResults");
+  if (!container) return;
+
+  const item = id ? getLineItemById(id) : null;
+  const isStarter = String(id).startsWith("starter-");
+
+  container.innerHTML = `
+    <div class="workflow-row">
+      <strong>${item && !isStarter ? "Edit Line Item" : "Add Line Item"}</strong>
+      <p class="muted">Save reusable labor, material, allowance, and subcontractor items for future estimates/proposals.</p>
+
+      <input id="lineItemName" placeholder="Item name, example: Labor - Carpenter" value="${safeClientText(item?.name || "")}" style="width:100%;padding:11px;margin:8px 0;border-radius:8px;border:1px solid #ccc;">
+
+      <select id="lineItemType" style="width:100%;padding:11px;margin:8px 0;border-radius:8px;border:1px solid #ccc;">
+        ${["Labor","Material","Allowance","Subcontractor","Equipment","Other"].map(type => `
+          <option value="${type}" ${String(item?.type || "") === type ? "selected" : ""}>${type}</option>
+        `).join("")}
+      </select>
+
+      <input id="lineItemUnit" placeholder="Unit, example: hour, each, sq ft, linear ft" value="${safeClientText(item?.unit || "each")}" style="width:100%;padding:11px;margin:8px 0;border-radius:8px;border:1px solid #ccc;">
+
+      <input id="lineItemPrice" type="number" step="0.01" placeholder="Price, example: 75" value="${safeClientText(item?.price || "")}" style="width:100%;padding:11px;margin:8px 0;border-radius:8px;border:1px solid #ccc;">
+
+      <textarea id="lineItemDescription" placeholder="Notes or description" style="width:100%;padding:11px;margin:8px 0;border-radius:8px;border:1px solid #ccc;min-height:90px;">${safeClientText(item?.description || "")}</textarea>
+
+      <div class="workflow-actions">
+        <button class="btn" onclick="saveLineItem('${isStarter ? "" : safeClientText(id)}')">Save Line Item</button>
+        <button class="btn secondary" onclick="openMaterialLibrary()">Cancel</button>
+      </div>
+    </div>
+  `;
+}
+
+async function saveLineItem(id = "") {
+  if (!currentUser) {
+    alert("Please log in first.");
+    return;
+  }
+
+  const payload = {
+    contractor_id: currentUser.id,
+    name: cleanText(document.getElementById("lineItemName")?.value),
+    type: cleanText(document.getElementById("lineItemType")?.value) || "Other",
+    unit: cleanText(document.getElementById("lineItemUnit")?.value) || "each",
+    price: Number(document.getElementById("lineItemPrice")?.value || 0),
+    description: cleanText(document.getElementById("lineItemDescription")?.value)
+  };
+
+  if (!payload.name) {
+    alert("Enter a line item name.");
+    return;
+  }
+
+  let result;
+
+  if (id) {
+    result = await client
+      .from("line_items_library")
+      .update(payload)
+      .eq("id", id)
+      .eq("contractor_id", currentUser.id)
+      .select("*")
+      .single();
+  } else {
+    result = await client
+      .from("line_items_library")
+      .insert(payload)
+      .select("*")
+      .single();
+  }
+
+  if (result.error) {
+    alert("Line item save failed: " + result.error.message + "\\n\\nMake sure you ran the line_items_library Supabase SQL.");
+    console.error(result.error);
+    return;
+  }
+
+  await loadMaterialLibrary();
+  openMaterialLibrary();
+}
+
+async function duplicateLineItem(id) {
+  const item = getLineItemById(id);
+  if (!item) return;
+
+  const payload = {
+    contractor_id: currentUser.id,
+    name: (item.name || "Line Item") + " Copy",
+    type: item.type || "Other",
+    unit: item.unit || "each",
+    price: Number(item.price || 0),
+    description: item.description || ""
+  };
+
+  const { error } = await client.from("line_items_library").insert(payload);
+
+  if (error) {
+    alert("Duplicate failed: " + error.message);
+    return;
+  }
+
+  await loadMaterialLibrary();
+  openMaterialLibrary();
+}
+
+async function deleteLineItem(id) {
+  if (String(id).startsWith("starter-")) {
+    alert("Starter examples are not saved yet. Click Add Starter Items first, or add your own item.");
+    return;
+  }
+
+  if (!confirm("Delete this reusable line item?")) return;
+
+  const { error } = await client
+    .from("line_items_library")
+    .delete()
+    .eq("id", id)
+    .eq("contractor_id", currentUser.id);
+
+  if (error) {
+    alert("Delete failed: " + error.message);
+    return;
+  }
+
+  await loadMaterialLibrary();
+  openMaterialLibrary();
+}
+
+async function seedStarterLineItems() {
+  if (!currentUser) {
+    alert("Please log in first.");
+    return;
+  }
+
+  const rows = starterMaterialLibrary.map(item => ({
+    contractor_id: currentUser.id,
+    ...item
+  }));
+
+  const { error } = await client.from("line_items_library").insert(rows);
+
+  if (error) {
+    alert("Could not add starter items: " + error.message + "\\n\\nMake sure you ran the line_items_library Supabase SQL.");
+    return;
+  }
+
+  await loadMaterialLibrary();
+  openMaterialLibrary();
 }
 
 function startProposalForClient(jobId) {
@@ -1094,6 +1296,7 @@ async function loadDashboard() {
 
   refreshDisplay();
   await loadClientVault();
+  await loadMaterialLibrary();
 }
 
 function openEditProfile() {
