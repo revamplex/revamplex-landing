@@ -264,6 +264,51 @@
   font-weight: 700;
 }
 
+/* ===== CLIENT VAULT + DOCUMENTS ===== */
+.client-vault-search {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 15px;
+  margin-bottom: 15px;
+}
+
+.client-vault-results {
+  margin-top: 15px;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 15px;
+  background: #fff;
+}
+
+.client-vault-toolbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 10px 0 14px;
+}
+
+.client-doc-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  margin: 4px 4px 0 0;
+}
+
+.vault-mini-note {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 8px 0 0;
+}
+
     @media (max-width: 600px) {
       .header { padding-top: 52px; }
       .back-btn {
@@ -387,6 +432,60 @@
 
     </div>
   </div>
+
+  <div class="card contractor-display" id="clientVaultCard">
+    <h3>Client Vault + Documents</h3>
+    <p class="muted">
+      Search past customers, connected project rooms, proposals, invoices, documents, photos, and reusable line items.
+    </p>
+
+    <input
+      id="clientSearch"
+      class="client-vault-search"
+      placeholder="Search clients, invoices, proposals, jobs, city, trade..."
+      oninput="filterClients()"
+    />
+
+    <div class="dash-grid">
+
+      <div class="dash-card" onclick="openClientList()">
+        <h3>Clients</h3>
+        <p id="clientCount">Homeowners and past customers you've worked with.</p>
+        <span class="dash-tag">CRM</span>
+      </div>
+
+      <div class="dash-card" onclick="openProposalVault()">
+        <h3>Proposals</h3>
+        <p>Search estimates, proposals, contracts, revisions, and project documents.</p>
+        <span class="dash-tag">Documents</span>
+      </div>
+
+      <div class="dash-card" onclick="openInvoiceVault()">
+        <h3>Invoices</h3>
+        <p>Track draft, sent, paid, overdue, and deposit invoices.</p>
+        <span class="dash-tag">Payments</span>
+      </div>
+
+      <div class="dash-card" onclick="openMaterialLibrary()">
+        <h3>Line Item Library</h3>
+        <p>Save reusable labor, materials, allowances, and estimate templates.</p>
+        <span class="dash-tag">Templates</span>
+      </div>
+
+    </div>
+
+    <div class="client-vault-toolbar">
+      <button class="btn" onclick="openClientList()">View Clients</button>
+      <button class="btn secondary" onclick="openProposalVault()">Proposal Vault</button>
+      <button class="btn secondary" onclick="openInvoiceVault()">Invoice Vault</button>
+      <button class="btn secondary" onclick="openMaterialLibrary()">Line Items</button>
+    </div>
+
+    <div id="clientResults" class="client-vault-results">
+      No client data yet.
+    </div>
+  </div>
+
 
 </div>
 
@@ -677,6 +776,272 @@ async function openDashboardWorkflow(section) {
   }
 }
 
+
+/* ===== CLIENT VAULT + DOCUMENTS DASHBOARD ADD-ON ===== */
+let clientVault = [];
+let proposalVault = [];
+let invoiceVault = [];
+let materialLibrary = [
+  { name: "Labor - Carpenter", type: "Labor", unit: "hour", price: "$75/hr" },
+  { name: "Labor - Helper", type: "Labor", unit: "hour", price: "$45/hr" },
+  { name: "Dumpster allowance", type: "Allowance", unit: "each", price: "$650" },
+  { name: "Permit allowance", type: "Allowance", unit: "each", price: "$350" },
+  { name: "General material allowance", type: "Material", unit: "allowance", price: "Custom" }
+];
+
+function safeClientText(value) {
+  return String(value || "").replace(/[<>&"']/g, function(char) {
+    return {
+      "<": "&lt;",
+      ">": "&gt;",
+      "&": "&amp;",
+      '"': "&quot;",
+      "'": "&#039;"
+    }[char];
+  });
+}
+
+function getVaultJobId(item) {
+  return item.job_id || item.job?.id || item.jobs?.id || item.id || "";
+}
+
+function getVaultProjectRoomUrl(item) {
+  const jobId = getVaultJobId(item);
+  return "project-room.html?mode=contractor&job=" + encodeURIComponent(jobId) + "&id=" + encodeURIComponent(jobId);
+}
+
+function normalizeVaultRow(row) {
+  const job = row.job || row.jobs || {};
+  return {
+    ...row,
+    job,
+    job_id: row.job_id || job.id || row.id,
+    customer_name:
+      row.customer_name ||
+      job.customer_name ||
+      row.client_name ||
+      "Customer",
+    customer_email:
+      row.customer_email ||
+      job.customer_email ||
+      row.client_email ||
+      "",
+    customer_phone:
+      row.customer_phone ||
+      job.customer_phone ||
+      row.client_phone ||
+      "",
+    project_title:
+      row.project_title ||
+      job.title ||
+      "Untitled Project",
+    trade:
+      row.trade ||
+      job.trade ||
+      "Trade",
+    city:
+      row.city ||
+      job.city ||
+      "Location",
+    budget:
+      row.budget ||
+      job.budget ||
+      "Budget not listed",
+    status:
+      row.status ||
+      job.status ||
+      "active"
+  };
+}
+
+async function loadClientVault() {
+  if (!currentUser || !isContractorProfile()) return;
+
+  let rows = [];
+
+  try {
+    const { data, error } = await client
+      .from("project_rooms")
+      .select("*, jobs(*)")
+      .or(`contractor_id.eq.${currentUser.id},contractor_user_id.eq.${currentUser.id}`)
+      .order("created_at", { ascending: false });
+
+    if (!error && Array.isArray(data)) rows = data;
+  } catch (err) {
+    console.warn("Project room client vault load skipped:", err);
+  }
+
+  if (!rows.length) {
+    try {
+      const bidRows = await loadMyBidRows();
+      rows = bidRows.map(({ bid, job }) => ({
+        ...bid,
+        job,
+        job_id: bid.job_id || job.id,
+        customer_name: job.customer_name || "Customer",
+        customer_email: job.customer_email || "",
+        project_title: job.title || "Untitled Project",
+        trade: job.trade || "Trade",
+        city: job.city || "Location",
+        budget: job.budget || "Budget not listed",
+        status: bid.status || job.status || "pending"
+      }));
+    } catch (err) {
+      console.warn("Bid client vault fallback skipped:", err);
+    }
+  }
+
+  clientVault = (rows || []).map(normalizeVaultRow);
+
+  const clientCount = document.getElementById("clientCount");
+  if (clientCount) {
+    clientCount.innerText = `${clientVault.length} saved client/project record${clientVault.length === 1 ? "" : "s"}`;
+  }
+
+  renderClients(clientVault);
+}
+
+function filterClients() {
+  const input = document.getElementById("clientSearch");
+  const value = (input?.value || "").toLowerCase();
+
+  const filtered = clientVault.filter(item => {
+    const haystack = [
+      item.customer_name,
+      item.customer_email,
+      item.customer_phone,
+      item.project_title,
+      item.trade,
+      item.city,
+      item.budget,
+      item.status
+    ].join(" ").toLowerCase();
+
+    return haystack.includes(value);
+  });
+
+  renderClients(filtered);
+}
+
+function renderClients(items) {
+  const container = document.getElementById("clientResults");
+  if (!container) return;
+
+  if (!items.length) {
+    container.innerHTML = `
+      <div class="workflow-empty">
+        No matching clients found yet. Connected project rooms and accepted project connections will appear here.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="workflow-list">
+      ${items.map(item => `
+        <div class="workflow-row">
+          <strong>${safeClientText(item.customer_name)}</strong>
+          <span>
+            ${safeClientText(item.project_title)}<br>
+            ${safeClientText(item.trade)} • ${safeClientText(item.city)} • ${safeClientText(item.budget)}<br>
+            ${safeClientText(item.customer_email || "No email saved")} ${item.customer_phone ? "• " + safeClientText(item.customer_phone) : ""}
+          </span>
+          <div>
+            <span class="client-doc-pill">Status: ${safeClientText(item.status)}</span>
+            <span class="client-doc-pill">Project Room</span>
+            <span class="client-doc-pill">Docs</span>
+            <span class="client-doc-pill">Estimate</span>
+          </div>
+          <div class="workflow-actions">
+            <button class="btn" onclick="window.location.href='${getVaultProjectRoomUrl(item)}'">Open Project Room</button>
+            <button class="btn secondary" onclick="startProposalForClient('${safeClientText(getVaultJobId(item))}')">New Proposal</button>
+            <button class="btn secondary" onclick="startInvoiceForClient('${safeClientText(getVaultJobId(item))}')">New Invoice</button>
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function openClientList() {
+  renderClients(clientVault);
+}
+
+function openProposalVault() {
+  const container = document.getElementById("clientResults");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="workflow-list">
+      <div class="workflow-row">
+        <strong>Proposal Vault</strong>
+        <span>
+          This is the Revamp version of a Joist-style proposal center. It will hold drafts, sent proposals,
+          accepted proposals, contracts, revisions, photos, and signed documents.
+        </span>
+        <p class="vault-mini-note">
+          Next database table: <strong>client_documents</strong> or <strong>proposals</strong>.
+        </p>
+        <div class="workflow-actions">
+          <button class="btn" onclick="openClientList()">Choose Client</button>
+          <button class="btn secondary" onclick="alert('Next step: connect this to your project-room proposal builder.')">Create Blank Proposal</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function openInvoiceVault() {
+  const container = document.getElementById("clientResults");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="workflow-list">
+      <div class="workflow-row">
+        <strong>Invoice Vault</strong>
+        <span>
+          Track invoices by Draft, Sent, Deposit Requested, Paid, Partial, and Overdue.
+          Later this can connect to Stripe payment links and payment history.
+        </span>
+        <p class="vault-mini-note">
+          Next database table: <strong>invoices</strong> and optional <strong>payments</strong>.
+        </p>
+        <div class="workflow-actions">
+          <button class="btn" onclick="openClientList()">Choose Client</button>
+          <button class="btn secondary" onclick="alert('Next step: build invoice form and Stripe payment link.')">Create Blank Invoice</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function openMaterialLibrary() {
+  const container = document.getElementById("clientResults");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="workflow-list">
+      ${materialLibrary.map(item => `
+        <div class="workflow-row">
+          <strong>${safeClientText(item.name)}</strong>
+          <span>${safeClientText(item.type)} • ${safeClientText(item.unit)} • ${safeClientText(item.price)}</span>
+          <div class="workflow-actions">
+            <button class="btn secondary" onclick="alert('Next step: edit/save reusable line items in Supabase.')">Use Item</button>
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function startProposalForClient(jobId) {
+  alert("Next step: open the proposal builder for job " + jobId + ".");
+}
+
+function startInvoiceForClient(jobId) {
+  alert("Next step: open the invoice builder for job " + jobId + ".");
+}
+
 async function loadDashboard() {
   const { data: { session }, error: sessionError } = await client.auth.getSession();
 
@@ -728,6 +1093,7 @@ async function loadDashboard() {
   }
 
   refreshDisplay();
+  await loadClientVault();
 }
 
 function openEditProfile() {
