@@ -10249,7 +10249,25 @@ body.light-room.command-room .command-active-panel textarea::placeholder {
     max-width: 100% !important;
   }
 }
+/* ===== REVAMPLEX REMOVE TEMPLATE + GOOD/BETTER/BEST UI ===== */
 
+/* Remove entire top card row */
+.estimate-studio-grid,
+.template-button-grid,
+.tier-button-grid,
+#tierGoodBtn,
+#tierBetterBtn,
+#tierBestBtn{
+    display:none !important;
+}
+
+/* Hide any generated template buttons */
+button[class*="template"],
+button[id*="template"],
+button[class*="tier"],
+button[id*="tier"]{
+    display:none !important;
+}
 </style>
 
 <script>
