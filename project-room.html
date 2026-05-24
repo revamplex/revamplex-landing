@@ -4434,7 +4434,47 @@ body.command-room .takeoff-json-box {
         </section>
 </main>
     </div>
+<section class="panel" id="completionPanel">
 
+<div class="panel-header">
+<div>
+<h3>Project Completion</h3>
+<p>Close out this project after work has been finished.</p>
+</div>
+</div>
+
+<div class="summary-box">
+
+<div id="completionStatus">
+
+Contractor completion:
+<span id="contractorCompleteStatus">
+Pending
+</span>
+
+<br><br>
+
+Homeowner completion:
+<span id="homeownerCompleteStatus">
+Pending
+</span>
+
+</div>
+
+<br>
+
+<button
+id="markCompleteBtn"
+class="btn btn-primary"
+onclick="markProjectComplete()">
+
+Mark Project Complete
+
+</button>
+
+</div>
+
+</section>
     <p class="footer-note">Revamp Project Room prototype • Private homeowner + contractor workspace • Ready to connect to Supabase / auth / database next</p>
   </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -10633,6 +10673,67 @@ window.addEventListener("load", function(){
     }
   }, 1000);
 });
+  async function markProjectComplete(){
+
+const jobId = currentJob.id;
+
+const { data:{user } } =
+await supabaseClient.auth.getUser();
+
+if(!user) return;
+
+const updates={};
+
+if(mode==="contractor"){
+updates.contractor_completed=true;
+}
+
+if(mode==="homeowner"){
+updates.homeowner_completed=true;
+}
+
+const {error}=await supabaseClient
+.from("jobs")
+.update(updates)
+.eq("id",jobId);
+
+if(error){
+console.error(error);
+return;
+}
+
+await checkCompletionStatus();
+
+}
+  async function checkCompletionStatus(){
+
+const {data:job}=await supabaseClient
+.from("jobs")
+.select("*")
+.eq("id",currentJob.id)
+.single();
+
+if(
+job.contractor_completed &&
+job.homeowner_completed
+){
+
+await supabaseClient
+.from("jobs")
+.update({
+completed:true
+})
+.eq("id",currentJob.id);
+
+alert(
+"Project completed successfully."
+);
+
+showReviewPopup();
+
+}
+
+}
 </script>
 
 </body>
