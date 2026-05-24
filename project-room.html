@@ -3755,32 +3755,6 @@ body.command-room .estimate-metrics-card *{
 }
 
 
-/* ===== REVAMPLEX CHANGES REQUESTED BUTTON FIX ===== */
-body.command-room button,
-body.command-room .status-btn,
-body.command-room .approval-btn,
-body.command-room .changes-requested-btn{
-
-}
-
-/* Specific Changes Requested button */
-body.command-room button:last-child,
-body.command-room .changes-requested-btn,
-body.command-room button[data-status="changes"],
-body.command-room button[onclick*="change"]{
-    background:#ffffff !important;
-    color:#0f172a !important;
-    border:1px solid #e2e8f0 !important;
-    box-shadow:0 2px 10px rgba(0,0,0,.06)!important;
-}
-
-body.command-room button:last-child:hover,
-body.command-room .changes-requested-btn:hover{
-    border-color:#f97316 !important;
-    color:#f97316 !important;
-}
-
-
 /* ===== REVAMPLEX DESKTOP + MOBILE SIGNATURE PAD FIX ===== */
 .signature-pad{
   position:relative !important;
@@ -3831,6 +3805,58 @@ body.command-room .changes-requested-btn:hover{
   font-weight:800;
   color:#ea580c;
   margin-top:6px;
+}
+
+
+/* ===== REVAMPLEX DARK COMMAND CARD + SAFE CHANGES REQUESTED FIX ===== */
+
+/* Keep command deck cards dark in dark mode, including Approval Console */
+body.command-room .command-card{
+  background:rgba(255,255,255,0.07) !important;
+  color:#f8fafc !important;
+  border:1px solid rgba(255,255,255,0.12) !important;
+  box-shadow:0 16px 34px rgba(0,0,0,0.18) !important;
+}
+
+body.command-room .command-card strong{
+  color:#f8fafc !important;
+}
+
+body.command-room .command-card small{
+  color:#cbd5e1 !important;
+}
+
+body.command-room .command-card.is-active{
+  background:linear-gradient(135deg, rgba(249,115,22,0.22), rgba(255,255,255,0.08)) !important;
+  border-color:rgba(249,115,22,0.62) !important;
+  color:#ffffff !important;
+}
+
+body.command-room .command-card.is-active .command-index{
+  background:linear-gradient(135deg,#f97316,#ea580c) !important;
+  color:#ffffff !important;
+}
+
+/* Only this one approval button gets the light style */
+body.command-room .approval-status-actions button[onclick*="Changes Requested"]{
+  background:#ffffff !important;
+  color:#0f172a !important;
+  border:1px solid #e2e8f0 !important;
+  box-shadow:0 2px 10px rgba(0,0,0,.06)!important;
+}
+
+body.command-room .approval-status-actions button[onclick*="Changes Requested"]:hover{
+  border-color:#f97316 !important;
+  color:#f97316 !important;
+}
+
+/* Signature canvas must receive mouse/trackpad events on desktop Chrome */
+#customerSignaturePad,
+#customerSignatureCanvas{
+  pointer-events:auto !important;
+  touch-action:none !important;
+  user-select:none !important;
+  -webkit-user-select:none !important;
 }
 
 </style>
@@ -11081,6 +11107,194 @@ window.addEventListener("load", function(){
   });
 
   window.initCustomerSignaturePad = bindSignaturePad;
+})();
+</script>
+
+
+<script>
+/* ===== REVAMPLEX SIGNATURE CHROME FINAL REPAIR ===== */
+(function(){
+  let canvas, ctx, drawing = false, signed = false;
+
+  function getCanvas(){
+    canvas = document.getElementById("customerSignatureCanvas");
+    return canvas;
+  }
+
+  function getPoint(e){
+    const c = getCanvas();
+    const rect = c.getBoundingClientRect();
+    const p = e.touches && e.touches.length ? e.touches[0] : e;
+    return {
+      x: p.clientX - rect.left,
+      y: p.clientY - rect.top
+    };
+  }
+
+  function sizeCanvas(){
+    const c = getCanvas();
+    if(!c) return;
+
+    const pad = document.getElementById("customerSignaturePad");
+    if(pad){
+      pad.style.height = pad.style.height || "220px";
+      pad.style.display = "block";
+    }
+
+    const rect = c.getBoundingClientRect();
+    const width = Math.max(300, Math.floor(rect.width || c.parentElement?.clientWidth || 600));
+    const height = Math.max(180, Math.floor(rect.height || c.parentElement?.clientHeight || 220));
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+
+    const old = signed ? c.toDataURL("image/png") : "";
+
+    c.width = Math.floor(width * ratio);
+    c.height = Math.floor(height * ratio);
+    c.style.width = width + "px";
+    c.style.height = height + "px";
+
+    ctx = c.getContext("2d");
+    ctx.setTransform(ratio,0,0,ratio,0,0);
+    ctx.lineWidth = 2.75;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "#0f172a";
+
+    if(old){
+      const img = new Image();
+      img.onload = () => ctx.drawImage(img,0,0,width,height);
+      img.src = old;
+    }
+  }
+
+  function down(e){
+    const c = getCanvas();
+    if(!c) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    if(!ctx) sizeCanvas();
+
+    drawing = true;
+    const p = getPoint(e);
+    ctx.beginPath();
+    ctx.moveTo(p.x,p.y);
+
+    if(c.setPointerCapture && e.pointerId !== undefined){
+      try{ c.setPointerCapture(e.pointerId); }catch(err){}
+    }
+  }
+
+  function move(e){
+    if(!drawing || !ctx) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    const p = getPoint(e);
+    ctx.lineTo(p.x,p.y);
+    ctx.stroke();
+    signed = true;
+
+    const ph = document.getElementById("signaturePlaceholder");
+    if(ph) ph.style.display = "none";
+  }
+
+  function up(e){
+    if(!drawing) return;
+    if(e){
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    drawing = false;
+  }
+
+  function bind(){
+    const c = getCanvas();
+    if(!c) return;
+
+    sizeCanvas();
+
+    if(c.dataset.finalSignatureBound === "true") return;
+    c.dataset.finalSignatureBound = "true";
+
+    c.addEventListener("pointerdown", down, {passive:false});
+    c.addEventListener("pointermove", move, {passive:false});
+    c.addEventListener("pointerup", up, {passive:false});
+    c.addEventListener("pointercancel", up, {passive:false});
+    c.addEventListener("pointerleave", up, {passive:false});
+
+    c.addEventListener("mousedown", down, {passive:false});
+    window.addEventListener("mousemove", move, {passive:false});
+    window.addEventListener("mouseup", up, {passive:false});
+
+    c.addEventListener("touchstart", down, {passive:false});
+    c.addEventListener("touchmove", move, {passive:false});
+    c.addEventListener("touchend", up, {passive:false});
+
+    window.addEventListener("resize", () => setTimeout(sizeCanvas,150));
+  }
+
+  window.clearCustomerSignature = function(){
+    const c = getCanvas();
+    if(!c) return;
+    if(!ctx) sizeCanvas();
+    ctx.clearRect(0,0,c.width,c.height);
+    signed = false;
+
+    const ph = document.getElementById("signaturePlaceholder");
+    if(ph) ph.style.display = "grid";
+
+    const status = document.getElementById("signatureStatus");
+    if(status) status.textContent = "Signature cleared.";
+  };
+
+  window.saveCustomerSignature = function(){
+    const c = getCanvas();
+    const status = document.getElementById("signatureStatus");
+
+    if(!c || !signed){
+      if(status) status.textContent = "Please sign before saving.";
+      return "";
+    }
+
+    const dataUrl = c.toDataURL("image/png");
+    window.revampCustomerSignatureDataUrl = dataUrl;
+    if(status) status.textContent = "Signature saved.";
+    return dataUrl;
+  };
+
+  function init(){
+    bind();
+    setTimeout(sizeCanvas,100);
+    setTimeout(sizeCanvas,500);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(init,300);
+    setTimeout(init,900);
+  });
+
+  window.addEventListener("load", () => {
+    setTimeout(init,300);
+    setTimeout(init,1200);
+  });
+
+  /* Re-size when Approval Console opens in Command Deck */
+  const originalShowCommandStage = window.showCommandStage;
+  if(typeof originalShowCommandStage === "function" && !window.__signatureShowCommandWrapped){
+    window.__signatureShowCommandWrapped = true;
+    window.showCommandStage = function(targetId){
+      const result = originalShowCommandStage.apply(this, arguments);
+      if(targetId === "signaturePanel"){
+        setTimeout(init,100);
+        setTimeout(init,400);
+        setTimeout(init,900);
+      }
+      return result;
+    };
+  }
+
+  window.initCustomerSignaturePad = init;
 })();
 </script>
 
