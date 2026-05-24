@@ -4227,6 +4227,130 @@ body.command-room #signaturePanel{
   pointer-events:none !important;
 }
 
+
+/* =========================================================
+   REVAMPLEX FINAL FIX — APPROVAL FONTS + SIGNATURE PAD
+   This must stay at the very bottom of <style>.
+   ========================================================= */
+
+/* Make the Approval Console title/description readable on the dark panel */
+body.command-room #signaturePanel > .panel-header h1,
+body.command-room #signaturePanel > .panel-header h2,
+body.command-room #signaturePanel > .panel-header h3,
+body.command-room #signaturePanel > .panel-header h4,
+body.command-room #signaturePanel > .panel-header p,
+body.command-room #signaturePanel > .panel-header span,
+body.command-room #signaturePanel > h1,
+body.command-room #signaturePanel > h2,
+body.command-room #signaturePanel > h3,
+body.command-room #signaturePanel > h4,
+body.command-room #signaturePanel > p{
+  color:#ffffff !important;
+  opacity:1 !important;
+  text-shadow:0 2px 12px rgba(0,0,0,.55) !important;
+}
+
+/* Signature security line must be white and visible */
+body.command-room #signaturePanel .signature-security,
+body.command-room #signaturePanel .signature-security *,
+body.command-room #signaturePanel .revamp-signature-security,
+body.command-room #signaturePanel .revamp-signature-security *,
+body.command-room #signaturePanel [class*="security"],
+body.command-room #signaturePanel [class*="security"] *,
+body.command-room #signaturePanel [id*="security"],
+body.command-room #signaturePanel [id*="security"] *{
+  color:#ffffff !important;
+  opacity:1 !important;
+  text-shadow:0 2px 12px rgba(0,0,0,.55) !important;
+}
+
+body.command-room #signaturePanel .signature-security,
+body.command-room #signaturePanel .revamp-signature-security,
+body.command-room #signaturePanel [class*="security"]{
+  background:linear-gradient(135deg, rgba(249,115,22,.20), rgba(2,6,23,.94)) !important;
+  border:1px solid rgba(249,115,22,.38) !important;
+  border-radius:18px !important;
+  padding:14px 16px !important;
+}
+
+/* White signature cards keep dark readable text */
+body.command-room #signaturePanel .signature-box,
+body.command-room #signaturePanel .signature-card,
+body.command-room #signaturePanel [class*="signature-card"],
+body.command-room #signaturePanel [class*="signature-box"],
+body.command-room #signaturePanel .revamp-party-signature-card,
+body.command-room #signaturePanel .revamp-final-doc-card{
+  background:#ffffff !important;
+  color:#0f172a !important;
+  border-color:#e2e8f0 !important;
+}
+
+body.command-room #signaturePanel .signature-box *,
+body.command-room #signaturePanel .signature-card *,
+body.command-room #signaturePanel [class*="signature-card"] *,
+body.command-room #signaturePanel [class*="signature-box"] *,
+body.command-room #signaturePanel .revamp-party-signature-card *,
+body.command-room #signaturePanel .revamp-final-doc-card *{
+  color:#0f172a !important;
+  opacity:1 !important;
+  text-shadow:none !important;
+}
+
+body.command-room #signaturePanel input,
+body.command-room #signaturePanel textarea,
+body.command-room #signaturePanel select{
+  background:#ffffff !important;
+  color:#0f172a !important;
+  border:1px solid #cbd5e1 !important;
+  opacity:1 !important;
+  pointer-events:auto !important;
+  user-select:text !important;
+  -webkit-user-select:text !important;
+}
+
+/* Signature canvas/pad desktop browser repair */
+body.command-room #signaturePanel canvas,
+body.command-room #signaturePanel .signature-pad canvas,
+body.command-room #signaturePanel [id*="signatureCanvas"],
+body.command-room #signaturePanel [id*="SignatureCanvas"]{
+  display:block !important;
+  width:100% !important;
+  min-height:220px !important;
+  background:#fffaf2 !important;
+  border:2px dashed #fdba74 !important;
+  border-radius:18px !important;
+  cursor:crosshair !important;
+  pointer-events:auto !important;
+  touch-action:none !important;
+  user-select:none !important;
+  -webkit-user-select:none !important;
+  position:relative !important;
+  z-index:999 !important;
+}
+
+body.command-room #signaturePanel .signature-pad,
+body.command-room #signaturePanel [class*="signature-pad"],
+body.command-room #signaturePanel [id*="signaturePad"],
+body.command-room #signaturePanel [id*="SignaturePad"]{
+  pointer-events:auto !important;
+  touch-action:none !important;
+  user-select:none !important;
+  -webkit-user-select:none !important;
+  position:relative !important;
+}
+
+/* Keep signature buttons readable */
+body.command-room #signaturePanel .btn-primary{
+  color:#ffffff !important;
+}
+
+body.command-room #signaturePanel .btn-soft,
+body.command-room #signaturePanel .btn-dark{
+  color:#ea580c !important;
+  background:#fff7ed !important;
+  border:1px solid #fed7aa !important;
+}
+
 </style>
 </head>
 <body class="command-room contractor-room">
@@ -11613,6 +11737,247 @@ setInterval(function(){
     revampBindTwoPartySignatures();
   }
 }, 1800);
+</script>
+
+
+<script>
+/* =========================================================
+   REVAMPLEX UNIVERSAL SIGNATURE PAD ENGINE — FINAL
+   Binds to any canvas inside #signaturePanel.
+   ========================================================= */
+(function(){
+  function panel(){
+    return document.getElementById("signaturePanel");
+  }
+
+  function allCanvases(){
+    const p = panel();
+    if(!p) return [];
+    return Array.from(p.querySelectorAll("canvas"));
+  }
+
+  function getRole(){
+    return document.body.classList.contains("homeowner-room") ? "homeowner" : "contractor";
+  }
+
+  function isAllowedCanvas(canvas){
+    const role = getRole();
+    const boxText = (canvas.closest(".signature-box,.signature-card,[class*='signature']")?.innerText || "").toLowerCase();
+    if(boxText.includes("homeowner") && role !== "homeowner") return false;
+    if(boxText.includes("contractor") && role !== "contractor") return false;
+    return true;
+  }
+
+  function resizeCanvas(canvas){
+    const rect = canvas.getBoundingClientRect();
+    const parentRect = canvas.parentElement ? canvas.parentElement.getBoundingClientRect() : rect;
+
+    const width = Math.max(320, Math.round(rect.width || parentRect.width || 700));
+    const height = Math.max(220, Math.round(rect.height || parentRect.height || 240));
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+
+    if(canvas.dataset.revampSized === "true" && canvas.dataset.w === String(width) && canvas.dataset.h === String(height)){
+      return;
+    }
+
+    let oldImage = "";
+    try{
+      if(canvas.dataset.revampSigned === "true") oldImage = canvas.toDataURL("image/png");
+    }catch(e){}
+
+    canvas.width = Math.round(width * ratio);
+    canvas.height = Math.round(height * ratio);
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
+    canvas.style.pointerEvents = "auto";
+    canvas.style.touchAction = "none";
+    canvas.style.cursor = "crosshair";
+
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(ratio,0,0,ratio,0,0);
+    ctx.lineWidth = 3;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "#0f172a";
+
+    canvas.__revampCtx = ctx;
+    canvas.dataset.revampSized = "true";
+    canvas.dataset.w = String(width);
+    canvas.dataset.h = String(height);
+
+    if(oldImage){
+      const img = new Image();
+      img.onload = function(){ ctx.drawImage(img,0,0,width,height); };
+      img.src = oldImage;
+    }
+  }
+
+  function getPoint(canvas,e){
+    const rect = canvas.getBoundingClientRect();
+    const p = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0]) || e;
+    return { x:p.clientX - rect.left, y:p.clientY - rect.top };
+  }
+
+  function start(e){
+    const canvas = e.currentTarget;
+    if(!isAllowedCanvas(canvas)){
+      const status = document.getElementById("signatureStatus");
+      if(status) status.textContent = "You can only sign your own signature.";
+      return;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    resizeCanvas(canvas);
+
+    const ctx = canvas.__revampCtx || canvas.getContext("2d");
+    const p = getPoint(canvas,e);
+
+    canvas.__revampDrawing = true;
+    canvas.__revampLast = p;
+
+    ctx.beginPath();
+    ctx.moveTo(p.x,p.y);
+  }
+
+  function move(e){
+    const canvas = e.currentTarget;
+    if(!canvas.__revampDrawing) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const ctx = canvas.__revampCtx || canvas.getContext("2d");
+    const p = getPoint(canvas,e);
+    const last = canvas.__revampLast || p;
+
+    ctx.beginPath();
+    ctx.moveTo(last.x,last.y);
+    ctx.lineTo(p.x,p.y);
+    ctx.stroke();
+
+    canvas.__revampLast = p;
+    canvas.dataset.revampSigned = "true";
+
+    const status = document.getElementById("signatureStatus");
+    if(status) status.textContent = "Signature captured. Save when ready.";
+  }
+
+  function end(e){
+    const canvas = e.currentTarget;
+    if(!canvas.__revampDrawing) return;
+    if(e){
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    canvas.__revampDrawing = false;
+    canvas.__revampLast = null;
+  }
+
+  function bindCanvas(canvas){
+    if(!canvas) return;
+    resizeCanvas(canvas);
+
+    if(canvas.dataset.revampUniversalBound === "true") return;
+    canvas.dataset.revampUniversalBound = "true";
+
+    canvas.addEventListener("pointerdown", start, {passive:false});
+    canvas.addEventListener("pointermove", move, {passive:false});
+    canvas.addEventListener("pointerup", end, {passive:false});
+    canvas.addEventListener("pointercancel", end, {passive:false});
+    canvas.addEventListener("pointerleave", end, {passive:false});
+
+    canvas.addEventListener("mousedown", start, {passive:false});
+    canvas.addEventListener("mousemove", move, {passive:false});
+    canvas.addEventListener("mouseup", end, {passive:false});
+    canvas.addEventListener("mouseleave", end, {passive:false});
+
+    canvas.addEventListener("touchstart", start, {passive:false});
+    canvas.addEventListener("touchmove", move, {passive:false});
+    canvas.addEventListener("touchend", end, {passive:false});
+    canvas.addEventListener("touchcancel", end, {passive:false});
+  }
+
+  function forceReadableFonts(){
+    const p = panel();
+    if(!p) return;
+
+    Array.from(p.querySelectorAll(".panel-header h3,.panel-header p,[class*='security'],[id*='security']")).forEach(el=>{
+      el.style.color = "#ffffff";
+      el.style.opacity = "1";
+    });
+
+    Array.from(p.querySelectorAll(".signature-box,.signature-card,[class*='signature-box'],[class*='signature-card']")).forEach(card=>{
+      card.style.background = "#ffffff";
+      card.style.color = "#0f172a";
+      Array.from(card.querySelectorAll("*")).forEach(el=>{
+        el.style.color = "#0f172a";
+      });
+    });
+  }
+
+  function bindAll(){
+    forceReadableFonts();
+    allCanvases().forEach(bindCanvas);
+  }
+
+  window.revampRefreshSignatures = bindAll;
+
+  const oldSave = window.saveCustomerSignature;
+  window.saveCustomerSignature = function(){
+    bindAll();
+    const canvas = allCanvases().find(c => isAllowedCanvas(c) && c.dataset.revampSigned === "true");
+    const status = document.getElementById("signatureStatus");
+
+    if(canvas){
+      window.revampCustomerSignatureDataUrl = canvas.toDataURL("image/png");
+      if(status) status.textContent = "Signature saved.";
+      return window.revampCustomerSignatureDataUrl;
+    }
+
+    if(typeof oldSave === "function"){
+      try{ return oldSave.apply(this, arguments); }catch(e){}
+    }
+
+    if(status) status.textContent = "Please sign before saving.";
+    return "";
+  };
+
+  const oldClear = window.clearCustomerSignature;
+  window.clearCustomerSignature = function(){
+    bindAll();
+    allCanvases().filter(isAllowedCanvas).forEach(canvas=>{
+      const ctx = canvas.__revampCtx || canvas.getContext("2d");
+      const rect = canvas.getBoundingClientRect();
+      ctx.clearRect(0,0,rect.width,rect.height);
+      canvas.dataset.revampSigned = "false";
+    });
+
+    const status = document.getElementById("signatureStatus");
+    if(status) status.textContent = "Signature cleared.";
+
+    if(typeof oldClear === "function"){
+      try{ oldClear.apply(this, arguments); }catch(e){}
+    }
+  };
+
+  document.addEventListener("DOMContentLoaded", function(){
+    setTimeout(bindAll,100);
+    setTimeout(bindAll,600);
+    setTimeout(bindAll,1400);
+  });
+
+  window.addEventListener("load", function(){
+    setTimeout(bindAll,100);
+    setTimeout(bindAll,900);
+    setTimeout(bindAll,1800);
+  });
+
+  setInterval(function(){
+    if(panel()) bindAll();
+  }, 1500);
+})();
 </script>
 
 </body>
