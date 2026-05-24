@@ -3893,6 +3893,137 @@ body.command-room .approval-status-actions button[onclick*="Changes Requested"]:
   font-weight:900 !important;
 }
 
+
+/* ===== REVAMPLEX FINAL APPROVAL CONSOLE FIX ===== */
+#signaturePanel,
+#signaturePanel *{
+  box-sizing:border-box !important;
+}
+
+#signaturePanel .revamp-final-approval-card,
+#signaturePanel .revamp-after-approval-card,
+#signaturePanel .signature-box{
+  background:#ffffff !important;
+  color:#0f172a !important;
+  border:1px solid #e2e8f0 !important;
+  box-shadow:0 14px 30px rgba(15,23,42,0.08) !important;
+}
+
+#signaturePanel h3,
+#signaturePanel h4,
+#signaturePanel label,
+#signaturePanel span,
+#signaturePanel p,
+#signaturePanel strong,
+#signaturePanel .result-metric,
+#signaturePanel .result-metric span,
+#signaturePanel .result-metric strong,
+#signaturePanel .check-row,
+#signaturePanel .check-row span{
+  color:#0f172a !important;
+}
+
+#signaturePanel input[type="text"],
+#signaturePanel input[type="email"],
+#signaturePanel input[type="number"],
+#signaturePanel textarea,
+#signaturePanel select{
+  background:#ffffff !important;
+  color:#0f172a !important;
+  border:1px solid #cbd5e1 !important;
+  pointer-events:auto !important;
+  user-select:text !important;
+  -webkit-user-select:text !important;
+  opacity:1 !important;
+}
+
+#signaturePanel input[type="checkbox"]{
+  width:auto !important;
+  min-width:18px !important;
+  height:18px !important;
+  pointer-events:auto !important;
+  opacity:1 !important;
+  accent-color:#f97316 !important;
+}
+
+.revamp-signature-preview-card{
+  margin:14px 0 !important;
+  border:2px dashed #fdba74 !important;
+  border-radius:18px !important;
+  background:#ffffff !important;
+  padding:18px !important;
+}
+
+.revamp-signature-preview-label{
+  font-size:.78rem !important;
+  font-weight:900 !important;
+  text-transform:uppercase !important;
+  letter-spacing:.08em !important;
+  color:#ea580c !important;
+  margin-bottom:10px !important;
+}
+
+#revampSignaturePreview{
+  min-height:86px !important;
+  display:flex !important;
+  align-items:center !important;
+  padding:16px !important;
+  border:1px solid #e2e8f0 !important;
+  border-radius:16px !important;
+  background:linear-gradient(180deg,#ffffff,#fff7ed) !important;
+  color:#64748b !important;
+  font-size:34px !important;
+  line-height:1.2 !important;
+  font-family:"Brush Script MT","Segoe Script","Snell Roundhand",cursive !important;
+}
+
+#revampSignatureTimestamp{
+  margin-top:8px !important;
+  color:#64748b !important;
+  font-size:.86rem !important;
+  font-weight:800 !important;
+}
+
+.signature-actions{
+  display:flex !important;
+  gap:10px !important;
+  flex-wrap:wrap !important;
+  margin:10px 0 14px !important;
+}
+
+.signature-status{
+  margin-top:8px !important;
+  color:#ea580c !important;
+  font-weight:900 !important;
+}
+
+/* Fix invisible black text in dark mode */
+body.command-room .private-room-alert,
+body.command-room .private-room-alert *,
+body.command-room .calendar-sync-status,
+body.command-room .calendar-sync-status *,
+body.command-room [class*="security"],
+body.command-room [class*="security"] *,
+body.command-room [id*="security"],
+body.command-room [id*="security"] *,
+body.command-room [class*="contractor"],
+body.command-room [class*="contractor"] *,
+body.command-room [id*="contractor"],
+body.command-room [id*="contractor"] *{
+  color:#e5e7eb !important;
+}
+
+body.command-room #signaturePanel [class*="contractor"],
+body.command-room #signaturePanel [class*="contractor"] *,
+body.command-room #signaturePanel [id*="contractor"],
+body.command-room #signaturePanel [id*="contractor"] *,
+body.command-room #signaturePanel [class*="security"],
+body.command-room #signaturePanel [class*="security"] *,
+body.command-room #signaturePanel [id*="security"],
+body.command-room #signaturePanel [id*="security"] *{
+  color:#0f172a !important;
+}
+
 </style>
 </head>
 <body class="command-room contractor-room">
@@ -4623,6 +4754,7 @@ body.command-room .approval-status-actions button[onclick*="Changes Requested"]:
 </section>
 
 
+
 <section class="panel" id="signaturePanel">
   <div class="panel-header">
     <div>
@@ -4632,11 +4764,11 @@ body.command-room .approval-status-actions button[onclick*="Changes Requested"]:
   </div>
 
   <div class="signature-layout">
-    <div class="signature-box revamp-simple-approval-box">
+    <div class="signature-box revamp-final-approval-card">
       <h4 style="margin-top:0;">Customer Electronic Approval</h4>
 
       <label for="revampApprovalName">Customer Full Legal Name</label>
-      <input id="revampApprovalName" type="text" placeholder="Type customer full legal name">
+      <input id="revampApprovalName" type="text" placeholder="Type customer full legal name" autocomplete="name">
 
       <div class="approval-checklist">
         <label class="check-row">
@@ -4655,10 +4787,10 @@ body.command-room .approval-status-actions button[onclick*="Changes Requested"]:
         </label>
       </div>
 
-      <div class="revamp-typed-signature-box">
-        <div class="revamp-typed-label">Electronic Signature Preview</div>
-        <div id="revampSignaturePreview" class="revamp-typed-preview">Type customer name above</div>
-        <div id="revampSignatureTimestamp" class="revamp-signature-time"></div>
+      <div class="revamp-signature-preview-card">
+        <div class="revamp-signature-preview-label">Electronic Signature Preview</div>
+        <div id="revampSignaturePreview">Type customer name above</div>
+        <div id="revampSignatureTimestamp"></div>
       </div>
 
       <div class="form-grid">
@@ -4673,14 +4805,14 @@ body.command-room .approval-status-actions button[onclick*="Changes Requested"]:
       </div>
 
       <div class="signature-actions">
-        <button class="btn btn-primary" type="button" id="saveRevampApprovalBtn">Save Customer Approval</button>
-        <button class="btn btn-soft" type="button" id="clearRevampApprovalBtn">Clear</button>
+        <button class="btn btn-primary" type="button" id="saveRevampApprovalBtn" onclick="return revampSaveApprovalNow(event)">Save Customer Approval</button>
+        <button class="btn btn-soft" type="button" id="clearRevampApprovalBtn" onclick="return revampClearApprovalNow(event)">Clear</button>
       </div>
 
       <div id="signatureStatus" class="signature-status">Approval form ready.</div>
     </div>
 
-    <div class="signature-box">
+    <div class="signature-box revamp-after-approval-card">
       <h4 style="margin-top:0;">After Approval</h4>
       <div class="result-metric"><span>Signed Contract PDF</span><strong>Generate</strong></div>
       <div class="result-metric"><span>Deposit Invoice</span><strong>Generate</strong></div>
@@ -4690,6 +4822,7 @@ body.command-room .approval-status-actions button[onclick*="Changes Requested"]:
     </div>
   </div>
 </section>
+
 
 </main>
     </div>
@@ -11008,170 +11141,162 @@ window.addEventListener("load", function(){
 
 
 
+
+
+
 <script>
-/* ===== REVAMPLEX FINAL SIMPLE APPROVAL ENGINE ===== */
-(function(){
-  function byId(id){ return document.getElementById(id); }
+/* ===== REVAMPLEX FINAL APPROVAL CONSOLE ENGINE ===== */
+function revampApprovalTodayText(){
+  return new Date().toLocaleDateString("en-US", {
+    year:"numeric",
+    month:"long",
+    day:"numeric"
+  });
+}
 
-  function todayText(){
-    return new Date().toLocaleDateString("en-US", {
-      year:"numeric",
-      month:"long",
-      day:"numeric"
-    });
+function revampGet(id){
+  return document.getElementById(id);
+}
+
+function revampUpdateApprovalPreview(){
+  const input = revampGet("revampApprovalName");
+  const preview = revampGet("revampSignaturePreview");
+  const date = revampGet("revampApprovalDate");
+
+  if(date && !date.value){
+    date.value = revampApprovalTodayText();
   }
 
-  function updateRevampApprovalPreview(){
-    const nameInput = byId("revampApprovalName");
-    const preview = byId("revampSignaturePreview");
-    const dateInput = byId("revampApprovalDate");
+  const name = input ? String(input.value || "").trim() : "";
 
-    if(dateInput && !dateInput.value){
-      dateInput.value = todayText();
-    }
+  if(preview){
+    preview.textContent = name || "Type customer name above";
+    preview.style.color = name ? "#0f172a" : "#64748b";
+  }
+}
 
-    const name = (nameInput && nameInput.value ? nameInput.value : "").trim();
-
-    if(preview){
-      preview.textContent = name || "Type customer name above";
-      preview.style.color = name ? "#0f172a" : "#64748b";
-    }
+function revampSaveApprovalNow(event){
+  if(event){
+    event.preventDefault();
+    event.stopPropagation();
   }
 
-  window.saveRevampTypedApproval = function(){
-    const nameInput = byId("revampApprovalName");
-    const scope = byId("revampApproveScope");
-    const changes = byId("revampApproveChanges");
-    const start = byId("revampApproveStart");
-    const status = byId("signatureStatus");
-    const timestamp = byId("revampSignatureTimestamp");
+  const nameInput = revampGet("revampApprovalName");
+  const status = revampGet("signatureStatus");
+  const timestamp = revampGet("revampSignatureTimestamp");
 
-    const name = (nameInput && nameInput.value ? nameInput.value : "").trim();
+  const name = nameInput ? String(nameInput.value || "").trim() : "";
 
-    if(!name){
-      if(status) status.textContent = "Type the customer's full legal name first.";
-      if(nameInput) nameInput.focus();
-      return false;
-    }
-
-    if(!scope.checked || !changes.checked || !start.checked){
-      if(status) status.textContent = "Check all approval boxes before saving.";
-      return false;
-    }
-
-    const savedAt = new Date().toLocaleString();
-
-    window.revampCustomerSignatureName = name;
-    window.revampCustomerSignatureDataUrl = "typed-approval:" + name;
-    window.revampCustomerApprovalSavedAt = savedAt;
-
-    if(timestamp){
-      timestamp.textContent = "Approved electronically by " + name + " on " + savedAt + ".";
-    }
-
-    if(status){
-      status.textContent = "Customer approval saved.";
-    }
-
-    return true;
-  };
-
-  window.clearRevampTypedApproval = function(){
-    const ids = ["revampApprovalName"];
-    ids.forEach(id => {
-      const item = byId(id);
-      if(item) item.value = "";
-    });
-
-    ["revampApproveScope","revampApproveChanges","revampApproveStart"].forEach(id => {
-      const item = byId(id);
-      if(item) item.checked = false;
-    });
-
-    const status = byId("signatureStatus");
-    const timestamp = byId("revampSignatureTimestamp");
-
-    if(status) status.textContent = "Approval cleared.";
-    if(timestamp) timestamp.textContent = "";
-
-    window.revampCustomerSignatureName = "";
-    window.revampCustomerSignatureDataUrl = "";
-    window.revampCustomerApprovalSavedAt = "";
-
-    updateRevampApprovalPreview();
-  };
-
-  window.saveCustomerSignature = window.saveRevampTypedApproval;
-  window.clearCustomerSignature = window.clearRevampTypedApproval;
-
-  function bindRevampApproval(){
-    const nameInput = byId("revampApprovalName");
-    const saveBtn = byId("saveRevampApprovalBtn");
-    const clearBtn = byId("clearRevampApprovalBtn");
-
-    if(!nameInput) return;
-
-    if(nameInput.dataset.revampApprovalBound !== "true"){
-      nameInput.dataset.revampApprovalBound = "true";
-      nameInput.addEventListener("input", updateRevampApprovalPreview);
-      nameInput.addEventListener("keyup", updateRevampApprovalPreview);
-    }
-
-    if(saveBtn && saveBtn.dataset.revampApprovalBound !== "true"){
-      saveBtn.dataset.revampApprovalBound = "true";
-      saveBtn.addEventListener("click", function(e){
-        e.preventDefault();
-        e.stopPropagation();
-        window.saveRevampTypedApproval();
-      });
-    }
-
-    if(clearBtn && clearBtn.dataset.revampApprovalBound !== "true"){
-      clearBtn.dataset.revampApprovalBound = "true";
-      clearBtn.addEventListener("click", function(e){
-        e.preventDefault();
-        e.stopPropagation();
-        window.clearRevampTypedApproval();
-      });
-    }
-
-    updateRevampApprovalPreview();
+  if(!name){
+    if(status) status.textContent = "Type the customer's full legal name first.";
+    if(nameInput) nameInput.focus();
+    return false;
   }
 
-  document.addEventListener("DOMContentLoaded", function(){
-    setTimeout(bindRevampApproval,200);
-    setTimeout(bindRevampApproval,900);
-    setTimeout(bindRevampApproval,1800);
+  const required = [
+    revampGet("revampApproveScope"),
+    revampGet("revampApproveChanges"),
+    revampGet("revampApproveStart")
+  ];
+
+  if(required.some(box => !box || !box.checked)){
+    if(status) status.textContent = "Check all approval boxes before saving.";
+    return false;
+  }
+
+  const savedAt = new Date().toLocaleString();
+
+  window.revampCustomerSignatureName = name;
+  window.revampCustomerSignatureDataUrl = "typed-approval:" + name;
+  window.revampCustomerApprovalSavedAt = savedAt;
+
+  if(timestamp){
+    timestamp.textContent = "Approved electronically by " + name + " on " + savedAt + ".";
+  }
+
+  if(status){
+    status.textContent = "Customer approval saved.";
+  }
+
+  revampUpdateApprovalPreview();
+  return false;
+}
+
+function revampClearApprovalNow(event){
+  if(event){
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  const nameInput = revampGet("revampApprovalName");
+  if(nameInput) nameInput.value = "";
+
+  ["revampApproveScope","revampApproveChanges","revampApproveStart"].forEach(id => {
+    const box = revampGet(id);
+    if(box) box.checked = false;
   });
 
-  window.addEventListener("load", function(){
-    setTimeout(bindRevampApproval,200);
-    setTimeout(bindRevampApproval,900);
-    setTimeout(bindRevampApproval,1800);
-  });
+  const status = revampGet("signatureStatus");
+  const timestamp = revampGet("revampSignatureTimestamp");
 
-  const wrapShow = function(){
-    if(typeof window.showCommandStage === "function" && !window.__revampFinalApprovalWrapped){
-      const oldShow = window.showCommandStage;
-      window.__revampFinalApprovalWrapped = true;
+  if(timestamp) timestamp.textContent = "";
+  if(status) status.textContent = "Approval cleared.";
 
-      window.showCommandStage = function(targetId){
-        const result = oldShow.apply(this, arguments);
-        if(targetId === "signaturePanel"){
-          setTimeout(bindRevampApproval,150);
-          setTimeout(bindRevampApproval,700);
-          setTimeout(bindRevampApproval,1300);
-        }
-        return result;
-      };
-    }
-  };
+  window.revampCustomerSignatureName = "";
+  window.revampCustomerSignatureDataUrl = "";
+  window.revampCustomerApprovalSavedAt = "";
 
-  setTimeout(wrapShow,300);
-  setTimeout(wrapShow,1200);
+  revampUpdateApprovalPreview();
+  return false;
+}
 
-  window.bindRevampApproval = bindRevampApproval;
-})();
+window.saveCustomerSignature = revampSaveApprovalNow;
+window.clearCustomerSignature = revampClearApprovalNow;
+window.saveRevampTypedApproval = revampSaveApprovalNow;
+window.clearRevampTypedApproval = revampClearApprovalNow;
+
+function revampBindApprovalConsole(){
+  const input = revampGet("revampApprovalName");
+  const saveBtn = revampGet("saveRevampApprovalBtn");
+  const clearBtn = revampGet("clearRevampApprovalBtn");
+
+  if(input && input.dataset.revampBound !== "true"){
+    input.dataset.revampBound = "true";
+    input.addEventListener("input", revampUpdateApprovalPreview);
+    input.addEventListener("keyup", revampUpdateApprovalPreview);
+  }
+
+  if(saveBtn && saveBtn.dataset.revampBound !== "true"){
+    saveBtn.dataset.revampBound = "true";
+    saveBtn.addEventListener("click", revampSaveApprovalNow, true);
+  }
+
+  if(clearBtn && clearBtn.dataset.revampBound !== "true"){
+    clearBtn.dataset.revampBound = "true";
+    clearBtn.addEventListener("click", revampClearApprovalNow, true);
+  }
+
+  revampUpdateApprovalPreview();
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+  setTimeout(revampBindApprovalConsole,100);
+  setTimeout(revampBindApprovalConsole,500);
+  setTimeout(revampBindApprovalConsole,1200);
+});
+
+window.addEventListener("load", function(){
+  setTimeout(revampBindApprovalConsole,100);
+  setTimeout(revampBindApprovalConsole,700);
+  setTimeout(revampBindApprovalConsole,1600);
+});
+
+/* Re-bind after the command stage changes panels */
+setInterval(function(){
+  if(document.getElementById("signaturePanel")){
+    revampBindApprovalConsole();
+  }
+}, 1500);
 </script>
 
 </body>
