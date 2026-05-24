@@ -3780,6 +3780,59 @@ body.command-room .changes-requested-btn:hover{
     color:#f97316 !important;
 }
 
+
+/* ===== REVAMPLEX DESKTOP + MOBILE SIGNATURE PAD FIX ===== */
+.signature-pad{
+  position:relative !important;
+  height:220px !important;
+  border:2px dashed #fdba74 !important;
+  border-radius:18px !important;
+  background:#ffffff !important;
+  display:block !important;
+  padding:0 !important;
+  overflow:hidden !important;
+  touch-action:none !important;
+  user-select:none !important;
+  color:#9a3412 !important;
+}
+
+.signature-pad canvas{
+  width:100% !important;
+  height:100% !important;
+  display:block !important;
+  background:#ffffff !important;
+  border-radius:16px !important;
+  cursor:crosshair !important;
+  touch-action:none !important;
+}
+
+.signature-pad .signature-placeholder{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  text-align:center;
+  color:#9a3412;
+  font-weight:800;
+  pointer-events:none;
+  opacity:.65;
+  padding:18px;
+}
+
+.signature-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin:10px 0 14px;
+}
+
+.signature-status{
+  font-size:.88rem;
+  font-weight:800;
+  color:#ea580c;
+  margin-top:6px;
+}
+
 </style>
 </head>
 <body class="command-room contractor-room">
@@ -4539,7 +4592,19 @@ body.command-room .changes-requested-btn:hover{
                 <label class="check-row"><input type="checkbox" /> <span>I authorize the contractor to begin on the scheduled start date once deposit is received.</span></label>
               </div>
 
-              <div class="signature-pad">Customer Signature Area<br />Tap / sign here on mobile or desktop signature pad</div>
+              
+<div class="signature-pad" id="customerSignaturePad">
+  <canvas id="customerSignatureCanvas"></canvas>
+  <div class="signature-placeholder" id="signaturePlaceholder">
+    Customer Signature Area<br>Use mouse, trackpad, or finger to sign here
+  </div>
+</div>
+<div class="signature-actions">
+  <button class="btn btn-soft" type="button" onclick="clearCustomerSignature()">Clear Signature</button>
+  <button class="btn btn-primary" type="button" onclick="saveCustomerSignature()">Save Signature</button>
+</div>
+<div id="signatureStatus" class="signature-status"></div>
+
 
               <div class="form-grid">
                 <div>
@@ -10855,6 +10920,167 @@ window.addEventListener("load", function(){
   });
 
   window.removeOldGrayEstimateButtons = removeOldGrayEstimateButtons;
+})();
+</script>
+
+
+<script>
+/* ===== REVAMPLEX DESKTOP + MOBILE SIGNATURE PAD FIX ===== */
+(function(){
+  let signatureCanvas = null;
+  let signatureCtx = null;
+  let isSigning = false;
+  let hasSignature = false;
+  let lastPoint = null;
+
+  function getSignaturePoint(event){
+    const rect = signatureCanvas.getBoundingClientRect();
+    const source = event.touches && event.touches.length ? event.touches[0] : event;
+    return {
+      x: source.clientX - rect.left,
+      y: source.clientY - rect.top
+    };
+  }
+
+  function resizeSignatureCanvas(){
+    signatureCanvas = document.getElementById("customerSignatureCanvas");
+    if(!signatureCanvas) return;
+
+    const rect = signatureCanvas.getBoundingClientRect();
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+
+    const oldData = hasSignature ? signatureCanvas.toDataURL("image/png") : null;
+
+    signatureCanvas.width = Math.max(1, Math.floor(rect.width * ratio));
+    signatureCanvas.height = Math.max(1, Math.floor(rect.height * ratio));
+
+    signatureCtx = signatureCanvas.getContext("2d");
+    signatureCtx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    signatureCtx.lineWidth = 2.4;
+    signatureCtx.lineCap = "round";
+    signatureCtx.lineJoin = "round";
+    signatureCtx.strokeStyle = "#0f172a";
+
+    if(oldData){
+      const img = new Image();
+      img.onload = function(){
+        signatureCtx.drawImage(img, 0, 0, rect.width, rect.height);
+      };
+      img.src = oldData;
+    }
+  }
+
+  function startSignature(event){
+    if(!signatureCanvas || !signatureCtx) return;
+    event.preventDefault();
+
+    isSigning = true;
+    lastPoint = getSignaturePoint(event);
+
+    signatureCtx.beginPath();
+    signatureCtx.moveTo(lastPoint.x, lastPoint.y);
+
+    if(signatureCanvas.setPointerCapture && event.pointerId !== undefined){
+      try{ signatureCanvas.setPointerCapture(event.pointerId); }catch(e){}
+    }
+  }
+
+  function drawSignature(event){
+    if(!isSigning || !signatureCanvas || !signatureCtx) return;
+    event.preventDefault();
+
+    const point = getSignaturePoint(event);
+
+    signatureCtx.lineTo(point.x, point.y);
+    signatureCtx.stroke();
+
+    lastPoint = point;
+    hasSignature = true;
+
+    const placeholder = document.getElementById("signaturePlaceholder");
+    if(placeholder) placeholder.style.display = "none";
+  }
+
+  function endSignature(event){
+    if(!isSigning) return;
+    if(event) event.preventDefault();
+    isSigning = false;
+    lastPoint = null;
+  }
+
+  function bindSignaturePad(){
+    signatureCanvas = document.getElementById("customerSignatureCanvas");
+    if(!signatureCanvas || signatureCanvas.dataset.signatureBound === "true") return;
+
+    signatureCanvas.dataset.signatureBound = "true";
+    resizeSignatureCanvas();
+
+    // Pointer events fix Chrome desktop, trackpads, touch screens, and stylus.
+    signatureCanvas.addEventListener("pointerdown", startSignature, { passive:false });
+    signatureCanvas.addEventListener("pointermove", drawSignature, { passive:false });
+    signatureCanvas.addEventListener("pointerup", endSignature, { passive:false });
+    signatureCanvas.addEventListener("pointercancel", endSignature, { passive:false });
+    signatureCanvas.addEventListener("pointerleave", endSignature, { passive:false });
+
+    // Mouse fallback for older browsers.
+    signatureCanvas.addEventListener("mousedown", startSignature, { passive:false });
+    window.addEventListener("mousemove", drawSignature, { passive:false });
+    window.addEventListener("mouseup", endSignature, { passive:false });
+
+    // Touch fallback for mobile Safari/Chrome.
+    signatureCanvas.addEventListener("touchstart", startSignature, { passive:false });
+    signatureCanvas.addEventListener("touchmove", drawSignature, { passive:false });
+    signatureCanvas.addEventListener("touchend", endSignature, { passive:false });
+
+    window.addEventListener("resize", function(){
+      setTimeout(resizeSignatureCanvas, 150);
+    });
+  }
+
+  window.clearCustomerSignature = function(){
+    signatureCanvas = document.getElementById("customerSignatureCanvas");
+    if(!signatureCanvas) return;
+
+    const rect = signatureCanvas.getBoundingClientRect();
+    if(!signatureCtx) signatureCtx = signatureCanvas.getContext("2d");
+
+    signatureCtx.clearRect(0, 0, rect.width, rect.height);
+    hasSignature = false;
+
+    const placeholder = document.getElementById("signaturePlaceholder");
+    if(placeholder) placeholder.style.display = "grid";
+
+    const status = document.getElementById("signatureStatus");
+    if(status) status.textContent = "Signature cleared.";
+  };
+
+  window.saveCustomerSignature = function(){
+    signatureCanvas = document.getElementById("customerSignatureCanvas");
+    const status = document.getElementById("signatureStatus");
+
+    if(!signatureCanvas || !hasSignature){
+      if(status) status.textContent = "Please sign before saving.";
+      return "";
+    }
+
+    const dataUrl = signatureCanvas.toDataURL("image/png");
+    window.revampCustomerSignatureDataUrl = dataUrl;
+
+    if(status) status.textContent = "Signature saved.";
+    return dataUrl;
+  };
+
+  document.addEventListener("DOMContentLoaded", function(){
+    setTimeout(bindSignaturePad, 300);
+    setTimeout(bindSignaturePad, 900);
+  });
+
+  window.addEventListener("load", function(){
+    setTimeout(bindSignaturePad, 300);
+    setTimeout(bindSignaturePad, 1200);
+  });
+
+  window.initCustomerSignaturePad = bindSignaturePad;
 })();
 </script>
 
