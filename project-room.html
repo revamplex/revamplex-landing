@@ -3754,6 +3754,32 @@ body.command-room .estimate-metrics-card *{
     color:#0f172a !important;
 }
 
+
+/* ===== REVAMPLEX CHANGES REQUESTED BUTTON FIX ===== */
+body.command-room button,
+body.command-room .status-btn,
+body.command-room .approval-btn,
+body.command-room .changes-requested-btn{
+
+}
+
+/* Specific Changes Requested button */
+body.command-room button:last-child,
+body.command-room .changes-requested-btn,
+body.command-room button[data-status="changes"],
+body.command-room button[onclick*="change"]{
+    background:#ffffff !important;
+    color:#0f172a !important;
+    border:1px solid #e2e8f0 !important;
+    box-shadow:0 2px 10px rgba(0,0,0,.06)!important;
+}
+
+body.command-room button:last-child:hover,
+body.command-room .changes-requested-btn:hover{
+    border-color:#f97316 !important;
+    color:#f97316 !important;
+}
+
 </style>
 </head>
 <body class="command-room contractor-room">
