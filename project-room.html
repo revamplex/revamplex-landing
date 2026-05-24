@@ -4351,6 +4351,266 @@ body.command-room #signaturePanel .btn-dark{
   border:1px solid #fed7aa !important;
 }
 
+
+/* =========================================================
+   REVAMPLEX LOCKED BASELINE — SIGNATURE + TEXT CONTRAST FIX
+   Keeps the working signature pad/signature system intact.
+   Fixes readable text on dark panels, white cards, buttons, inputs,
+   security callouts, and approval/status areas.
+   ========================================================= */
+
+/* Reset any weird inherited browser text fill conflicts */
+body.command-room #signaturePanel,
+body.command-room #signaturePanel *,
+body.command-room .command-active-panel,
+body.command-room .command-active-panel *{
+  -webkit-text-fill-color: unset !important;
+}
+
+/* Main dark panel titles/descriptions must be white */
+body.command-room .command-active-panel > .panel-header,
+body.command-room .command-active-panel > .panel-header *,
+body.command-room #signaturePanel > .panel-header,
+body.command-room #signaturePanel > .panel-header *,
+body.command-room #signaturePanel .revamp-signature-header,
+body.command-room #signaturePanel .revamp-signature-header *,
+body.command-room #signaturePanel > h1,
+body.command-room #signaturePanel > h2,
+body.command-room #signaturePanel > h3,
+body.command-room #signaturePanel > h4,
+body.command-room #signaturePanel > p{
+  color:#ffffff !important;
+  opacity:1 !important;
+  text-shadow:0 2px 12px rgba(0,0,0,.55) !important;
+}
+
+/* Security / alert / helper text on dark panels */
+body.command-room #signaturePanel .revamp-signature-security,
+body.command-room #signaturePanel .revamp-signature-security *,
+body.command-room #signaturePanel .signature-security,
+body.command-room #signaturePanel .signature-security *,
+body.command-room #signaturePanel [class*="security"],
+body.command-room #signaturePanel [class*="security"] *,
+body.command-room #signaturePanel [id*="security"],
+body.command-room #signaturePanel [id*="security"] *,
+body.command-room .private-room-alert,
+body.command-room .private-room-alert *,
+body.command-room .labor-explainer,
+body.command-room .labor-explainer *,
+body.command-room .guided-helper-card,
+body.command-room .guided-helper-card *,
+body.command-room .calendar-sync-status,
+body.command-room .calendar-sync-status *,
+body.command-room .takeoff-status,
+body.command-room .takeoff-status *{
+  color:#ffffff !important;
+  opacity:1 !important;
+  text-shadow:0 2px 12px rgba(0,0,0,.48) !important;
+}
+
+/* Premium dark/orange callout backgrounds */
+body.command-room #signaturePanel .revamp-signature-security,
+body.command-room #signaturePanel .signature-security,
+body.command-room #signaturePanel [class*="security"],
+body.command-room .private-room-alert,
+body.command-room .labor-explainer,
+body.command-room .guided-helper-card{
+  background:
+    linear-gradient(135deg, rgba(249,115,22,.20), rgba(2,6,23,.94)) !important;
+  border:1px solid rgba(249,115,22,.38) !important;
+  border-radius:18px !important;
+}
+
+/* White cards must always use dark readable text */
+body.command-room #signaturePanel .signature-box,
+body.command-room #signaturePanel .signature-card,
+body.command-room #signaturePanel [class*="signature-box"],
+body.command-room #signaturePanel [class*="signature-card"],
+body.command-room #signaturePanel .revamp-party-signature-card,
+body.command-room #signaturePanel .revamp-final-doc-card,
+body.command-room #signaturePanel .revamp-signature-preview-card,
+body.command-room .version-pill,
+body.command-room .approval-status-card,
+body.command-room .summary-box,
+body.command-room .estimate-summary-card,
+body.command-room .estimate-status-card,
+body.command-room .approval-tracker-card,
+body.command-room .estimate-approval-card,
+body.command-room .money-card,
+body.command-room .estimate-metrics-card{
+  background:#ffffff !important;
+  color:#0f172a !important;
+  border:1px solid #e2e8f0 !important;
+  box-shadow:0 14px 30px rgba(15,23,42,.08) !important;
+  text-shadow:none !important;
+}
+
+/* All text inside white cards */
+body.command-room #signaturePanel .signature-box *,
+body.command-room #signaturePanel .signature-card *,
+body.command-room #signaturePanel [class*="signature-box"] *,
+body.command-room #signaturePanel [class*="signature-card"] *,
+body.command-room #signaturePanel .revamp-party-signature-card *,
+body.command-room #signaturePanel .revamp-final-doc-card *,
+body.command-room #signaturePanel .revamp-signature-preview-card *,
+body.command-room .version-pill *,
+body.command-room .approval-status-card *,
+body.command-room .summary-box *,
+body.command-room .estimate-summary-card *,
+body.command-room .estimate-status-card *,
+body.command-room .approval-tracker-card *,
+body.command-room .estimate-approval-card *,
+body.command-room .money-card *,
+body.command-room .estimate-metrics-card *{
+  color:#0f172a !important;
+  opacity:1 !important;
+  text-shadow:none !important;
+}
+
+/* Orange labels/kickers inside white cards stay orange */
+body.command-room #signaturePanel .revamp-signature-kicker,
+body.command-room #signaturePanel .revamp-signature-preview-label,
+body.command-room #signaturePanel .signature-status,
+body.command-room #signaturePanel .signature-status *,
+body.command-room #signaturePanel .signature-status-pill,
+body.command-room #signaturePanel .signature-status-pill *,
+body.command-room #signaturePanel .revamp-typed-label{
+  color:#ea580c !important;
+  text-shadow:none !important;
+}
+
+/* Signature preview text */
+body.command-room #signaturePanel .revamp-signature-preview,
+body.command-room #signaturePanel #revampSignaturePreview,
+body.command-room #signaturePanel .revamp-typed-preview{
+  background:linear-gradient(180deg,#ffffff,#fff7ed) !important;
+  color:#0f172a !important;
+  border:1px solid #e2e8f0 !important;
+  text-shadow:none !important;
+}
+
+/* Muted timestamp/helper text inside white cards */
+body.command-room #signaturePanel .revamp-signature-time,
+body.command-room #signaturePanel #revampSignatureTimestamp,
+body.command-room #signaturePanel #homeownerSignatureTimestamp,
+body.command-room #signaturePanel #contractorSignatureTimestamp{
+  color:#64748b !important;
+  text-shadow:none !important;
+}
+
+/* Inputs inside approval/signature area */
+body.command-room #signaturePanel input,
+body.command-room #signaturePanel textarea,
+body.command-room #signaturePanel select{
+  background:#ffffff !important;
+  color:#0f172a !important;
+  border:1px solid #cbd5e1 !important;
+  opacity:1 !important;
+  pointer-events:auto !important;
+  user-select:text !important;
+  -webkit-user-select:text !important;
+  text-shadow:none !important;
+}
+
+body.command-room #signaturePanel input::placeholder,
+body.command-room #signaturePanel textarea::placeholder{
+  color:#64748b !important;
+  opacity:1 !important;
+}
+
+/* Checkboxes stay clickable and visible */
+body.command-room #signaturePanel input[type="checkbox"]{
+  width:auto !important;
+  min-width:18px !important;
+  height:18px !important;
+  accent-color:#f97316 !important;
+  pointer-events:auto !important;
+  opacity:1 !important;
+}
+
+/* Buttons readable */
+body.command-room #signaturePanel .btn-primary{
+  background:linear-gradient(135deg,#f97316,#ea580c) !important;
+  color:#ffffff !important;
+  border:1px solid rgba(249,115,22,.65) !important;
+  text-shadow:none !important;
+}
+
+body.command-room #signaturePanel .btn-soft,
+body.command-room #signaturePanel .btn-dark{
+  background:#fff7ed !important;
+  color:#ea580c !important;
+  border:1px solid #fdba74 !important;
+  text-shadow:none !important;
+}
+
+/* Keep disabled/locked other-party card legible */
+body.command-room #signaturePanel .revamp-party-signature-card.revamp-locked-party{
+  opacity:.86 !important;
+  filter:none !important;
+}
+
+body.command-room #signaturePanel .revamp-party-signature-card.revamp-locked-party *{
+  color:#0f172a !important;
+}
+
+/* Signature canvas / pad desktop browser support.
+   This does not replace the working engine; it only preserves clickability + visibility. */
+body.command-room #signaturePanel canvas,
+body.command-room #signaturePanel .signature-pad canvas,
+body.command-room #signaturePanel [id*="signatureCanvas"],
+body.command-room #signaturePanel [id*="SignatureCanvas"]{
+  display:block !important;
+  width:100% !important;
+  min-height:220px !important;
+  background:#fffaf2 !important;
+  border:2px dashed #fdba74 !important;
+  border-radius:18px !important;
+  cursor:crosshair !important;
+  pointer-events:auto !important;
+  touch-action:none !important;
+  user-select:none !important;
+  -webkit-user-select:none !important;
+  position:relative !important;
+  z-index:999 !important;
+}
+
+body.command-room #signaturePanel .signature-pad,
+body.command-room #signaturePanel [class*="signature-pad"],
+body.command-room #signaturePanel [id*="signaturePad"],
+body.command-room #signaturePanel [id*="SignaturePad"]{
+  pointer-events:auto !important;
+  touch-action:none !important;
+  user-select:none !important;
+  -webkit-user-select:none !important;
+  position:relative !important;
+}
+
+/* Status pills */
+body.command-room #signaturePanel .revamp-signature-pill.pending{
+  background:#fff7ed !important;
+  color:#c2410c !important;
+  border:1px solid #fed7aa !important;
+}
+
+body.command-room #signaturePanel .revamp-signature-pill.signed{
+  background:#ecfdf5 !important;
+  color:#166534 !important;
+  border:1px solid #bbf7d0 !important;
+}
+
+/* Final document rows inside white card */
+body.command-room #signaturePanel .result-metric{
+  background:#ffffff !important;
+  color:#0f172a !important;
+  border-bottom:1px dashed #e2e8f0 !important;
+}
+
+body.command-room #signaturePanel .result-metric span,
+body.command-room #signaturePanel .result-metric strong{
+  color:#0f172a !important;
+}
+
 </style>
 </head>
 <body class="command-room contractor-room">
