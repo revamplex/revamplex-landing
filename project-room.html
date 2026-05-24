@@ -3653,6 +3653,78 @@ body.light-room.command-room .guided-helper-card *{
   display: none !important;
 }
 
+
+/* ===== REVAMPLEX FINAL CLEANUP: REMOVE GRAY BUTTON SECTIONS ===== */
+
+/* Removed old estimate template / pricing / saved price book button blocks */
+#smartCalculatorPanel .estimate-studio-grid,
+#smartCalculatorPanel .estimate-studio-card,
+#smartCalculatorPanel .template-button-grid,
+#smartCalculatorPanel .tier-button-grid,
+#smartCalculatorPanel .price-book-grid,
+#smartCalculatorPanel .template-btn,
+#smartCalculatorPanel .tier-btn,
+#smartCalculatorPanel .price-book-btn,
+#tierGoodBtn,
+#tierBetterBtn,
+#tierBestBtn,
+#priceTierOut,
+#proposalTierOut {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Keep the actual calculator controls visible */
+#smartCalculatorPanel .trade-tool-shell,
+#smartCalculatorPanel .trade-select-card,
+#smartCalculatorPanel .trade-current-card,
+#smartCalculatorPanel .trade-menu-details,
+#smartCalculatorPanel .trade-chip-grid,
+#smartCalculatorPanel .trade-chip,
+#smartCalculatorPanel .calc-layout,
+#smartCalculatorPanel #calculatorFields,
+#smartCalculatorPanel .result-card,
+#smartCalculatorPanel .estimate-table-wrap,
+#smartCalculatorPanel .estimate-summary {
+  display: revert !important;
+  visibility: visible !important;
+}
+
+/* Make the 1-2-3 mini step cards match the premium dark/orange UI instead of gray */
+body.command-room #smartCalculatorPanel .guided-mini-step {
+  background: linear-gradient(180deg, rgba(15,23,42,.92), rgba(2,6,23,.88)) !important;
+  border: 1px solid rgba(249,115,22,.28) !important;
+  color: #f8fafc !important;
+  box-shadow: 0 14px 30px rgba(0,0,0,.22) !important;
+}
+
+body.command-room #smartCalculatorPanel .guided-mini-step strong {
+  color: #f8fafc !important;
+}
+
+body.command-room #smartCalculatorPanel .guided-mini-step p {
+  color: #cbd5e1 !important;
+}
+
+body.command-room #smartCalculatorPanel .guided-mini-step span {
+  background: linear-gradient(135deg, #f97316, #ea580c) !important;
+  color: #fff !important;
+}
+
+/* Make generated trade chips dark/orange too, not gray */
+body.command-room #smartCalculatorPanel .trade-chip {
+  background: rgba(15,23,42,.86) !important;
+  border: 1px solid rgba(249,115,22,.28) !important;
+  color: #f8fafc !important;
+}
+
+body.command-room #smartCalculatorPanel .trade-chip:hover,
+body.command-room #smartCalculatorPanel .trade-chip.active {
+  background: rgba(249,115,22,.18) !important;
+  border-color: rgba(249,115,22,.55) !important;
+  color: #fed7aa !important;
+}
+
 </style>
 </head>
 <body class="command-room contractor-room">
@@ -4055,7 +4127,7 @@ body.light-room.command-room .guided-helper-card *{
   <div class="panel-header">
     <div>
       <h3>Step 2: Build the Estimate</h3>
-      <p>Choose one trade calculator, enter the basics, then push the result into the estimate table when it looks right.</p>
+      <p>Build estimates faster with trade calculators, custom line items, and saved pricing.</p>
     </div>
     <button class="btn btn-soft" type="button" onclick="pushCalcResultsToEstimate()">Push Results to Estimate</button>
   </div>
@@ -4068,23 +4140,8 @@ body.light-room.command-room .guided-helper-card *{
 
   
   <!-- Removed optional estimate template/pricing comparison cards. -->
-
-
-  <div class="estimate-studio-card contractor-guide" style="margin-bottom:16px;">
-    <h4>Saved Price Book</h4>
-    <p>Add common contractor items fast. Later this can be saved per contractor profile in Supabase.</p>
-    <div class="price-book-grid">
-      <button class="price-book-btn" type="button" onclick="addPriceBookItem('Demo Labor',1,'lot',450,6,65)">Demo Labor</button>
-      <button class="price-book-btn" type="button" onclick="addPriceBookItem('Dumpster / Disposal',1,'allowance',650,0,75)">Dumpster</button>
-      <button class="price-book-btn" type="button" onclick="addPriceBookItem('Site Protection',1,'allowance',175,2,65)">Site Protection</button>
-      <button class="price-book-btn" type="button" onclick="addPriceBookItem('Drywall Sheet',1,'sheet',18,0.5,65)">Drywall Sheet</button>
-      <button class="price-book-btn" type="button" onclick="addPriceBookItem('Tile Install',1,'sqft',3.25,0.12,75)">Tile / Sq Ft</button>
-      <button class="price-book-btn" type="button" onclick="addPriceBookItem('Interior Painting',1,'sqft',0.65,0.06,60)">Paint / Sq Ft</button>
-    </div>
-  </div>
-
-
-  <div class="guided-mini-steps contractor-guide">
+  <!-- Saved Price Book gray button section removed by request. -->
+<div class="guided-mini-steps contractor-guide">
     <button class="guided-mini-step" type="button" data-calc-focus="calcPickTrade"><span>1</span><strong>Pick trade</strong><p>The dropdown changes the form to only the fields for that trade.</p></button>
     <button class="guided-mini-step" type="button" data-calc-focus="calculatorFields"><span>2</span><strong>Enter basics</strong><p>Use rough dimensions first. You can fine tune line items afterward.</p></button>
     <button class="guided-mini-step" type="button" data-calc-focus="calcEstimateTableWrap" data-calc-action="push"><span>3</span><strong>Push result</strong><p>Add the calculated scope into the estimate table when it looks right.</p></button>
@@ -10691,6 +10748,58 @@ window.addEventListener("load", function(){
 
   window.forcePhotosDocsVisible = forcePhotosDocsVisible;
   window.openPhotosDocs = openPhotosDocs;
+})();
+</script>
+
+
+<script>
+/* ===== REVAMPLEX FINAL JS CLEANUP: REMOVE OLD GRAY BUTTON BLOCKS ===== */
+(function(){
+  function removeOldGrayEstimateButtons(){
+    const selectors = [
+      "#smartCalculatorPanel .estimate-studio-grid",
+      "#smartCalculatorPanel .template-button-grid",
+      "#smartCalculatorPanel .tier-button-grid",
+      "#smartCalculatorPanel .price-book-grid",
+      "#smartCalculatorPanel .template-btn",
+      "#smartCalculatorPanel .tier-btn",
+      "#smartCalculatorPanel .price-book-btn",
+      "#tierGoodBtn",
+      "#tierBetterBtn",
+      "#tierBestBtn"
+    ];
+
+    selectors.forEach(sel => {
+      document.querySelectorAll(sel).forEach(el => el.remove());
+    });
+
+    document.querySelectorAll("#smartCalculatorPanel .estimate-studio-card").forEach(card => {
+      const text = (card.innerText || card.textContent || "").toLowerCase();
+      if (
+        text.includes("saved price book") ||
+        text.includes("estimate templates") ||
+        text.includes("good / better / best") ||
+        text.includes("good better best")
+      ) {
+        card.remove();
+      }
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    removeOldGrayEstimateButtons();
+    setTimeout(removeOldGrayEstimateButtons, 300);
+    setTimeout(removeOldGrayEstimateButtons, 900);
+    setTimeout(removeOldGrayEstimateButtons, 1800);
+  });
+
+  window.addEventListener("load", () => {
+    removeOldGrayEstimateButtons();
+    setTimeout(removeOldGrayEstimateButtons, 600);
+    setTimeout(removeOldGrayEstimateButtons, 1500);
+  });
+
+  window.removeOldGrayEstimateButtons = removeOldGrayEstimateButtons;
 })();
 </script>
 
