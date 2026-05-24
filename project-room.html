@@ -3575,18 +3575,43 @@ body.command-room .tier-btn.active {
   font-size: 0.86rem;
 }
 
-body.command-room .takeoff-card,
-body.command-room .takeoff-result-item {
-  background: rgba(15,23,42,0.78) !important;
-  border-color: rgba(249,115,22,0.24) !important;
-  color: #e5e7eb !important;
+/* ===== REVAMPLEX FIXED AI TAKEOFF + 3D ESTIMATE PANELS ===== */
+
+/* Dark mode */
+body.command-room:not(.light-room) .takeoff-card,
+body.command-room:not(.light-room) .takeoff-result-item{
+  background:rgba(15,23,42,.78)!important;
+  border-color:rgba(249,115,22,.24)!important;
+  color:#e5e7eb!important;
 }
 
-body.command-room .takeoff-preview-box,
-body.command-room .takeoff-json-box {
-  background: rgba(2,6,23,0.48) !important;
-  border-color: rgba(148,163,184,0.24) !important;
-  color: #cbd5e1 !important;
+body.command-room:not(.light-room) .takeoff-preview-box,
+body.command-room:not(.light-room) .takeoff-json-box{
+  background:rgba(2,6,23,.48)!important;
+  border-color:rgba(148,163,184,.24)!important;
+  color:#cbd5e1!important;
+}
+
+/* Light mode */
+body.light-room.command-room .takeoff-card,
+body.light-room.command-room .takeoff-result-item,
+body.light-room.command-room .takeoff-preview-box,
+body.light-room.command-room .takeoff-json-box,
+body.light-room.command-room #takeoffResults,
+body.light-room.command-room #takeoffSummary,
+body.light-room.command-room .guided-helper-card,
+body.light-room.command-room #smartCalculatorPanel,
+body.light-room.command-room #smartCalculatorPanel .estimate-studio-card,
+body.light-room.command-room #smartCalculatorPanel .summary-box{
+    background:#ffffff!important;
+    color:#0f172a!important;
+    border:1px solid #e2e8f0!important;
+}
+
+body.light-room.command-room #smartCalculatorPanel *,
+body.light-room.command-room .takeoff-card *,
+body.light-room.command-room .guided-helper-card *{
+    color:#0f172a!important;
 }
 
 @media (max-width: 900px) {
