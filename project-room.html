@@ -3618,6 +3618,19 @@ body.light-room.command-room .guided-helper-card *{
   .takeoff-grid { grid-template-columns: 1fr !important; }
 }
 
+
+/* ===== REVAMPLEX REMOVE TEMPLATE + GOOD/BETTER/BEST UI ===== */
+.estimate-studio-grid.contractor-guide,
+.template-button-grid,
+.tier-button-grid,
+#tierGoodBtn,
+#tierBetterBtn,
+#tierBestBtn,
+#priceTierOut,
+#proposalTierOut {
+  display: none !important;
+}
+
 </style>
 </head>
 <body class="command-room contractor-room">
@@ -4030,8 +4043,10 @@ body.light-room.command-room .guided-helper-card *{
     <strong>Start here. One calculator, one clear result.</strong>
     <p>Choose the trade that best matches the job. Fill in the few fields shown, review the calculated material/labor hints, then use Push Results to Estimate. You can ignore every other calculator until you need it.</p>
   </div>
-  <!-- Removed optional estimate template/pricing comparison cards by request.
-       RevampLEX now opens directly into the trade calculator + saved price book. -->
+
+  
+  <!-- Removed optional estimate template/pricing comparison cards. -->
+
 
   <div class="estimate-studio-card contractor-guide" style="margin-bottom:16px;">
     <h4>Saved Price Book</h4>
@@ -10521,10 +10536,7 @@ window.addEventListener("load", function(){
 
 
 <script>
-/* ===== REVAMPLEX HARD FIX — PHOTOS + DOCS SHARED ACCESS =====
-   Keeps Photos + Docs visible/clickable for homeowners and contractors,
-   even after Command Room / Guided Stage scripts hide panels.
-*/
+/* ===== REVAMPLEX HARD FIX — PHOTOS + DOCS SHARED ACCESS ===== */
 (function(){
   function findPhotosDocsSection(){
     let section =
