@@ -3755,59 +3755,6 @@ body.command-room .estimate-metrics-card *{
 }
 
 
-/* ===== REVAMPLEX DESKTOP + MOBILE SIGNATURE PAD FIX ===== */
-.signature-pad{
-  position:relative !important;
-  height:220px !important;
-  border:2px dashed #fdba74 !important;
-  border-radius:18px !important;
-  background:#ffffff !important;
-  display:block !important;
-  padding:0 !important;
-  overflow:hidden !important;
-  touch-action:none !important;
-  user-select:none !important;
-  color:#9a3412 !important;
-}
-
-.signature-pad canvas{
-  width:100% !important;
-  height:100% !important;
-  display:block !important;
-  background:#ffffff !important;
-  border-radius:16px !important;
-  cursor:crosshair !important;
-  touch-action:none !important;
-}
-
-.signature-pad .signature-placeholder{
-  position:absolute;
-  inset:0;
-  display:grid;
-  place-items:center;
-  text-align:center;
-  color:#9a3412;
-  font-weight:800;
-  pointer-events:none;
-  opacity:.65;
-  padding:18px;
-}
-
-.signature-actions{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin:10px 0 14px;
-}
-
-.signature-status{
-  font-size:.88rem;
-  font-weight:800;
-  color:#ea580c;
-  margin-top:6px;
-}
-
-
 /* ===== REVAMPLEX DARK COMMAND CARD + SAFE CHANGES REQUESTED FIX ===== */
 
 /* Keep command deck cards dark in dark mode, including Approval Console */
@@ -3860,265 +3807,68 @@ body.command-room .approval-status-actions button[onclick*="Changes Requested"]:
 }
 
 
-/* ===== REVAMPLEX FINAL SIGNATURE PAD FIX — CHROME + SAFARI ===== */
-.revamp-signature-wrap{
-  position:relative !important;
-  width:100% !important;
-  height:260px !important;
-  min-height:260px !important;
-  border:2px dashed #fdba74 !important;
-  border-radius:18px !important;
-  background:#ffffff !important;
-  overflow:hidden !important;
-  margin:12px 0 0 !important;
-  touch-action:none !important;
-  -ms-touch-action:none !important;
-  user-select:none !important;
-  -webkit-user-select:none !important;
-  -webkit-touch-callout:none !important;
-  z-index:20 !important;
+
+/* ===== REVAMPLEX SIMPLE APPROVAL SIGNATURE — FINAL ===== */
+.revamp-typed-signature-box{
+  margin:14px 0;
+  border:2px dashed #fdba74;
+  border-radius:18px;
+  background:#ffffff;
+  padding:18px;
 }
 
-#customerSignatureCanvas{
-  position:absolute !important;
-  inset:0 !important;
-  width:100% !important;
-  height:100% !important;
-  display:block !important;
-  background:#ffffff !important;
-  cursor:crosshair !important;
-  touch-action:none !important;
-  -ms-touch-action:none !important;
-  user-select:none !important;
-  -webkit-user-select:none !important;
-  pointer-events:auto !important;
-  z-index:2 !important;
+.revamp-typed-label{
+  font-size:.78rem;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:#ea580c;
+  margin-bottom:10px;
 }
 
-.revamp-signature-placeholder{
-  position:absolute !important;
-  inset:0 !important;
-  display:grid !important;
-  place-items:center !important;
-  text-align:center !important;
-  color:#9a3412 !important;
-  font-weight:900 !important;
-  pointer-events:none !important;
-  opacity:.65 !important;
-  padding:18px !important;
-  z-index:3 !important;
+.revamp-typed-preview{
+  min-height:86px;
+  display:flex;
+  align-items:center;
+  padding:16px;
+  border:1px solid #e2e8f0;
+  border-radius:16px;
+  background:linear-gradient(180deg,#ffffff,#fff7ed);
+  color:#0f172a;
+  font-size:34px;
+  line-height:1.2;
+  font-family:"Brush Script MT","Segoe Script","Snell Roundhand",cursive;
 }
 
-.signature-actions{
-  display:flex !important;
-  gap:10px !important;
-  flex-wrap:wrap !important;
-  margin:10px 0 14px !important;
+.revamp-signature-time{
+  margin-top:8px;
+  color:#64748b;
+  font-size:.86rem;
+  font-weight:800;
 }
 
 .signature-status{
-  font-size:.88rem !important;
-  font-weight:800 !important;
+  margin-top:8px;
+  color:#ea580c;
+  font-weight:900;
+}
+
+body.command-room .revamp-typed-signature-box,
+body.command-room .revamp-typed-preview,
+body.command-room #revampApprovalName,
+body.command-room #revampApprovalDate,
+body.command-room #revampApprovalDeposit{
+  background:#ffffff !important;
+  color:#0f172a !important;
+  border-color:#e2e8f0 !important;
+}
+
+body.command-room .revamp-typed-label{
   color:#ea580c !important;
-  margin-top:6px !important;
 }
 
-/* prevent command-room dark panel styles from breaking signature */
-body.command-room .revamp-signature-wrap,
-body.command-room #customerSignatureCanvas{
-  background:#ffffff !important;
-  border-color:#fdba74 !important;
-}
-
-body.command-room .revamp-signature-wrap *{
-  color:#0f172a !important;
-}
-
-
-/* ===== REVAMPLEX SIGNATURE MODAL FIX ===== */
-.revamp-signature-wrap{
-  border:2px dashed #fdba74 !important;
-  border-radius:18px !important;
-  background:#ffffff !important;
-  min-height:180px !important;
-  display:grid !important;
-  place-items:center !important;
-  text-align:center !important;
-  color:#9a3412 !important;
-  font-weight:900 !important;
-  padding:18px !important;
-}
-
-.signature-actions{
-  display:flex !important;
-  gap:10px !important;
-  flex-wrap:wrap !important;
-  margin:10px 0 14px !important;
-}
-
-.signature-status{
-  font-size:.88rem !important;
-  font-weight:800 !important;
-  color:#ea580c !important;
-  margin-top:6px !important;
-}
-
-#revampSignatureModal{
-  position:fixed !important;
-  inset:0 !important;
-  z-index:2147483647 !important;
-  display:none;
-  align-items:center !important;
-  justify-content:center !important;
-  background:rgba(2,6,23,.74) !important;
-  padding:20px !important;
-}
-
-#revampSignatureModal.active{
-  display:flex !important;
-}
-
-.revamp-signature-modal-card{
-  width:min(960px, calc(100vw - 32px)) !important;
-  background:#ffffff !important;
-  color:#0f172a !important;
-  border-radius:24px !important;
-  border:1px solid #e2e8f0 !important;
-  box-shadow:0 30px 90px rgba(0,0,0,.42) !important;
-  padding:18px !important;
-}
-
-.revamp-signature-modal-head{
-  display:flex !important;
-  align-items:center !important;
-  justify-content:space-between !important;
-  gap:12px !important;
-  margin-bottom:12px !important;
-}
-
-.revamp-signature-modal-head h3{
-  margin:0 !important;
-  color:#0f172a !important;
-}
-
-.revamp-signature-canvas-box{
-  position:relative !important;
-  width:100% !important;
-  height:360px !important;
-  background:#ffffff !important;
-  border:2px dashed #fdba74 !important;
-  border-radius:18px !important;
-  overflow:hidden !important;
-  touch-action:none !important;
-  user-select:none !important;
-  -webkit-user-select:none !important;
-}
-
-#revampSignatureCanvas{
-  position:absolute !important;
-  inset:0 !important;
-  width:100% !important;
-  height:100% !important;
-  background:#ffffff !important;
-  display:block !important;
-  cursor:crosshair !important;
-  touch-action:none !important;
-  user-select:none !important;
-  -webkit-user-select:none !important;
-}
-
-.revamp-signature-modal-actions{
-  display:flex !important;
-  gap:10px !important;
-  flex-wrap:wrap !important;
-  justify-content:flex-end !important;
-  margin-top:12px !important;
-}
-
-#signatureImagePreview{
-  max-width:100% !important;
-  max-height:160px !important;
-  display:none;
-  background:#fff !important;
-  border-radius:14px !important;
-}
-
-@media(max-width:760px){
-  .revamp-signature-canvas-box{
-    height:300px !important;
-  }
-}
-
-
-/* ===== REVAMPLEX RELIABLE E-SIGNATURE FIX ===== */
-.revamp-esign-box{
-  border:2px dashed #fdba74 !important;
-  border-radius:18px !important;
-  background:#ffffff !important;
-  padding:18px !important;
-  margin:12px 0 0 !important;
-  color:#0f172a !important;
-}
-
-.revamp-esign-box label{
-  display:block !important;
-  font-weight:900 !important;
-  color:#0f172a !important;
-  margin-bottom:8px !important;
-}
-
-#customerSignatureTyped{
-  width:100% !important;
-  background:#ffffff !important;
-  color:#0f172a !important;
-  border:1px solid #e2e8f0 !important;
-  border-radius:14px !important;
-  padding:14px 16px !important;
-  font-size:18px !important;
-}
-
-.revamp-signature-preview{
-  min-height:90px !important;
-  margin-top:12px !important;
-  border:1px solid #e2e8f0 !important;
-  border-radius:16px !important;
-  background:linear-gradient(180deg,#ffffff,#fff7ed) !important;
-  display:flex !important;
-  align-items:center !important;
-  padding:18px !important;
-  color:#64748b !important;
-  font-size:28px !important;
-  font-family:"Brush Script MT","Segoe Script","Snell Roundhand",cursive !important;
-}
-
-.revamp-esign-confirm{
-  margin-top:12px !important;
-  color:#0f172a !important;
-}
-
-.signature-actions{
-  display:flex !important;
-  gap:10px !important;
-  flex-wrap:wrap !important;
-  margin:10px 0 14px !important;
-}
-
-.signature-status{
-  font-size:.88rem !important;
-  font-weight:800 !important;
-  color:#ea580c !important;
-  margin-top:6px !important;
-}
-
-body.command-room .revamp-esign-box,
-body.command-room .revamp-signature-preview,
-body.command-room #customerSignatureTyped{
-  background:#ffffff !important;
-  color:#0f172a !important;
-}
-
-body.command-room .revamp-esign-box *,
-body.command-room .revamp-signature-preview{
+body.command-room .check-row,
+body.command-room .check-row span{
   color:#0f172a !important;
 }
 
@@ -4871,51 +4621,55 @@ body.command-room .revamp-signature-preview{
           </div>
 
           <div class="signature-layout">
-            <div class="signature-box">
-              <label>Customer Full Name</label>
-              <input type="text" value="Approved Homeowner" />
+            
+<div class="signature-box">
+  <h4 style="margin-top:0;">Customer Approval</h4>
 
-              <div class="approval-checklist">
-                <label class="check-row"><input type="checkbox" checked /> <span>I approve the estimate amount and scope of work shown in this Project Room.</span></label>
-                <label class="check-row"><input type="checkbox" checked /> <span>I understand any change orders will be documented separately.</span></label>
-                <label class="check-row"><input type="checkbox" /> <span>I authorize the contractor to begin on the scheduled start date once deposit is received.</span></label>
-              </div>
+  <label for="revampApprovalName">Customer Full Name</label>
+  <input id="revampApprovalName" type="text" placeholder="Type customer full legal name">
 
-              
+  <div class="approval-checklist">
+    <label class="check-row">
+      <input id="revampApproveScope" type="checkbox">
+      <span>I approve the estimate amount and scope of work shown in this Project Room.</span>
+    </label>
 
+    <label class="check-row">
+      <input id="revampApproveChanges" type="checkbox">
+      <span>I understand any change orders will be documented separately.</span>
+    </label>
 
+    <label class="check-row">
+      <input id="revampApproveStart" type="checkbox">
+      <span>I authorize the contractor to begin on the scheduled start date once deposit is received.</span>
+    </label>
+  </div>
 
-<div class="revamp-esign-box" id="customerSignaturePad">
-  <label for="customerSignatureTyped">Customer E-Signature</label>
-  <input id="customerSignatureTyped" type="text" placeholder="Type full legal name here">
-  <div class="revamp-signature-preview" id="signatureTypedPreview">Signature preview will appear here</div>
+  <div class="revamp-typed-signature-box">
+    <div class="revamp-typed-label">Electronic Signature Preview</div>
+    <div id="revampSignaturePreview" class="revamp-typed-preview">Type customer name above</div>
+    <div id="revampSignatureTimestamp" class="revamp-signature-time"></div>
+  </div>
 
-  <label class="check-row revamp-esign-confirm">
-    <input id="customerSignatureConfirm" type="checkbox">
-    <span>I agree this typed name represents my electronic signature and approval for this project.</span>
-  </label>
+  <div class="form-grid">
+    <div>
+      <label>Date</label>
+      <input id="revampApprovalDate" type="text" readonly>
+    </div>
+    <div>
+      <label>Deposit Amount</label>
+      <input id="revampApprovalDeposit" type="text" value="$5,500">
+    </div>
+  </div>
+
+  <div class="signature-actions">
+    <button class="btn btn-primary" type="button" onclick="saveRevampTypedApproval()">Save Customer Approval</button>
+    <button class="btn btn-soft" type="button" onclick="clearRevampTypedApproval()">Clear</button>
+  </div>
+
+  <div id="signatureStatus" class="signature-status"></div>
 </div>
 
-<div class="signature-actions">
-  <button class="btn btn-primary" type="button" onclick="saveCustomerSignature()">Save Signature</button>
-  <button class="btn btn-soft" type="button" onclick="clearCustomerSignature()">Clear Signature</button>
-</div>
-<div id="signatureStatus" class="signature-status"></div>
-
-
-
-
-
-              <div class="form-grid">
-                <div>
-                  <label>Date</label>
-                  <input type="text" value="March 11, 2026" />
-                </div>
-                <div>
-                  <label>Deposit Amount</label>
-                  <input type="text" value="$5,500" />
-                </div>
-              </div>
             </div>
 
             <div class="signature-box">
@@ -11239,102 +10993,127 @@ window.addEventListener("load", function(){
 
 
 
+
+
+
 <script>
-/* ===== REVAMPLEX RELIABLE E-SIGNATURE ENGINE ===== */
+/* ===== REVAMPLEX SIMPLE APPROVAL SIGNATURE ENGINE — FINAL ===== */
 (function(){
   function byId(id){ return document.getElementById(id); }
 
-  function updateSignaturePreview(){
-    const input = byId("customerSignatureTyped");
-    const preview = byId("signatureTypedPreview");
-    if(!input || !preview) return;
-
-    const name = input.value.trim();
-    preview.textContent = name || "Signature preview will appear here";
-    preview.style.color = name ? "#0f172a" : "#64748b";
+  function todayText(){
+    return new Date().toLocaleDateString("en-US", {
+      year:"numeric",
+      month:"long",
+      day:"numeric"
+    });
   }
 
-  window.saveCustomerSignature = function(){
-    const input = byId("customerSignatureTyped");
-    const confirm = byId("customerSignatureConfirm");
-    const status = byId("signatureStatus");
+  function updatePreview(){
+    const name = (byId("revampApprovalName")?.value || "").trim();
+    const preview = byId("revampSignaturePreview");
+    const date = byId("revampApprovalDate");
 
-    const name = (input?.value || "").trim();
+    if(date && !date.value) date.value = todayText();
+
+    if(preview){
+      preview.textContent = name || "Type customer name above";
+      preview.style.color = name ? "#0f172a" : "#64748b";
+    }
+  }
+
+  window.saveRevampTypedApproval = function(){
+    const name = (byId("revampApprovalName")?.value || "").trim();
+    const scope = byId("revampApproveScope");
+    const changes = byId("revampApproveChanges");
+    const start = byId("revampApproveStart");
+    const status = byId("signatureStatus");
+    const timestamp = byId("revampSignatureTimestamp");
 
     if(!name){
-      if(status) status.textContent = "Please type the customer's full name.";
-      if(input) input.focus();
-      return "";
+      if(status) status.textContent = "Type the customer's full name first.";
+      byId("revampApprovalName")?.focus();
+      return false;
     }
 
-    if(confirm && !confirm.checked){
-      if(status) status.textContent = "Please check the e-signature approval box.";
-      return "";
+    if(!scope?.checked || !changes?.checked || !start?.checked){
+      if(status) status.textContent = "Check all approval boxes before saving.";
+      return false;
     }
 
+    const savedAt = new Date().toLocaleString();
     window.revampCustomerSignatureName = name;
-    window.revampCustomerSignatureDataUrl = "typed-signature:" + name;
+    window.revampCustomerSignatureDataUrl = "typed-approval:" + name;
+    window.revampCustomerApprovalSavedAt = savedAt;
 
-    const date = new Date().toLocaleString();
-    if(status) status.textContent = "Signature saved: " + name + " • " + date;
+    if(timestamp) timestamp.textContent = "Approved electronically by " + name + " on " + savedAt + ".";
+    if(status) status.textContent = "Customer approval saved.";
 
-    return window.revampCustomerSignatureDataUrl;
+    return true;
   };
 
-  window.clearCustomerSignature = function(){
-    const input = byId("customerSignatureTyped");
-    const confirm = byId("customerSignatureConfirm");
+  window.clearRevampTypedApproval = function(){
+    const name = byId("revampApprovalName");
+    const scope = byId("revampApproveScope");
+    const changes = byId("revampApproveChanges");
+    const start = byId("revampApproveStart");
     const status = byId("signatureStatus");
+    const timestamp = byId("revampSignatureTimestamp");
 
-    if(input) input.value = "";
-    if(confirm) confirm.checked = false;
+    if(name) name.value = "";
+    if(scope) scope.checked = false;
+    if(changes) changes.checked = false;
+    if(start) start.checked = false;
+    if(timestamp) timestamp.textContent = "";
+    if(status) status.textContent = "Approval cleared.";
 
     window.revampCustomerSignatureName = "";
     window.revampCustomerSignatureDataUrl = "";
+    window.revampCustomerApprovalSavedAt = "";
 
-    updateSignaturePreview();
-
-    if(status) status.textContent = "Signature cleared.";
+    updatePreview();
   };
 
-  function bind(){
-    const input = byId("customerSignatureTyped");
-    if(!input || input.dataset.esignBound === "true") return;
+  window.saveCustomerSignature = window.saveRevampTypedApproval;
+  window.clearCustomerSignature = window.clearRevampTypedApproval;
 
-    input.dataset.esignBound = "true";
-    input.addEventListener("input", updateSignaturePreview);
-    input.addEventListener("keyup", updateSignaturePreview);
-    updateSignaturePreview();
+  function bind(){
+    const name = byId("revampApprovalName");
+    if(!name || name.dataset.revampApprovalBound === "true") return;
+    name.dataset.revampApprovalBound = "true";
+    name.addEventListener("input", updatePreview);
+    name.addEventListener("keyup", updatePreview);
+    updatePreview();
   }
 
   document.addEventListener("DOMContentLoaded", function(){
-    setTimeout(bind,250);
-    setTimeout(bind,900);
+    setTimeout(bind,200);
+    setTimeout(bind,800);
+    setTimeout(bind,1600);
   });
 
   window.addEventListener("load", function(){
-    setTimeout(bind,250);
-    setTimeout(bind,900);
+    setTimeout(bind,200);
+    setTimeout(bind,1000);
   });
 
   const wrapShow = function(){
-    if(typeof window.showCommandStage === "function" && !window.__revampEsignWrapped){
+    if(typeof window.showCommandStage === "function" && !window.__revampSimpleApprovalWrapped){
       const oldShow = window.showCommandStage;
-      window.__revampEsignWrapped = true;
-
+      window.__revampSimpleApprovalWrapped = true;
       window.showCommandStage = function(targetId){
         const result = oldShow.apply(this, arguments);
         if(targetId === "signaturePanel"){
           setTimeout(bind,150);
-          setTimeout(bind,600);
+          setTimeout(bind,700);
         }
         return result;
       };
     }
   };
 
-  setTimeout(wrapShow,500);
-  setTimeout(wrapShow,1500);
+  setTimeout(wrapShow,400);
+  setTimeout(wrapShow,1300);
 })();
 </script>
 
