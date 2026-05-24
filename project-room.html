@@ -3934,6 +3934,121 @@ body.command-room .revamp-signature-wrap *{
   color:#0f172a !important;
 }
 
+
+/* ===== REVAMPLEX SIGNATURE MODAL FIX ===== */
+.revamp-signature-wrap{
+  border:2px dashed #fdba74 !important;
+  border-radius:18px !important;
+  background:#ffffff !important;
+  min-height:180px !important;
+  display:grid !important;
+  place-items:center !important;
+  text-align:center !important;
+  color:#9a3412 !important;
+  font-weight:900 !important;
+  padding:18px !important;
+}
+
+.signature-actions{
+  display:flex !important;
+  gap:10px !important;
+  flex-wrap:wrap !important;
+  margin:10px 0 14px !important;
+}
+
+.signature-status{
+  font-size:.88rem !important;
+  font-weight:800 !important;
+  color:#ea580c !important;
+  margin-top:6px !important;
+}
+
+#revampSignatureModal{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:2147483647 !important;
+  display:none;
+  align-items:center !important;
+  justify-content:center !important;
+  background:rgba(2,6,23,.74) !important;
+  padding:20px !important;
+}
+
+#revampSignatureModal.active{
+  display:flex !important;
+}
+
+.revamp-signature-modal-card{
+  width:min(960px, calc(100vw - 32px)) !important;
+  background:#ffffff !important;
+  color:#0f172a !important;
+  border-radius:24px !important;
+  border:1px solid #e2e8f0 !important;
+  box-shadow:0 30px 90px rgba(0,0,0,.42) !important;
+  padding:18px !important;
+}
+
+.revamp-signature-modal-head{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:12px !important;
+  margin-bottom:12px !important;
+}
+
+.revamp-signature-modal-head h3{
+  margin:0 !important;
+  color:#0f172a !important;
+}
+
+.revamp-signature-canvas-box{
+  position:relative !important;
+  width:100% !important;
+  height:360px !important;
+  background:#ffffff !important;
+  border:2px dashed #fdba74 !important;
+  border-radius:18px !important;
+  overflow:hidden !important;
+  touch-action:none !important;
+  user-select:none !important;
+  -webkit-user-select:none !important;
+}
+
+#revampSignatureCanvas{
+  position:absolute !important;
+  inset:0 !important;
+  width:100% !important;
+  height:100% !important;
+  background:#ffffff !important;
+  display:block !important;
+  cursor:crosshair !important;
+  touch-action:none !important;
+  user-select:none !important;
+  -webkit-user-select:none !important;
+}
+
+.revamp-signature-modal-actions{
+  display:flex !important;
+  gap:10px !important;
+  flex-wrap:wrap !important;
+  justify-content:flex-end !important;
+  margin-top:12px !important;
+}
+
+#signatureImagePreview{
+  max-width:100% !important;
+  max-height:160px !important;
+  display:none;
+  background:#fff !important;
+  border-radius:14px !important;
+}
+
+@media(max-width:760px){
+  .revamp-signature-canvas-box{
+    height:300px !important;
+  }
+}
+
 </style>
 </head>
 <body class="command-room contractor-room">
@@ -4695,17 +4810,19 @@ body.command-room .revamp-signature-wrap *{
 
               
 
-<div class="revamp-signature-wrap">
-  <canvas id="customerSignatureCanvas"></canvas>
-  <div id="signaturePlaceholder" class="revamp-signature-placeholder">
-    Sign here with mouse, trackpad, finger, or stylus
+
+<div class="revamp-signature-wrap" id="customerSignaturePad">
+  <div>
+    <div id="signaturePlaceholder">No signature saved yet.</div>
+    <img id="signatureImagePreview" alt="Saved customer signature">
   </div>
 </div>
 <div class="signature-actions">
+  <button class="btn btn-primary" type="button" onclick="openRevampSignatureModal()">Open Signature Pad</button>
   <button class="btn btn-soft" type="button" onclick="clearCustomerSignature()">Clear Signature</button>
-  <button class="btn btn-primary" type="button" onclick="saveCustomerSignature()">Save Signature</button>
 </div>
 <div id="signatureStatus" class="signature-status"></div>
+
 
 
 
@@ -11033,24 +11150,76 @@ window.addEventListener("load", function(){
 
 
 
+
+
+
+<div id="revampSignatureModal" aria-hidden="true">
+  <div class="revamp-signature-modal-card">
+    <div class="revamp-signature-modal-head">
+      <h3>Customer Signature</h3>
+      <button class="btn btn-soft" type="button" onclick="closeRevampSignatureModal()">Close</button>
+    </div>
+
+    <div class="revamp-signature-canvas-box">
+      <canvas id="revampSignatureCanvas"></canvas>
+    </div>
+
+    <div class="revamp-signature-modal-actions">
+      <button class="btn btn-soft" type="button" onclick="clearRevampSignatureCanvas()">Clear</button>
+      <button class="btn btn-primary" type="button" onclick="saveRevampSignatureFromModal()">Use This Signature</button>
+    </div>
+  </div>
+</div>
+
+
 <script>
-/* ===== REVAMPLEX FINAL SIGNATURE ENGINE — CHROME + SAFARI ===== */
+/* ===== REVAMPLEX SIGNATURE MODAL ENGINE ===== */
 (function(){
   let canvas = null;
   let ctx = null;
-  let drawing = false;
-  let hasSignature = false;
-  let lastX = 0;
-  let lastY = 0;
+  let isDrawing = false;
+  let hasDrawn = false;
+  let last = {x:0,y:0};
 
-  function el(id){ return document.getElementById(id); }
+  function byId(id){ return document.getElementById(id); }
 
   function getCanvas(){
-    canvas = el("customerSignatureCanvas");
+    canvas = byId("revampSignatureCanvas");
     return canvas;
   }
 
-  function getPoint(e){
+  function resizeCanvas(){
+    const c = getCanvas();
+    if(!c) return;
+
+    const box = c.parentElement;
+    const rect = box.getBoundingClientRect();
+    const width = Math.max(320, Math.round(rect.width || 800));
+    const height = Math.max(240, Math.round(rect.height || 360));
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+
+    const old = hasDrawn ? c.toDataURL("image/png") : "";
+
+    c.width = Math.round(width * ratio);
+    c.height = Math.round(height * ratio);
+    c.style.width = width + "px";
+    c.style.height = height + "px";
+
+    ctx = c.getContext("2d");
+    ctx.setTransform(ratio,0,0,ratio,0,0);
+    ctx.lineWidth = 3;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "#0f172a";
+
+    if(old){
+      const img = new Image();
+      img.onload = function(){ ctx.drawImage(img,0,0,width,height); };
+      img.src = old;
+    }
+  }
+
+  function point(e){
     const c = getCanvas();
     const rect = c.getBoundingClientRect();
     const p = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0]) || e;
@@ -11060,197 +11229,170 @@ window.addEventListener("load", function(){
     };
   }
 
-  function setupSize(){
-    const c = getCanvas();
-    if(!c) return false;
+  function start(e){
+    e.preventDefault();
+    e.stopPropagation();
 
-    const wrap = c.closest(".revamp-signature-wrap");
-    if(wrap){
-      wrap.style.height = "260px";
-      wrap.style.minHeight = "260px";
-      wrap.style.display = "block";
-    }
+    if(!ctx) resizeCanvas();
 
-    const rect = c.getBoundingClientRect();
-    const width = Math.max(320, Math.round(rect.width || wrap?.clientWidth || 700));
-    const height = Math.max(220, Math.round(rect.height || wrap?.clientHeight || 260));
-    const dpr = Math.max(window.devicePixelRatio || 1, 1);
+    isDrawing = true;
+    last = point(e);
 
-    const oldImage = hasSignature ? c.toDataURL("image/png") : "";
-
-    c.width = Math.round(width * dpr);
-    c.height = Math.round(height * dpr);
-    c.style.width = width + "px";
-    c.style.height = height + "px";
-
-    ctx = c.getContext("2d");
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-    ctx.lineWidth = 3;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    ctx.strokeStyle = "#0f172a";
-
-    if(oldImage){
-      const img = new Image();
-      img.onload = function(){ ctx.drawImage(img,0,0,width,height); };
-      img.src = oldImage;
-    }
-
-    return true;
+    ctx.beginPath();
+    ctx.moveTo(last.x,last.y);
   }
 
-  function beginDraw(e){
-    const c = getCanvas();
-    if(!c) return;
+  function move(e){
+    if(!isDrawing || !ctx) return;
 
     e.preventDefault();
     e.stopPropagation();
 
-    if(!ctx) setupSize();
-
-    const p = getPoint(e);
-    drawing = true;
-    lastX = p.x;
-    lastY = p.y;
-
+    const p = point(e);
     ctx.beginPath();
-    ctx.moveTo(lastX,lastY);
-
-    const placeholder = el("signaturePlaceholder");
-    if(placeholder) placeholder.style.display = "none";
-  }
-
-  function draw(e){
-    if(!drawing || !ctx) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-
-    const p = getPoint(e);
-
-    ctx.beginPath();
-    ctx.moveTo(lastX,lastY);
+    ctx.moveTo(last.x,last.y);
     ctx.lineTo(p.x,p.y);
     ctx.stroke();
 
-    lastX = p.x;
-    lastY = p.y;
-    hasSignature = true;
+    last = p;
+    hasDrawn = true;
   }
 
-  function endDraw(e){
-    if(!drawing) return;
+  function end(e){
+    if(!isDrawing) return;
     if(e){
       e.preventDefault();
       e.stopPropagation();
     }
-    drawing = false;
+    isDrawing = false;
   }
 
   function bind(){
     const c = getCanvas();
-    if(!c) return;
+    if(!c || c.dataset.revampModalBound === "true") return;
 
-    setupSize();
+    c.dataset.revampModalBound = "true";
 
-    if(c.dataset.revampSignatureBound === "true") return;
-    c.dataset.revampSignatureBound = "true";
+    c.addEventListener("pointerdown", start, {passive:false});
+    c.addEventListener("pointermove", move, {passive:false});
+    c.addEventListener("pointerup", end, {passive:false});
+    c.addEventListener("pointercancel", end, {passive:false});
+    c.addEventListener("pointerleave", end, {passive:false});
 
-    // Use pointer events when available
-    c.addEventListener("pointerdown", beginDraw, false);
-    c.addEventListener("pointermove", draw, false);
-    c.addEventListener("pointerup", endDraw, false);
-    c.addEventListener("pointercancel", endDraw, false);
-    c.addEventListener("pointerout", endDraw, false);
+    c.addEventListener("mousedown", start, {passive:false});
+    document.addEventListener("mousemove", move, {passive:false});
+    document.addEventListener("mouseup", end, {passive:false});
 
-    // Mouse fallback
-    c.addEventListener("mousedown", beginDraw, false);
-    document.addEventListener("mousemove", draw, false);
-    document.addEventListener("mouseup", endDraw, false);
-
-    // Safari/iPhone/iPad fallback
-    c.addEventListener("touchstart", beginDraw, {passive:false});
-    c.addEventListener("touchmove", draw, {passive:false});
-    c.addEventListener("touchend", endDraw, {passive:false});
-    c.addEventListener("touchcancel", endDraw, {passive:false});
+    c.addEventListener("touchstart", start, {passive:false});
+    c.addEventListener("touchmove", move, {passive:false});
+    c.addEventListener("touchend", end, {passive:false});
+    c.addEventListener("touchcancel", end, {passive:false});
 
     window.addEventListener("resize", function(){
-      setTimeout(setupSize, 200);
+      if(byId("revampSignatureModal")?.classList.contains("active")){
+        setTimeout(resizeCanvas,150);
+      }
     });
   }
 
-  window.clearCustomerSignature = function(){
+  window.openRevampSignatureModal = function(){
+    const modal = byId("revampSignatureModal");
+    if(!modal) return;
+
+    modal.classList.add("active");
+    modal.setAttribute("aria-hidden","false");
+
+    setTimeout(function(){
+      bind();
+      resizeCanvas();
+    },80);
+
+    setTimeout(resizeCanvas,350);
+  };
+
+  window.closeRevampSignatureModal = function(){
+    const modal = byId("revampSignatureModal");
+    if(!modal) return;
+    modal.classList.remove("active");
+    modal.setAttribute("aria-hidden","true");
+    isDrawing = false;
+  };
+
+  window.clearRevampSignatureCanvas = function(){
     const c = getCanvas();
     if(!c) return;
-    if(!ctx) setupSize();
+    if(!ctx) resizeCanvas();
 
     const rect = c.getBoundingClientRect();
     ctx.clearRect(0,0,rect.width,rect.height);
-    hasSignature = false;
-
-    const placeholder = el("signaturePlaceholder");
-    if(placeholder) placeholder.style.display = "grid";
-
-    const status = el("signatureStatus");
-    if(status) status.textContent = "Signature cleared.";
+    hasDrawn = false;
   };
 
-  window.saveCustomerSignature = function(){
+  window.saveRevampSignatureFromModal = function(){
     const c = getCanvas();
-    const status = el("signatureStatus");
+    const status = byId("signatureStatus");
 
-    if(!c || !hasSignature){
+    if(!c || !hasDrawn){
       if(status) status.textContent = "Please sign before saving.";
-      return "";
+      return;
     }
 
     const dataUrl = c.toDataURL("image/png");
     window.revampCustomerSignatureDataUrl = dataUrl;
 
+    const preview = byId("signatureImagePreview");
+    const placeholder = byId("signaturePlaceholder");
+
+    if(preview){
+      preview.src = dataUrl;
+      preview.style.display = "block";
+    }
+
+    if(placeholder){
+      placeholder.textContent = "Signature saved.";
+    }
+
     if(status) status.textContent = "Signature saved.";
-    return dataUrl;
+    closeRevampSignatureModal();
   };
 
-  function initSignature(){
-    bind();
-    setTimeout(setupSize,100);
-    setTimeout(setupSize,400);
-    setTimeout(setupSize,900);
-  }
+  window.clearCustomerSignature = function(){
+    window.revampCustomerSignatureDataUrl = "";
+    hasDrawn = false;
 
-  document.addEventListener("DOMContentLoaded", function(){
-    setTimeout(initSignature,300);
-    setTimeout(initSignature,1000);
-  });
+    const preview = byId("signatureImagePreview");
+    const placeholder = byId("signaturePlaceholder");
+    const status = byId("signatureStatus");
 
-  window.addEventListener("load", function(){
-    setTimeout(initSignature,300);
-    setTimeout(initSignature,1200);
-  });
+    if(preview){
+      preview.removeAttribute("src");
+      preview.style.display = "none";
+    }
 
-  // Re-init any time command stage opens the signature panel.
-  const wrapShow = function(){
-    if(typeof window.showCommandStage === "function" && !window.__revampSignatureWrapped){
-      const oldShow = window.showCommandStage;
-      window.__revampSignatureWrapped = true;
+    if(placeholder){
+      placeholder.textContent = "No signature saved yet.";
+    }
 
-      window.showCommandStage = function(targetId){
-        const result = oldShow.apply(this, arguments);
-        if(targetId === "signaturePanel"){
-          setTimeout(initSignature,100);
-          setTimeout(initSignature,500);
-          setTimeout(initSignature,1100);
-        }
-        return result;
-      };
+    if(status) status.textContent = "Signature cleared.";
+
+    const c = getCanvas();
+    if(c && ctx){
+      const rect = c.getBoundingClientRect();
+      ctx.clearRect(0,0,rect.width,rect.height);
     }
   };
 
-  setTimeout(wrapShow,400);
-  setTimeout(wrapShow,1200);
-  setTimeout(wrapShow,2400);
+  window.saveCustomerSignature = function(){
+    return window.revampCustomerSignatureDataUrl || "";
+  };
 
-  window.initCustomerSignaturePad = initSignature;
+  document.addEventListener("DOMContentLoaded", function(){
+    setTimeout(bind,500);
+  });
+
+  window.addEventListener("load", function(){
+    setTimeout(bind,500);
+  });
 })();
 </script>
 
