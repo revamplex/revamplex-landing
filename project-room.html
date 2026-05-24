@@ -3808,7 +3808,40 @@ body.command-room .approval-status-actions button[onclick*="Changes Requested"]:
 
 
 
-/* ===== REVAMPLEX SIMPLE APPROVAL SIGNATURE — FINAL ===== */
+
+/* ===== REVAMPLEX FINAL SIMPLE APPROVAL FIX ===== */
+#signaturePanel,
+#signaturePanel *{
+  box-sizing:border-box;
+}
+
+#signaturePanel .revamp-simple-approval-box,
+#signaturePanel .signature-box{
+  background:#ffffff !important;
+  color:#0f172a !important;
+  border:1px solid #e2e8f0 !important;
+}
+
+#signaturePanel label,
+#signaturePanel .check-row,
+#signaturePanel .check-row span,
+#signaturePanel h4,
+#signaturePanel strong{
+  color:#0f172a !important;
+}
+
+#signaturePanel input[type="text"]{
+  background:#ffffff !important;
+  color:#0f172a !important;
+  border:1px solid #e2e8f0 !important;
+  pointer-events:auto !important;
+}
+
+#signaturePanel input[type="checkbox"]{
+  width:auto !important;
+  pointer-events:auto !important;
+}
+
 .revamp-typed-signature-box{
   margin:14px 0;
   border:2px dashed #fdba74;
@@ -3822,7 +3855,7 @@ body.command-room .approval-status-actions button[onclick*="Changes Requested"]:
   font-weight:900;
   text-transform:uppercase;
   letter-spacing:.08em;
-  color:#ea580c;
+  color:#ea580c !important;
   margin-bottom:10px;
 }
 
@@ -3834,7 +3867,7 @@ body.command-room .approval-status-actions button[onclick*="Changes Requested"]:
   border:1px solid #e2e8f0;
   border-radius:16px;
   background:linear-gradient(180deg,#ffffff,#fff7ed);
-  color:#0f172a;
+  color:#64748b !important;
   font-size:34px;
   line-height:1.2;
   font-family:"Brush Script MT","Segoe Script","Snell Roundhand",cursive;
@@ -3842,34 +3875,22 @@ body.command-room .approval-status-actions button[onclick*="Changes Requested"]:
 
 .revamp-signature-time{
   margin-top:8px;
-  color:#64748b;
+  color:#64748b !important;
   font-size:.86rem;
   font-weight:800;
 }
 
+.signature-actions{
+  display:flex !important;
+  gap:10px !important;
+  flex-wrap:wrap !important;
+  margin:10px 0 14px !important;
+}
+
 .signature-status{
   margin-top:8px;
-  color:#ea580c;
-  font-weight:900;
-}
-
-body.command-room .revamp-typed-signature-box,
-body.command-room .revamp-typed-preview,
-body.command-room #revampApprovalName,
-body.command-room #revampApprovalDate,
-body.command-room #revampApprovalDeposit{
-  background:#ffffff !important;
-  color:#0f172a !important;
-  border-color:#e2e8f0 !important;
-}
-
-body.command-room .revamp-typed-label{
   color:#ea580c !important;
-}
-
-body.command-room .check-row,
-body.command-room .check-row span{
-  color:#0f172a !important;
+  font-weight:900 !important;
 }
 
 </style>
@@ -4601,87 +4622,75 @@ body.command-room .check-row span{
   </div>
 </section>
 
+
 <section class="panel" id="signaturePanel">
-          <div class="panel-header">
-            <div>
-              <h3>Final Step: Approval Signature</h3>
-              <p>Use this only after the proposal, scope, deposit, and start date are clear to both sides.</p>
-            </div>
-            <button class="btn btn-primary">Finalize for Signature</button>
-          </div>
-
-
-          <div class="guided-helper-card homeowner-guide">
-            <strong>Only sign when the proposal feels clear.</strong>
-            <p>Review the estimate amount, scope, deposit, and start date. The signature area is the final approval step, not the place to figure out missing details.</p>
-          </div>
-          <div class="guided-helper-card contractor-guide">
-            <strong>Make approval easy for the customer.</strong>
-            <p>Before sending this section for signature, make sure the proposal notes explain scope, exclusions, change orders, deposit, and start timing in plain language.</p>
-          </div>
-
-          <div class="signature-layout">
-            
-<div class="signature-box">
-  <h4 style="margin-top:0;">Customer Approval</h4>
-
-  <label for="revampApprovalName">Customer Full Name</label>
-  <input id="revampApprovalName" type="text" placeholder="Type customer full legal name">
-
-  <div class="approval-checklist">
-    <label class="check-row">
-      <input id="revampApproveScope" type="checkbox">
-      <span>I approve the estimate amount and scope of work shown in this Project Room.</span>
-    </label>
-
-    <label class="check-row">
-      <input id="revampApproveChanges" type="checkbox">
-      <span>I understand any change orders will be documented separately.</span>
-    </label>
-
-    <label class="check-row">
-      <input id="revampApproveStart" type="checkbox">
-      <span>I authorize the contractor to begin on the scheduled start date once deposit is received.</span>
-    </label>
-  </div>
-
-  <div class="revamp-typed-signature-box">
-    <div class="revamp-typed-label">Electronic Signature Preview</div>
-    <div id="revampSignaturePreview" class="revamp-typed-preview">Type customer name above</div>
-    <div id="revampSignatureTimestamp" class="revamp-signature-time"></div>
-  </div>
-
-  <div class="form-grid">
+  <div class="panel-header">
     <div>
-      <label>Date</label>
-      <input id="revampApprovalDate" type="text" readonly>
-    </div>
-    <div>
-      <label>Deposit Amount</label>
-      <input id="revampApprovalDeposit" type="text" value="$5,500">
+      <h3>Final Step: Customer Approval</h3>
+      <p>Use this after the proposal, scope, deposit, and start date are clear to both sides.</p>
     </div>
   </div>
 
-  <div class="signature-actions">
-    <button class="btn btn-primary" type="button" onclick="saveRevampTypedApproval()">Save Customer Approval</button>
-    <button class="btn btn-soft" type="button" onclick="clearRevampTypedApproval()">Clear</button>
+  <div class="signature-layout">
+    <div class="signature-box revamp-simple-approval-box">
+      <h4 style="margin-top:0;">Customer Electronic Approval</h4>
+
+      <label for="revampApprovalName">Customer Full Legal Name</label>
+      <input id="revampApprovalName" type="text" placeholder="Type customer full legal name">
+
+      <div class="approval-checklist">
+        <label class="check-row">
+          <input id="revampApproveScope" type="checkbox">
+          <span>I approve the estimate amount and scope of work shown in this Project Room.</span>
+        </label>
+
+        <label class="check-row">
+          <input id="revampApproveChanges" type="checkbox">
+          <span>I understand any change orders will be documented separately.</span>
+        </label>
+
+        <label class="check-row">
+          <input id="revampApproveStart" type="checkbox">
+          <span>I authorize the contractor to begin on the scheduled start date once deposit is received.</span>
+        </label>
+      </div>
+
+      <div class="revamp-typed-signature-box">
+        <div class="revamp-typed-label">Electronic Signature Preview</div>
+        <div id="revampSignaturePreview" class="revamp-typed-preview">Type customer name above</div>
+        <div id="revampSignatureTimestamp" class="revamp-signature-time"></div>
+      </div>
+
+      <div class="form-grid">
+        <div>
+          <label>Date</label>
+          <input id="revampApprovalDate" type="text" readonly>
+        </div>
+        <div>
+          <label>Deposit Amount</label>
+          <input id="revampApprovalDeposit" type="text" value="$5,500">
+        </div>
+      </div>
+
+      <div class="signature-actions">
+        <button class="btn btn-primary" type="button" id="saveRevampApprovalBtn">Save Customer Approval</button>
+        <button class="btn btn-soft" type="button" id="clearRevampApprovalBtn">Clear</button>
+      </div>
+
+      <div id="signatureStatus" class="signature-status">Approval form ready.</div>
+    </div>
+
+    <div class="signature-box">
+      <h4 style="margin-top:0;">After Approval</h4>
+      <div class="result-metric"><span>Signed Contract PDF</span><strong>Generate</strong></div>
+      <div class="result-metric"><span>Deposit Invoice</span><strong>Generate</strong></div>
+      <div class="result-metric"><span>Payment Schedule</span><strong>Create</strong></div>
+      <div class="result-metric"><span>Customer Copy Email</span><strong>Send</strong></div>
+      <div class="result-metric"><span>Internal Job Folder</span><strong>Open</strong></div>
+    </div>
   </div>
+</section>
 
-  <div id="signatureStatus" class="signature-status"></div>
-</div>
-
-            </div>
-
-            <div class="signature-box">
-              <h4 style="margin-top:0;">After Approval</h4>
-              <div class="result-metric"><span>Signed Contract PDF</span><strong>Generate</strong></div>
-              <div class="result-metric"><span>Deposit Invoice</span><strong>Generate</strong></div>
-              <div class="result-metric"><span>Payment Schedule</span><strong>Create</strong></div>
-              <div class="result-metric"><span>Customer Copy Email</span><strong>Send</strong></div>
-              <div class="result-metric"><span>Internal Job Folder</span><strong>Open</strong></div>
-            </div>
-          </div>
-        </section>
 </main>
     </div>
 
@@ -10996,8 +11005,11 @@ window.addEventListener("load", function(){
 
 
 
+
+
+
 <script>
-/* ===== REVAMPLEX SIMPLE APPROVAL SIGNATURE ENGINE — FINAL ===== */
+/* ===== REVAMPLEX FINAL SIMPLE APPROVAL ENGINE ===== */
 (function(){
   function byId(id){ return document.getElementById(id); }
 
@@ -11009,12 +11021,16 @@ window.addEventListener("load", function(){
     });
   }
 
-  function updatePreview(){
-    const name = (byId("revampApprovalName")?.value || "").trim();
+  function updateRevampApprovalPreview(){
+    const nameInput = byId("revampApprovalName");
     const preview = byId("revampSignaturePreview");
-    const date = byId("revampApprovalDate");
+    const dateInput = byId("revampApprovalDate");
 
-    if(date && !date.value) date.value = todayText();
+    if(dateInput && !dateInput.value){
+      dateInput.value = todayText();
+    }
+
+    const name = (nameInput && nameInput.value ? nameInput.value : "").trim();
 
     if(preview){
       preview.textContent = name || "Type customer name above";
@@ -11023,97 +11039,138 @@ window.addEventListener("load", function(){
   }
 
   window.saveRevampTypedApproval = function(){
-    const name = (byId("revampApprovalName")?.value || "").trim();
+    const nameInput = byId("revampApprovalName");
     const scope = byId("revampApproveScope");
     const changes = byId("revampApproveChanges");
     const start = byId("revampApproveStart");
     const status = byId("signatureStatus");
     const timestamp = byId("revampSignatureTimestamp");
 
+    const name = (nameInput && nameInput.value ? nameInput.value : "").trim();
+
     if(!name){
-      if(status) status.textContent = "Type the customer's full name first.";
-      byId("revampApprovalName")?.focus();
+      if(status) status.textContent = "Type the customer's full legal name first.";
+      if(nameInput) nameInput.focus();
       return false;
     }
 
-    if(!scope?.checked || !changes?.checked || !start?.checked){
+    if(!scope.checked || !changes.checked || !start.checked){
       if(status) status.textContent = "Check all approval boxes before saving.";
       return false;
     }
 
     const savedAt = new Date().toLocaleString();
+
     window.revampCustomerSignatureName = name;
     window.revampCustomerSignatureDataUrl = "typed-approval:" + name;
     window.revampCustomerApprovalSavedAt = savedAt;
 
-    if(timestamp) timestamp.textContent = "Approved electronically by " + name + " on " + savedAt + ".";
-    if(status) status.textContent = "Customer approval saved.";
+    if(timestamp){
+      timestamp.textContent = "Approved electronically by " + name + " on " + savedAt + ".";
+    }
+
+    if(status){
+      status.textContent = "Customer approval saved.";
+    }
 
     return true;
   };
 
   window.clearRevampTypedApproval = function(){
-    const name = byId("revampApprovalName");
-    const scope = byId("revampApproveScope");
-    const changes = byId("revampApproveChanges");
-    const start = byId("revampApproveStart");
+    const ids = ["revampApprovalName"];
+    ids.forEach(id => {
+      const item = byId(id);
+      if(item) item.value = "";
+    });
+
+    ["revampApproveScope","revampApproveChanges","revampApproveStart"].forEach(id => {
+      const item = byId(id);
+      if(item) item.checked = false;
+    });
+
     const status = byId("signatureStatus");
     const timestamp = byId("revampSignatureTimestamp");
 
-    if(name) name.value = "";
-    if(scope) scope.checked = false;
-    if(changes) changes.checked = false;
-    if(start) start.checked = false;
-    if(timestamp) timestamp.textContent = "";
     if(status) status.textContent = "Approval cleared.";
+    if(timestamp) timestamp.textContent = "";
 
     window.revampCustomerSignatureName = "";
     window.revampCustomerSignatureDataUrl = "";
     window.revampCustomerApprovalSavedAt = "";
 
-    updatePreview();
+    updateRevampApprovalPreview();
   };
 
   window.saveCustomerSignature = window.saveRevampTypedApproval;
   window.clearCustomerSignature = window.clearRevampTypedApproval;
 
-  function bind(){
-    const name = byId("revampApprovalName");
-    if(!name || name.dataset.revampApprovalBound === "true") return;
-    name.dataset.revampApprovalBound = "true";
-    name.addEventListener("input", updatePreview);
-    name.addEventListener("keyup", updatePreview);
-    updatePreview();
+  function bindRevampApproval(){
+    const nameInput = byId("revampApprovalName");
+    const saveBtn = byId("saveRevampApprovalBtn");
+    const clearBtn = byId("clearRevampApprovalBtn");
+
+    if(!nameInput) return;
+
+    if(nameInput.dataset.revampApprovalBound !== "true"){
+      nameInput.dataset.revampApprovalBound = "true";
+      nameInput.addEventListener("input", updateRevampApprovalPreview);
+      nameInput.addEventListener("keyup", updateRevampApprovalPreview);
+    }
+
+    if(saveBtn && saveBtn.dataset.revampApprovalBound !== "true"){
+      saveBtn.dataset.revampApprovalBound = "true";
+      saveBtn.addEventListener("click", function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        window.saveRevampTypedApproval();
+      });
+    }
+
+    if(clearBtn && clearBtn.dataset.revampApprovalBound !== "true"){
+      clearBtn.dataset.revampApprovalBound = "true";
+      clearBtn.addEventListener("click", function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        window.clearRevampTypedApproval();
+      });
+    }
+
+    updateRevampApprovalPreview();
   }
 
   document.addEventListener("DOMContentLoaded", function(){
-    setTimeout(bind,200);
-    setTimeout(bind,800);
-    setTimeout(bind,1600);
+    setTimeout(bindRevampApproval,200);
+    setTimeout(bindRevampApproval,900);
+    setTimeout(bindRevampApproval,1800);
   });
 
   window.addEventListener("load", function(){
-    setTimeout(bind,200);
-    setTimeout(bind,1000);
+    setTimeout(bindRevampApproval,200);
+    setTimeout(bindRevampApproval,900);
+    setTimeout(bindRevampApproval,1800);
   });
 
   const wrapShow = function(){
-    if(typeof window.showCommandStage === "function" && !window.__revampSimpleApprovalWrapped){
+    if(typeof window.showCommandStage === "function" && !window.__revampFinalApprovalWrapped){
       const oldShow = window.showCommandStage;
-      window.__revampSimpleApprovalWrapped = true;
+      window.__revampFinalApprovalWrapped = true;
+
       window.showCommandStage = function(targetId){
         const result = oldShow.apply(this, arguments);
         if(targetId === "signaturePanel"){
-          setTimeout(bind,150);
-          setTimeout(bind,700);
+          setTimeout(bindRevampApproval,150);
+          setTimeout(bindRevampApproval,700);
+          setTimeout(bindRevampApproval,1300);
         }
         return result;
       };
     }
   };
 
-  setTimeout(wrapShow,400);
-  setTimeout(wrapShow,1300);
+  setTimeout(wrapShow,300);
+  setTimeout(wrapShow,1200);
+
+  window.bindRevampApproval = bindRevampApproval;
 })();
 </script>
 
