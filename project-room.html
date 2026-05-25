@@ -12971,7 +12971,7 @@ async function submitProjectReview(){
     const reviewRecord = {
       job_id: ctx.jobId,
       reviewer_id: user.id,
-      reviewed_user_id: ctx.reviewedUserId,
+      reviewed_user_id: ctx.reviewedUserId || null,
       reviewer_role: ctx.role,
       reviewed_role: ctx.reviewedRole,
       rating,
