@@ -4685,7 +4685,7 @@ body.command-room #completionPanel .summary-box * {
               <h2 id="jobTitle">Loading...</h2>
               <p id="jobMeta">Loading job details...</p>
             </div>
-            <div class="status-pill">● In Estimate Review</div>
+            <div class="status-pill" id="projectStatusPill">● In Estimate Review</div>
           </div>
 
           <div class="mini-stats">
@@ -4699,7 +4699,7 @@ body.command-room #completionPanel .summary-box * {
             </div>
             <div class="stat">
               <div class="label">Approval Status</div>
-              <div class="value">Pending Signature</div>
+              <div class="value" id="jobApprovalStatus">Pending Signature</div>
             </div>
             <div class="stat">
               <div class="label">Room Size</div>
@@ -6464,9 +6464,11 @@ function refreshJobMetaFromVisibleContractorFields() {
 
   document.getElementById("jobRoomSize").innerText = job.room_size || "N/A";
 
-  document.getElementById("jobStartGoal").innerText = job.start_goal || "TBD";
+  const startGoalText = job.start_goal || job.start_date || job.projected_start_date || "TBD";
+  document.getElementById("jobStartGoal").innerText = startGoalText;
 
-  document.getElementById("jobDeposit").innerText = job.deposit || "$0";
+  const savedDepositText = job.deposit || job.deposit_requested || job.suggested_deposit || "";
+  document.getElementById("jobDeposit").innerText = savedDepositText || (document.getElementById("depositOut")?.textContent || "$0.00");
 
   const topJobTitle = document.getElementById("topJobTitle");
   const topJobTrade = document.getElementById("topJobTrade");
@@ -6477,6 +6479,10 @@ function refreshJobMetaFromVisibleContractorFields() {
   if (topJobTrade) topJobTrade.innerText = job.trade || "General";
   if (topJobCity) topJobCity.innerText = job.city || "NJ Area";
   if (topJobBudget) topJobBudget.innerText = job.budget || "$0";
+
+  if (typeof revampUpdateProjectOverviewApprovalStatus === "function") revampUpdateProjectOverviewApprovalStatus();
+  if (typeof revampUpdateProjectOverviewDeposit === "function") revampUpdateProjectOverviewDeposit();
+  if (typeof revampUpdateProjectOverviewStartGoalFromCalendar === "function") revampUpdateProjectOverviewStartGoalFromCalendar();
 
 }
   loadJob();
@@ -8013,6 +8019,10 @@ function updateEstimateMetaOutputs(){
     const el = document.getElementById(id);
     if (el) el.textContent = value;
   });
+
+  if (typeof revampUpdateProjectOverviewDeposit === "function") {
+    revampUpdateProjectOverviewDeposit();
+  }
 }
 
 function setEstimateApprovalStatus(status){
@@ -9946,6 +9956,9 @@ function renderCalendar(){
   grid.innerHTML = html;
   renderAppointmentList();
   updateNextAppointmentStat();
+  if (typeof revampUpdateProjectOverviewStartGoalFromCalendar === "function") {
+    revampUpdateProjectOverviewStartGoalFromCalendar();
+  }
 }
 
 function selectCalendarDate(dateKey){
@@ -12814,6 +12827,61 @@ function revampClearPartySignature(event, role){
   return false;
 }
 
+function revampUpdateProjectOverviewApprovalStatus(){
+  const homeownerSigned = !!window.revamp_homeowner_signature_name;
+  const contractorSigned = !!window.revamp_contractor_signature_name;
+  const approvalValue = document.getElementById("jobApprovalStatus");
+  const statusPill = document.getElementById("projectStatusPill");
+
+  let label = "Pending Signature";
+  let pill = "● Pending Signature";
+
+  if (homeownerSigned && contractorSigned) {
+    label = "Fully Signed";
+    pill = "● Fully Signed";
+  } else if (homeownerSigned || contractorSigned) {
+    label = "Partially Signed";
+    pill = "● Partially Signed";
+  }
+
+  if (approvalValue) approvalValue.textContent = label;
+  if (statusPill) statusPill.textContent = pill;
+}
+
+function revampUpdateProjectOverviewDeposit(){
+  const depositEl = document.getElementById("jobDeposit");
+  if (!depositEl) return;
+
+  const current = String(depositEl.textContent || "").trim();
+  const calculated = document.getElementById("depositOut")?.textContent || "";
+
+  // Only overwrite empty/default values. If the saved job has its own deposit, keep it.
+  if (!current || current === "$0" || current === "$0.00" || current === "Loading...") {
+    depositEl.textContent = calculated || "$0.00";
+  }
+}
+
+function revampUpdateProjectOverviewStartGoalFromCalendar(){
+  const startEl = document.getElementById("jobStartGoal");
+  const appointments = Array.isArray(window.projectAppointments)
+    ? window.projectAppointments
+    : (typeof projectAppointments !== "undefined" && Array.isArray(projectAppointments) ? projectAppointments : []);
+
+  if (!startEl || !appointments.length) return;
+
+  const current = String(startEl.textContent || "").trim();
+  if (current && current !== "TBD" && current !== "Loading...") return;
+  const projectedStart = appointments
+    .filter(a => String(a.type || "").toLowerCase().includes("projected start"))
+    .sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")))[0];
+
+  if (projectedStart?.date) {
+    const [y, m, d] = String(projectedStart.date).split("-").map(Number);
+    const dt = new Date(y, (m || 1) - 1, d || 1);
+    startEl.textContent = dt.toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric" });
+  }
+}
+
 function revampUpdateFinalSignedDocStatus(){
   const finalDoc = revampEl("finalSignedDocStatus");
   const homeownerSigned = !!window.revamp_homeowner_signature_name;
@@ -12824,6 +12892,8 @@ function revampUpdateFinalSignedDocStatus(){
       ? "Ready to Generate"
       : "Locked Until Both Sign";
   }
+
+  revampUpdateProjectOverviewApprovalStatus();
 }
 
 function revampBindTwoPartySignatures(){
