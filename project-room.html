@@ -11294,6 +11294,129 @@ body.command-room .revamp-after-approval-card *{
     color:#0f172a !important;
 
 }
+
+
+/* =========================================================
+   REVAMPLEX FINAL APPROVAL FONT PATCH — LIGHT/DARK CLEAN
+   Matches requested image: black approval header in light mode,
+   white approval header in dark mode, with no text shadow/glow.
+   Keep this at the very bottom of the last <style> block.
+   ========================================================= */
+body.command-room #signaturePanel.command-active-panel::before{
+  content:"Selected Station" !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  margin-bottom:26px !important;
+  padding:12px 18px !important;
+  border-radius:999px !important;
+  background:linear-gradient(135deg,#f97316,#ea580c) !important;
+  color:#ffffff !important;
+  -webkit-text-fill-color:#ffffff !important;
+  font-weight:950 !important;
+  letter-spacing:.03em !important;
+  text-transform:uppercase !important;
+  text-shadow:none !important;
+  box-shadow:0 10px 24px rgba(249,115,22,.22) !important;
+}
+
+body.command-room #signaturePanel.command-active-panel > .panel-header,
+body.command-room #signaturePanel.command-active-panel > .panel-header > div{
+  background:transparent !important;
+  background-image:none !important;
+  box-shadow:none !important;
+  border:0 !important;
+}
+
+body.command-room #signaturePanel.command-active-panel > .panel-header h1,
+body.command-room #signaturePanel.command-active-panel > .panel-header h2,
+body.command-room #signaturePanel.command-active-panel > .panel-header h3,
+body.command-room #signaturePanel.command-active-panel > .panel-header h4{
+  color:#ffffff !important;
+  -webkit-text-fill-color:#ffffff !important;
+  opacity:1 !important;
+  text-shadow:none !important;
+  filter:none !important;
+  font-weight:950 !important;
+  letter-spacing:-.035em !important;
+}
+
+body.command-room #signaturePanel.command-active-panel > .panel-header p,
+body.command-room #signaturePanel.command-active-panel > .panel-header span{
+  color:#ffffff !important;
+  -webkit-text-fill-color:#ffffff !important;
+  opacity:1 !important;
+  text-shadow:none !important;
+  filter:none !important;
+  font-weight:500 !important;
+}
+
+body.command-room #signaturePanel.command-active-panel .btn-soft,
+body.command-room #signaturePanel.command-active-panel button.btn-soft[onclick*="loadProjectSignatures"]{
+  background:transparent !important;
+  color:#f97316 !important;
+  -webkit-text-fill-color:#f97316 !important;
+  border:2px solid #f97316 !important;
+  box-shadow:none !important;
+  text-shadow:none !important;
+}
+
+body.light-room.command-room #signaturePanel.command-active-panel > .panel-header h1,
+body.light-room.command-room #signaturePanel.command-active-panel > .panel-header h2,
+body.light-room.command-room #signaturePanel.command-active-panel > .panel-header h3,
+body.light-room.command-room #signaturePanel.command-active-panel > .panel-header h4{
+  color:#030712 !important;
+  -webkit-text-fill-color:#030712 !important;
+  text-shadow:none !important;
+  filter:none !important;
+}
+
+body.light-room.command-room #signaturePanel.command-active-panel > .panel-header p,
+body.light-room.command-room #signaturePanel.command-active-panel > .panel-header span{
+  color:#030712 !important;
+  -webkit-text-fill-color:#030712 !important;
+  text-shadow:none !important;
+  filter:none !important;
+}
+
+body.light-room.command-room #signaturePanel.command-active-panel .private-room-alert,
+body.light-room.command-room #signaturePanel.command-active-panel .private-room-alert *,
+body.light-room.command-room #signaturePanel.command-active-panel .revamp-signature-security,
+body.light-room.command-room #signaturePanel.command-active-panel .revamp-signature-security *,
+body.light-room.command-room #signaturePanel.command-active-panel .signature-security,
+body.light-room.command-room #signaturePanel.command-active-panel .signature-security *{
+  color:#030712 !important;
+  -webkit-text-fill-color:#030712 !important;
+  text-shadow:none !important;
+  filter:none !important;
+}
+
+body:not(.light-room).command-room #signaturePanel.command-active-panel .private-room-alert,
+body:not(.light-room).command-room #signaturePanel.command-active-panel .private-room-alert *,
+body:not(.light-room).command-room #signaturePanel.command-active-panel .revamp-signature-security,
+body:not(.light-room).command-room #signaturePanel.command-active-panel .revamp-signature-security *,
+body:not(.light-room).command-room #signaturePanel.command-active-panel .signature-security,
+body:not(.light-room).command-room #signaturePanel.command-active-panel .signature-security *{
+  color:#ffffff !important;
+  -webkit-text-fill-color:#ffffff !important;
+  text-shadow:none !important;
+  filter:none !important;
+}
+
+body.light-room.command-room #signaturePanel.command-active-panel .private-room-alert,
+body.light-room.command-room #signaturePanel.command-active-panel .revamp-signature-security,
+body.light-room.command-room #signaturePanel.command-active-panel .signature-security{
+  background:#ffffff !important;
+  background-image:none !important;
+  border:1px solid #e2e8f0 !important;
+  box-shadow:none !important;
+}
+
+body.command-room #signaturePanel.command-active-panel .signature-box,
+body.command-room #signaturePanel.command-active-panel .signature-box *{
+  text-shadow:none !important;
+  filter:none !important;
+}
 </style>
 
 <script>
@@ -12163,16 +12286,24 @@ setInterval(function(){
     const p = panel();
     if(!p) return;
 
+    const isLight = document.body.classList.contains("light-room");
+    const headerColor = isLight ? "#030712" : "#ffffff";
+
     Array.from(p.querySelectorAll(".panel-header h3,.panel-header p,[class*='security'],[id*='security']")).forEach(el=>{
-      el.style.color = "#ffffff";
+      el.style.color = headerColor;
       el.style.opacity = "1";
+      el.style.textShadow = "none";
+      el.style.webkitTextFillColor = headerColor;
     });
 
     Array.from(p.querySelectorAll(".signature-box,.signature-card,[class*='signature-box'],[class*='signature-card']")).forEach(card=>{
       card.style.background = "#ffffff";
       card.style.color = "#0f172a";
+      card.style.textShadow = "none";
       Array.from(card.querySelectorAll("*")).forEach(el=>{
         el.style.color = "#0f172a";
+        el.style.textShadow = "none";
+        el.style.webkitTextFillColor = "#0f172a";
       });
     });
   }
