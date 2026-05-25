@@ -12665,6 +12665,32 @@ async function revampSavePartySignature(event, role){
     job_id: activeJobId
   });
 
+  // If this signature completes both sides, send a second "both parties signed" notification.
+  // localStorage prevents duplicate emails if someone re-saves or refreshes.
+  try {
+    const { data: signedJob, error: signedJobError } = await supabaseClient
+      .from("jobs")
+      .select("id, homeowner_signature_name, contractor_signature_name, homeowner_signature_saved_at, contractor_signature_saved_at")
+      .eq("id", activeJobId)
+      .maybeSingle();
+
+    if (!signedJobError && signedJob?.homeowner_signature_name && signedJob?.contractor_signature_name) {
+      const bothSignedKey = "revamplex_both_signed_notified_" + activeJobId;
+      if (!localStorage.getItem(bothSignedKey)) {
+        await sendRevampZapierNotification("project_fully_signed", {
+          subject: "RevampLEX project fully signed",
+          message: "Both the homeowner and contractor have signed the project approval document.",
+          job_id: activeJobId,
+          homeowner_signed_at: signedJob.homeowner_signature_saved_at || "",
+          contractor_signed_at: signedJob.contractor_signature_saved_at || ""
+        });
+        localStorage.setItem(bothSignedKey, new Date().toISOString());
+      }
+    }
+  } catch (notifyErr) {
+    console.warn("Both-signature notification check skipped safely:", notifyErr);
+  }
+
   await loadSavedSignatures();
   return false;
 }
