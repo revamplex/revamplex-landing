@@ -6370,7 +6370,9 @@ function refreshJobMetaFromVisibleContractorFields() {
   }
 
   window.currentJob = data[0];
-  renderJob(data[0]);
+renderJob(data[0]);
+
+await checkCompletionStatus();
 }
   function renderJob(job){
 
