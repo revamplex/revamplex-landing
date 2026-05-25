@@ -3297,6 +3297,7 @@ body.command-room #photoDocsPanel:not(.command-active-panel),
 body.command-room #schedulePanel:not(.command-active-panel),
 body.command-room #videoChatPanel:not(.command-active-panel),
 body.command-room #signaturePanel:not(.command-active-panel),
+body.command-room #completionPanel:not(.command-active-panel),
 body.command-room #smartCalculatorPanel:not(.command-active-panel),
 body.command-room #takeoffLabPanel:not(.command-active-panel),
 body.command-room #estimateProposalPanel:not(.command-active-panel) {
@@ -4611,6 +4612,52 @@ body.command-room #signaturePanel .result-metric strong{
   color:#0f172a !important;
 }
 
+
+/* ===== REVAMPLEX PROJECT COMPLETION CLOSEOUT FIX ===== */
+#completionPanel .summary-box {
+  background:#ffffff !important;
+  color:#0f172a !important;
+  border:1px solid #e2e8f0 !important;
+}
+
+#completionPanel .summary-box *,
+#contractorCompleteStatus,
+#homeownerCompleteStatus {
+  color:#0f172a !important;
+  text-shadow:none !important;
+}
+
+#contractorCompleteStatus,
+#homeownerCompleteStatus {
+  display:inline-flex;
+  padding:4px 9px;
+  border-radius:999px;
+  background:#fff7ed;
+  border:1px solid #fed7aa;
+  color:#c2410c !important;
+  font-weight:900;
+}
+
+#contractorCompleteStatus.complete,
+#homeownerCompleteStatus.complete {
+  background:#ecfdf5;
+  border-color:#bbf7d0;
+  color:#166534 !important;
+}
+
+body.command-room #completionPanel > .panel-header,
+body.command-room #completionPanel > .panel-header * {
+  color:#ffffff !important;
+  opacity:1 !important;
+  text-shadow:0 2px 12px rgba(0,0,0,.55) !important;
+}
+
+body.command-room #completionPanel .summary-box,
+body.command-room #completionPanel .summary-box * {
+  color:#0f172a !important;
+  text-shadow:none !important;
+}
+
 </style>
 </head>
 <body class="command-room contractor-room">
@@ -4685,6 +4732,7 @@ body.command-room #signaturePanel .result-metric strong{
           <div class="nav-item" data-target="photoDocsPanel"><span>Photos + Docs</span><span>Upload</span></div>
           <div class="nav-item homeowner-only-nav" data-target="receivedBidsSection"><span>Review Bids</span><span>Private</span></div>
           <div class="nav-item" data-target="signaturePanel"><span>Customer Signature</span><span>Pending</span></div>
+          <div class="nav-item" data-target="completionPanel"><span>Project Completion</span><span>Closeout</span></div>
         </div>
       </aside>
 
@@ -5623,7 +5671,8 @@ function getGuideTargetPanelIds() {
     "estimateProposalPanel",
     "photoDocsPanel",
     "receivedBidsSection",
-    "signaturePanel"
+    "signaturePanel",
+    "completionPanel"
   ];
 }
 
@@ -5719,7 +5768,8 @@ function getCommandSteps() {
       { id: 'photoDocsPanel', title: 'Files + Photos', text: 'Upload plans, images, approvals, and questions.' },
       { id: 'schedulePanel', title: 'Schedule', text: 'Appointments and reminders for this room.' },
       { id: 'videoChatPanel', title: 'Live Room', text: 'Video, chat, and walkthrough notes.' },
-      { id: 'signaturePanel', title: 'Approval', text: 'Sign only when scope and terms are clear.' }
+      { id: 'signaturePanel', title: 'Approval', text: 'Sign only when scope and terms are clear.' },
+      { id: 'completionPanel', title: 'Completion', text: 'Both sides mark finished before the project closes.' }
     ];
   }
 
@@ -5731,7 +5781,8 @@ function getCommandSteps() {
     { id: 'photoDocsPanel', title: 'Files + Evidence', text: 'Photos, videos, docs, permits, and project files.' },
     { id: 'schedulePanel', title: 'Schedule', text: 'Set visits, estimate calls, and job milestones.' },
     { id: 'videoChatPanel', title: 'Live Room', text: 'Video call, screen share, and private chat.' },
-    { id: 'signaturePanel', title: 'Approval Console', text: 'Make the final approval clean and easy.' }
+    { id: 'signaturePanel', title: 'Approval Console', text: 'Make the final approval clean and easy.' },
+    { id: 'completionPanel', title: 'Project Completion', text: 'Close out the project after both sides confirm.' }
   ];
 }
 
@@ -5746,7 +5797,8 @@ function getCommandPanelIds() {
     'estimateProposalPanel',
     'photoDocsPanel',
     'receivedBidsSection',
-    'signaturePanel'
+    'signaturePanel',
+    'completionPanel'
   ];
 }
 
@@ -11457,6 +11509,52 @@ body.command-room #signaturePanel.command-active-panel .signature-box *{
   text-shadow:none !important;
   filter:none !important;
 }
+
+/* ===== REVAMPLEX PROJECT COMPLETION CLOSEOUT FIX ===== */
+#completionPanel .summary-box {
+  background:#ffffff !important;
+  color:#0f172a !important;
+  border:1px solid #e2e8f0 !important;
+}
+
+#completionPanel .summary-box *,
+#contractorCompleteStatus,
+#homeownerCompleteStatus {
+  color:#0f172a !important;
+  text-shadow:none !important;
+}
+
+#contractorCompleteStatus,
+#homeownerCompleteStatus {
+  display:inline-flex;
+  padding:4px 9px;
+  border-radius:999px;
+  background:#fff7ed;
+  border:1px solid #fed7aa;
+  color:#c2410c !important;
+  font-weight:900;
+}
+
+#contractorCompleteStatus.complete,
+#homeownerCompleteStatus.complete {
+  background:#ecfdf5;
+  border-color:#bbf7d0;
+  color:#166534 !important;
+}
+
+body.command-room #completionPanel > .panel-header,
+body.command-room #completionPanel > .panel-header * {
+  color:#ffffff !important;
+  opacity:1 !important;
+  text-shadow:0 2px 12px rgba(0,0,0,.55) !important;
+}
+
+body.command-room #completionPanel .summary-box,
+body.command-room #completionPanel .summary-box * {
+  color:#0f172a !important;
+  text-shadow:none !important;
+}
+
 </style>
 
 <script>
@@ -12409,73 +12507,142 @@ setInterval(function(){
     if(panel()) bindAll();
   }, 1500);
 })();
-  async function markProjectComplete(){
 
-const jobId = currentJob.id;
+async function markProjectComplete(){
+  try {
+    const activeJob = window.currentJob || {};
+    const activeJobId = activeJob.id || jobId;
 
-const { data:{user } } =
-await supabaseClient.auth.getUser();
+    if (!activeJobId || activeJobId === "preview" || String(activeJobId).startsWith("demo")) {
+      alert("This project cannot be marked complete until it is connected to a real saved job.");
+      return;
+    }
 
-if(!user) return;
+    const { data:{ user } } = await supabaseClient.auth.getUser();
 
-const updates={};
+    if (!user) {
+      alert("Please sign in before marking the project complete.");
+      return;
+    }
 
-if(mode==="contractor"){
-updates.contractor_completed=true;
+    const role = typeof getWorkspaceRole === "function" ? getWorkspaceRole() : mode;
+    const updates = {};
+
+    if (role === "contractor") {
+      updates.contractor_completed = true;
+    } else if (role === "homeowner") {
+      updates.homeowner_completed = true;
+    } else {
+      alert("Could not detect whether you are the homeowner or contractor.");
+      return;
+    }
+
+    const { error } = await supabaseClient
+      .from("jobs")
+      .update(updates)
+      .eq("id", activeJobId);
+
+    if (error) {
+      console.error("Project completion update failed:", error);
+      alert("Could not update project completion. Check Supabase columns and RLS policies.");
+      return;
+    }
+
+    await checkCompletionStatus();
+
+  } catch (err) {
+    console.error("markProjectComplete failed:", err);
+    alert("Something went wrong while marking the project complete.");
+  }
 }
 
-if(mode==="homeowner"){
-updates.homeowner_completed=true;
+async function checkCompletionStatus(){
+  try {
+    const activeJob = window.currentJob || {};
+    const activeJobId = activeJob.id || jobId;
+
+    if (!activeJobId || activeJobId === "preview" || String(activeJobId).startsWith("demo")) {
+      refreshCompletionStatus(activeJob);
+      return;
+    }
+
+    const { data: job, error } = await supabaseClient
+      .from("jobs")
+      .select("id, contractor_completed, homeowner_completed, completed")
+      .eq("id", activeJobId)
+      .single();
+
+    if (error) {
+      console.error("Completion status lookup failed:", error);
+      return;
+    }
+
+    refreshCompletionStatus(job);
+
+    if (job.contractor_completed && job.homeowner_completed && !job.completed) {
+      const { error: closeError } = await supabaseClient
+        .from("jobs")
+        .update({ completed: true })
+        .eq("id", activeJobId);
+
+      if (closeError) {
+        console.error("Final closeout update failed:", closeError);
+        alert("Both sides marked complete, but final closeout could not be saved.");
+        return;
+      }
+
+      alert("Project completed successfully.");
+      showReviewPopup();
+    }
+
+  } catch (err) {
+    console.error("checkCompletionStatus failed:", err);
+  }
 }
 
-const {error}=await supabaseClient
-.from("jobs")
-.update(updates)
-.eq("id",jobId);
+function refreshCompletionStatus(job = {}){
+  const contractorStatus = document.getElementById("contractorCompleteStatus");
+  const homeownerStatus = document.getElementById("homeownerCompleteStatus");
+  const completeBtn = document.getElementById("markCompleteBtn");
 
-if(error){
-console.error(error);
-return;
+  const contractorDone = !!job.contractor_completed;
+  const homeownerDone = !!job.homeowner_completed;
+
+  if (contractorStatus) {
+    contractorStatus.textContent = contractorDone ? "Complete" : "Pending";
+    contractorStatus.classList.toggle("complete", contractorDone);
+  }
+
+  if (homeownerStatus) {
+    homeownerStatus.textContent = homeownerDone ? "Complete" : "Pending";
+    homeownerStatus.classList.toggle("complete", homeownerDone);
+  }
+
+  const role = typeof getWorkspaceRole === "function" ? getWorkspaceRole() : mode;
+  const currentSideDone = role === "contractor" ? contractorDone : homeownerDone;
+
+  if (completeBtn) {
+    completeBtn.disabled = currentSideDone || !!job.completed;
+    completeBtn.textContent = job.completed
+      ? "Project Completed"
+      : currentSideDone
+        ? "Your Side Is Complete"
+        : "Mark Project Complete";
+  }
 }
 
-await checkCompletionStatus();
-
-}
-  async function checkCompletionStatus(){
 function showReviewPopup(){
-
-alert(
-"Leave a review for your contractor/homeowner."
-);
-
-}
-const {data:job}=await supabaseClient
-.from("jobs")
-.select("*")
-.eq("id",currentJob.id)
-.single();
-
-if(
-job.contractor_completed &&
-job.homeowner_completed
-){
-
-await supabaseClient
-.from("jobs")
-.update({
-completed:true
-})
-.eq("id",currentJob.id);
-
-alert(
-"Project completed successfully."
-);
-
-showReviewPopup();
-
+  alert("Leave a review for your contractor/homeowner.");
 }
 
-}
+document.addEventListener("DOMContentLoaded", function(){
+  setTimeout(function(){
+    if (typeof checkCompletionStatus === "function") {
+      checkCompletionStatus();
+    }
+  }, 1200);
+});
+
 </script>
 
 </body>
