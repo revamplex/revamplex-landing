@@ -6286,8 +6286,14 @@ function refreshJobMetaFromVisibleContractorFields() {
 
   window.currentJob = data[0];
   renderJob(data[0]);
-  await checkCompletionStatus();
-  await loadSavedSignatures();
+
+  if (typeof checkCompletionStatus === "function") {
+    await checkCompletionStatus();
+  }
+
+  if (typeof loadSavedSignatures === "function") {
+    await loadSavedSignatures();
+  }
 }
   function renderJob(job){
 
@@ -12018,6 +12024,9 @@ async function revampSavePartySignature(event, role){
   const input = revampEl(role + "SignatureName");
   const confirm = revampEl(role + "SignatureConfirm");
   const preview = revampEl(role + "SignaturePreview");
+  const timestamp = revampEl(role + "SignatureTimestamp");
+  const pill = revampEl(role + "SignatureStatusPill");
+  const finalStatus = revampEl(role + "FinalStatus");
 
   const name = String(input?.value || preview?.textContent || "").trim();
 
@@ -12032,79 +12041,41 @@ async function revampSavePartySignature(event, role){
   }
 
   const activeJobId = window.currentJob?.id || jobId;
-
   if(!activeJobId || activeJobId === "preview" || String(activeJobId).startsWith("demo")){
-    if(status) status.textContent = "This signature cannot be permanently saved until this room is connected to a real saved job.";
+    if(status) status.textContent = "Signature can only be saved on a real saved project.";
     return false;
   }
 
-  const savedAt = new Date().toISOString();
+  const savedAtISO = new Date().toISOString();
+  const savedAtDisplay = new Date(savedAtISO).toLocaleString();
+
   const updateData = {};
   updateData[role + "_signature_name"] = name;
-  updateData[role + "_signature_saved_at"] = savedAt;
+  updateData[role + "_signature_saved_at"] = savedAtISO;
 
-  const { error } = await supabaseClient
-    .from("jobs")
-    .update(updateData)
-    .eq("id", activeJobId);
+  if(status) status.textContent = "Saving signature...";
 
-  if(error){
-    console.error("Signature save failed:", error);
-    if(status) status.textContent = "Signature could not be saved. Check Supabase columns/RLS.";
-    return false;
-  }
+  try{
+    const { error } = await supabaseClient
+      .from("jobs")
+      .update(updateData)
+      .eq("id", activeJobId);
 
-  window["revamp_" + role + "_signature_name"] = name;
-  window["revamp_" + role + "_signature_saved_at"] = savedAt;
-  window["revamp_" + role + "_signature_data"] = "typed-signature:" + name;
-
-  if(status){
-    status.textContent = (role === "homeowner" ? "Homeowner" : "Contractor") + " signature saved.";
-  }
-
-  await loadSavedSignatures();
-  return false;
-}
-
-async function loadSavedSignatures(){
-  const activeJobId = window.currentJob?.id || jobId;
-  if(!activeJobId || activeJobId === "preview" || String(activeJobId).startsWith("demo")) return;
-
-  const { data: job, error } = await supabaseClient
-    .from("jobs")
-    .select("homeowner_signature_name, homeowner_signature_saved_at, contractor_signature_name, contractor_signature_saved_at")
-    .eq("id", activeJobId)
-    .single();
-
-  if(error){
-    console.error("Could not load signatures:", error);
-    return;
-  }
-
-  ["homeowner", "contractor"].forEach(role => {
-    const name = job[role + "_signature_name"];
-    const savedAt = job[role + "_signature_saved_at"];
-
-    if(!name) return;
-
-    const input = revampEl(role + "SignatureName");
-    const confirm = revampEl(role + "SignatureConfirm");
-    const preview = revampEl(role + "SignaturePreview");
-    const timestamp = revampEl(role + "SignatureTimestamp");
-    const pill = revampEl(role + "SignatureStatusPill");
-    const finalStatus = revampEl(role + "FinalStatus");
+    if(error){
+      console.error("Signature save failed:", error);
+      if(status) status.textContent = "Signature could not be saved. Check Supabase columns/RLS.";
+      return false;
+    }
 
     window["revamp_" + role + "_signature_name"] = name;
-    window["revamp_" + role + "_signature_saved_at"] = savedAt || "";
+    window["revamp_" + role + "_signature_saved_at"] = savedAtDisplay;
     window["revamp_" + role + "_signature_data"] = "typed-signature:" + name;
 
-    if(input) input.value = name;
-    if(confirm) confirm.checked = true;
-    if(preview) preview.textContent = name;
+    localStorage.setItem("revamp_" + role + "_signature_name", name);
+    localStorage.setItem("revamp_" + role + "_signature_saved_at", savedAtDisplay);
 
     if(timestamp){
-      const shownDate = savedAt ? new Date(savedAt).toLocaleString() : "saved date";
-      timestamp.textContent = "Signed electronically by " + name + " on " + shownDate + ".";
+      timestamp.textContent = "Signed electronically by " + name + " on " + savedAtDisplay + ".";
     }
 
     if(pill){
@@ -12116,14 +12087,25 @@ async function loadSavedSignatures(){
     if(finalStatus){
       finalStatus.textContent = "Signed";
     }
-  });
 
-  if(typeof revampUpdateFinalSignedDocStatus === "function"){
+    if(status){
+      status.textContent = (role === "homeowner" ? "Homeowner" : "Contractor") + " signature saved.";
+    }
+
     revampUpdateFinalSignedDocStatus();
+
+    if(typeof loadSavedSignatures === "function"){
+      await loadSavedSignatures();
+    }
+  }catch(err){
+    console.error("Signature save failed:", err);
+    if(status) status.textContent = "Signature could not be saved.";
   }
+
+  return false;
 }
 
-function revampClearPartySignature(event, role){
+async function revampClearPartySignature(event, role){
   if(event){
     event.preventDefault();
     event.stopPropagation();
@@ -12135,6 +12117,25 @@ function revampClearPartySignature(event, role){
   if(role !== currentRole){
     if(status) status.textContent = "You can only clear your own signature.";
     return false;
+  }
+
+  const activeJobId = window.currentJob?.id || jobId;
+
+  if(activeJobId && activeJobId !== "preview" && !String(activeJobId).startsWith("demo")){
+    const updateData = {};
+    updateData[role + "_signature_name"] = null;
+    updateData[role + "_signature_saved_at"] = null;
+
+    const { error } = await supabaseClient
+      .from("jobs")
+      .update(updateData)
+      .eq("id", activeJobId);
+
+    if(error){
+      console.error("Signature clear failed:", error);
+      if(status) status.textContent = "Signature could not be cleared in Supabase.";
+      return false;
+    }
   }
 
   const input = revampEl(role + "SignatureName");
@@ -12150,6 +12151,9 @@ function revampClearPartySignature(event, role){
   window["revamp_" + role + "_signature_name"] = "";
   window["revamp_" + role + "_signature_saved_at"] = "";
   window["revamp_" + role + "_signature_data"] = "";
+
+  localStorage.removeItem("revamp_" + role + "_signature_name");
+  localStorage.removeItem("revamp_" + role + "_signature_saved_at");
 
   if(pill){
     pill.textContent = "Pending";
@@ -12182,6 +12186,76 @@ function revampUpdateFinalSignedDocStatus(){
   }
 }
 
+async function loadSavedSignatures(){
+  const activeJobId = window.currentJob?.id || jobId;
+  if(!activeJobId || activeJobId === "preview" || String(activeJobId).startsWith("demo")) return;
+
+  try{
+    const { data: job, error } = await supabaseClient
+      .from("jobs")
+      .select("homeowner_signature_name, homeowner_signature_saved_at, contractor_signature_name, contractor_signature_saved_at")
+      .eq("id", activeJobId)
+      .single();
+
+    if(error){
+      console.error("Could not load saved signatures:", error);
+      return;
+    }
+
+    ["homeowner", "contractor"].forEach(role => {
+      const name = job?.[role + "_signature_name"];
+      const savedAt = job?.[role + "_signature_saved_at"];
+
+      const input = revampEl(role + "SignatureName");
+      const confirm = revampEl(role + "SignatureConfirm");
+      const preview = revampEl(role + "SignaturePreview");
+      const timestamp = revampEl(role + "SignatureTimestamp");
+      const pill = revampEl(role + "SignatureStatusPill");
+      const finalStatus = revampEl(role + "FinalStatus");
+
+      if(!name){
+        window["revamp_" + role + "_signature_name"] = "";
+        window["revamp_" + role + "_signature_saved_at"] = "";
+        window["revamp_" + role + "_signature_data"] = "";
+        if(pill){
+          pill.textContent = "Pending";
+          pill.classList.remove("signed");
+          pill.classList.add("pending");
+        }
+        if(finalStatus) finalStatus.textContent = "Pending";
+        return;
+      }
+
+      const savedAtDisplay = savedAt ? new Date(savedAt).toLocaleString() : "saved date unavailable";
+
+      window["revamp_" + role + "_signature_name"] = name;
+      window["revamp_" + role + "_signature_saved_at"] = savedAtDisplay;
+      window["revamp_" + role + "_signature_data"] = "typed-signature:" + name;
+
+      if(input) input.value = name;
+      if(confirm) confirm.checked = true;
+      if(preview) preview.textContent = name;
+      if(timestamp){
+        timestamp.textContent = "Signed electronically by " + name + " on " + savedAtDisplay + ".";
+      }
+
+      if(pill){
+        pill.textContent = "Signed";
+        pill.classList.remove("pending");
+        pill.classList.add("signed");
+      }
+
+      if(finalStatus){
+        finalStatus.textContent = "Signed";
+      }
+    });
+
+    revampUpdateFinalSignedDocStatus();
+  }catch(err){
+    console.error("loadSavedSignatures failed:", err);
+  }
+}
+
 function revampBindTwoPartySignatures(){
   ["homeowner","contractor"].forEach(function(role){
     const input = revampEl(role + "SignatureName");
@@ -12209,12 +12283,14 @@ document.addEventListener("DOMContentLoaded", function(){
   setTimeout(revampBindTwoPartySignatures, 100);
   setTimeout(revampBindTwoPartySignatures, 600);
   setTimeout(revampBindTwoPartySignatures, 1400);
+  setTimeout(function(){ if(typeof loadSavedSignatures === "function") loadSavedSignatures(); }, 1600);
 });
 
 window.addEventListener("load", function(){
   setTimeout(revampBindTwoPartySignatures, 100);
   setTimeout(revampBindTwoPartySignatures, 900);
   setTimeout(revampBindTwoPartySignatures, 1800);
+  setTimeout(function(){ if(typeof loadSavedSignatures === "function") loadSavedSignatures(); }, 2000);
 });
 
 /* Keep rebinding after Command Deck moves the panel into the stage */
@@ -12472,8 +12548,7 @@ setInterval(function(){
     if(panel()) bindAll();
   }, 1500);
 })();
-
-async function markProjectComplete(){
+  async function markProjectComplete(){
   try {
     const activeJob = window.currentJob || {};
     const activeJobId = activeJob.id || jobId;
@@ -12560,10 +12635,6 @@ async function checkCompletionStatus(){
       showReviewPopup();
     }
 
-    if (job.completed) {
-      showReviewPopup();
-    }
-
   } catch (err) {
     console.error("checkCompletionStatus failed:", err);
   }
@@ -12642,8 +12713,8 @@ async function submitProjectReview(){
     });
 
   if(error){
-    console.error("Review save failed:", error);
-    if(status) status.textContent = "Review could not be saved. Check reviews table/RLS.";
+    console.error(error);
+    if(status) status.textContent = "Review could not be saved.";
     return;
   }
 
@@ -12652,8 +12723,12 @@ async function submitProjectReview(){
 
 document.addEventListener("DOMContentLoaded", function(){
   setTimeout(function(){
-    if (typeof loadSavedSignatures === "function") loadSavedSignatures();
-    if (typeof checkCompletionStatus === "function") checkCompletionStatus();
+    if (typeof checkCompletionStatus === "function") {
+      checkCompletionStatus();
+    }
+    if (typeof loadSavedSignatures === "function") {
+      loadSavedSignatures();
+    }
   }, 1200);
 });
 </script>
