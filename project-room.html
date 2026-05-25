@@ -12986,11 +12986,29 @@ async function submitProjectReview(){
       .from("reviews")
       .insert(reviewRecord);
 
-    if(error){
-      console.error("Review save failed:", error);
-      if(status) status.textContent = "Review could not be saved: " + (error.message || "check Supabase RLS/table columns.");
-      return;
+   if(error){
+  console.error("Review save failed:", error);
+
+  if(error.code === "23505"){
+    if(status) status.textContent = "You already submitted a review for this project.";
+
+    const panel = document.getElementById("reviewPopupPanel");
+    const submitBtn = panel?.querySelector('button[onclick*="submitProjectReview"]');
+
+    if(submitBtn){
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Review Already Submitted";
     }
+
+    return;
+  }
+
+  if(status){
+    status.textContent = "Review could not be saved: " + (error.message || "check Supabase RLS/table columns.");
+  }
+
+  return;
+}
 
     if(status) status.textContent = "Review submitted successfully.";
 
