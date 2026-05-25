@@ -5580,7 +5580,7 @@ function scrollToSection(id) {
 
 try{
 
-const { data:{ user } } = await supabaseClient.auth.getUser();
+const { data:{ user } } = await supabase.auth.getUser();
 
 if(!user){
    alert("Please sign in");
@@ -5591,7 +5591,7 @@ setLoading(true);
 
 
 // get current job
-const { data:job, error:jobError } = await supabaseClient
+const { data:job, error:jobError } = await supabase
 .from('jobs')
 .select('*')
 .eq('id',jobId)
@@ -5609,7 +5609,7 @@ if((job.bids_received || 0) >= (job.max_bids || 3)){
 
 // create room immediately
 const { data:room, error:roomError } =
-await supabaseClient
+await supabase
 .from('project_rooms')
 .insert({
     job_id:job.id,
@@ -5627,7 +5627,7 @@ if(roomError) throw roomError;
 
 // create bid record
 const { error:bidError } =
-await supabaseClient
+await supabase
 .from('bids')
 .insert({
    contractor_id:user.id,
@@ -5641,7 +5641,7 @@ if(bidError) throw bidError;
 
 
 // increment bid count
-await supabaseClient
+await supabase
 .from('jobs')
 .update({
    bids_received:(job.bids_received || 0)+1
@@ -5651,13 +5651,13 @@ await supabaseClient
 
 // increment contractor usage
 const { data:profile } =
-await supabaseClient
+await supabase
 .from('profiles')
 .select('bids_used')
 .eq('id',user.id)
 .single();
 
-await supabaseClient
+await supabase
 .from('profiles')
 .update({
    bids_used:(profile?.bids_used || 0)+1
@@ -6265,18 +6265,11 @@ function refreshJobMetaFromVisibleContractorFields() {
   async function loadJob() {
 
   const params = new URLSearchParams(window.location.search);
-  let rawJobId = params.get("job");
-  const roomIdFromUrl =
-    params.get("room") ||
-    params.get("room_id") ||
-    params.get("project_room") ||
-    params.get("id");
-
-  const modeParam = params.get("mode");
+  const rawJobId = params.get('job');
+  const modeParam = params.get('mode');
   const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null");
 
   console.log("RAW PROJECT ROOM JOB ID:", rawJobId);
-  console.log("RAW PROJECT ROOM ROOM ID:", roomIdFromUrl);
   console.log("PROJECT ROOM MODE:", modeParam);
   console.log("SAVED SESSION JOB:", savedJob);
 
@@ -6310,37 +6303,6 @@ function refreshJobMetaFromVisibleContractorFields() {
       description: savedJob.description || "Project loaded from map session."
     });
     return;
-  }
-
-  // IMPORTANT FIX:
-  // Some buttons open project-room.html?id={project_room_id}&mode=contractor.
-  // The old code only read ?job=, so job info stayed stuck on "Loading..."
-  // or fell into preview mode. This resolves ?id / ?room to project_rooms.job_id first.
-  let loadedRoom = null;
-
-  if (!rawJobId && roomIdFromUrl) {
-    try {
-      const { data: roomData, error: roomError } = await supabaseClient
-        .from("project_rooms")
-        .select("*")
-        .eq("id", roomIdFromUrl)
-        .maybeSingle();
-
-      if (!roomError && roomData) {
-        loadedRoom = roomData;
-        rawJobId = roomData.job_id;
-        if (typeof currentProjectRoomId !== "undefined") {
-          currentProjectRoomId = roomData.id;
-        }
-        console.log("Resolved project room to job:", loadedRoom);
-      } else {
-        console.warn("Could not resolve project room from URL id. Will try id as job id next.", roomError);
-        rawJobId = roomIdFromUrl;
-      }
-    } catch (err) {
-      console.warn("Project room lookup failed. Will try URL id as job id next.", err);
-      rawJobId = roomIdFromUrl;
-    }
   }
 
   if (!rawJobId) {
@@ -6381,9 +6343,9 @@ function refreshJobMetaFromVisibleContractorFields() {
   console.log("LOADING JOB ID:", jobIdValue);
 
   const { data, error } = await supabaseClient
-    .from("jobs")
-    .select("*")
-    .eq("id", jobIdValue);
+    .from('jobs')
+    .select('*')
+    .eq('id', jobIdValue);
 
   if (error) {
     console.error("SUPABASE ERROR:", error);
@@ -6421,15 +6383,10 @@ function refreshJobMetaFromVisibleContractorFields() {
   }
 
   window.currentJob = data[0];
-  window.currentProject = data[0]; // backwards-compatible alias for older notification code
-  if (loadedRoom) {
-    window.currentProjectRoom = loadedRoom;
-  }
+renderJob(data[0]);
 
-  renderJob(data[0]);
-
-  await checkCompletionStatus();
-  await loadSavedSignatures();
+await checkCompletionStatus();
+await loadSavedSignatures();
 }
   function renderJob(job){
 
@@ -6550,9 +6507,26 @@ async function revampGetNotificationContext(extra = {}){
 
   const notificationJobId = extra.job_id || room?.job_id || job.id || params.get("job") || "";
   const contractorId = extra.contractor_id || room?.contractor_id || params.get("contractor") || savedContractor?.id || "";
-  const homeownerId = extra.homeowner_id || room?.homeowner_id || job.user_id || job.homeowner_id || job.customer_id || "";
 
-  let homeownerEmail = revampSafeText(job.customer_email || job.homeowner_email || job.email || "");
+  // If this page was opened by project room id (?id=roomId), window.currentJob can be empty.
+  // Pull the real job row before choosing homeowner/contractor recipient emails.
+  let notificationJob = job || {};
+  try {
+    if (notificationJobId && (!notificationJob?.customer_email || !notificationJob?.title) && window.supabaseClient) {
+      const { data } = await supabaseClient
+        .from("jobs")
+        .select("*")
+        .eq("id", notificationJobId)
+        .maybeSingle();
+      if (data) notificationJob = data;
+    }
+  } catch(err) {
+    console.warn("Zapier job email lookup skipped:", err);
+  }
+
+  const homeownerId = extra.homeowner_id || room?.homeowner_id || notificationJob.user_id || notificationJob.homeowner_id || notificationJob.customer_id || "";
+
+  let homeownerEmail = revampSafeText(notificationJob.customer_email || notificationJob.homeowner_email || notificationJob.email || "");
   let homeownerName = revampSafeText(job.customer_name || job.homeowner_name || "Homeowner");
   let contractorEmail = revampSafeText(savedContractor?.email || document.getElementById("contractorEmail")?.value || "");
   let contractorName = revampSafeText(savedContractor?.company || savedContractor?.name || document.getElementById("contractorCompany")?.value || document.getElementById("contractorName")?.value || "Contractor");
@@ -6612,10 +6586,10 @@ async function revampGetNotificationContext(extra = {}){
     project_room_id: roomId || "",
     contractor_id: contractorId || "",
     homeowner_id: homeownerId || "",
-    job_title: job.title || extra.job_title || "Revamp Project",
-    trade: job.trade || "",
-    city: job.city || "",
-    budget: job.budget || "",
+    job_title: notificationJob.title || extra.job_title || "Revamp Project",
+    trade: notificationJob.trade || "",
+    city: notificationJob.city || "",
+    budget: notificationJob.budget || "",
     homeowner_email: homeownerEmail,
     homeowner_name: homeownerName,
     contractor_email: contractorEmail,
@@ -8357,43 +8331,41 @@ async function sendPrivateChatMessage(){
   if (sendBtn) sendBtn.disabled = true;
 
   try {
-    if (!roomId) {
-      throw new Error("No private project room available yet.");
-    }
+    if (roomId) {
+      const { error } = await supabaseClient
+        .from("project_chat_messages")
+        .insert({
+          project_room_id: roomId,
+          job_id: typeof getNumericProjectRoomJobId === "function" ? getNumericProjectRoomJobId() : null,
+          sender_id: user?.id || null,
+          sender_role: actor.role,
+          sender_name: actor.label,
+          body: text
+        });
 
-    const { error } = await supabaseClient
-      .from("project_chat_messages")
-      .insert({
+      if (error) throw error;
+
+chatUsesSupabase = true;
+
+      // Send email notification through the main RevampLEX Zapier notification center.
+      // This replaces the old placeholder hook and uses recipient_email/homeowner_email/contractor_email.
+      await sendRevampZapierNotification("project_chat_message", {
+        subject: "New RevampLEX project chat message",
+        message: "A new private project-room chat message was sent.",
         project_room_id: roomId,
+        room_id: roomId,
         job_id: typeof getNumericProjectRoomJobId === "function" ? getNumericProjectRoomJobId() : null,
-        sender_id: user?.id || null,
-        sender_role: actor.role,
-        sender_name: actor.label,
-        body: text
+        chat_sender_role: actor.role,
+        chat_sender_name: actor.label,
+        chat_message: text,
+        message_preview: text.substring(0, 140)
       });
 
-    if (error) throw error;
+      chatInput.value = "";
+      await loadPrivateChatMessages({ ping:false });
+      return;
 
-    chatUsesSupabase = true;
-    chatInput.value = "";
-
-    // IMPORTANT FIX:
-    // The old pasted block used a placeholder Zapier URL and window.currentProject.
-    // This uses your central RevampLEX webhook + context builder, so Zapier gets
-    // recipient_email, homeowner_email, contractor_email, project_room_url, etc.
-    await sendRevampZapierNotification("project_chat_message", {
-      subject: "New RevampLEX project chat message",
-      message: "A new private project-room chat message was sent.",
-      project_room_id: roomId,
-      chat_sender_role: actor.role,
-      chat_sender_name: actor.label,
-      chat_message: text,
-      message_preview: text.substring(0, 140)
-    });
-
-    await loadPrivateChatMessages({ ping:false });
-    return;
-
+    throw new Error("No private project room available yet.");
   } catch (err) {
     console.warn("Supabase chat send failed. Saving locally:", err);
 
@@ -8409,18 +8381,14 @@ async function sendPrivateChatMessage(){
 
     chatInput.value = "";
     saveLocalChatMessages();
-
     await sendRevampZapierNotification("project_chat_message", {
       subject: "New RevampLEX project chat message",
       message: "A new private project-room chat message was sent.",
-      project_room_id: roomId || "",
       chat_sender_role: actor.role,
       chat_sender_name: actor.label,
-      chat_message: text,
-      message_preview: text.substring(0, 140)
+      chat_message: text
     });
-
-    setChatStatus("Message saved on this device. Add/check the Supabase chat SQL to sync across both users.");
+    setChatStatus("Message saved on this device. Add the Supabase chat SQL below to sync across both users.");
     renderPrivateChatMessages({ ping: false });
   } finally {
     if (sendBtn) sendBtn.disabled = false;
