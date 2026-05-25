@@ -5432,15 +5432,7 @@ body.command-room #completionPanel .summary-box * {
       </div>
 
       <div class="signature-actions">
-        <button
-type="button"
-id="saveHomeownerSignature"
-class="btn btn-primary"
-onclick="return revampSavePartySignature(event,'homeowner')">
-
-Save My Signature
-
-</button>
+        <button class="btn btn-primary" type="button" id="homeownerSaveSignatureBtn" onclick="return revampSavePartySignature(event,'homeowner')">Save Homeowner Signature</button>
         <button class="btn btn-soft" type="button" id="homeownerClearSignatureBtn" onclick="return revampClearPartySignature(event,'homeowner')">Clear</button>
       </div>
     </div>
@@ -5469,15 +5461,7 @@ Save My Signature
       </div>
 
       <div class="signature-actions">
-        <button
-type="button"
-id="saveContractorSignature"
-class="btn btn-primary"
-onclick="return revampSavePartySignature(event,'contractor')">
-
-Save My Signature
-
-</button>
+        <button class="btn btn-primary" type="button" id="contractorSaveSignatureBtn" onclick="return revampSavePartySignature(event,'contractor')">Save Contractor Signature</button>
         <button class="btn btn-soft" type="button" id="contractorClearSignatureBtn" onclick="return revampClearPartySignature(event,'contractor')">Clear</button>
       </div>
     </div>
@@ -11631,7 +11615,7 @@ function inject(){
    const otherRole=myRole==='homeowner'?'contractor':'homeowner';
    const myTitle=myRole==='homeowner'?'Homeowner Signature':'Contractor Signature';
    const otherTitle=otherRole==='homeowner'?'Homeowner Signature':'Contractor Signature';
-   sig.innerHTML=`<div class="panel-header"><div><h3>Two-Party Project Approval Signatures</h3><p>Each party can only sign their own signature. The final signed approval document is only available after both the homeowner and contractor have signed.</p></div><button class="btn btn-soft" type="button" onclick="loadProjectSignatures()">Refresh Signatures</button></div><div class="private-room-alert"><strong>Signature security:</strong> you are signed in as <strong>${escapeHTML(myRole)}</strong>. You can only complete the ${escapeHTML(myTitle)}. The other party must log in from their own account to complete their signature.</div><div class="signature-layout" id="twoPartySignatureUI"><div class="signature-box" id="mySignatureBox"><h4 style="margin-top:0;">${escapeHTML(myTitle)}</h4><label>${myRole==='homeowner'?'Homeowner':'Contractor'} Full Name</label><input id="${myRole}SignerName" type="text" placeholder="${myRole==='homeowner'?'Homeowner':'Contractor'} full name"><canvas id="${myRole}SignatureCanvas" class="signature-live-pad"></canvas><div class="exchange-actions"><button class="btn btn-soft" type="button" onclick="clearSignaturePad('${myRole}')">Clear</button><button class="btn btn-primary" type="button" onclick="saveProjectSignature('${myRole}')">Save My Signature</button></div><div id="${myRole}SignatureStatus" class="signature-status-pill">Not signed yet</div></div><div class="signature-box" id="otherSignatureBox"><h4 style="margin-top:0;">${escapeHTML(otherTitle)}</h4><p style="color:var(--muted);line-height:1.45;margin-top:0;">This signature must be completed by the ${escapeHTML(otherRole)} from their own private login. You cannot sign on their behalf.</p><div id="${otherRole}SignatureStatus" class="signature-status-pill">Not signed yet</div></div></div><div class="exchange-card" style="margin-top:14px;"><h4>Final Signed Approval Document</h4><div id="finalApprovalStatus" class="exchange-list"><div class="appointment-empty">Waiting for both signatures. The combined document stays locked until both parties sign.</div></div></div>`;
+   sig.innerHTML=`<div class="panel-header"><div><h3>Two-Party Project Approval Signatures</h3><p>Each party can only sign their own signature. The final signed approval document is only available after both the homeowner and contractor have signed.</p></div><button class="btn btn-soft" type="button" onclick="loadProjectSignatures()">Refresh Signatures</button></div><div class="private-room-alert"><strong>Signature security:</strong> you are signed in as <strong>${escapeHTML(myRole)}</strong>. You can only complete the ${escapeHTML(myTitle)}. The other party must log in from their own account to complete their signature.</div><div class="signature-layout" id="twoPartySignatureUI"><div class="signature-box" id="mySignatureBox"><h4 style="margin-top:0;">${escapeHTML(myTitle)}</h4><label>${myRole==='homeowner'?'Homeowner':'Contractor'} Full Name</label><input id="${myRole}SignerName" type="text" placeholder="${myRole==='homeowner'?'Homeowner':'Contractor'} full name"><canvas id="${myRole}SignatureCanvas" class="signature-live-pad"></canvas><div class="exchange-actions"><button class="btn btn-soft" type="button" onclick="clearSignaturePad('${myRole}')">Clear</button><button class="btn btn-primary" type="button" onclick="return saveProjectSignature('${myRole}')">Save My Signature</button></div><div id="${myRole}SignatureStatus" class="signature-status-pill">Not signed yet</div></div><div class="signature-box" id="otherSignatureBox"><h4 style="margin-top:0;">${escapeHTML(otherTitle)}</h4><p style="color:var(--muted);line-height:1.45;margin-top:0;">This signature must be completed by the ${escapeHTML(otherRole)} from their own private login. You cannot sign on their behalf.</p><div id="${otherRole}SignatureStatus" class="signature-status-pill">Not signed yet</div></div></div><div class="exchange-card" style="margin-top:14px;"><h4>Final Signed Approval Document</h4><div id="finalApprovalStatus" class="exchange-list"><div class="appointment-empty">Waiting for both signatures. The combined document stays locked until both parties sign.</div></div></div>`;
  }
 }
 async function uploadOne(file,cat,note,name){ const r=await room(), u=await user(), a=actor(); if(!r) throw new Error('Private project room is not ready yet.'); const fname=name||file.name||'document.pdf'; const path=`${r}/${Date.now()}-${safe(fname)}`; const up=await supabaseClient.storage.from('project-files').upload(path,file,{upsert:false,contentType:file.type||'application/octet-stream'}); if(up.error) throw up.error; const {data,error}=await supabaseClient.from('project_room_files').insert({project_room_id:r,job_id:jobId(),uploaded_by:u?.id||null,sender_role:a.role,file_name:fname,file_path:path,file_type:file.type||'application/octet-stream',file_category:cat||'document',note:note||''}).select().single(); if(error) throw error; return data; }
@@ -11753,21 +11737,124 @@ window.clearSignaturePad=function(role){
 };
 window.saveProjectSignature=async function(role){
   const allowed=currentSignatureRole();
-  if(role!==allowed) return alert('You can only sign your own signature.');
-  const c=document.getElementById(role+'SignatureCanvas'), name=(document.getElementById(role+'SignerName')?.value||'').trim()||(role==='homeowner'?'Homeowner':'Contractor'), el=document.getElementById(role+'SignatureStatus');
-  if(!c)return;
-  if(!drawn[role])return alert('Please sign in your signature box first.');
-  const r=await room(), u=await user();
-  if(!r)return alert('Private project room is not ready yet.');
-  if(!u?.id)return alert('You must be logged in to save your signature.');
-  if(el)el.textContent='Saving signature...';
+  if(role!==allowed){
+    alert('You can only sign your own signature.');
+    return false;
+  }
+
+  const c=document.getElementById(role+'SignatureCanvas');
+  const nameInput=document.getElementById(role+'SignerName');
+  const el=document.getElementById(role+'SignatureStatus');
+  const name=(nameInput?.value||'').trim() || (role==='homeowner'?'Homeowner':'Contractor');
+
+  if(!c){
+    alert('Signature box was not found. Refresh the page and try again.');
+    return false;
+  }
+
+  function canvasHasInk(canvas){
+    try{
+      const ctx=canvas.getContext('2d');
+      const w=canvas.width;
+      const h=canvas.height;
+      if(!w || !h) return false;
+      const pixels=ctx.getImageData(0,0,w,h).data;
+      for(let i=3;i<pixels.length;i+=4){
+        if(pixels[i] > 0) return true;
+      }
+    }catch(err){
+      console.warn('Could not inspect signature canvas:', err);
+    }
+    return false;
+  }
+
+  const hasInk = drawn[role] || canvasHasInk(c);
+
+  if(!hasInk){
+    alert('Please sign in your signature box first.');
+    return false;
+  }
+
+  const signedAtIso = new Date().toISOString();
+  const signedAtNice = when(signedAtIso);
+  let signatureData = '';
+
   try{
-    const {error}=await supabaseClient.from('project_signatures').upsert({project_room_id:r,job_id:jobId(),signer_id:u.id,signer_role:role,signer_name:name,signature_data:c.toDataURL('image/png'),signed_at:new Date().toISOString()},{onConflict:'project_room_id,signer_role'});
-    if(error)throw error;
+    signatureData = c.toDataURL('image/png');
+  }catch(err){
+    console.warn('Could not convert signature to image:', err);
+  }
+
+  // Register the signature in the UI immediately so the button always responds.
+  window.__projectSignaturesByRole = window.__projectSignaturesByRole || {};
+  window.__projectSignaturesByRole[role] = {
+    signer_role: role,
+    signer_name: name,
+    signature_data: signatureData,
+    signed_at: signedAtIso,
+    local_only: true
+  };
+
+  localStorage.setItem('revamp_project_signature_' + role + '_name', name);
+  localStorage.setItem('revamp_project_signature_' + role + '_signed_at', signedAtIso);
+  if(signatureData){
+    try{ localStorage.setItem('revamp_project_signature_' + role + '_data', signatureData); }catch(e){}
+  }
+
+  if(el){
+    el.textContent = 'Signed by ' + name + ' • ' + signedAtNice;
+    el.classList.add('signed');
+  }
+
+  const final=document.getElementById('finalApprovalStatus');
+  const by=window.__projectSignaturesByRole || {};
+  if(final){
+    final.innerHTML=(by.homeowner&&by.contractor)
+      ? `<div class="exchange-item"><strong>Project approval complete ✔</strong><span>Homeowner signed: ${escapeHTML(by.homeowner.signer_name||'Homeowner')} • ${escapeHTML(when(by.homeowner.signed_at))}</span><span>Contractor signed: ${escapeHTML(by.contractor.signer_name||'Contractor')} • ${escapeHTML(when(by.contractor.signed_at))}</span><div class="exchange-actions"><button class="btn btn-primary" type="button" onclick="openFinalSignedApprovalPDF()">View Final Signed Document</button></div></div>`
+      : `<div class="appointment-empty">${role==='homeowner'?'Homeowner':'Contractor'} signature saved. Waiting for the other party to sign before the final document unlocks.</div>`;
+  }
+
+  // Try to save to Supabase, but do not block the local UI from registering.
+  try{
+    const r=await room();
+    const u=await user();
+
+    if(!r){
+      if(el) el.textContent = 'Signed by ' + name + ' • saved on this device. Private room not ready yet.';
+      return false;
+    }
+
+    if(!u?.id){
+      if(el) el.textContent = 'Signed by ' + name + ' • saved on this device. Log in to sync it.';
+      return false;
+    }
+
+    const {error}=await supabaseClient
+      .from('project_signatures')
+      .upsert({
+        project_room_id:r,
+        job_id:jobId(),
+        signer_id:u.id,
+        signer_role:role,
+        signer_name:name,
+        signature_data:signatureData,
+        signed_at:signedAtIso
+      },{onConflict:'project_room_id,signer_role'});
+
+    if(error) throw error;
+
+    if(el) el.textContent = 'Signed by ' + name + ' • saved successfully';
     await loadProjectSignatures();
-  }catch(e){console.error(e); if(el)el.textContent='Signature failed: '+(e.message||e);}
-};
-window.openFinalSignedApprovalPDF=function(){
+  }catch(e){
+    console.error('Signature saved locally but Supabase sync failed:', e);
+    if(el){
+      el.textContent = 'Signed by ' + name + ' • saved locally. Sync issue: ' + (e.message||e);
+      el.classList.add('signed');
+    }
+  }
+
+  return false;
+}window.openFinalSignedApprovalPDF=function(){
   if(!window.__projectSignaturesByRole?.homeowner || !window.__projectSignaturesByRole?.contractor){
     alert('Both parties must sign before the final approval document can be viewed.');
     return;
@@ -11802,7 +11889,7 @@ window.loadProjectSignatures=async function(){
   }
 };
 function realtime(r){ if(!r)return; if(!filesChannel)filesChannel=supabaseClient.channel('project-files-'+r).on('postgres_changes',{event:'*',schema:'public',table:'project_room_files',filter:'project_room_id=eq.'+r},()=>loadProjectRoomFiles()).subscribe(); if(!docsChannel)docsChannel=supabaseClient.channel('project-documents-'+r).on('postgres_changes',{event:'*',schema:'public',table:'project_documents',filter:'project_room_id=eq.'+r},()=>{loadProjectDocuments();loadProjectRoomFiles();}).subscribe(); if(!sigsChannel)sigsChannel=supabaseClient.channel('project-signatures-'+r).on('postgres_changes',{event:'*',schema:'public',table:'project_signatures',filter:'project_room_id=eq.'+r},()=>loadProjectSignatures()).subscribe(); }
-async function init(){ inject(); if(!padsReady){pad(currentSignatureRole()); padsReady=true;} const r=await room(); await loadProjectRoomFiles(); await loadProjectDocuments(); await loadProjectSignatures(); realtime(r); }
+async function init(){ inject(); pad(currentSignatureRole()); padsReady=true; const r=await room(); await loadProjectRoomFiles(); await loadProjectDocuments(); await loadProjectSignatures(); realtime(r); }
 document.addEventListener('DOMContentLoaded',()=>setTimeout(init,900));
 window.addEventListener('resize',()=>{ if(!padsReady)return; resize(document.getElementById(currentSignatureRole()+'SignatureCanvas')); });
 })();
