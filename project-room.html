@@ -5801,7 +5801,8 @@ function getCommandSteps() {
       { id: 'schedulePanel', title: 'Schedule', text: 'Appointments and reminders for this room.' },
       { id: 'videoChatPanel', title: 'Live Room', text: 'Video, chat, and walkthrough notes.' },
       { id: 'signaturePanel', title: 'Approval', text: 'Sign only when scope and terms are clear.' },
-      { id: 'completionPanel', title: 'Completion', text: 'Both sides mark finished before the project closes.' }
+      { id: 'completionPanel', title: 'Completion', text: 'Both sides mark finished before the project closes.' },
+      { id: 'reviewPopupPanel', title: 'Leave Review', text: 'Rate the other party after closeout.' }
     ];
   }
 
@@ -5814,7 +5815,8 @@ function getCommandSteps() {
     { id: 'schedulePanel', title: 'Schedule', text: 'Set visits, estimate calls, and job milestones.' },
     { id: 'videoChatPanel', title: 'Live Room', text: 'Video call, screen share, and private chat.' },
     { id: 'signaturePanel', title: 'Approval Console', text: 'Make the final approval clean and easy.' },
-    { id: 'completionPanel', title: 'Project Completion', text: 'Close out the project after both sides confirm.' }
+    { id: 'completionPanel', title: 'Project Completion', text: 'Close out the project after both sides confirm.' },
+    { id: 'reviewPopupPanel', title: 'Leave Review', text: 'Rate the other party after closeout.' }
   ];
 }
 
@@ -12720,10 +12722,64 @@ setInterval(function(){
   }, 1500);
 })();
 
+async function getReviewContext(){
+  const params = new URLSearchParams(window.location.search);
+  const activeJob = window.currentJob || {};
+
+  const rawJobId =
+    activeJob.id ||
+    params.get("job") ||
+    jobId ||
+    null;
+
+  const numericJobId =
+    rawJobId && /^\d+$/.test(String(rawJobId))
+      ? Number(rawJobId)
+      : null;
+
+  const roomId =
+    params.get("room") ||
+    params.get("project_room") ||
+    params.get("room_id") ||
+    params.get("id") ||
+    null;
+
+  const role = typeof getWorkspaceRole === "function" ? getWorkspaceRole() : mode;
+
+  let room = null;
+  if(roomId){
+    const { data, error } = await supabaseClient
+      .from("project_rooms")
+      .select("id, job_id, homeowner_id, contractor_id")
+      .eq("id", roomId)
+      .maybeSingle();
+
+    if(!error && data){
+      room = data;
+    } else if(error){
+      console.warn("Review room lookup failed:", error);
+    }
+  }
+
+  const finalJobId = numericJobId || (room?.job_id && /^\d+$/.test(String(room.job_id)) ? Number(room.job_id) : null);
+
+  return {
+    role,
+    reviewedRole: role === "homeowner" ? "contractor" : "homeowner",
+    jobId: finalJobId,
+    roomId: room?.id || roomId || null,
+    reviewedUserId:
+      role === "homeowner"
+        ? (room?.contractor_id || null)
+        : (room?.homeowner_id || null)
+  };
+}
+
 async function markProjectComplete(){
   try {
+    const ctx = await getReviewContext();
     const activeJob = window.currentJob || {};
-    const activeJobId = activeJob.id || jobId;
+    const activeJobId = ctx.jobId || activeJob.id || jobId;
 
     if (!activeJobId || activeJobId === "preview" || String(activeJobId).startsWith("demo")) {
       alert("This project cannot be marked complete until it is connected to a real saved job.");
@@ -12737,12 +12793,11 @@ async function markProjectComplete(){
       return;
     }
 
-    const role = typeof getWorkspaceRole === "function" ? getWorkspaceRole() : mode;
     const updates = {};
 
-    if (role === "contractor") {
+    if (ctx.role === "contractor") {
       updates.contractor_completed = true;
-    } else if (role === "homeowner") {
+    } else if (ctx.role === "homeowner") {
       updates.homeowner_completed = true;
     } else {
       alert("Could not detect whether you are the homeowner or contractor.");
@@ -12760,7 +12815,7 @@ async function markProjectComplete(){
       return;
     }
 
-    await checkCompletionStatus();
+    await checkCompletionStatus({ openReviewIfReady: true });
 
   } catch (err) {
     console.error("markProjectComplete failed:", err);
@@ -12768,10 +12823,11 @@ async function markProjectComplete(){
   }
 }
 
-async function checkCompletionStatus(){
+async function checkCompletionStatus(options = {}){
   try {
+    const ctx = await getReviewContext();
     const activeJob = window.currentJob || {};
-    const activeJobId = activeJob.id || jobId;
+    const activeJobId = ctx.jobId || activeJob.id || jobId;
 
     if (!activeJobId || activeJobId === "preview" || String(activeJobId).startsWith("demo")) {
       refreshCompletionStatus(activeJob);
@@ -12791,7 +12847,9 @@ async function checkCompletionStatus(){
 
     refreshCompletionStatus(job);
 
-    if (job.contractor_completed && job.homeowner_completed && !job.completed) {
+    const bothDone = !!job.contractor_completed && !!job.homeowner_completed;
+
+    if (bothDone && !job.completed) {
       const { error: closeError } = await supabaseClient
         .from("jobs")
         .update({ completed: true })
@@ -12805,7 +12863,10 @@ async function checkCompletionStatus(){
 
       refreshCompletionStatus({ ...job, completed: true });
       alert("Project completed successfully.");
-      showReviewPopup();
+    }
+
+    if (bothDone || job.completed || options.openReviewIfReady) {
+      await maybeShowReviewPopupForCurrentUser(activeJobId);
     }
 
   } catch (err) {
@@ -12845,25 +12906,14 @@ function refreshCompletionStatus(job = {}){
 }
 
 function showReviewPopup(){
-  alert("Leave a review for your contractor/homeowner.");
-}
-
-document.addEventListener("DOMContentLoaded", function(){
-  setTimeout(function(){
-    if (typeof checkCompletionStatus === "function") {
-      checkCompletionStatus();
-    }
-    if (typeof loadSavedSignatures === "function") {
-      loadSavedSignatures();
-    }
-  }, 1200);
-});
-function showReviewPopup(){
   const panel = document.getElementById("reviewPopupPanel");
   if(!panel) return;
 
   panel.style.display = "block";
   panel.hidden = false;
+
+  const status = document.getElementById("reviewStatus");
+  if(status) status.textContent = "";
 
   if(typeof showCommandStage === "function"){
     showCommandStage("reviewPopupPanel");
@@ -12872,42 +12922,101 @@ function showReviewPopup(){
   }
 }
 
+async function maybeShowReviewPopupForCurrentUser(activeJobId){
+  try {
+    const { data:{ user } } = await supabaseClient.auth.getUser();
+    if(!user || !activeJobId) return;
+
+    const { data: existing, error } = await supabaseClient
+      .from("reviews")
+      .select("id")
+      .eq("job_id", activeJobId)
+      .eq("reviewer_id", user.id)
+      .limit(1);
+
+    if(error){
+      console.warn("Review lookup failed:", error);
+      showReviewPopup();
+      return;
+    }
+
+    if(!existing || existing.length === 0){
+      showReviewPopup();
+    }
+  } catch(err){
+    console.warn("Could not check existing review:", err);
+  }
+}
+
 async function submitProjectReview(){
   const rating = Number(document.getElementById("reviewRating")?.value || 5);
   const comment = document.getElementById("reviewComment")?.value || "";
   const status = document.getElementById("reviewStatus");
 
-  const { data:{ user } } = await supabaseClient.auth.getUser();
+  try {
+    const { data:{ user } } = await supabaseClient.auth.getUser();
 
-  if(!user){
-    if(status) status.textContent = "Please sign in to submit a review.";
-    return;
-  }
+    if(!user){
+      if(status) status.textContent = "Please sign in to submit a review.";
+      return;
+    }
 
-  const job = window.currentJob || {};
+    const ctx = await getReviewContext();
 
-  const reviewerRole = mode === "homeowner" ? "homeowner" : "contractor";
-  const reviewedRole = reviewerRole === "homeowner" ? "contractor" : "homeowner";
+    if(!ctx.jobId){
+      if(status) status.textContent = "Review could not be saved because this room is not connected to a saved job.";
+      return;
+    }
 
-  const { error } = await supabaseClient
-    .from("reviews")
-    .insert({
-      job_id: job.id || null,
+    const reviewRecord = {
+      job_id: ctx.jobId,
       reviewer_id: user.id,
-      reviewer_role: reviewerRole,
-      reviewed_role: reviewedRole,
+      reviewed_user_id: ctx.reviewedUserId,
+      reviewer_role: ctx.role,
+      reviewed_role: ctx.reviewedRole,
       rating,
       comment
-    });
+    };
 
-  if(error){
-    console.error(error);
-    if(status) status.textContent = "Review could not be saved.";
-    return;
+    if(ctx.roomId){
+      reviewRecord.project_room_id = ctx.roomId;
+    }
+
+    const { error } = await supabaseClient
+      .from("reviews")
+      .insert(reviewRecord);
+
+    if(error){
+      console.error("Review save failed:", error);
+      if(status) status.textContent = "Review could not be saved: " + (error.message || "check Supabase RLS/table columns.");
+      return;
+    }
+
+    if(status) status.textContent = "Review submitted successfully.";
+
+    const panel = document.getElementById("reviewPopupPanel");
+    const submitBtn = panel?.querySelector('button[onclick*="submitProjectReview"]');
+    if(submitBtn){
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Review Submitted";
+    }
+
+  } catch(err){
+    console.error("submitProjectReview failed:", err);
+    if(status) status.textContent = "Review could not be saved: " + (err.message || err);
   }
-
-  if(status) status.textContent = "Review submitted successfully.";
 }
+
+document.addEventListener("DOMContentLoaded", function(){
+  setTimeout(function(){
+    if (typeof checkCompletionStatus === "function") {
+      checkCompletionStatus({ openReviewIfReady: true });
+    }
+    if (typeof loadSavedSignatures === "function") {
+      loadSavedSignatures();
+    }
+  }, 1200);
+});
 </script>
 
 </body>
