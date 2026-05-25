@@ -5830,6 +5830,7 @@ function getCommandPanelIds() {
     'receivedBidsSection',
     'signaturePanel',
     'completionPanel'
+    'reviewPopupPanel'
   ];
 }
 
@@ -12779,7 +12780,56 @@ document.addEventListener("DOMContentLoaded", function(){
     }
   }, 1200);
 });
+function showReviewPopup(){
+  const panel = document.getElementById("reviewPopupPanel");
+  if(!panel) return;
 
+  panel.style.display = "block";
+  panel.hidden = false;
+
+  if(typeof showCommandStage === "function"){
+    showCommandStage("reviewPopupPanel");
+  } else {
+    panel.scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+}
+
+async function submitProjectReview(){
+  const rating = Number(document.getElementById("reviewRating")?.value || 5);
+  const comment = document.getElementById("reviewComment")?.value || "";
+  const status = document.getElementById("reviewStatus");
+
+  const { data:{ user } } = await supabaseClient.auth.getUser();
+
+  if(!user){
+    if(status) status.textContent = "Please sign in to submit a review.";
+    return;
+  }
+
+  const job = window.currentJob || {};
+
+  const reviewerRole = mode === "homeowner" ? "homeowner" : "contractor";
+  const reviewedRole = reviewerRole === "homeowner" ? "contractor" : "homeowner";
+
+  const { error } = await supabaseClient
+    .from("reviews")
+    .insert({
+      job_id: job.id || null,
+      reviewer_id: user.id,
+      reviewer_role: reviewerRole,
+      reviewed_role: reviewedRole,
+      rating,
+      comment
+    });
+
+  if(error){
+    console.error(error);
+    if(status) status.textContent = "Review could not be saved.";
+    return;
+  }
+
+  if(status) status.textContent = "Review submitted successfully.";
+}
 </script>
 
 </body>
