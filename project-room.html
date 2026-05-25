@@ -8328,19 +8328,68 @@ async function sendPrivateChatMessage(){
 
       if (error) throw error;
 
-      chatUsesSupabase = true;
-      chatInput.value = "";
-      await sendRevampZapierNotification("project_chat_message", {
-        subject: "New RevampLEX project chat message",
-        message: "A new private project-room chat message was sent.",
-        project_room_id: roomId,
-        chat_sender_role: actor.role,
-        chat_sender_name: actor.label,
-        chat_message: text
-      });
-      await loadPrivateChatMessages({ ping: false });
-      return;
-    }
+chatUsesSupabase = true;
+
+/* ---------- ZAPIER EMAIL NOTIFICATION ---------- */
+
+try {
+
+  // Determine who should receive email
+  const recipientEmail =
+    actor.role === "contractor"
+      ? (window.currentProject?.customer_email || "")
+      : (window.currentProject?.contractor_email || "");
+
+  if (recipientEmail) {
+
+    await fetch(
+      "https://hooks.zapier.com/hooks/catch/YOUR_ZAPIER_ID/YOUR_HOOK/",
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+
+          type:"new_chat_message",
+
+          recipient_email: recipientEmail,
+
+          sender_name: actor.label,
+
+          project_id:
+            typeof getNumericProjectRoomJobId==="function"
+              ? getNumericProjectRoomJobId()
+              : null,
+
+          project_title:
+            window.currentProject?.title || "RevampLEX Project",
+
+          message_preview: text.substring(0,100),
+
+          room_url:
+            `${window.location.origin}/project-room.html?id=${
+              typeof getNumericProjectRoomJobId==="function"
+                ? getNumericProjectRoomJobId()
+                : ""
+            }`
+        })
+      }
+    );
+
+  }
+
+} catch(err){
+  console.warn("Zapier notification failed:", err);
+}
+
+/* ---------- END ZAPIER ---------- */
+
+chatInput.value = "";
+
+await loadPrivateChatMessages({ ping:false });
+
+return;
 
     throw new Error("No private project room available yet.");
   } catch (err) {
