@@ -6058,6 +6058,7 @@ const SUPABASE_URL = "https://dezvwoedboikshqttdqu.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+window.supabaseClient = supabaseClient;
   checkAuth();
 const urlParams = new URLSearchParams(window.location.search);
 const jobId = urlParams.get('job');
@@ -8409,6 +8410,7 @@ chatUsesSupabase = true;
       chatInput.value = "";
       await loadPrivateChatMessages({ ping:false });
       return;
+    }
 
     throw new Error("No private project room available yet.");
   } catch (err) {
@@ -11916,6 +11918,51 @@ let exchangeRoomId=null,filesChannel=null,docsChannel=null,sigsChannel=null,pads
 function actor(){ if(typeof getChatActor==='function') return getChatActor(); const role=typeof getWorkspaceRole==='function'?getWorkspaceRole():'contractor'; return {role,label:role==='homeowner'?'Homeowner':'Contractor'}; }
 async function room(){ if(exchangeRoomId) return exchangeRoomId; if(typeof ensureProjectRoom!=='function') return null; exchangeRoomId=await ensureProjectRoom(); return exchangeRoomId; }
 function jobId(){ if(typeof getNumericProjectRoomJobId==='function') return getNumericProjectRoomJobId(); const raw=new URLSearchParams(location.search).get('job')||window.currentJob?.id; const n=Number(raw); return Number.isFinite(n)?n:null; }
+function getProjectDocLists(){
+  return [
+    document.getElementById('privateDocumentList'),
+    document.getElementById('privateDocumentListShared')
+  ].filter(Boolean);
+}
+window.loadProjectDocuments=window.loadProjectDocuments||async function(){
+  const lists=getProjectDocLists();
+  if(!lists.length) return;
+  const r=await room();
+  if(!r){
+    lists.forEach(list=>list.innerHTML='<div class="appointment-empty">Private room not ready yet.</div>');
+    return;
+  }
+  const {data,error}=await supabaseClient
+    .from('project_documents')
+    .select('*')
+    .eq('project_room_id',r)
+    .order('created_at',{ascending:false});
+
+  if(error){
+    lists.forEach(list=>list.innerHTML='<div class="appointment-empty">Document table not connected yet.</div>');
+    console.warn('loadProjectDocuments failed:', error);
+    return;
+  }
+
+  if(!data?.length){
+    lists.forEach(list=>list.innerHTML='<div class="appointment-empty">No proposals or invoices sent yet.</div>');
+    return;
+  }
+
+  const rows=await Promise.all(data.map(async d=>{
+    const href=await fileUrl(d.file_path);
+    const title=escapeHTML(d.title||d.file_name||d.document_type||'Project document');
+    const type=escapeHTML(d.document_type||'document');
+    const date=escapeHTML(when(d.created_at));
+    const amount=d.amount?` • $${Number(d.amount).toLocaleString()}`:'';
+    const note=d.note?`<span>Note: ${escapeHTML(d.note)}</span>`:'';
+    return `<div class="exchange-item"><strong>${title}</strong><span>${type} • ${date}${amount}</span>${note}<div class="exchange-actions"><a class="btn btn-soft" href="${href}" target="_blank" rel="noopener">Open / Download</a></div></div>`;
+  }));
+
+  lists.forEach(list=>list.innerHTML=rows.join(''));
+};
+const loadProjectDocuments=window.loadProjectDocuments;
+const loadProjectFiles=window.loadProjectRoomFiles;
 async function user(){ if(typeof getCurrentProjectUser==='function') return await getCurrentProjectUser(); try{const {data}=await supabaseClient.auth.getUser(); return data?.user||null;}catch(e){return null;} }
 function stat(id,msg){const el=document.getElementById(id); if(el) el.textContent=msg||'';}
 function safe(s){return String(s||'file').replace(/[^a-zA-Z0-9._-]/g,'-');}
