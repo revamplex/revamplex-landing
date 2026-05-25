@@ -3883,7 +3883,13 @@ function hideMissingCardImage(img) {
             <h3 class="card-title">${item.title}</h3>
             <p class="card-sub">${getCompactTradeLabel(item)} • ${getDisplayCity(item)}</p>
           </div>
-          <div class="rating-pill">⭐ ${Number(item.rating || 0).toFixed(1)}</div>
+          const publicRatings =
+await loadPublicRatings(item.user_id);
+
+<div class="rating-pill">
+⭐ ${publicRatings.rating || "New"}
+(${publicRatings.reviews || 0})
+</div>
         </div>
         <div class="card-body">
           <div class="meta-grid">
@@ -5415,6 +5421,35 @@ async function initAuthGate() {
 
 function goToDashboard() {
   window.location.href = "dashboard.html";
+}
+    async function loadPublicRatings(userId){
+
+const {data,error} =
+await supabase
+.from("reviews")
+.select("rating")
+.eq("reviewed_user_id",userId)
+.lte(
+   "visible_after",
+   new Date().toISOString()
+);
+
+if(error || !data?.length){
+   return {
+      rating:0,
+      reviews:0
+   };
+}
+
+const avg =
+data.reduce((t,r)=>t+r.rating,0)
+/
+data.length;
+
+return {
+   rating:avg.toFixed(1),
+   reviews:data.length
+};
 }
 </script>
   
