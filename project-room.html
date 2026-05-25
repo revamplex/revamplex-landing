@@ -6265,11 +6265,25 @@ function refreshJobMetaFromVisibleContractorFields() {
   async function loadJob() {
 
   const params = new URLSearchParams(window.location.search);
-  const rawJobId = params.get('job');
+
+  // RevampLEX can open this page two different ways:
+  // 1) project-room.html?job=12                 -> direct job id
+  // 2) project-room.html?id=PROJECT_ROOM_ID     -> accepted private room id
+  // The old code only read ?job=. That is why accepted project rooms showed preview/not found.
+  let rawJobId = params.get('job') || params.get('job_id') || null;
+  const rawRoomId =
+    params.get('room') ||
+    params.get('room_id') ||
+    params.get('project_room') ||
+    params.get('project_room_id') ||
+    params.get('id') ||
+    null;
+
   const modeParam = params.get('mode');
   const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null");
 
   console.log("RAW PROJECT ROOM JOB ID:", rawJobId);
+  console.log("RAW PROJECT ROOM ROOM ID:", rawRoomId);
   console.log("PROJECT ROOM MODE:", modeParam);
   console.log("SAVED SESSION JOB:", savedJob);
 
@@ -6303,6 +6317,37 @@ function refreshJobMetaFromVisibleContractorFields() {
       description: savedJob.description || "Project loaded from map session."
     });
     return;
+  }
+
+  // If the page was opened by private project-room id, resolve the real job_id first.
+  if (!rawJobId && rawRoomId && !String(rawRoomId).startsWith("demo-")) {
+    try {
+      console.log("Resolving project room id to job id:", rawRoomId);
+
+      const { data: room, error: roomError } = await supabaseClient
+        .from('project_rooms')
+        .select('*')
+        .eq('id', rawRoomId)
+        .maybeSingle();
+
+      if (roomError) {
+        console.warn("PROJECT ROOM LOOKUP ERROR:", roomError);
+      }
+
+      if (room && room.job_id) {
+        window.__revampProjectRoomId = room.id;
+        window.__revampLoadedProjectRoom = room;
+        rawJobId = room.job_id;
+        console.log("Resolved room to job id:", rawJobId, room);
+      } else if (!isNaN(Number(rawRoomId))) {
+        // Safety fallback for older links that used ?id=JOB_ID instead of ?job=JOB_ID.
+        rawJobId = rawRoomId;
+        console.warn("No project_rooms row found. Treating numeric ?id= as job id:", rawJobId);
+      }
+    } catch (err) {
+      console.warn("Could not resolve project room id. Falling back safely:", err);
+      if (!isNaN(Number(rawRoomId))) rawJobId = rawRoomId;
+    }
   }
 
   if (!rawJobId) {
@@ -6348,7 +6393,7 @@ function refreshJobMetaFromVisibleContractorFields() {
     .eq('id', jobIdValue);
 
   if (error) {
-    console.error("SUPABASE ERROR:", error);
+    console.error("SUPABASE JOB LOAD ERROR:", error);
 
     renderJob({
       id: rawJobId,
@@ -6383,10 +6428,10 @@ function refreshJobMetaFromVisibleContractorFields() {
   }
 
   window.currentJob = data[0];
-renderJob(data[0]);
+  renderJob(data[0]);
 
-await checkCompletionStatus();
-await loadSavedSignatures();
+  if (typeof checkCompletionStatus === "function") await checkCompletionStatus();
+  if (typeof loadSavedSignatures === "function") await loadSavedSignatures();
 }
   function renderJob(job){
 
@@ -9500,7 +9545,7 @@ function setCalendarSyncStatus(message){
 
 function getRawProjectRoomJobId(){
   const params = new URLSearchParams(window.location.search);
-  return params.get("job") || (window.currentJob && window.currentJob.id) || "";
+  return params.get("job") || params.get("job_id") || (window.currentJob && window.currentJob.id) || "";
 }
 
 function getNumericProjectRoomJobId(){
@@ -9553,6 +9598,17 @@ async function findContractorAuthIdFromParam(contractorParam){
 
 async function ensureProjectRoom(){
   if (currentProjectRoomId) return currentProjectRoomId;
+  if (window.__revampProjectRoomId) {
+    currentProjectRoomId = window.__revampProjectRoomId;
+    calendarUsesSupabase = true;
+    if (typeof setCalendarSyncStatus === "function") {
+      setCalendarSyncStatus("Calendar synced to private Supabase project room.");
+    }
+    if (typeof subscribeToCalendarChanges === "function") {
+      subscribeToCalendarChanges(currentProjectRoomId);
+    }
+    return currentProjectRoomId;
+  }
 
   const user = await getCurrentProjectUser();
   const jobIdNumber = getNumericProjectRoomJobId();
