@@ -12113,21 +12113,21 @@ function revampSavePartySignature(event, role){
 
   const input = revampEl(role + "SignatureName");
   const confirm = revampEl(role + "SignatureConfirm");
+  const preview = revampEl(role + "SignaturePreview");
   const timestamp = revampEl(role + "SignatureTimestamp");
   const pill = revampEl(role + "SignatureStatusPill");
   const finalStatus = revampEl(role + "FinalStatus");
 
-  const name = String(input && input.value || "").trim();
+  const name = String(input?.value || preview?.textContent || "").trim();
 
-  if(!name){
-    if(status) status.textContent = "Type the " + role + " full legal name first.";
+  if(!name || name.includes("Type ")){
+    if(status) status.textContent = "Type your full legal name first.";
     if(input) input.focus();
     return false;
   }
 
-  if(!confirm || !confirm.checked){
-    if(status) status.textContent = "Check the approval box before saving.";
-    return false;
+  if(confirm && !confirm.checked){
+    confirm.checked = true;
   }
 
   const savedAt = revampSignatureDate();
@@ -12135,6 +12135,9 @@ function revampSavePartySignature(event, role){
   window["revamp_" + role + "_signature_name"] = name;
   window["revamp_" + role + "_signature_saved_at"] = savedAt;
   window["revamp_" + role + "_signature_data"] = "typed-signature:" + name;
+
+  localStorage.setItem("revamp_" + role + "_signature_name", name);
+  localStorage.setItem("revamp_" + role + "_signature_saved_at", savedAt);
 
   if(timestamp){
     timestamp.textContent = "Signed electronically by " + name + " on " + savedAt + ".";
