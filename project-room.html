@@ -11644,15 +11644,11 @@ function inject(){
  if(photo&&!document.getElementById('privateFileExchangeUI')){ const box=photo.querySelector('.summary-box')||photo; box.insertAdjacentHTML('afterend',`<div id="privateFileExchangeUI" class="exchange-grid"><div class="exchange-card"><h4>Send Files Privately</h4><p>Homeowners and contractors can exchange photos, videos, PDFs, proposals, invoices, permits, and job documents inside only this private project room.</p><label>File Category</label><select id="projectFileCategory"><option value="photo">Photo</option><option value="video">Video</option><option value="document">Document</option><option value="proposal">Proposal</option><option value="invoice">Invoice</option><option value="permit">Permit / Approval</option><option value="other">Other</option></select><label style="margin-top:10px;display:block;">Message / Note</label><input id="projectFileNote" type="text" placeholder="Example: Updated shower tile layout / signed invoice / before photos"><div id="uploadStatus" class="exchange-status"></div></div><div class="exchange-card"><h4>Shared Private Room Files</h4><p>Files listed here are attached only to this homeowner + contractor room.</p><div id="privateFileList" class="exchange-list"><div class="appointment-empty">No files shared yet.</div></div></div></div><div id="sharedProposalInvoiceDocumentsUI" class="exchange-card" style="margin-top:14px;"><h4>Sent Proposals + Invoices</h4><p>Customer-ready PDFs sent by the contractor will appear here for the homeowner and contractor.</p><div id="privateDocumentListShared" class="exchange-list"><div class="appointment-empty">No proposals or invoices sent yet.</div></div></div>`); }
  const prop=document.getElementById('estimateProposalPanel');
  if(prop&&!document.getElementById('proposalInvoiceExchangeUI')){ prop.insertAdjacentHTML('beforeend',`<div id="proposalInvoiceExchangeUI" class="exchange-grid"><div class="exchange-card"><h4>Send Proposal to Homeowner</h4><p>Generates the current proposal PDF, uploads it to this private room, and adds it to the shared document list.</p><button class="btn btn-primary" type="button" onclick="sendProposalToPrivateRoom()">Send Proposal</button><div id="proposalSendStatus" class="exchange-status"></div></div><div class="exchange-card"><h4>Send Invoice to Homeowner</h4><p>Creates an invoice from the current estimate total and stores it privately in this project room.</p><label>Invoice Amount</label><input id="invoiceAmountInput" type="text" placeholder="Example: $2,500 deposit or full balance"><label style="margin-top:10px;display:block;">Invoice Note</label><input id="invoiceNoteInput" type="text" placeholder="Example: Deposit due to schedule start date"><button class="btn btn-primary" type="button" onclick="sendInvoiceToPrivateRoom()" style="margin-top:10px;">Send Invoice</button><div id="invoiceSendStatus" class="exchange-status"></div></div></div><div class="exchange-card" style="margin-top:14px;"><h4>Sent Proposals + Invoices</h4><div id="privateDocumentList" class="exchange-list"><div class="appointment-empty">No proposals or invoices sent yet.</div></div></div>`); }
- const sig=document.getElementById('signaturePanel');
- if(sig&&!document.getElementById('twoPartySignatureUI')){
-   const a=actor();
-   const myRole=a.role==='homeowner'?'homeowner':'contractor';
-   const otherRole=myRole==='homeowner'?'contractor':'homeowner';
-   const myTitle=myRole==='homeowner'?'Homeowner Signature':'Contractor Signature';
-   const otherTitle=otherRole==='homeowner'?'Homeowner Signature':'Contractor Signature';
-   sig.innerHTML=`<div class="panel-header"><div><h3>Two-Party Project Approval Signatures</h3><p>Each party can only sign their own signature. The final signed approval document is only available after both the homeowner and contractor have signed.</p></div><button class="btn btn-soft" type="button" onclick="loadProjectSignatures()">Refresh Signatures</button></div><div class="private-room-alert"><strong>Signature security:</strong> you are signed in as <strong>${escapeHTML(myRole)}</strong>. You can only complete the ${escapeHTML(myTitle)}. The other party must log in from their own account to complete their signature.</div><div class="signature-layout" id="twoPartySignatureUI"><div class="signature-box" id="mySignatureBox"><h4 style="margin-top:0;">${escapeHTML(myTitle)}</h4><label>${myRole==='homeowner'?'Homeowner':'Contractor'} Full Name</label><input id="${myRole}SignerName" type="text" placeholder="${myRole==='homeowner'?'Homeowner':'Contractor'} full name"><canvas id="${myRole}SignatureCanvas" class="signature-live-pad"></canvas><div class="exchange-actions"><button class="btn btn-soft" type="button" onclick="clearSignaturePad('${myRole}')">Clear</button><button class="btn btn-primary" type="button" onclick="return saveProjectSignature('${myRole}')">Save My Signature</button></div><div id="${myRole}SignatureStatus" class="signature-status-pill">Not signed yet</div></div><div class="signature-box" id="otherSignatureBox"><h4 style="margin-top:0;">${escapeHTML(otherTitle)}</h4><p style="color:var(--muted);line-height:1.45;margin-top:0;">This signature must be completed by the ${escapeHTML(otherRole)} from their own private login. You cannot sign on their behalf.</p><div id="${otherRole}SignatureStatus" class="signature-status-pill">Not signed yet</div></div></div><div class="exchange-card" style="margin-top:14px;"><h4>Final Signed Approval Document</h4><div id="finalApprovalStatus" class="exchange-list"><div class="appointment-empty">Waiting for both signatures. The combined document stays locked until both parties sign.</div></div></div>`;
- }
+
+ // IMPORTANT: Do not rebuild/replace #signaturePanel here.
+ // The latest RevampLEX file already has the correct two-party typed signature UI.
+ // Older canvas-based injection was removed because it overwrote the working signature panel on refresh.
+
 }
 async function uploadOne(file,cat,note,name){ const r=await room(), u=await user(), a=actor(); if(!r) throw new Error('Private project room is not ready yet.'); const fname=name||file.name||'document.pdf'; const path=`${r}/${Date.now()}-${safe(fname)}`; const up=await supabaseClient.storage.from('project-files').upload(path,file,{upsert:false,contentType:file.type||'application/octet-stream'}); if(up.error) throw up.error; const {data,error}=await supabaseClient.from('project_room_files').insert({project_room_id:r,job_id:jobId(),uploaded_by:u?.id||null,sender_role:a.role,file_name:fname,file_path:path,file_type:file.type||'application/octet-stream',file_category:cat||'document',note:note||''}).select().single(); if(error) throw error; return data; }
 window.uploadProjectFiles=async function(){ const input=document.getElementById('projectFileUpload'), cat=document.getElementById('projectFileCategory')?.value||'document', note=document.getElementById('projectFileNote')?.value||''; if(!input)return alert('Upload field not found.'); const files=[...(input.files||[])]; if(!files.length)return alert('Choose at least one project file first.'); stat('uploadStatus','Uploading private room files...'); try{for(const f of files) await uploadOne(f,cat,note); input.value=''; const ni=document.getElementById('projectFileNote'); if(ni)ni.value=''; stat('uploadStatus','Upload complete ✔ Shared only in this private room.'); await loadProjectRoomFiles();}catch(e){console.error(e); stat('uploadStatus','Upload failed: '+(e.message||e));} };
@@ -11890,7 +11886,7 @@ window.saveProjectSignature=async function(role){
   }
 
   return false;
-}
+};
 window.openFinalSignedApprovalPDF=function(){
   if(!window.__projectSignaturesByRole?.homeowner || !window.__projectSignaturesByRole?.contractor){
     alert('Both parties must sign before the final approval document can be viewed.');
@@ -11926,7 +11922,7 @@ window.loadProjectSignatures=async function(){
   }
 };
 function realtime(r){ if(!r)return; if(!filesChannel)filesChannel=supabaseClient.channel('project-files-'+r).on('postgres_changes',{event:'*',schema:'public',table:'project_room_files',filter:'project_room_id=eq.'+r},()=>loadProjectRoomFiles()).subscribe(); if(!docsChannel)docsChannel=supabaseClient.channel('project-documents-'+r).on('postgres_changes',{event:'*',schema:'public',table:'project_documents',filter:'project_room_id=eq.'+r},()=>{loadProjectDocuments();loadProjectRoomFiles();}).subscribe(); if(!sigsChannel)sigsChannel=supabaseClient.channel('project-signatures-'+r).on('postgres_changes',{event:'*',schema:'public',table:'project_signatures',filter:'project_room_id=eq.'+r},()=>loadProjectSignatures()).subscribe(); }
-async function init(){ inject(); pad(currentSignatureRole()); padsReady=true; const r=await room(); await loadProjectRoomFiles(); await loadProjectDocuments(); await loadProjectSignatures(); realtime(r); }
+async function init(){ inject(); pad(currentSignatureRole()); padsReady=true; const r=await room(); await loadProjectRoomFiles(); await loadProjectDocuments(); await loadProjectSignatures(); if(typeof loadSavedSignatures==='function') await loadSavedSignatures(); realtime(r); }
 document.addEventListener('DOMContentLoaded',()=>setTimeout(init,900));
 window.addEventListener('resize',()=>{ if(!padsReady)return; resize(document.getElementById(currentSignatureRole()+'SignatureCanvas')); });
 })();
@@ -12267,17 +12263,19 @@ async function revampSavePartySignature(event, role){
     confirm.checked = true;
   }
 
-  const activeJobId = window.currentJob?.id || jobId;
+  const activeJob = window.currentJob || {};
+  const activeJobId = activeJob.id || jobId;
 
   if(!activeJobId || activeJobId === "preview" || String(activeJobId).startsWith("demo")){
-    if(status) status.textContent = "Signature cannot be saved until this is connected to a real saved job.";
+    if(status) status.textContent = "Signature preview saved, but this is not connected to a real saved job yet.";
+    revampApplySavedSignatureToUI(role, name, new Date().toISOString());
     return false;
   }
 
-  const savedAtISO = new Date().toISOString();
+  const savedAt = new Date().toISOString();
   const updateData = {};
   updateData[role + "_signature_name"] = name;
-  updateData[role + "_signature_saved_at"] = savedAtISO;
+  updateData[role + "_signature_saved_at"] = savedAt;
 
   const { error } = await supabaseClient
     .from("jobs")
@@ -12286,28 +12284,93 @@ async function revampSavePartySignature(event, role){
 
   if(error){
     console.error("Signature save failed:", error);
-    if(status) status.textContent = "Signature could not be saved. Check Supabase columns/RLS.";
+    if(status) status.textContent = "Signature could not be saved to Supabase. Check jobs signature columns and RLS update policy.";
     return false;
   }
 
-  window["revamp_" + role + "_signature_name"] = name;
-  window["revamp_" + role + "_signature_saved_at"] = savedAtISO;
-  window["revamp_" + role + "_signature_data"] = "typed-signature:" + name;
-
-  localStorage.setItem("revamp_" + role + "_signature_name", name);
-  localStorage.setItem("revamp_" + role + "_signature_saved_at", savedAtISO);
-
-  revampApplySavedSignatureToUI(role, name, savedAtISO);
+  revampApplySavedSignatureToUI(role, name, savedAt);
 
   if(status){
-    status.textContent = (role === "homeowner" ? "Homeowner" : "Contractor") + " signature saved.";
+    status.textContent = (role === "homeowner" ? "Homeowner" : "Contractor") + " signature saved to project.";
   }
 
-  revampUpdateFinalSignedDocStatus();
+  await loadSavedSignatures();
   return false;
 }
 
-async function revampClearPartySignature(event, role){
+function revampApplySavedSignatureToUI(role, name, savedAt){
+  const input = revampEl(role + "SignatureName");
+  const confirm = revampEl(role + "SignatureConfirm");
+  const preview = revampEl(role + "SignaturePreview");
+  const timestamp = revampEl(role + "SignatureTimestamp");
+  const pill = revampEl(role + "SignatureStatusPill");
+  const finalStatus = revampEl(role + "FinalStatus");
+
+  window["revamp_" + role + "_signature_name"] = name || "";
+  window["revamp_" + role + "_signature_saved_at"] = savedAt || "";
+  window["revamp_" + role + "_signature_data"] = name ? "typed-signature:" + name : "";
+
+  if(input && name) input.value = name;
+  if(confirm && name) confirm.checked = true;
+
+  if(preview){
+    preview.textContent = name || (role === "homeowner" ? "Type homeowner name above" : "Type contractor name above");
+    preview.style.color = name ? "#0f172a" : "#64748b";
+  }
+
+  if(timestamp){
+    timestamp.textContent = name && savedAt
+      ? "Signed electronically by " + name + " on " + new Date(savedAt).toLocaleString() + "."
+      : "";
+  }
+
+  if(pill){
+    pill.textContent = name ? "Signed" : "Pending";
+    pill.classList.toggle("signed", !!name);
+    pill.classList.toggle("pending", !name);
+  }
+
+  if(finalStatus){
+    finalStatus.textContent = name ? "Signed" : "Pending";
+  }
+
+  revampUpdateFinalSignedDocStatus();
+}
+
+async function loadSavedSignatures(){
+  try{
+    const activeJob = window.currentJob || {};
+    const activeJobId = activeJob.id || jobId;
+
+    if(!activeJobId || activeJobId === "preview" || String(activeJobId).startsWith("demo")){
+      return;
+    }
+
+    const { data: job, error } = await supabaseClient
+      .from("jobs")
+      .select("homeowner_signature_name, homeowner_signature_saved_at, contractor_signature_name, contractor_signature_saved_at")
+      .eq("id", activeJobId)
+      .single();
+
+    if(error){
+      console.error("Could not load saved signatures:", error);
+      return;
+    }
+
+    ["homeowner", "contractor"].forEach(role => {
+      revampApplySavedSignatureToUI(
+        role,
+        job?.[role + "_signature_name"] || "",
+        job?.[role + "_signature_saved_at"] || ""
+      );
+    });
+
+  }catch(err){
+    console.error("loadSavedSignatures failed:", err);
+  }
+}
+
+function revampClearPartySignature(event, role){
   if(event){
     event.preventDefault();
     event.stopPropagation();
@@ -12319,25 +12382,6 @@ async function revampClearPartySignature(event, role){
   if(role !== currentRole){
     if(status) status.textContent = "You can only clear your own signature.";
     return false;
-  }
-
-  const activeJobId = window.currentJob?.id || jobId;
-
-  if(activeJobId && activeJobId !== "preview" && !String(activeJobId).startsWith("demo")){
-    const updateData = {};
-    updateData[role + "_signature_name"] = null;
-    updateData[role + "_signature_saved_at"] = null;
-
-    const { error } = await supabaseClient
-      .from("jobs")
-      .update(updateData)
-      .eq("id", activeJobId);
-
-    if(error){
-      console.error("Signature clear failed:", error);
-      if(status) status.textContent = "Signature could not be cleared from Supabase.";
-      return false;
-    }
   }
 
   const input = revampEl(role + "SignatureName");
@@ -12353,9 +12397,6 @@ async function revampClearPartySignature(event, role){
   window["revamp_" + role + "_signature_name"] = "";
   window["revamp_" + role + "_signature_saved_at"] = "";
   window["revamp_" + role + "_signature_data"] = "";
-
-  localStorage.removeItem("revamp_" + role + "_signature_name");
-  localStorage.removeItem("revamp_" + role + "_signature_saved_at");
 
   if(pill){
     pill.textContent = "Pending";
@@ -12375,74 +12416,6 @@ async function revampClearPartySignature(event, role){
   revampUpdateFinalSignedDocStatus();
   return false;
 }
-
-
-function revampApplySavedSignatureToUI(role, name, savedAt){
-  const input = revampEl(role + "SignatureName");
-  const confirm = revampEl(role + "SignatureConfirm");
-  const preview = revampEl(role + "SignaturePreview");
-  const timestamp = revampEl(role + "SignatureTimestamp");
-  const pill = revampEl(role + "SignatureStatusPill");
-  const finalStatus = revampEl(role + "FinalStatus");
-
-  if(input) input.value = name || "";
-  if(confirm) confirm.checked = !!name;
-  if(preview && name) preview.textContent = name;
-
-  if(timestamp && name){
-    const prettyDate = savedAt ? new Date(savedAt).toLocaleString() : revampSignatureDate();
-    timestamp.textContent = "Signed electronically by " + name + " on " + prettyDate + ".";
-  }
-
-  if(pill){
-    pill.textContent = name ? "Signed" : "Pending";
-    pill.classList.toggle("signed", !!name);
-    pill.classList.toggle("pending", !name);
-  }
-
-  if(finalStatus){
-    finalStatus.textContent = name ? "Signed" : "Pending";
-  }
-
-  window["revamp_" + role + "_signature_name"] = name || "";
-  window["revamp_" + role + "_signature_saved_at"] = savedAt || "";
-  window["revamp_" + role + "_signature_data"] = name ? "typed-signature:" + name : "";
-}
-
-async function loadSavedSignatures(){
-  try{
-    const activeJobId = window.currentJob?.id || jobId;
-
-    if(!activeJobId || activeJobId === "preview" || String(activeJobId).startsWith("demo")){
-      return;
-    }
-
-    const { data: job, error } = await supabaseClient
-      .from("jobs")
-      .select("homeowner_signature_name, homeowner_signature_saved_at, contractor_signature_name, contractor_signature_saved_at")
-      .eq("id", activeJobId)
-      .single();
-
-    if(error){
-      console.error("Could not load signatures:", error);
-      return;
-    }
-
-    ["homeowner", "contractor"].forEach(function(role){
-      const name = job?.[role + "_signature_name"] || "";
-      const savedAt = job?.[role + "_signature_saved_at"] || "";
-
-      if(name){
-        revampApplySavedSignatureToUI(role, name, savedAt);
-      }
-    });
-
-    revampUpdateFinalSignedDocStatus();
-  }catch(err){
-    console.error("loadSavedSignatures failed:", err);
-  }
-}
-
 
 function revampUpdateFinalSignedDocStatus(){
   const finalDoc = revampEl("finalSignedDocStatus");
@@ -12800,7 +12773,7 @@ async function checkCompletionStatus(){
     const activeJob = window.currentJob || {};
     const activeJobId = activeJob.id || jobId;
 
-    if(!activeJobId || activeJobId === "preview" || String(activeJobId).startsWith("demo")){
+    if (!activeJobId || activeJobId === "preview" || String(activeJobId).startsWith("demo")) {
       refreshCompletionStatus(activeJob);
       return;
     }
@@ -12811,36 +12784,27 @@ async function checkCompletionStatus(){
       .eq("id", activeJobId)
       .single();
 
-    if(error){
+    if (error) {
       console.error("Completion status lookup failed:", error);
       return;
     }
 
     refreshCompletionStatus(job);
 
-    if(job.contractor_completed && job.homeowner_completed && !job.completed){
+    if (job.contractor_completed && job.homeowner_completed && !job.completed) {
       const { error: closeError } = await supabaseClient
         .from("jobs")
         .update({ completed: true })
         .eq("id", activeJobId);
 
-      if(closeError){
+      if (closeError) {
         console.error("Final closeout update failed:", closeError);
         alert("Both sides marked complete, but final closeout could not be saved.");
         return;
       }
 
-      const completedJob = { ...job, completed: true };
-      refreshCompletionStatus(completedJob);
-
+      refreshCompletionStatus({ ...job, completed: true });
       alert("Project completed successfully.");
-
-      if(typeof showReviewPopup === "function"){
-        showReviewPopup();
-      }
-    }
-
-    if(job.completed && typeof showReviewPopup === "function"){
       showReviewPopup();
     }
 
@@ -12888,6 +12852,9 @@ document.addEventListener("DOMContentLoaded", function(){
   setTimeout(function(){
     if (typeof checkCompletionStatus === "function") {
       checkCompletionStatus();
+    }
+    if (typeof loadSavedSignatures === "function") {
+      loadSavedSignatures();
     }
   }, 1200);
 });
