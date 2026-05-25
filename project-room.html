@@ -12696,44 +12696,70 @@ async function markProjectComplete(){
 }
 
 async function checkCompletionStatus(){
-  try {
-    const activeJob = window.currentJob || {};
-    const activeJobId = activeJob.id || jobId;
 
-    if (!activeJobId || activeJobId === "preview" || String(activeJobId).startsWith("demo")) {
-      refreshCompletionStatus(activeJob);
-      return;
-    }
+const {data:job,error}=await supabaseClient
+.from("jobs")
+.select("*")
+.eq("id",currentJob.id)
+.single();
 
-    const { data: job, error } = await supabaseClient
-      .from("jobs")
-      .select("id, contractor_completed, homeowner_completed, completed")
-      .eq("id", activeJobId)
-      .single();
+if(error){
+console.error(error);
+return;
+}
 
-    if (error) {
-      console.error("Completion status lookup failed:", error);
-      return;
-    }
+const contractorStatus =
+document.getElementById(
+"contractorCompleteStatus"
+);
 
-    refreshCompletionStatus(job);
+const homeownerStatus =
+document.getElementById(
+"homeownerCompleteStatus"
+);
 
-    if (job.contractor_completed && job.homeowner_completed && !job.completed) {
-      const { error: closeError } = await supabaseClient
-        .from("jobs")
-        .update({ completed: true })
-        .eq("id", activeJobId);
+if(contractorStatus){
+contractorStatus.textContent =
+job.contractor_completed
+? "Completed ✓"
+: "Pending";
+}
 
-      if (closeError) {
-        console.error("Final closeout update failed:", closeError);
-        alert("Both sides marked complete, but final closeout could not be saved.");
-        return;
-      }
+if(homeownerStatus){
+homeownerStatus.textContent =
+job.homeowner_completed
+? "Completed ✓"
+: "Pending";
+}
 
-      alert("Project completed successfully.");
-      showReviewPopup();
-    }
+if(
+job.contractor_completed &&
+job.homeowner_completed
+){
 
+await supabaseClient
+.from("jobs")
+.update({
+completed:true
+})
+.eq("id",currentJob.id);
+
+const btn =
+document.getElementById(
+"markCompleteBtn"
+);
+
+if(btn){
+btn.disabled=true;
+btn.textContent=
+"Project Completed";
+}
+
+showReviewPopup();
+
+}
+
+}
   } catch (err) {
     console.error("checkCompletionStatus failed:", err);
   }
