@@ -13344,7 +13344,10 @@ async function checkCompletionStatus(options = {}){
       alert("Project completed successfully.");
     }
 
-    if (bothDone || job.completed || options.openReviewIfReady) {
+    // Do NOT auto-open the Leave Review station on normal Project Room load.
+    // Reviews should only open after the user clicks Leave Review, or immediately after
+    // the user marks their side complete through markProjectComplete().
+    if (options.openReviewIfReady === true) {
       await maybeShowReviewPopupForCurrentUser(activeJobId);
     }
 
@@ -13521,7 +13524,9 @@ async function submitProjectReview(){
 document.addEventListener("DOMContentLoaded", function(){
   setTimeout(function(){
     if (typeof checkCompletionStatus === "function") {
-      checkCompletionStatus({ openReviewIfReady: true });
+      // Normal page load should update completion labels only.
+      // It should NOT open or scroll to Leave Review automatically.
+      checkCompletionStatus({ openReviewIfReady: false });
     }
     if (typeof loadSavedSignatures === "function") {
       loadSavedSignatures();
