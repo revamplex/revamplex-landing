@@ -5665,6 +5665,17 @@ await supabase
 .eq('id',user.id);
 
 
+await sendRevampZapierNotification("project_room_accepted", {
+   subject: "RevampLEX project accepted",
+   message: "A contractor accepted the project and opened the private project room.",
+   job_id: job.id,
+   project_room_id: room.id,
+   homeowner_id: job.user_id,
+   contractor_id: user.id,
+   recipient_email: job.customer_email || job.homeowner_email || job.email || "",
+   recipient_name: job.customer_name || job.homeowner_name || "Homeowner"
+});
+
 // open project room
 window.location.href=
 `project-room.html?id=${room.id}&mode=contractor`;
@@ -6446,6 +6457,164 @@ function currency(value){
 const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null");
 
 /* ---------- MODE SWITCH ---------- */
+
+
+/* ---------- ZAPIER NOTIFICATION CENTER ---------- */
+const REVAMP_ZAPIER_NOTIFICATION_WEBHOOK = "https://hooks.zapier.com/hooks/catch/27422517/uvgb5l2/";
+
+function revampSafeText(value, fallback = ""){
+  return String(value ?? fallback).trim();
+}
+
+async function revampGetNotificationContext(extra = {}){
+  const params = new URLSearchParams(window.location.search);
+  const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null");
+  const savedContractor = JSON.parse(sessionStorage.getItem("revampSelectedContractor") || "null");
+  const job = window.currentJob || savedJob || {};
+  const role = typeof getWorkspaceRole === "function" ? getWorkspaceRole() : (params.get("mode") || "contractor");
+
+  let currentUser = null;
+  try {
+    const { data } = await supabaseClient.auth.getUser();
+    currentUser = data?.user || null;
+  } catch(err) {
+    console.warn("Zapier context auth lookup skipped:", err);
+  }
+
+  let room = null;
+  let roomId = params.get("room") || params.get("room_id") || params.get("project_room") || params.get("id") || extra.project_room_id || extra.room_id || null;
+
+  try {
+    if (!roomId && typeof ensureProjectRoom === "function") {
+      roomId = await ensureProjectRoom();
+    }
+  } catch(err) {
+    console.warn("Zapier context room lookup skipped:", err);
+  }
+
+  try {
+    if (roomId && window.supabaseClient) {
+      const { data } = await supabaseClient
+        .from("project_rooms")
+        .select("*")
+        .eq("id", roomId)
+        .maybeSingle();
+      room = data || null;
+    }
+  } catch(err) {
+    console.warn("Zapier context project room fetch skipped:", err);
+  }
+
+  const notificationJobId = extra.job_id || room?.job_id || job.id || params.get("job") || "";
+  const contractorId = extra.contractor_id || room?.contractor_id || params.get("contractor") || savedContractor?.id || "";
+  const homeownerId = extra.homeowner_id || room?.homeowner_id || job.user_id || job.homeowner_id || job.customer_id || "";
+
+  let homeownerEmail = revampSafeText(job.customer_email || job.homeowner_email || job.email || "");
+  let homeownerName = revampSafeText(job.customer_name || job.homeowner_name || "Homeowner");
+  let contractorEmail = revampSafeText(savedContractor?.email || document.getElementById("contractorEmail")?.value || "");
+  let contractorName = revampSafeText(savedContractor?.company || savedContractor?.name || document.getElementById("contractorCompany")?.value || document.getElementById("contractorName")?.value || "Contractor");
+
+  try {
+    if ((!homeownerEmail || homeownerName === "Homeowner") && homeownerId) {
+      const { data } = await supabaseClient
+        .from("profiles")
+        .select("email,full_name,name")
+        .eq("id", homeownerId)
+        .maybeSingle();
+      homeownerEmail = homeownerEmail || revampSafeText(data?.email || "");
+      homeownerName = homeownerName !== "Homeowner" ? homeownerName : revampSafeText(data?.full_name || data?.name || data?.email || "Homeowner");
+    }
+  } catch(err) {
+    console.warn("Zapier homeowner profile lookup skipped:", err);
+  }
+
+  try {
+    if ((!contractorEmail || contractorName === "Contractor") && contractorId) {
+      const { data } = await supabaseClient
+        .from("profiles")
+        .select("email,full_name,name,company_name,business_name,company")
+        .eq("id", contractorId)
+        .maybeSingle();
+      contractorEmail = contractorEmail || revampSafeText(data?.email || "");
+      contractorName = contractorName !== "Contractor" ? contractorName : revampSafeText(data?.company_name || data?.business_name || data?.company || data?.full_name || data?.name || data?.email || "Contractor");
+    }
+  } catch(err) {
+    console.warn("Zapier contractor profile lookup skipped:", err);
+  }
+
+  try {
+    if ((!contractorEmail || contractorName === "Contractor") && contractorId) {
+      const { data } = await supabaseClient
+        .from("contractors")
+        .select("email,name,company,full_name,business_name,company_name")
+        .eq("id", contractorId)
+        .maybeSingle();
+      contractorEmail = contractorEmail || revampSafeText(data?.email || "");
+      contractorName = contractorName !== "Contractor" ? contractorName : revampSafeText(data?.company_name || data?.business_name || data?.company || data?.full_name || data?.name || "Contractor");
+    }
+  } catch(err) {
+    console.warn("Zapier contractor table lookup skipped:", err);
+  }
+
+  const projectRoomUrl = `${window.location.origin}${window.location.pathname}?mode=${encodeURIComponent(role === "homeowner" ? "homeowner" : "contractor")}&job=${encodeURIComponent(notificationJobId || "")}${contractorId ? "&contractor=" + encodeURIComponent(contractorId) : ""}${roomId ? "&room=" + encodeURIComponent(roomId) : ""}`;
+
+  return {
+    app: "RevampLEX",
+    source: "project-room.html",
+    sent_at: new Date().toISOString(),
+    sender_role: role,
+    sender_user_id: currentUser?.id || "",
+    sender_email: currentUser?.email || "",
+    job_id: notificationJobId || "",
+    project_room_id: roomId || "",
+    contractor_id: contractorId || "",
+    homeowner_id: homeownerId || "",
+    job_title: job.title || extra.job_title || "Revamp Project",
+    trade: job.trade || "",
+    city: job.city || "",
+    budget: job.budget || "",
+    homeowner_email: homeownerEmail,
+    homeowner_name: homeownerName,
+    contractor_email: contractorEmail,
+    contractor_name: contractorName,
+    project_room_url: projectRoomUrl,
+    recipient_email: role === "homeowner" ? contractorEmail : homeownerEmail,
+    recipient_name: role === "homeowner" ? contractorName : homeownerName,
+    other_party_email: role === "homeowner" ? contractorEmail : homeownerEmail,
+    other_party_name: role === "homeowner" ? contractorName : homeownerName,
+    ...extra
+  };
+}
+
+async function sendRevampZapierNotification(notificationType, extra = {}){
+  try {
+    if (!REVAMP_ZAPIER_NOTIFICATION_WEBHOOK || REVAMP_ZAPIER_NOTIFICATION_WEBHOOK === "PASTE_ZAPIER_WEBHOOK_URL_HERE") {
+      console.warn("Zapier notification webhook missing.");
+      return false;
+    }
+
+    const context = await revampGetNotificationContext(extra);
+    const payload = {
+      notification_type: notificationType,
+      event_type: notificationType,
+      subject: extra.subject || `RevampLEX notification: ${notificationType}`,
+      message: extra.message || "A RevampLEX project-room event needs attention.",
+      ...context
+    };
+
+    await fetch(REVAMP_ZAPIER_NOTIFICATION_WEBHOOK, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify(payload)
+    });
+
+    console.log("Zapier notification queued:", notificationType, payload);
+    return true;
+  } catch(err) {
+    console.warn("Zapier notification failed safely:", notificationType, err);
+    return false;
+  }
+}
 
 function getWorkspaceRole() {
   const params = new URLSearchParams(window.location.search);
@@ -8161,6 +8330,14 @@ async function sendPrivateChatMessage(){
 
       chatUsesSupabase = true;
       chatInput.value = "";
+      await sendRevampZapierNotification("project_chat_message", {
+        subject: "New RevampLEX project chat message",
+        message: "A new private project-room chat message was sent.",
+        project_room_id: roomId,
+        chat_sender_role: actor.role,
+        chat_sender_name: actor.label,
+        chat_message: text
+      });
       await loadPrivateChatMessages({ ping: false });
       return;
     }
@@ -8181,6 +8358,13 @@ async function sendPrivateChatMessage(){
 
     chatInput.value = "";
     saveLocalChatMessages();
+    await sendRevampZapierNotification("project_chat_message", {
+      subject: "New RevampLEX project chat message",
+      message: "A new private project-room chat message was sent.",
+      chat_sender_role: actor.role,
+      chat_sender_name: actor.label,
+      chat_message: text
+    });
     setChatStatus("Message saved on this device. Add the Supabase chat SQL below to sync across both users.");
     renderPrivateChatMessages({ ping: false });
   } finally {
@@ -9718,6 +9902,15 @@ async function addCalendarAppointment(){
     }
 
     if (noteInput) noteInput.value = "";
+    await sendRevampZapierNotification("calendar_appointment_created", {
+      subject: "RevampLEX appointment added",
+      message: "A new private project-room appointment was added.",
+      project_room_id: roomId,
+      appointment_date: dateKey,
+      appointment_time: time,
+      appointment_type: type,
+      appointment_note: note
+    });
     await loadCalendarAppointments();
     return;
   }
@@ -9737,6 +9930,14 @@ async function addCalendarAppointment(){
   if (noteInput) noteInput.value = "";
 
   await saveCalendarAppointments();
+  await sendRevampZapierNotification("calendar_appointment_created", {
+    subject: "RevampLEX appointment added",
+    message: "A new private project-room appointment was added.",
+    appointment_date: dateKey,
+    appointment_time: time,
+    appointment_type: type,
+    appointment_note: note
+  });
   scheduleBrowserReminders();
   renderCalendar();
 }
@@ -12296,6 +12497,15 @@ async function revampSavePartySignature(event, role){
     status.textContent = (role === "homeowner" ? "Homeowner" : "Contractor") + " signature saved to project.";
   }
 
+  await sendRevampZapierNotification("project_signature_saved", {
+    subject: "RevampLEX approval signature saved",
+    message: (role === "homeowner" ? "Homeowner" : "Contractor") + " saved their project approval signature.",
+    signed_role: role,
+    signed_name: name,
+    signed_at: savedAt,
+    job_id: activeJobId
+  });
+
   await loadSavedSignatures();
   return false;
 }
@@ -12815,6 +13025,14 @@ async function markProjectComplete(){
       return;
     }
 
+    await sendRevampZapierNotification("project_marked_complete", {
+      subject: "RevampLEX project completion update",
+      message: (ctx.role === "homeowner" ? "Homeowner" : "Contractor") + " marked their side of the project complete.",
+      completed_role: ctx.role,
+      job_id: activeJobId,
+      project_room_id: ctx.roomId || ""
+    });
+
     await checkCompletionStatus({ openReviewIfReady: true });
 
   } catch (err) {
@@ -12862,6 +13080,12 @@ async function checkCompletionStatus(options = {}){
       }
 
       refreshCompletionStatus({ ...job, completed: true });
+      await sendRevampZapierNotification("project_fully_completed", {
+        subject: "RevampLEX project fully completed",
+        message: "Both homeowner and contractor marked the project complete.",
+        job_id: activeJobId,
+        project_room_id: ctx.roomId || ""
+      });
       alert("Project completed successfully.");
     }
 
@@ -13011,6 +13235,17 @@ async function submitProjectReview(){
 }
 
     if(status) status.textContent = "Review submitted successfully.";
+
+    await sendRevampZapierNotification("project_review_submitted", {
+      subject: "New RevampLEX project review submitted",
+      message: "A project review was submitted in the RevampLEX project room.",
+      job_id: ctx.jobId,
+      project_room_id: ctx.roomId || "",
+      reviewer_role: ctx.role,
+      reviewed_role: ctx.reviewedRole,
+      rating: rating,
+      review_comment: comment
+    });
 
     const panel = document.getElementById("reviewPopupPanel");
     const submitBtn = panel?.querySelector('button[onclick*="submitProjectReview"]');
