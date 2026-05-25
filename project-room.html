@@ -5518,7 +5518,38 @@ Mark Project Complete
 
 </section>
 
+<section class="panel" id="reviewPopupPanel" style="display:none;">
+  <div class="panel-header">
+    <div>
+      <h3>Leave a Review</h3>
+      <p>Rate the other party after the project is completed.</p>
+    </div>
+  </div>
 
+  <div class="summary-box">
+    <label>Rating</label>
+    <select id="reviewRating">
+      <option value="5">5 Stars</option>
+      <option value="4">4 Stars</option>
+      <option value="3">3 Stars</option>
+      <option value="2">2 Stars</option>
+      <option value="1">1 Star</option>
+    </select>
+
+    <br><br>
+
+    <label>Review Comment</label>
+    <textarea id="reviewComment" placeholder="Write a short review..."></textarea>
+
+    <br>
+
+    <button class="btn btn-primary" type="button" onclick="submitProjectReview()">
+      Submit Review
+    </button>
+
+    <div id="reviewStatus" style="margin-top:10px;font-weight:800;"></div>
+  </div>
+</section>
 </main>
     </div>
 
