@@ -6665,19 +6665,55 @@ async function sendRevampZapierNotification(notificationType, extra = {}){
       ...context
     };
 
+    // Final recipient safety net.
+    // Zapier email steps fail silently when the mapped recipient is blank.
+    if (!payload.recipient_email) {
+      console.warn("RevampLEX notification has no recipient_email. Payload:", payload);
+      const status = document.getElementById("privateChatStatus") || document.getElementById("calendarSyncStatus") || document.getElementById("signatureStatus");
+      if (status) {
+        status.textContent = "Notification warning: no recipient email found for the other party. Make sure jobs.customer_email and contractor/profile email are saved.";
+      }
+    }
+
+    // Zapier browser-safe format:
+    // JSON with no-cors often reaches Zapier as raw text and fields may not map.
+    // URLSearchParams sends normal form fields so Zapier can map recipient_email,
+    // subject, message, job_title, project_room_url, etc.
+    const formBody = new URLSearchParams();
+    Object.entries(payload).forEach(([key, value]) => {
+      if (value === undefined || value === null) {
+        formBody.append(key, "");
+      } else if (typeof value === "object") {
+        formBody.append(key, JSON.stringify(value));
+      } else {
+        formBody.append(key, String(value));
+      }
+    });
+
     await fetch(REVAMP_ZAPIER_NOTIFICATION_WEBHOOK, {
       method: "POST",
       mode: "no-cors",
-      body: JSON.stringify(payload)
+      body: formBody
     });
 
-    console.log("Zapier notification queued:", notificationType, payload);
+    console.log("Zapier notification submitted:", notificationType, payload);
+    window.__lastRevampNotificationPayload = payload;
     return true;
   } catch(err) {
     console.warn("Zapier notification failed safely:", notificationType, err);
     return false;
   }
 }
+
+// Run this from Chrome console to test Zapier without sending a chat:
+// testRevampZapierNotification()
+window.testRevampZapierNotification = async function(){
+  return await sendRevampZapierNotification("test_notification", {
+    subject: "RevampLEX Zapier test",
+    message: "This is a test notification from project-room.html.",
+    test_mode: "true"
+  });
+};
 
 function getWorkspaceRole() {
   const params = new URLSearchParams(window.location.search);
@@ -6772,25 +6808,22 @@ async function inviteContractorToProjectRoom() {
     return;
   }
 
-  let res;
-
   try {
-    res = await fetch(zapierUrl, {
+    const formBody = new URLSearchParams();
+    Object.entries(payload).forEach(([key, value]) => formBody.append(key, value == null ? "" : String(value)));
+
+    await fetch(zapierUrl, {
       method: "POST",
-      body: JSON.stringify(payload)
+      mode: "no-cors",
+      body: formBody
     });
+
+    console.log("Invite notification submitted to Zapier:", payload);
+    alert("Invite submitted. If no email arrives, check the Zap History and make sure recipient_email is mapped in the Gmail step.");
   } catch (err) {
     console.error("Zapier invite failed:", err);
     alert("Invite failed because Zapier blocked the browser request. We may need to send this through Vercel/Supabase instead.");
-    return;
   }
-
-  if (!res.ok) {
-    alert("Invite failed. Please try again.");
-    return;
-  }
-
-  alert("Invite sent.");
 }
 
 function applyWorkspaceMode() {
