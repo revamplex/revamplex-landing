@@ -2106,7 +2106,7 @@
     <option value="4.0">4.0+ stars</option>
     <option value="3.5">3.5+ stars</option>
   </select>
-  <button class="activity-toggle-btn active" id="activityToggleBtn" type="button">🔥 Build Activity</button>
+  <button class="activity-toggle-btn active" id="activityToggleBtn" type="button">🔥 Revamp Activity</button>
   <div class="mode-inline">
   <button class="mode-btn active" id="homeownerMode">🏠 Homeowner</button>
   <button class="mode-btn" id="contractorMode">🛠 Contractor</button>
@@ -2251,16 +2251,16 @@
 
         <div class="activity-share-box">
           <div>
-            <div class="activity-share-title">Build Activity Around Me</div>
+            <div class="activity-share-title">Revamp Activity</div>
             <div class="activity-share-sub">Optional public showcase. RevampLEX only shows an approximate area — never your exact address.</div>
           </div>
           <label class="activity-check-row">
             <input type="checkbox" id="jobShareActivity" checked>
-            <span>Share this project as neighborhood build activity so nearby homeowners can discover it.</span>
+            <span>Share this project to Revamp Activity so nearby homeowners can discover it.</span>
           </label>
           <label class="activity-check-row">
             <input type="checkbox" id="jobRevealPrice">
-            <span>Show my budget/price publicly on the activity card.</span>
+            <span>Show my budget/price publicly on the Revamp Activity card.</span>
           </label>
           <label class="activity-check-row">
             <input type="checkbox" id="jobHeatMapOptIn">
@@ -3540,7 +3540,7 @@ async function getCurrentDataset() {
       if (activityToggleBtn) {
         activityToggleBtn.style.display = currentMode === 'homeowner' ? 'inline-flex' : 'none';
         activityToggleBtn.classList.toggle('active', showBuildActivity);
-        activityToggleBtn.textContent = showBuildActivity ? '🔥 Build Activity' : '○ Build Activity';
+        activityToggleBtn.textContent = showBuildActivity ? '🔥 Revamp Activity' : '○ Revamp Activity';
       }
     }
 
@@ -3763,7 +3763,7 @@ function clearMarkers() {
 
     function getPopupHtml(item) {
       if (item.type === 'activity') {
-        detailTitle.textContent = item.title || 'Build Activity';
+        detailTitle.textContent = item.title || 'Revamp Activity';
         const priceText = item.price_visible === false ? 'Homeowner chose to hide the price.' : `Shared price/budget: ${item.budget || 'Not listed'}`;
         detailContent.innerHTML = `
           <div class="detail-panel">
@@ -3786,8 +3786,7 @@ function clearMarkers() {
             <p>${item.heatmap_opt_in ? 'This homeowner also opted into future Neighborhood Project Heat Map totals.' : 'This homeowner did not opt into heat map totals.'}</p>
           </div>
           <div class="card-actions">
-            <button class="mini-btn secondary" data-action="activity-inspire" data-id="${item.id}">Save Inspiration</button>
-            <button class="mini-btn primary" data-action="activity-request" data-id="${item.id}">Request Similar Quote</button>
+            <button class="mini-btn primary" data-action="activity-inspire" data-id="${item.id}">Save Idea</button>
           </div>
         `;
         return;
@@ -4230,10 +4229,9 @@ function canIncreaseBidLimit(item) {
 function activityCardHtml(item) {
   const imageSrc = item.image_url || getJobImage(item);
   const priceText = item.price_visible === false ? 'Price hidden' : (item.budget || 'Price optional');
-  const contractor = item.contractor_name || 'Contractor not shown yet';
   return `
     <div class="card-image-wrap">
-      <span class="activity-badge">Build Activity</span>
+      <span class="activity-badge">Revamp Activity</span>
       ${item.is_demo ? `<span class="featured-badge">Sample</span>` : ``}
       <img src="${imageSrc}" onerror="hideMissingCardImage(this)">
     </div>
@@ -4251,8 +4249,8 @@ function activityCardHtml(item) {
           <div class="meta-value">${priceText}</div>
         </div>
         <div class="meta-box">
-          <div class="meta-label">Built By</div>
-          <div class="meta-value" style="font-size:12px;line-height:1.15;">${contractor}</div>
+          <div class="meta-label">Privacy</div>
+          <div class="meta-value" style="font-size:12px;line-height:1.15;">Contractor hidden</div>
         </div>
       </div>
       <div class="info-row">
@@ -4595,7 +4593,7 @@ async function createJobFromForm() {
   let insertResult = await supabaseClient.from('jobs').insert([activityPayload]).select().maybeSingle();
 
   // If Supabase does not have the Phase 1 columns yet, do not break job posting.
-  // Retry with the existing safe payload and keep the activity card locally for the map preview.
+  // Retry with the existing safe payload and keep the Revamp Activity card locally for the map preview.
   if (insertResult.error) {
     activityFieldsSaved = false;
     console.warn("JOB POST WITH ACTIVITY FIELDS FAILED, retrying base job:", insertResult.error);
@@ -5002,7 +5000,7 @@ const bidsHtml = visibleBids.length
       `activity-${entry.id}` === rawId
     );
     if (item) openDetailModal(item);
-    else showStatus('Activity not found');
+    else showStatus('Revamp Activity not found');
     return;
   }
 
@@ -5012,8 +5010,7 @@ const bidsHtml = visibleBids.length
   }
 
   if (action === 'activity-request') {
-    showStatus('Post a similar project to request quotes');
-    openJobModal();
+    showStatus('Saved to inspiration');
     return;
   }
 
