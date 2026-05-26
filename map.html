@@ -800,7 +800,7 @@
 
 
 
-/* ===== PHASE 1: BUILD ACTIVITY AROUND ME ===== */
+/* ===== PHASE 1: REVAMP ACTIVITY ===== */
 .activity-toggle-btn {
   height: 34px;
   padding: 0 12px;
@@ -874,6 +874,139 @@
 @media (max-width:640px){
   .activity-price-row { grid-template-columns: 1fr; }
   .activity-toggle-btn { font-size: 12px; padding: 0 10px; }
+}
+
+
+
+/* ===== REVAMP ACTIVITY LARGE VIEW CARD ===== */
+.activity-detail-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  min-height: 230px;
+  background: #0f172a;
+  border: 1px solid rgba(15,23,42,.08);
+  box-shadow: 0 20px 42px rgba(15,23,42,.16);
+}
+.activity-detail-hero img {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  display: block;
+  opacity: .92;
+}
+.activity-detail-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(15,23,42,.04), rgba(15,23,42,.82));
+  pointer-events: none;
+}
+.activity-detail-overlay {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 16px;
+  z-index: 2;
+  color: #fff;
+}
+.activity-detail-kicker {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(249,115,22,.92);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.activity-detail-overlay h3 {
+  margin: 0 0 5px;
+  font-size: clamp(1.35rem, 3vw, 2rem);
+  line-height: 1.05;
+  font-weight: 950;
+  letter-spacing: -.04em;
+}
+.activity-detail-overlay p {
+  margin: 0;
+  color: rgba(255,255,255,.86);
+  font-weight: 800;
+}
+.activity-detail-grid {
+  display: grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap: 12px;
+}
+.activity-detail-card {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 15px;
+  background: #ffffff;
+}
+.activity-detail-card h4 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 950;
+}
+.activity-detail-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+  font-size: 14px;
+}
+.activity-contractor-card {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid rgba(249,115,22,.18);
+  background: linear-gradient(180deg, #fff7ed 0%, #ffffff 100%);
+}
+.activity-contractor-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 950;
+  box-shadow: 0 10px 20px rgba(249,115,22,.20);
+}
+.activity-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.activity-stat-pill {
+  border-radius: 16px;
+  background: #f8fafc;
+  border: 1px solid var(--line);
+  padding: 12px;
+}
+.activity-stat-pill span {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 4px;
+}
+.activity-stat-pill strong {
+  display: block;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 950;
+}
+@media (max-width: 640px) {
+  .activity-detail-grid,
+  .activity-stats-row { grid-template-columns: 1fr; }
+  .activity-detail-hero img { height: 220px; }
 }
 
 /* ===== REVAMPLEX BID LIMIT CONTROLS ===== */
@@ -3271,6 +3404,8 @@ const DEMO_ACTIVITY = [
     price_visible: true,
     contractor_name: "NorthStar Remodelers",
     contractor_rating: 4.9,
+    contractor_reviews: 93,
+    contractor_bio: "Kitchen and bath remodeling team with tile, waterproofing, cabinetry, and finish-work experience.",
     image_url: "images/jobs/bathroom.jpg",
     description: "New tile shower, vanity, lighting, paint, and waterproofing. Shared by homeowner as neighborhood inspiration.",
     completed_ago: "2 weeks ago",
@@ -3289,6 +3424,8 @@ const DEMO_ACTIVITY = [
     price_visible: true,
     contractor_name: "MetroBuild Kitchens",
     contractor_rating: 4.8,
+    contractor_reviews: 118,
+    contractor_bio: "Kitchen remodel specialists focused on cabinets, counters, backsplash, lighting, and clean project coordination.",
     image_url: "images/jobs/kitchen.jpg",
     description: "Cabinet update, counters, backsplash, sink, under-cabinet lighting, and flooring refresh.",
     completed_ago: "1 month ago",
@@ -3307,6 +3444,8 @@ const DEMO_ACTIVITY = [
     price_visible: false,
     contractor_name: "Summit Deck & Carpentry",
     contractor_rating: 4.9,
+    contractor_reviews: 61,
+    contractor_bio: "Deck and carpentry crew specializing in composite decking, railing, stairs, framing repairs, and porch work.",
     image_url: "images/jobs/decks-porches.jpg",
     description: "Homeowner shared before/after deck repair photos while keeping project cost private.",
     completed_ago: "3 weeks ago",
@@ -3331,6 +3470,8 @@ function getBuildActivityItems() {
       image_url: job.activity_photo_url || job.image_url || job.image || getJobImage(job),
       contractor_name: job.contractor_used || job.contractor_name || 'Contractor not shown yet',
       contractor_rating: job.contractor_rating || job.rating || 5,
+      contractor_reviews: job.contractor_reviews || job.reviews || 0,
+      contractor_bio: job.contractor_bio || '',
       completed_ago: job.completed_ago || job.posted_ago || 'Recently shared',
       heatmap_opt_in: Boolean(job.heatmap_opt_in)
     }));
@@ -4881,6 +5022,68 @@ async function increaseBidLimit(jobId) {
   if (!item) return;
       expandUI();
       detailModal.classList.add('show');
+
+      if (item.type === 'activity') {
+        const imageSrc = item.image_url || getJobImage(item);
+        const priceText = item.price_visible === false ? 'Not publicly shared' : (item.budget || 'Not listed');
+        const contractorName = item.contractor_name || item.company || 'Verified Contractor';
+        const contractorInitial = String(contractorName || 'R').trim().charAt(0).toUpperCase() || 'R';
+        const contractorRating = Number(item.contractor_rating || item.rating || 0).toFixed(1);
+        const contractorReviews = item.contractor_reviews || item.reviews || 0;
+        const contractorBio = item.contractor_bio || item.bio || 'Verified RevampLEX contractor profile. Full profile details, logo, work photos, bio, and ratings can connect here as the contractor profile system grows.';
+
+        detailTitle.textContent = 'Revamp Activity';
+        detailContent.innerHTML = `
+          <div class="activity-detail-hero">
+            <img src="${imageSrc}" onerror="hideMissingCardImage(this)">
+            <div class="activity-detail-overlay">
+              <div class="activity-detail-kicker">Revamp Activity</div>
+              <h3>${item.title || 'Shared Project'}</h3>
+              <p>${getCompactTradeLabel(item)} • ${getDisplayCity(item)} • ${item.completed_ago || 'Recently shared'}</p>
+            </div>
+          </div>
+
+          <div class="activity-stats-row">
+            <div class="activity-stat-pill">
+              <span>Project Type</span>
+              <strong>${getCompactTradeLabel(item)}</strong>
+            </div>
+            <div class="activity-stat-pill">
+              <span>Shared Price</span>
+              <strong>${priceText}</strong>
+            </div>
+            <div class="activity-stat-pill">
+              <span>Area</span>
+              <strong>${getDisplayCity(item) || 'Nearby'}</strong>
+            </div>
+          </div>
+
+          <div class="activity-detail-grid">
+            <div class="activity-detail-card">
+              <h4>Project Details</h4>
+              <p>${item.description || 'A homeowner shared this project as neighborhood inspiration.'}</p>
+            </div>
+
+            <div class="activity-detail-card activity-contractor-card">
+              <div class="activity-contractor-avatar">${contractorInitial}</div>
+              <div>
+                <h4>${contractorName}</h4>
+                <p>⭐ ${contractorRating} rating${contractorReviews ? ` • ${contractorReviews} reviews` : ''}<br>${contractorBio}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="activity-detail-card">
+            <h4>Why this is useful</h4>
+            <p>Save this as inspiration so you can compare project style, price range, trade type, and contractor quality when you are ready to start something similar.</p>
+          </div>
+
+          <div class="card-actions">
+            <button class="mini-btn primary" data-action="activity-inspire" data-id="${item.id}">Save Idea</button>
+          </div>
+        `;
+        return;
+      }
 
       if (item.type === 'contractor') {
         detailTitle.textContent = anonymizeContractorName(item);
