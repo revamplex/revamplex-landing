@@ -797,6 +797,26 @@
   }
 }
 
+
+/* ===== REVAMPLEX BID LIMIT CONTROLS ===== */
+.submit-bid-btn.closed,
+.mini-btn[disabled]{
+  opacity: .55;
+  cursor: not-allowed;
+  filter: grayscale(.25);
+}
+.bid-limit-note{
+  display:inline-flex;
+  margin-top:6px;
+  padding:5px 8px;
+  border-radius:999px;
+  background:#fff7ed;
+  color:#9a3412;
+  border:1px solid #fed7aa;
+  font-size:11px;
+  font-weight:900;
+}
+
 </style>
   <style>
     :root {
@@ -3848,8 +3868,25 @@ function getMaxBidLimit(item) {
   return [3, 5, 7].includes(limit) ? limit : 5;
 }
 
+function getNextBidLimit(item) {
+  const currentLimit = getMaxBidLimit(item);
+  if (currentLimit < 3) return 3;
+  if (currentLimit < 5) return 5;
+  if (currentLimit < 7) return 7;
+  return null;
+}
+
+function isBidExpansionLocked(item) {
+  const status = String(item?.status || item?.workflow_status || item?.project_status || '').toLowerCase().trim();
+  return ['accepted','approved','contract_signed','scheduled','in_progress','active','complete','completed','closed'].includes(status);
+}
+
 function isJobBidClosed(item) {
   return getBidCount(item) >= getMaxBidLimit(item);
+}
+
+function canIncreaseBidLimit(item) {
+  return Boolean(item && item.type === 'job' && canEditItem(item) && getNextBidLimit(item) && !isBidExpansionLocked(item));
 }
 
     function contractorCardHtml(item) {
@@ -3937,6 +3974,7 @@ function isJobBidClosed(item) {
           </div>
           <div class="card-actions">
             <button class="mini-btn secondary" data-action="job-details" data-id="${item.id}">View</button>
+            ${canIncreaseBidLimit(item) ? `<button class="mini-btn secondary" data-action="increase-bid-limit" data-id="${item.id}">Raise to ${getNextBidLimit(item)}</button>` : ``}
             <button class="mini-btn primary submit-bid-btn ${bidClosed ? 'closed' : ''}" ${bidClosed ? 'disabled title="Maximum contractor bids reached"' : `onclick="openProjectRoom('${item.id}')"`}>${bidClosed ? 'Bidding Closed' : 'Submit Bid'}</button>
           </div>
         </div>
@@ -4401,6 +4439,12 @@ function contractorCanAccess(profile){
       return;
     }
 
+    const targetJob = jobs.find(job => String(job.id) === String(jobId) || `job-${job.id}` === String(jobId));
+    if (targetJob && isJobBidClosed(targetJob)) {
+      alert('Maximum contractor bids reached for this project.');
+      return;
+    }
+
     const amount = prompt("Enter your bid amount:");
     if (!amount) return;
 
@@ -4433,6 +4477,69 @@ function canEditItem(item) {
   if (!currentUserId || !item) return false;
 
   return String(item.user_id || item.owner_id || item.profile_id || item.contractor_id || '') === String(currentUserId);
+}
+
+async function increaseBidLimit(jobId) {
+  try {
+    const rawId = String(jobId || '');
+    const cleanId = rawId.replace(/^job-/, '');
+    const item = jobs.find(job =>
+      String(job.id) === rawId ||
+      String(job.id) === cleanId ||
+      `job-${job.id}` === rawId
+    );
+
+    if (!item) {
+      showStatus('Job not found');
+      return;
+    }
+
+    if (!canEditItem(item)) {
+      alert('Only the homeowner who posted this job can change the bid limit.');
+      return;
+    }
+
+    if (isBidExpansionLocked(item)) {
+      alert('This project already has an accepted/active project room, so bidding is closed.');
+      return;
+    }
+
+    const bidCount = getBidCount(item);
+    const currentLimit = getMaxBidLimit(item);
+    const nextLimit = getNextBidLimit(item);
+
+    if (!nextLimit) {
+      showStatus('This job is already at the 7 bid maximum');
+      return;
+    }
+
+    if (nextLimit < bidCount) {
+      alert(`This job already has ${bidCount} bids, so the limit cannot be set below that.`);
+      return;
+    }
+
+    const confirmed = confirm(`Increase this job from ${currentLimit} max bids to ${nextLimit}? Contractors will be able to submit more bids.`);
+    if (!confirmed) return;
+
+    const { error } = await supabaseClient
+      .from('jobs')
+      .update({ max_bids: nextLimit })
+      .eq('id', item.id)
+      .eq('user_id', window.__currentUserId);
+
+    if (error) {
+      console.error('BID LIMIT UPDATE ERROR:', error);
+      alert(error.message || 'Could not update the bid limit.');
+      return;
+    }
+
+    item.max_bids = nextLimit;
+    showStatus(`Bid limit increased to ${nextLimit}`);
+    await loadLiveData();
+  } catch (err) {
+    console.error('increaseBidLimit failed:', err);
+    alert(err.message || 'Could not update bid limit.');
+  }
 }
    function openDetailModal(item) {
   if (!item) return;
@@ -4502,17 +4609,19 @@ const bidsHtml = visibleBids.length
             </div>
             <div class="detail-panel">
               <h4>Budget & Bids</h4>
-              <p>${item.budget || '$0'} • Posted ${item.posted_ago || 'Live'} • Bids ${(item.bids || []).length}/${item.max_bids || 5}</p>
+              <p>${item.budget || '$0'} • Posted ${item.posted_ago || 'Live'} • Bids ${getBidCount(item)}/${getMaxBidLimit(item)}${isJobBidClosed(item) ? ' • Closed' : ' • Open'}</p>
             </div>
           </div>
           <div class="detail-panel">
-            <h4>Bids (${(item.bids || []).length}/${item.max_bids || 5})</h4>
+            <h4>Bids (${getBidCount(item)}/${getMaxBidLimit(item)})</h4>
             ${bidsHtml}
+            ${canIncreaseBidLimit(item) ? `<div class="bid-limit-note">Need more options? Raise this job to ${getNextBidLimit(item)} bids.</div>` : ``}
           </div>
          <div class="card-actions">
  ${canEditItem(item) ? `<button class="mini-btn secondary" data-action="edit" data-id="${item.id}">Edit</button>` : ''}
-<button class="mini-btn primary" data-action="project-room" data-id="${item.id}">
-  Submit Bid
+ ${canIncreaseBidLimit(item) ? `<button class="mini-btn secondary" data-action="increase-bid-limit" data-id="${item.id}">Increase Bid Limit</button>` : ''}
+<button class="mini-btn primary" data-action="project-room" data-id="${item.id}" ${isJobBidClosed(item) ? 'disabled title="Maximum contractor bids reached"' : ''}>
+  ${isJobBidClosed(item) ? 'Bidding Closed' : 'Submit Bid'}
 </button>
 </div>
         `;
@@ -4530,6 +4639,11 @@ const bidsHtml = visibleBids.length
 
   if (action === 'edit') {
     openEditModal(cleanId);
+    return;
+  }
+
+  if (action === 'increase-bid-limit') {
+    increaseBidLimit(cleanId);
     return;
   }
 
