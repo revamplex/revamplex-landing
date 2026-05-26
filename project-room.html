@@ -5580,25 +5580,42 @@ function scrollToSection(id) {
 
 try{
 
-const { data:{ user } } = await supabase.auth.getUser();
+const db = window.supabaseClient || (typeof supabaseClient !== "undefined" ? supabaseClient : null);
+
+if(!db){
+   alert("Project Room is still loading. Please try again in a moment.");
+   return;
+}
+
+const { data:{ user }, error:userError } = await db.auth.getUser();
+
+if(userError){
+   console.warn("User lookup failed:", userError);
+}
 
 if(!user){
    alert("Please sign in");
    return;
 }
 
-setLoading(true);
+if(typeof setLoading === "function") setLoading(true);
 
+const safeJobId = jobId || window.currentJob?.id || new URLSearchParams(window.location.search).get("job");
+
+if(!safeJobId){
+   alert("No job ID found for this project room.");
+   return;
+}
 
 // get current job
-const { data:job, error:jobError } = await supabase
+const { data:job, error:jobError } = await db
 .from('jobs')
 .select('*')
-.eq('id',jobId)
+.eq('id',safeJobId)
 .single();
 
 if(jobError) throw jobError;
-
+if(!job) throw new Error("Job not found.");
 
 // stop if bid limit reached
 if((job.bids_received || 0) >= (job.max_bids || 3)){
@@ -5606,10 +5623,9 @@ if((job.bids_received || 0) >= (job.max_bids || 3)){
    return;
 }
 
-
 // create room immediately
 const { data:room, error:roomError } =
-await supabase
+await db
 .from('project_rooms')
 .insert({
     job_id:job.id,
@@ -5617,17 +5633,16 @@ await supabase
     contractor_id:user.id,
     status:'active',
     identities_revealed:true,
-    accepted_at:new Date()
+    accepted_at:new Date().toISOString()
 })
 .select()
 .single();
 
 if(roomError) throw roomError;
 
-
 // create bid record
 const { error:bidError } =
-await supabase
+await db
 .from('bids')
 .insert({
    contractor_id:user.id,
@@ -5639,25 +5654,23 @@ await supabase
 
 if(bidError) throw bidError;
 
-
 // increment bid count
-await supabase
+await db
 .from('jobs')
 .update({
    bids_received:(job.bids_received || 0)+1
 })
 .eq('id',job.id);
 
-
 // increment contractor usage
 const { data:profile } =
-await supabase
+await db
 .from('profiles')
 .select('bids_used')
 .eq('id',user.id)
 .single();
 
-await supabase
+await db
 .from('profiles')
 .update({
    bids_used:(profile?.bids_used || 0)+1
@@ -5684,11 +5697,11 @@ window.location.href=
 catch(err){
 
 console.error(err);
-alert(err.message);
+alert(err.message || "Could not open the project room.");
 
 }
 finally{
-setLoading(false);
+if(typeof setLoading === "function") setLoading(false);
 }
 
 }
