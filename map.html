@@ -2517,6 +2517,221 @@
       .welcomeActions { flex-direction:column; }
     }
 </style>
+<style>
+
+/* ===== PREMIUM LARGE DETAIL CARDS — HOMEOWNER + CONTRACTOR ===== */
+.modal.detail-premium-modal {
+  z-index: 9100 !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+}
+.modal.detail-premium-modal .modal-card {
+  width: min(1180px, calc(100vw - 32px)) !important;
+  max-width: calc(100vw - 32px) !important;
+  max-height: calc(100vh - 32px) !important;
+  overflow: auto !important;
+  padding: 24px !important;
+  border-radius: 30px !important;
+  background:
+    radial-gradient(circle at top right, rgba(249,115,22,.10), transparent 34%),
+    #ffffff !important;
+}
+.modal.detail-premium-modal .modal-head { margin-bottom: 14px !important; }
+.modal.detail-premium-modal .modal-title { font-size: 0 !important; }
+.modal.detail-premium-modal .detail-stack { display:block !important; }
+.premium-detail-wrap {
+  display:grid;
+  grid-template-columns:minmax(330px,.85fr) minmax(420px,1.15fr);
+  gap:22px;
+  align-items:start;
+}
+.premium-detail-left,
+.premium-detail-right { min-width:0; }
+.premium-kicker {
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  margin-bottom:14px;
+  padding:7px 13px;
+  border-radius:999px;
+  background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+  color:#fff;
+  font-size:12px;
+  font-weight:950;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  box-shadow:0 12px 24px rgba(249,115,22,.22);
+}
+.premium-kicker.dark { background:#0f172a; box-shadow:0 12px 24px rgba(15,23,42,.18); }
+.premium-big-title {
+  margin:0 0 14px;
+  color:var(--text);
+  font-size:clamp(2.1rem,4vw,3.55rem);
+  line-height:.98;
+  font-weight:950;
+  letter-spacing:-.06em;
+}
+.premium-location-line {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-items:center;
+  margin-bottom:22px;
+  color:#334155;
+  font-weight:850;
+  font-size:14px;
+}
+.premium-stats-row {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-bottom:18px;
+}
+.premium-stat-pill {
+  border-radius:17px;
+  background:linear-gradient(180deg,#ffffff,#f8fafc);
+  border:1px solid rgba(15,23,42,.08);
+  padding:14px 12px;
+  box-shadow:0 8px 18px rgba(15,23,42,.04);
+}
+.premium-stat-icon {
+  width:34px;
+  height:34px;
+  border-radius:13px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:8px;
+  background:#fff7ed;
+  color:var(--brand-dark);
+  font-size:17px;
+}
+.premium-stat-pill span {
+  display:block;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:950;
+  text-transform:uppercase;
+  letter-spacing:.07em;
+  margin-bottom:5px;
+}
+.premium-stat-pill strong {
+  display:block;
+  color:var(--text);
+  font-size:14px;
+  font-weight:950;
+  line-height:1.18;
+}
+.premium-section {
+  border-top:1px solid rgba(15,23,42,.10);
+  padding-top:18px;
+  margin-top:18px;
+}
+.premium-section h4 { margin:0 0 10px; color:var(--text); font-size:17px; font-weight:950; }
+.premium-section p { margin:0; color:#475569; line-height:1.55; font-size:15px; }
+.premium-highlight-tags { display:flex; flex-wrap:wrap; gap:8px; }
+.premium-highlight-tags span {
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:8px 10px;
+  border-radius:999px;
+  border:1px solid rgba(15,23,42,.12);
+  background:#fff;
+  color:#0f172a;
+  font-size:12px;
+  font-weight:850;
+}
+.premium-hero-large {
+  position:relative;
+  overflow:hidden;
+  border-radius:24px;
+  background:#0f172a;
+  border:1px solid rgba(15,23,42,.10);
+  box-shadow:0 22px 46px rgba(15,23,42,.14);
+}
+.premium-hero-large img { width:100%; height:clamp(285px,42vh,450px); object-fit:cover; display:block; }
+.premium-photo-count {
+  position:absolute;
+  top:14px;
+  right:14px;
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:8px 11px;
+  border-radius:999px;
+  background:rgba(15,23,42,.74);
+  color:#fff;
+  font-size:12px;
+  font-weight:950;
+  backdrop-filter:blur(10px);
+}
+.premium-thumb-row { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin:10px 0 16px; }
+.premium-thumb { height:58px; border-radius:12px; overflow:hidden; border:2px solid rgba(15,23,42,.08); background:#e2e8f0; }
+.premium-thumb.active { border-color:var(--brand); box-shadow:0 0 0 3px rgba(249,115,22,.12); }
+.premium-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+.premium-action-panel {
+  border:1px solid rgba(15,23,42,.10);
+  border-radius:22px;
+  background:linear-gradient(180deg,#ffffff 0%,#fff7ed 160%);
+  padding:18px;
+  box-shadow:0 12px 28px rgba(15,23,42,.06);
+}
+.premium-action-panel h4 { margin:0 0 12px; font-size:16px; font-weight:950; }
+.premium-action-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+.premium-action-grid .mini-btn { width:100%; height:52px !important; border-radius:16px !important; font-size:15px !important; }
+.premium-action-grid .wide { grid-column:1 / -1; }
+.premium-pro-card {
+  border:1px solid rgba(15,23,42,.10);
+  border-radius:22px;
+  background:linear-gradient(180deg,#ffffff 0%,#fff7ed 160%);
+  padding:18px;
+  margin-top:14px;
+  box-shadow:0 12px 28px rgba(15,23,42,.06);
+}
+.premium-pro-main { display:grid; grid-template-columns:82px 1fr minmax(130px,.38fr); gap:16px; align-items:center; }
+.premium-pro-logo {
+  width:82px;
+  height:82px;
+  border-radius:18px;
+  background:#0f172a;
+  color:var(--brand);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:34px;
+  font-weight:950;
+  box-shadow:0 12px 24px rgba(15,23,42,.14);
+  overflow:hidden;
+}
+.premium-pro-logo img { width:100%; height:100%; object-fit:cover; display:block; }
+.premium-pro-copy h3 { margin:0 0 6px; color:var(--text); font-size:22px; font-weight:950; letter-spacing:-.03em; }
+.premium-pro-copy p { margin:8px 0 0; color:#475569; line-height:1.45; font-size:13px; }
+.premium-badge-row { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.premium-badge-row span { border-radius:999px; padding:5px 8px; font-size:11px; font-weight:850; background:#ecfdf5; color:#166534; }
+.premium-pro-stats { display:grid; gap:10px; border-left:1px solid rgba(15,23,42,.10); padding-left:16px; }
+.premium-pro-stats div { display:grid; gap:2px; color:#475569; font-size:12px; font-weight:750; }
+.premium-pro-stats strong { color:#0f172a; font-size:15px; font-weight:950; }
+.premium-bid-list { display:grid; gap:10px; }
+.premium-bid-item { border:1px solid rgba(15,23,42,.10); border-radius:16px; padding:12px; background:#fff; }
+.premium-bid-item strong { display:block; margin-bottom:4px; }
+.premium-bid-note { margin-top:10px; display:inline-flex; padding:7px 10px; border-radius:999px; background:#fff7ed; color:#9a3412; border:1px solid #fed7aa; font-size:12px; font-weight:900; }
+@media (max-width:1040px){
+  .premium-detail-wrap,.premium-pro-main { grid-template-columns:1fr !important; }
+  .premium-pro-stats { border-left:0; border-top:1px solid rgba(15,23,42,.10); padding-left:0; padding-top:12px; grid-template-columns:repeat(3,1fr); }
+  .premium-hero-large img { height:330px !important; }
+}
+@media (max-width:640px){
+  .modal.detail-premium-modal { padding:8px !important; align-items:flex-start !important; }
+  .modal.detail-premium-modal .modal-card { width:calc(100vw - 16px) !important; max-width:calc(100vw - 16px) !important; max-height:calc(100vh - 16px) !important; padding:14px !important; border-radius:22px !important; }
+  .premium-big-title { font-size:2.25rem; }
+  .premium-stats-row,.premium-pro-stats,.premium-action-grid { grid-template-columns:1fr; }
+  .premium-hero-large img { height:240px !important; }
+  .premium-thumb-row { grid-template-columns:repeat(3,1fr) !important; }
+}
+
+</style>
 </head>
 <body>
   <div id="app">
@@ -6727,6 +6942,211 @@ async function applyPublicReviewStatsToMapItems() {
 
 </script>
   
+
+
+<script>
+/* ===== PREMIUM LARGE CARD OVERRIDE FOR JOB + CONTRACTOR DETAILS ===== */
+(function(){
+  const __revampOriginalOpenDetailModal = window.openDetailModal;
+
+  function revampPremiumImageStrip(imageSrc){
+    return `
+      <div class="premium-hero-large">
+        <img src="${imageSrc}" onerror="hideMissingCardImage(this)">
+        <div class="premium-photo-count">📷 1 / 6</div>
+      </div>
+      <div class="premium-thumb-row">
+        ${[0,1,2,3,4,5].map(n => `
+          <div class="premium-thumb ${n === 0 ? 'active' : ''}">
+            <img src="${imageSrc}" onerror="hideMissingCardImage(this)">
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  window.openDetailModal = function(item){
+    if (!item) return;
+
+    if (item.type === 'activity' && typeof __revampOriginalOpenDetailModal === 'function') {
+      detailModal.classList.remove('detail-premium-modal');
+      return __revampOriginalOpenDetailModal(item);
+    }
+
+    expandUI();
+    detailModal.classList.add('show');
+    detailModal.classList.remove('activity-modal');
+    detailModal.classList.add('detail-premium-modal');
+
+    if (item.type === 'contractor') {
+      const imageSrc = getContractorImage(item);
+      const displayCity = getDisplayCity(item) || 'Nearby area';
+      const tradeText = getFullTradeText(item) || getCompactTradeLabel(item);
+      const proName = anonymizeContractorName(item);
+      const initials = String(item.company || item.name || 'R').trim().charAt(0).toUpperCase() || 'R';
+      const rating = Number(item.rating || 0).toFixed(1);
+      const tags = item.tags && item.tags.length ? item.tags : splitTrades(tradeText).slice(0,4);
+
+      detailTitle.textContent = '';
+      detailContent.innerHTML = `
+        <div class="premium-detail-wrap">
+          <div class="premium-detail-left">
+            <div class="premium-kicker dark">Verified Contractor</div>
+            <h3 class="premium-big-title">${proName}</h3>
+            <div class="premium-location-line">
+              <span>📍 ${displayCity}</span><span>•</span><span>${getCompactTradeLabel(item)}</span>
+            </div>
+
+            <div class="premium-stats-row">
+              <div class="premium-stat-pill"><div class="premium-stat-icon">⭐</div><span>Rating</span><strong>${rating}</strong></div>
+              <div class="premium-stat-pill"><div class="premium-stat-icon">💬</div><span>Reviews</span><strong>${item.reviews || 0}</strong></div>
+              <div class="premium-stat-pill"><div class="premium-stat-icon">📍</div><span>Distance</span><strong>${formatDistance(item)}</strong></div>
+            </div>
+
+            <div class="premium-section">
+              <h4>About This Contractor</h4>
+              <p>${item.bio || 'Verified RevampLEX contractor with project experience, homeowner communication, and local service coverage.'}</p>
+            </div>
+
+            <div class="premium-section">
+              <h4>Specialties</h4>
+              <div class="premium-highlight-tags">
+                ${tags.map(tag => `<span>✓ ${tag}</span>`).join('') || '<span>✓ General Contractor</span>'}
+              </div>
+            </div>
+          </div>
+
+          <div class="premium-detail-right">
+            ${revampPremiumImageStrip(imageSrc)}
+
+            <div class="premium-pro-card">
+              <div class="premium-pro-main">
+                <div class="premium-pro-logo">${initials}</div>
+                <div class="premium-pro-copy">
+                  <h3>${item.company || item.name || 'Verified Pro'}</h3>
+                  <div>⭐ ${rating} ${item.reviews ? `(${item.reviews} reviews)` : ''}</div>
+                  <div class="premium-badge-row">
+                    ${item.licensed ? '<span>✓ Licensed</span>' : ''}
+                    ${item.insured ? '<span>✓ Insured</span>' : ''}
+                    ${item.verified ? '<span>✓ Verified</span>' : ''}
+                  </div>
+                  <p>${tradeText} • ${displayCity}</p>
+                </div>
+                <div class="premium-pro-stats">
+                  <div><strong>${item.projects_completed || 0}</strong><span>Projects Completed</span></div>
+                  <div><strong>${item.response_time || '—'}</strong><span>Response Time</span></div>
+                  <div><strong>${item.price || '$$'}</strong><span>Budget Tier</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="premium-action-panel">
+              <h4>Next Step</h4>
+              <div class="premium-action-grid">
+                ${canEditItem(item) ? `<button class="mini-btn secondary" data-action="edit" data-id="${item.id}">Edit Profile</button>` : ''}
+                <button class="mini-btn primary ${canEditItem(item) ? '' : 'wide'}" data-action="message" data-id="${item.id}">Message</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    const imageSrc = getJobImage(item);
+    const bidCount = getBidCount(item);
+    const maxBids = getMaxBidLimit(item);
+    const closed = isJobBidClosed(item);
+    const visibleBids = (item.bids || []).filter(bid => {
+      if (currentMode === 'contractor' && bid.contractor_id !== 'demo-contractor') return false;
+      return true;
+    });
+    const highlights = [getCompactTradeLabel(item), `${bidCount}/${maxBids} bids`, item.budget || 'Budget TBD', item.verified ? 'Verified customer' : 'Customer project'].filter(Boolean);
+    const bidsHtml = visibleBids.length
+      ? visibleBids.map((bid, index) => `
+          <div class="premium-bid-item">
+            <strong>Verified Contractor</strong>
+            <div>Bid: ${bid.amount || '—'} • Start: ${bid.eta || 'TBD'}</div>
+            ${bid.message ? `<div>${bid.message}</div>` : ''}
+            <button class="mini-btn primary" style="margin-top:10px;" data-action="accept-bid" data-job="${item.id}" data-bid="${index}">Accept Bid</button>
+          </div>
+        `).join('')
+      : '<div class="premium-bid-item">No bids yet.</div>';
+
+    detailTitle.textContent = '';
+    detailContent.innerHTML = `
+      <div class="premium-detail-wrap">
+        <div class="premium-detail-left">
+          <div class="premium-kicker">Homeowner Project</div>
+          <h3 class="premium-big-title">${item.title || 'Customer Project'}</h3>
+          <div class="premium-location-line">
+            <span>📍 ${getDisplayCity(item) || 'Nearby area'}</span><span>•</span><span>${item.posted_ago || 'Live'}</span>
+          </div>
+
+          <div class="premium-stats-row">
+            <div class="premium-stat-pill"><div class="premium-stat-icon">💲</div><span>Budget</span><strong>${item.budget || '$0'}</strong></div>
+            <div class="premium-stat-pill"><div class="premium-stat-icon">🧾</div><span>Bids</span><strong>${bidCount}/${maxBids}${closed ? ' Closed' : ''}</strong></div>
+            <div class="premium-stat-pill"><div class="premium-stat-icon">🏷️</div><span>Trade</span><strong>${getCompactTradeLabel(item)}</strong></div>
+          </div>
+
+          <div class="premium-section">
+            <h4>Project Scope</h4>
+            <p>${item.description || 'Customer posted a new project and is looking for qualified contractors.'}</p>
+          </div>
+
+          <div class="premium-section">
+            <h4>Project Highlights</h4>
+            <div class="premium-highlight-tags">
+              ${highlights.map(tag => `<span>✓ ${tag}</span>`).join('')}
+            </div>
+          </div>
+
+          <div class="premium-section">
+            <h4>Bids (${bidCount}/${maxBids})</h4>
+            <div class="premium-bid-list">${bidsHtml}</div>
+            ${canIncreaseBidLimit(item) ? `<div class="premium-bid-note">Need more options? Raise this job to ${getNextBidLimit(item)} bids.</div>` : ''}
+          </div>
+        </div>
+
+        <div class="premium-detail-right">
+          ${revampPremiumImageStrip(imageSrc)}
+
+          <div class="premium-pro-card">
+            <div class="premium-pro-main">
+              <div class="premium-pro-logo">🏠</div>
+              <div class="premium-pro-copy">
+                <h3>${anonymizeCustomerName(item)}</h3>
+                <div>⭐ ${Number(item.rating || 0).toFixed(1)} ${item.reviews ? `(${item.reviews} reviews)` : ''}</div>
+                <div class="premium-badge-row">
+                  ${item.verified ? '<span>✓ Verified Customer</span>' : '<span>Customer Project</span>'}
+                  <span>Approx. Area Only</span>
+                </div>
+                <p>${getFullTradeText(item) || getCompactTradeLabel(item)} • ${getDisplayCity(item) || 'Nearby area'}</p>
+              </div>
+              <div class="premium-pro-stats">
+                <div><strong>${item.posted_ago || 'Live'}</strong><span>Posted</span></div>
+                <div><strong>${item.budget || '$0'}</strong><span>Budget</span></div>
+                <div><strong>${closed ? 'Closed' : 'Open'}</strong><span>Bidding</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="premium-action-panel">
+            <h4>Take Action</h4>
+            <div class="premium-action-grid">
+              ${canEditItem(item) ? `<button class="mini-btn secondary" data-action="edit" data-id="${item.id}">Edit</button>` : ''}
+              ${canIncreaseBidLimit(item) ? `<button class="mini-btn secondary" data-action="increase-bid-limit" data-id="${item.id}">Increase Bid Limit</button>` : ''}
+              <button class="mini-btn primary wide" data-action="project-room" data-id="${item.id}" ${closed ? 'disabled title="Maximum contractor bids reached"' : ''}>
+                ${closed ? 'Bidding Closed' : 'Submit Bid'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  };
+})();
+</script>
 
 </body>
 </html>
