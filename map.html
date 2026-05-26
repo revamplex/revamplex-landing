@@ -1269,6 +1269,77 @@
   }
 }
 
+
+/* ===== REVAMP ACTIVITY MODAL FIX — KEEP LARGE CARD INSIDE SCREEN ===== */
+.modal.activity-modal {
+  z-index: 9000 !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+}
+
+.modal.activity-modal .modal-card {
+  width: min(1180px, calc(100vw - 32px)) !important;
+  max-width: calc(100vw - 32px) !important;
+  max-height: calc(100vh - 32px) !important;
+  overflow: auto !important;
+  padding: 24px !important;
+  border-radius: 28px !important;
+}
+
+.modal.activity-modal .detail-stack {
+  display: block !important;
+  overflow: visible !important;
+}
+
+.activity-hero-large img,
+.activity-thumb img {
+  max-width: 100% !important;
+}
+
+.activity-hero-large {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.activity-premium-wrap {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+@media (max-width: 1040px) {
+  .activity-premium-wrap {
+    grid-template-columns: 1fr !important;
+  }
+
+  .activity-hero-large img {
+    height: 330px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .modal.activity-modal {
+    padding: 8px !important;
+    align-items: flex-start !important;
+  }
+
+  .modal.activity-modal .modal-card {
+    width: calc(100vw - 16px) !important;
+    max-width: calc(100vw - 16px) !important;
+    max-height: calc(100vh - 16px) !important;
+    padding: 14px !important;
+    border-radius: 22px !important;
+  }
+
+  .activity-hero-large img {
+    height: 240px !important;
+  }
+
+  .activity-thumb-row {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
 /* ===== REVAMPLEX BID LIMIT CONTROLS ===== */
 .submit-bid-btn.closed,
 .mini-btn[disabled]{
@@ -5377,62 +5448,115 @@ async function increaseBidLimit(jobId) {
       detailModal.classList.remove('activity-modal');
 
       if (item.type === 'activity') {
+        detailModal.classList.add('activity-modal');
+
         const imageSrc = item.image_url || getJobImage(item);
         const priceText = item.price_visible === false ? 'Not publicly shared' : (item.budget || 'Not listed');
-        const contractorName = item.contractor_name || item.company || 'Verified Contractor';
+        const locationText = getDisplayCity(item) || 'Nearby area';
+        const completedText = item.completed_ago || 'Recently shared';
+        const contractorName = item.contractor_name || item.company || 'Verified RevampLEX Pro';
         const contractorInitial = String(contractorName || 'R').trim().charAt(0).toUpperCase() || 'R';
         const contractorRating = Number(item.contractor_rating || item.rating || 0).toFixed(1);
         const contractorReviews = item.contractor_reviews || item.reviews || 0;
-        const contractorBio = item.contractor_bio || item.bio || 'Verified RevampLEX contractor profile. Full profile details, logo, work photos, bio, and ratings can connect here as the contractor profile system grows.';
+        const contractorProjects = item.contractor_projects_completed || item.projects_completed || '—';
+        const contractorExperience = item.contractor_experience || item.years_experience || '—';
+        const contractorBio = item.contractor_bio || item.bio || 'Specializing in quality renovation work with clean communication, clear pricing, and strong homeowner results.';
+        const logoUrl = item.contractor_logo_url || item.logo_url || '';
+        const highlights = item.highlights || ['New cabinets', 'Quartz countertops', 'Backsplash', 'Under-cabinet lighting', 'New flooring', 'Modern fixtures'];
 
         detailTitle.textContent = 'Revamp Activity';
         detailContent.innerHTML = `
-          <div class="activity-detail-hero">
-            <img src="${imageSrc}" onerror="hideMissingCardImage(this)">
-            <div class="activity-detail-overlay">
+          <div class="activity-premium-wrap">
+            <div class="activity-left-panel">
               <div class="activity-detail-kicker">Revamp Activity</div>
-              <h3>${item.title || 'Shared Project'}</h3>
-              <p>${getCompactTradeLabel(item)} • ${getDisplayCity(item)} • ${item.completed_ago || 'Recently shared'}</p>
-            </div>
-          </div>
+              <h3 class="activity-big-title">${item.title || 'Shared Project Nearby'}</h3>
 
-          <div class="activity-stats-row">
-            <div class="activity-stat-pill">
-              <span>Project Type</span>
-              <strong>${getCompactTradeLabel(item)}</strong>
-            </div>
-            <div class="activity-stat-pill">
-              <span>Shared Price</span>
-              <strong>${priceText}</strong>
-            </div>
-            <div class="activity-stat-pill">
-              <span>Area</span>
-              <strong>${getDisplayCity(item) || 'Nearby'}</strong>
-            </div>
-          </div>
+              <div class="activity-location-line">
+                <span>📍 ${locationText}</span>
+                <span>•</span>
+                <span>${completedText}</span>
+              </div>
 
-          <div class="activity-detail-grid">
-            <div class="activity-detail-card">
-              <h4>Project Details</h4>
-              <p>${item.description || 'A homeowner shared this project as neighborhood inspiration.'}</p>
-            </div>
+              <div class="activity-stats-row">
+                <div class="activity-stat-pill">
+                  <div class="activity-stat-icon">🏷️</div>
+                  <span>Project Type</span>
+                  <strong>${getCompactTradeLabel(item)}</strong>
+                </div>
+                <div class="activity-stat-pill">
+                  <div class="activity-stat-icon">💲</div>
+                  <span>Shared Price</span>
+                  <strong>${priceText}</strong>
+                </div>
+                <div class="activity-stat-pill">
+                  <div class="activity-stat-icon">📍</div>
+                  <span>Area</span>
+                  <strong>${locationText}</strong>
+                </div>
+              </div>
 
-            <div class="activity-detail-card activity-contractor-card">
-              <div class="activity-contractor-avatar">${contractorInitial}</div>
-              <div>
-                <h4>${contractorName}</h4>
-                <p>⭐ ${contractorRating} rating${contractorReviews ? ` • ${contractorReviews} reviews` : ''}<br>${contractorBio}</p>
+              <div class="activity-section">
+                <h4>About This Project</h4>
+                <p>${item.description || 'A homeowner shared this project as neighborhood inspiration.'}</p>
+              </div>
+
+              <div class="activity-section">
+                <h4>Project Highlights</h4>
+                <div class="activity-highlight-tags">
+                  ${highlights.map(tag => `<span>✓ ${tag}</span>`).join('')}
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="activity-detail-card">
-            <h4>Why this is useful</h4>
-            <p>Save this as inspiration so you can compare project style, price range, trade type, and contractor quality when you are ready to start something similar.</p>
-          </div>
+            <div class="activity-right-panel">
+              <div class="activity-hero-large">
+                <img src="${imageSrc}" onerror="hideMissingCardImage(this)">
+                <div class="activity-photo-count">📷 1 / 6</div>
+              </div>
 
-          <div class="card-actions">
-            <button class="mini-btn primary" data-action="activity-inspire" data-id="${item.id}">Save Idea</button>
+              <div class="activity-thumb-row">
+                ${[0,1,2,3,4,5].map((n) => `
+                  <div class="activity-thumb ${n === 0 ? 'active' : ''}">
+                    <img src="${imageSrc}" onerror="hideMissingCardImage(this)">
+                  </div>
+                `).join('')}
+              </div>
+
+              <div class="activity-contractor-panel">
+                <div class="activity-contractor-panel-head">
+                  <h4>Contractor Used</h4>
+                  <span class="activity-verified-mini">🛡 Verified Pro</span>
+                </div>
+
+                <div class="activity-contractor-main">
+                  <div class="activity-contractor-logo">
+                    ${logoUrl ? `<img src="${logoUrl}" onerror="this.outerHTML='${contractorInitial}'">` : contractorInitial}
+                  </div>
+
+                  <div class="activity-contractor-copy">
+                    <h3>${contractorName}</h3>
+                    <div>⭐ ${contractorRating} ${contractorReviews ? `(${contractorReviews} reviews)` : ''}</div>
+                    <div class="activity-badge-row">
+                      <span>✓ Licensed</span>
+                      <span>✓ Insured</span>
+                      <span>✓ Verified</span>
+                    </div>
+                    <p>${contractorBio}</p>
+                  </div>
+
+                  <div class="activity-contractor-stats">
+                    <div><strong>${contractorProjects}</strong><span>Projects Completed</span></div>
+                    <div><strong>${contractorRating}★</strong><span>Average Rating</span></div>
+                    <div><strong>${contractorExperience}</strong><span>Experience</span></div>
+                    <div><strong>${locationText}</strong><span>Service Area</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="activity-save-bar">
+                <button class="mini-btn primary" data-action="activity-inspire" data-id="${item.id}">🔖 Save Idea</button>
+              </div>
+            </div>
           </div>
         `;
         return;
