@@ -65,6 +65,14 @@
   padding: 0 12px;
 }
 
+.submit-bid-btn.closed,
+.submit-bid-btn:disabled {
+  background: #e5e7eb !important;
+  color: #64748b !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+}
+
 
 /* ===== SCROLLABLE MAP FOOTER ===== */
 .map-footer-section {
@@ -2112,6 +2120,14 @@
           <input class="input" id="jobBudget" placeholder="$12,000" />
         </div>
 
+        <div class="field">
+          <label class="label" for="jobMaxBids">Maximum bids requested</label>
+          <select class="select" id="jobMaxBids">
+            <option value="3">3 bids — Fast Match</option>
+            <option value="5" selected>5 bids — Recommended</option>
+            <option value="7">7 bids — Maximum Exposure</option>
+          </select>
+        </div>
 
         <div class="field">
           <label class="label" for="jobCity">City</label>
@@ -3820,6 +3836,22 @@ function hideMissingCardImage(img) {
 }
 
     
+
+function getBidCount(item) {
+  const arrayCount = Array.isArray(item?.bids) ? item.bids.length : 0;
+  const storedCount = Number(item?.bids_received || item?.bid_count || 0);
+  return Math.max(arrayCount, Number.isFinite(storedCount) ? storedCount : 0);
+}
+
+function getMaxBidLimit(item) {
+  const limit = Number(item?.max_bids || 5);
+  return [3, 5, 7].includes(limit) ? limit : 5;
+}
+
+function isJobBidClosed(item) {
+  return getBidCount(item) >= getMaxBidLimit(item);
+}
+
     function contractorCardHtml(item) {
       const tradeLabel = getCompactTradeLabel(item);
       const displayCity = getDisplayCity(item);
@@ -3869,6 +3901,9 @@ function hideMissingCardImage(img) {
     function jobCardHtml(item) {
       const isDemo = item.is_demo === true;
       const isFeatured = item.featured === true;
+      const bidCount = getBidCount(item);
+      const maxBids = getMaxBidLimit(item);
+      const bidClosed = isJobBidClosed(item);
 
       return `
         <div class="card-image-wrap">
@@ -3892,7 +3927,7 @@ function hideMissingCardImage(img) {
             </div>
             <div class="meta-box">
               <div class="meta-label">Bids</div>
-              <div class="meta-value">${(item.bids || []).length} / ${item.max_bids || 5}</div>
+              <div class="meta-value">${bidCount} / ${maxBids}${bidClosed ? ' Closed' : ''}</div>
             </div>
           </div>
           <div class="info-row">
@@ -3902,7 +3937,7 @@ function hideMissingCardImage(img) {
           </div>
           <div class="card-actions">
             <button class="mini-btn secondary" data-action="job-details" data-id="${item.id}">View</button>
-            <button class="mini-btn primary submit-bid-btn" onclick="openProjectRoom('${item.id}')">Submit Bid</button>
+            <button class="mini-btn primary submit-bid-btn ${bidClosed ? 'closed' : ''}" ${bidClosed ? 'disabled title="Maximum contractor bids reached"' : `onclick="openProjectRoom('${item.id}')"`}>${bidClosed ? 'Bidding Closed' : 'Submit Bid'}</button>
           </div>
         </div>
       `;
@@ -4077,7 +4112,7 @@ filteredItems = cleanSource;
       if (mode === 'homeowner' && item.type !== 'contractor') return false;
       if (mode === 'contractor' && item.type !== 'job') return false;
 
-      if (mode === 'contractor' && (item.max_bids || 5) <= ((item.bids || []).length)) {
+      if (mode === 'contractor' && isJobBidClosed(item)) {
         return false;
       }
 
@@ -4156,6 +4191,8 @@ function setSort(type) {
       document.getElementById('jobCity').value = '';
       document.getElementById('jobDescription').value = '';
       document.getElementById('jobTrade').selectedIndex = 0;
+      const maxBidsEl = document.getElementById('jobMaxBids');
+      if (maxBidsEl) maxBidsEl.value = '5';
     }
 
 async function createJobFromForm() {
@@ -4171,6 +4208,8 @@ async function createJobFromForm() {
   const budget = getFormattedBudget(document.getElementById('jobBudget').value);
   const city = document.getElementById('jobCity').value.trim() || 'North Jersey, NJ';
   const description = document.getElementById('jobDescription').value.trim() || 'Customer posted a new project on Revamp.';
+  const selectedMaxBids = Number(document.getElementById('jobMaxBids')?.value || 5);
+  const maxBids = [3, 5, 7].includes(selectedMaxBids) ? selectedMaxBids : 5;
   const center = map.getCenter();
 
   const payload = {
@@ -4194,7 +4233,7 @@ async function createJobFromForm() {
     distance: 1.0,
     verified: true,
     posted_ago: 'Just now',
-    max_bids: 5,
+    max_bids: maxBids,
     type: 'job',
     is_demo: false,
     is_live: true
@@ -4257,6 +4296,12 @@ function contractorCanAccess(profile){
     if (!job) {
       console.warn("Project room job not found:", { rawJobId, cleanJobId, jobs });
       alert("Job not found. Refresh the page and try again.");
+      return;
+    }
+
+    if (isJobBidClosed(job)) {
+      showStatus("Maximum contractor bids reached");
+      alert("Maximum contractor bids reached for this project.");
       return;
     }
 
