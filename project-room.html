@@ -3292,6 +3292,7 @@ body.command-room #projectOverviewPanel.command-active-panel {
 body.command-room .command-stage > section:not(.command-active-panel),
 body.command-room .command-stage > .panel:not(.command-active-panel),
 body.command-room #projectOverviewPanel:not(.command-active-panel),
+body.command-room #contractorSnapshotPanel:not(.command-active-panel),
 body.command-room #receivedBidsSection:not(.command-active-panel),
 body.command-room #photoDocsPanel:not(.command-active-panel),
 body.command-room #schedulePanel:not(.command-active-panel),
@@ -4659,6 +4660,94 @@ body.command-room #completionPanel .summary-box * {
   text-shadow:none !important;
 }
 
+
+
+/* ===== REVAMPLEX CONTRACTOR SNAPSHOT PANEL ===== */
+.contractor-snapshot{
+  display:flex;
+  justify-content:space-between;
+  gap:30px;
+  align-items:flex-start;
+  flex-wrap:wrap;
+}
+
+.contractor-left{
+  display:flex;
+  gap:20px;
+  align-items:center;
+}
+
+.contractor-avatar{
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  object-fit:cover;
+  border:3px solid orange;
+  background:#fff7ed;
+}
+
+.contractor-badges{
+  display:flex;
+  gap:8px;
+  margin:10px 0;
+  flex-wrap:wrap;
+}
+
+.contractor-badges span{
+  background:rgba(255,255,255,.08);
+  padding:6px 12px;
+  border-radius:30px;
+  font-size:13px;
+  font-weight:700;
+}
+
+.contractor-right{
+  max-width:500px;
+}
+
+#contractorSnapshotPanel{
+  border:1px solid rgba(249,115,22,.24);
+}
+
+body.command-room #contractorSnapshotPanel .contractor-avatar{
+  box-shadow:0 18px 38px rgba(249,115,22,.18);
+}
+
+body.command-room #contractorSnapshotPanel .contractor-badges span{
+  background:rgba(249,115,22,.16);
+  color:#fed7aa;
+  border:1px solid rgba(249,115,22,.24);
+}
+
+body.command-room #contractorSnapshotPanel #contractorBio,
+body.command-room #contractorSnapshotPanel .contractor-rating,
+body.command-room #contractorSnapshotPanel #contractorProjects{
+  color:#cbd5e1 !important;
+}
+
+body.light-room.command-room #contractorSnapshotPanel #contractorBio,
+body.light-room.command-room #contractorSnapshotPanel .contractor-rating,
+body.light-room.command-room #contractorSnapshotPanel #contractorProjects{
+  color:#0f172a !important;
+}
+
+@media(max-width:768px){
+  .contractor-snapshot{
+    flex-direction:column;
+  }
+
+  .contractor-left{
+    flex-direction:column;
+    text-align:center;
+    width:100%;
+  }
+
+  .contractor-right{
+    max-width:100%;
+    width:100%;
+  }
+}
+
 </style>
 </head>
 <body class="command-room contractor-room">
@@ -4724,6 +4813,7 @@ body.command-room #completionPanel .summary-box * {
         <h3 class="nav-title">Workspace Sections</h3>
         <div class="nav-list">
           <div class="nav-item active" data-target="projectOverviewPanel"><span>Project Overview</span><span>Top</span></div>
+          <div class="nav-item" data-target="contractorSnapshotPanel"><span>Contractor Snapshot</span><span>Profile</span></div>
           <div class="nav-item" data-target="schedulePanel"><span>Schedule Calendar</span><span>4 items</span></div>
           <div class="nav-item" data-target="jobListPanel"><span>Active Job List</span><span>Live</span></div>
           <div class="nav-item" data-target="videoChatPanel"><span>Video + Chat</span><span>2 alerts</span></div>
@@ -4811,6 +4901,68 @@ body.command-room #completionPanel .summary-box * {
       <button class="btn btn-soft" type="button" data-scroll-target="signaturePanel" onclick="scrollGuidedSection(this)">Go to Signature</button>
     </div>
   </div>
+</section>
+
+<section class="panel" id="contractorSnapshotPanel">
+
+<div class="panel-header">
+<div>
+<h3>Contractor Snapshot</h3>
+<p>Connected contractor information</p>
+</div>
+</div>
+
+<div class="contractor-snapshot">
+
+<div class="contractor-left">
+<img id="contractorPhoto"
+src="https://placehold.co/120x120"
+class="contractor-avatar">
+
+<div>
+<h2 id="contractorCompanyName">
+Contractor Name
+</h2>
+
+<div class="contractor-badges">
+
+<span id="verifiedBadge">✓ Verified</span>
+<span id="insuredBadge">🛡 Insured</span>
+<span id="licensedBadge">📄 Licensed</span>
+
+</div>
+
+<div class="contractor-rating">
+⭐ <span id="contractorRating">5.0</span>
+(<span id="contractorReviews">0</span> reviews)
+</div>
+
+<div id="contractorProjects">
+0 completed projects
+</div>
+
+</div>
+
+</div>
+
+<div class="contractor-right">
+
+<p id="contractorBio">
+Contractor bio appears here...
+</p>
+
+<button
+class="btn btn-primary"
+onclick="viewContractorProfile()">
+
+View Full Profile
+
+</button>
+
+</div>
+
+</div>
+
 </section>
 <section class="panel" id="schedulePanel">
           <div class="panel-header">
@@ -5719,6 +5871,7 @@ function getDefaultGuideTarget() {
 
 function getGuideTargetPanelIds() {
   return [
+    "contractorSnapshotPanel",
     "schedulePanel",
     "jobListPanel",
     "videoChatPanel",
@@ -5820,6 +5973,7 @@ function getCommandSteps() {
   if (role === 'homeowner') {
     return [
       { id: 'projectOverviewPanel', title: 'Job Information', text: 'Scope, budget, location, status, and next action.' },
+      { id: 'contractorSnapshotPanel', title: 'Contractor Snapshot', text: 'Photo, logo, rating, badges, bio, and recent trust signals.' },
       { id: 'receivedBidsSection', title: 'Review Bids', text: 'Private bids without contractor-only clutter.' },
       { id: 'photoDocsPanel', title: 'Files + Photos', text: 'Upload plans, images, approvals, and questions.' },
       { id: 'schedulePanel', title: 'Schedule', text: 'Appointments and reminders for this room.' },
@@ -5847,6 +6001,7 @@ function getCommandSteps() {
 function getCommandPanelIds() {
   return [
     'projectOverviewPanel',
+    'contractorSnapshotPanel',
     'schedulePanel',
     'jobListPanel',
     'videoChatPanel',
@@ -6061,6 +6216,80 @@ document.addEventListener("DOMContentLoaded", function(){
     };
   }
 });
+
+
+
+/* ===== REVAMPLEX CONTRACTOR SNAPSHOT LOADER ===== */
+function loadContractorSnapshot(){
+
+  let contractor = null;
+
+  try {
+    contractor = JSON.parse(sessionStorage.getItem("revampSelectedContractor") || "null");
+  } catch (err) {
+    console.warn("Could not parse revampSelectedContractor:", err);
+  }
+
+  const panel = document.getElementById("contractorSnapshotPanel");
+  if(!panel) return;
+
+  // Fallbacks from already-visible proposal fields keep the card useful even when
+  // the contractor was loaded from Supabase instead of sessionStorage.
+  const companyField = document.getElementById("contractorCompany")?.value?.trim() || "";
+  const nameField = document.getElementById("contractorName")?.value?.trim() || "";
+  const emailField = document.getElementById("contractorEmail")?.value?.trim() || "";
+
+  if(!contractor){
+    contractor = {
+      company: companyField || nameField || "Verified Contractor",
+      name: nameField || companyField || "Verified Contractor",
+      image_url: "",
+      rating: "0",
+      reviews: "0",
+      projects_completed: 0,
+      bio: emailField ? `Connected contractor: ${emailField}` : "Contractor details will appear here after a contractor connection is selected.",
+      verified: true,
+      insured: false,
+      licensed: false
+    };
+  }
+
+  const setText = (id, value) => {
+    const el = document.getElementById(id);
+    if(el) el.innerText = value;
+  };
+
+  const setDisplay = (id, show) => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = show ? "" : "none";
+  };
+
+  setText("contractorCompanyName", contractor.company || contractor.company_name || contractor.business_name || contractor.name || "Contractor");
+
+  const photo = document.getElementById("contractorPhoto");
+  if(photo){
+    photo.src = contractor.image_url || contractor.image || contractor.logo_url || contractor.photo_url || "https://placehold.co/120x120";
+  }
+
+  setText("contractorRating", contractor.rating || "0");
+  setText("contractorReviews", contractor.reviews || contractor.review_count || "0");
+  setText("contractorProjects", `${contractor.projects_completed || contractor.projects || 0} completed projects`);
+  setText("contractorBio", contractor.bio || contractor.description || "No contractor bio available.");
+
+  setDisplay("verifiedBadge", contractor.verified !== false);
+  setDisplay("insuredBadge", !!contractor.insured);
+  setDisplay("licensedBadge", !!contractor.licensed);
+}
+
+document.addEventListener("DOMContentLoaded", loadContractorSnapshot);
+window.addEventListener("load", function(){
+  setTimeout(loadContractorSnapshot, 500);
+  setTimeout(loadContractorSnapshot, 1500);
+});
+
+function viewContractorProfile(){
+  alert("Full contractor profile page coming next phase");
+}
 
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
