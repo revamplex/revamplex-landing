@@ -878,135 +878,395 @@
 
 
 
-/* ===== REVAMP ACTIVITY LARGE VIEW CARD ===== */
-.activity-detail-hero {
-  position: relative;
-  overflow: hidden;
-  border-radius: 22px;
-  min-height: 230px;
-  background: #0f172a;
-  border: 1px solid rgba(15,23,42,.08);
-  box-shadow: 0 20px 42px rgba(15,23,42,.16);
+/* ===== REVAMP ACTIVITY LARGE VIEW CARD — PREMIUM FITTED MODAL ===== */
+.modal.activity-modal {
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
 }
-.activity-detail-hero img {
-  width: 100%;
-  height: 260px;
-  object-fit: cover;
+
+.modal.activity-modal .modal-card {
+  width: min(1120px, calc(100vw - 36px));
+  max-height: calc(100vh - 36px);
+  overflow: auto;
+  padding: 24px;
+  border-radius: 28px;
+}
+
+.modal.activity-modal .modal-head {
+  margin-bottom: 16px;
+}
+
+.modal.activity-modal .detail-stack {
   display: block;
-  opacity: .92;
 }
-.activity-detail-hero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(15,23,42,.04), rgba(15,23,42,.82));
-  pointer-events: none;
+
+.activity-premium-wrap {
+  display: grid;
+  grid-template-columns: minmax(330px, .82fr) minmax(420px, 1.18fr);
+  gap: 22px;
+  align-items: start;
 }
-.activity-detail-overlay {
-  position: absolute;
-  left: 18px;
-  right: 18px;
-  bottom: 16px;
-  z-index: 2;
-  color: #fff;
+
+.activity-left-panel,
+.activity-right-panel {
+  min-width: 0;
 }
+
 .activity-detail-kicker {
   display: inline-flex;
   align-items: center;
-  margin-bottom: 8px;
-  padding: 6px 10px;
+  margin-bottom: 14px;
+  padding: 7px 13px;
   border-radius: 999px;
-  background: rgba(249,115,22,.92);
-  font-size: 11px;
-  font-weight: 900;
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  color: #fff;
+  font-size: 12px;
+  font-weight: 950;
   letter-spacing: .04em;
   text-transform: uppercase;
 }
-.activity-detail-overlay h3 {
-  margin: 0 0 5px;
-  font-size: clamp(1.35rem, 3vw, 2rem);
-  line-height: 1.05;
+
+.activity-big-title {
+  margin: 0 0 14px;
+  color: var(--text);
+  font-size: clamp(2.15rem, 4vw, 3.55rem);
+  line-height: .98;
   font-weight: 950;
-  letter-spacing: -.04em;
+  letter-spacing: -.06em;
 }
-.activity-detail-overlay p {
-  margin: 0;
-  color: rgba(255,255,255,.86);
-  font-weight: 800;
-}
-.activity-detail-grid {
-  display: grid;
-  grid-template-columns: 1.2fr .8fr;
-  gap: 12px;
-}
-.activity-detail-card {
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 15px;
-  background: #ffffff;
-}
-.activity-detail-card h4 {
-  margin: 0 0 8px;
-  font-size: 14px;
-  font-weight: 950;
-}
-.activity-detail-card p {
-  margin: 0;
-  color: var(--muted);
-  line-height: 1.5;
-  font-size: 14px;
-}
-.activity-contractor-card {
-  display: grid;
-  grid-template-columns: 58px 1fr;
-  gap: 12px;
-  align-items: center;
-  border: 1px solid rgba(249,115,22,.18);
-  background: linear-gradient(180deg, #fff7ed 0%, #ffffff 100%);
-}
-.activity-contractor-avatar {
-  width: 58px;
-  height: 58px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
-  color: #fff;
+
+.activity-location-line {
   display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  font-weight: 950;
-  box-shadow: 0 10px 20px rgba(249,115,22,.20);
+  margin-bottom: 22px;
+  color: #334155;
+  font-weight: 850;
+  font-size: 14px;
 }
+
 .activity-stats-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
+  margin-bottom: 18px;
 }
+
 .activity-stat-pill {
-  border-radius: 16px;
-  background: #f8fafc;
-  border: 1px solid var(--line);
-  padding: 12px;
+  border-radius: 17px;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  border: 1px solid rgba(15,23,42,.08);
+  padding: 14px 12px;
+  box-shadow: 0 8px 18px rgba(15,23,42,.04);
 }
+
+.activity-stat-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  background: #fff7ed;
+  color: var(--brand-dark);
+  font-size: 17px;
+}
+
 .activity-stat-pill span {
   display: block;
   color: var(--muted);
   font-size: 10px;
-  font-weight: 900;
+  font-weight: 950;
   text-transform: uppercase;
-  letter-spacing: .06em;
-  margin-bottom: 4px;
+  letter-spacing: .07em;
+  margin-bottom: 5px;
 }
+
 .activity-stat-pill strong {
   display: block;
   color: var(--text);
   font-size: 14px;
   font-weight: 950;
+  line-height: 1.18;
 }
+
+.activity-section {
+  border-top: 1px solid rgba(15,23,42,.10);
+  padding-top: 18px;
+  margin-top: 18px;
+}
+
+.activity-section h4 {
+  margin: 0 0 10px;
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 950;
+}
+
+.activity-section p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.55;
+  font-size: 15px;
+}
+
+.activity-highlight-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.activity-highlight-tags span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(15,23,42,.12);
+  background: #fff;
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.activity-homeowner-note {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.activity-hero-large {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  background: #0f172a;
+  border: 1px solid rgba(15,23,42,.10);
+  box-shadow: 0 22px 46px rgba(15,23,42,.14);
+}
+
+.activity-hero-large img {
+  width: 100%;
+  height: clamp(290px, 43vh, 460px);
+  object-fit: cover;
+  display: block;
+}
+
+.activity-photo-count {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 11px;
+  border-radius: 999px;
+  background: rgba(15,23,42,.74);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 950;
+  backdrop-filter: blur(10px);
+}
+
+.activity-thumb-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin: 10px 0 16px;
+}
+
+.activity-thumb {
+  height: 58px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid rgba(15,23,42,.08);
+  background: #e2e8f0;
+}
+
+.activity-thumb.active {
+  border-color: var(--brand);
+}
+
+.activity-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.activity-contractor-panel {
+  border: 1px solid rgba(15,23,42,.10);
+  border-radius: 22px;
+  background: linear-gradient(180deg, #ffffff 0%, #fff7ed 160%);
+  padding: 18px;
+  margin-top: 14px;
+  box-shadow: 0 12px 28px rgba(15,23,42,.06);
+}
+
+.activity-contractor-panel-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.activity-contractor-panel-head h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 950;
+}
+
+.activity-verified-mini {
+  color: #166534;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.activity-contractor-main {
+  display: grid;
+  grid-template-columns: 82px 1fr minmax(130px, .35fr);
+  gap: 16px;
+  align-items: center;
+}
+
+.activity-contractor-logo {
+  width: 82px;
+  height: 82px;
+  border-radius: 18px;
+  background: #0f172a;
+  color: var(--brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  font-weight: 950;
+  box-shadow: 0 12px 24px rgba(15,23,42,.14);
+  overflow: hidden;
+}
+
+.activity-contractor-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.activity-contractor-copy h3 {
+  margin: 0 0 6px;
+  color: var(--text);
+  font-size: 21px;
+  font-weight: 950;
+  letter-spacing: -.03em;
+}
+
+.activity-contractor-copy p {
+  margin: 8px 0 0;
+  color: #475569;
+  line-height: 1.45;
+  font-size: 13px;
+}
+
+.activity-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.activity-badge-row span {
+  border-radius: 999px;
+  padding: 5px 8px;
+  font-size: 11px;
+  font-weight: 850;
+  background: #ecfdf5;
+  color: #166534;
+}
+
+.activity-contractor-stats {
+  display: grid;
+  gap: 10px;
+  border-left: 1px solid rgba(15,23,42,.10);
+  padding-left: 16px;
+}
+
+.activity-contractor-stats div {
+  display: grid;
+  gap: 2px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.activity-contractor-stats strong {
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.activity-save-bar {
+  margin-top: 16px;
+}
+
+.activity-save-bar .mini-btn {
+  width: 100%;
+  height: 56px !important;
+  border-radius: 16px !important;
+  font-size: 17px !important;
+}
+
+@media (max-width: 980px) {
+  .modal.activity-modal .modal-card {
+    width: min(760px, calc(100vw - 24px));
+    padding: 18px;
+  }
+
+  .activity-premium-wrap,
+  .activity-contractor-main {
+    grid-template-columns: 1fr;
+  }
+
+  .activity-contractor-stats {
+    border-left: 0;
+    border-top: 1px solid rgba(15,23,42,.10);
+    padding-left: 0;
+    padding-top: 12px;
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 @media (max-width: 640px) {
-  .activity-detail-grid,
-  .activity-stats-row { grid-template-columns: 1fr; }
-  .activity-detail-hero img { height: 220px; }
+  .modal.activity-modal {
+    padding: 8px;
+    align-items: flex-start;
+  }
+
+  .modal.activity-modal .modal-card {
+    width: calc(100vw - 16px);
+    max-height: calc(100vh - 16px);
+    padding: 14px;
+    border-radius: 22px;
+  }
+
+  .activity-big-title {
+    font-size: 2.25rem;
+  }
+
+  .activity-stats-row,
+  .activity-contractor-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .activity-hero-large img {
+    height: 245px;
+  }
+
+  .activity-thumb-row {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 /* ===== REVAMPLEX BID LIMIT CONTROLS ===== */
@@ -3893,31 +4153,123 @@ function clearMarkers() {
 
     function getPopupHtml(item) {
       if (item.type === 'activity') {
-        detailTitle.textContent = item.title || 'Revamp Activity';
-        const priceText = item.price_visible === false ? 'Homeowner chose to hide the price.' : `Shared price/budget: ${item.budget || 'Not listed'}`;
+        detailModal.classList.add('activity-modal');
+
+        const imageSrc = item.image_url || getJobImage(item);
+        const priceText = item.price_visible === false ? 'Not publicly shared' : (item.budget || 'Not listed');
+        const locationText = getDisplayCity(item) || 'Nearby area';
+        const completedText = item.completed_ago || 'Recently shared';
+        const contractorName = item.contractor_name || item.company || 'Verified RevampLEX Pro';
+        const contractorInitial = String(contractorName || 'R').trim().charAt(0).toUpperCase() || 'R';
+        const contractorRating = Number(item.contractor_rating || item.rating || 0).toFixed(1);
+        const contractorReviews = item.contractor_reviews || item.reviews || 0;
+        const contractorProjects = item.contractor_projects_completed || item.projects_completed || '—';
+        const contractorExperience = item.contractor_experience || item.years_experience || '—';
+        const contractorBio = item.contractor_bio || item.bio || 'Specializing in quality renovation work with clean communication, clear pricing, and strong homeowner results.';
+        const logoUrl = item.contractor_logo_url || item.logo_url || '';
+        const highlights = item.highlights || ['New cabinets', 'Quartz countertops', 'Backsplash', 'Under-cabinet lighting', 'New flooring', 'Modern fixtures'];
+
+        detailTitle.textContent = '';
         detailContent.innerHTML = `
-          <div class="detail-panel">
-            <h4>${getFullTradeText(item) || getCompactTradeLabel(item)} • ${getDisplayCity(item)}</h4>
-            <p>${item.description || 'A homeowner shared this project as neighborhood inspiration.'}</p>
-          </div>
-          <div class="modal-grid">
-            <div class="detail-panel">
-              <h4>Project Cost</h4>
-              <p>${priceText}</p>
+          <div class="activity-premium-wrap">
+            <div class="activity-left-panel">
+              <div class="activity-detail-kicker">Revamp Activity</div>
+              <h3 class="activity-big-title">${item.title || 'Shared Project Nearby'}</h3>
+
+              <div class="activity-location-line">
+                <span>📍 ${locationText} <strong>(Approx. Area)</strong></span>
+                <span>•</span>
+                <span>${completedText}</span>
+              </div>
+
+              <div class="activity-stats-row">
+                <div class="activity-stat-pill">
+                  <div class="activity-stat-icon">🏷️</div>
+                  <span>Project Type</span>
+                  <strong>${getCompactTradeLabel(item)}</strong>
+                </div>
+                <div class="activity-stat-pill">
+                  <div class="activity-stat-icon">💲</div>
+                  <span>Shared Price</span>
+                  <strong>${priceText}</strong>
+                </div>
+                <div class="activity-stat-pill">
+                  <div class="activity-stat-icon">📍</div>
+                  <span>Area</span>
+                  <strong>${locationText}</strong>
+                </div>
+              </div>
+
+              <div class="activity-section">
+                <h4>About This Project</h4>
+                <p>${item.description || 'A homeowner shared this project as neighborhood inspiration.'}</p>
+              </div>
+
+              <div class="activity-section">
+                <h4>Project Highlights</h4>
+                <div class="activity-highlight-tags">
+                  ${highlights.map(tag => `<span>✓ ${tag}</span>`).join('')}
+                </div>
+              </div>
+
+              <div class="activity-section activity-homeowner-note">
+                <div class="activity-stat-icon">🛡️</div>
+                <div>
+                  <h4>Shared by Homeowner</h4>
+                  <p>This project was shared to help inspire other homeowners. The map only shows the approximate area, never the exact address.</p>
+                </div>
+              </div>
             </div>
-            <div class="detail-panel">
-              <h4>Contractor</h4>
-              <p><strong>${item.contractor_name || item.company || 'Verified Contractor'}</strong><br>
-              ⭐ ${Number(item.contractor_rating || item.rating || 0).toFixed(1)} rating${item.contractor_reviews ? ` • ${item.contractor_reviews} reviews` : ''}<br>
-              ${item.contractor_bio || item.bio || 'Contractor profile details will appear here when connected to a verified contractor profile.'}</p>
+
+            <div class="activity-right-panel">
+              <div class="activity-hero-large">
+                <img src="${imageSrc}" onerror="hideMissingCardImage(this)">
+                <div class="activity-photo-count">📷 1 / 6</div>
+              </div>
+
+              <div class="activity-thumb-row">
+                ${[0,1,2,3,4,5].map((n) => `
+                  <div class="activity-thumb ${n === 0 ? 'active' : ''}">
+                    <img src="${imageSrc}" onerror="hideMissingCardImage(this)">
+                  </div>
+                `).join('')}
+              </div>
+
+              <div class="activity-contractor-panel">
+                <div class="activity-contractor-panel-head">
+                  <h4>Contractor Used</h4>
+                  <span class="activity-verified-mini">🛡 Verified Pro</span>
+                </div>
+
+                <div class="activity-contractor-main">
+                  <div class="activity-contractor-logo">
+                    ${logoUrl ? `<img src="${logoUrl}" onerror="this.outerHTML='${contractorInitial}'">` : contractorInitial}
+                  </div>
+
+                  <div class="activity-contractor-copy">
+                    <h3>${contractorName}</h3>
+                    <div>⭐ ${contractorRating} ${contractorReviews ? `(${contractorReviews} reviews)` : ''}</div>
+                    <div class="activity-badge-row">
+                      <span>✓ Licensed</span>
+                      <span>✓ Insured</span>
+                      <span>✓ Verified</span>
+                    </div>
+                    <p>${contractorBio}</p>
+                  </div>
+
+                  <div class="activity-contractor-stats">
+                    <div><strong>${contractorProjects}</strong><span>Projects Completed</span></div>
+                    <div><strong>${contractorRating}★</strong><span>Average Rating</span></div>
+                    <div><strong>${contractorExperience}</strong><span>Experience</span></div>
+                    <div><strong>${locationText}</strong><span>Primary Service Area</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="activity-save-bar">
+                <button class="mini-btn primary" data-action="activity-inspire" data-id="${item.id}">🔖 Save Idea</button>
+              </div>
             </div>
-          </div>
-          <div class="detail-panel">
-            <h4>Project Showcase</h4>
-            <p>${item.heatmap_opt_in ? 'Included in future neighborhood project totals.' : 'Shared as a project inspiration card only.'}</p>
-          </div>
-          <div class="card-actions">
-            <button class="mini-btn primary" data-action="activity-inspire" data-id="${item.id}">Save Idea</button>
           </div>
         `;
         return;
@@ -5022,6 +5374,7 @@ async function increaseBidLimit(jobId) {
   if (!item) return;
       expandUI();
       detailModal.classList.add('show');
+      detailModal.classList.remove('activity-modal');
 
       if (item.type === 'activity') {
         const imageSrc = item.image_url || getJobImage(item);
@@ -5169,6 +5522,7 @@ const bidsHtml = visibleBids.length
 
     function closeDetails() {
       detailModal.classList.remove('show');
+      detailModal.classList.remove('activity-modal');
     }
 
    function handleCardAction(action, id) {
