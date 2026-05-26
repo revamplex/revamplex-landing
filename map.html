@@ -871,17 +871,6 @@
   letter-spacing: .04em;
   text-transform: uppercase;
 }
-.activity-privacy-note {
-  margin-top: 8px;
-  padding: 9px 10px;
-  border-radius: 13px;
-  background: #f8fafc;
-  border: 1px solid rgba(15,23,42,.08);
-  color: #475569;
-  font-size: 12px;
-  font-weight: 800;
-  line-height: 1.35;
-}
 @media (max-width:640px){
   .activity-price-row { grid-template-columns: 1fr; }
   .activity-toggle-btn { font-size: 12px; padding: 0 10px; }
@@ -3769,7 +3758,6 @@ function clearMarkers() {
           <div class="detail-panel">
             <h4>${getFullTradeText(item) || getCompactTradeLabel(item)} • ${getDisplayCity(item)}</h4>
             <p>${item.description || 'A homeowner shared this project as neighborhood inspiration.'}</p>
-            <div class="activity-privacy-note">Privacy protected: RevampLEX shows only an approximate area, never the homeowner's exact address.</div>
           </div>
           <div class="modal-grid">
             <div class="detail-panel">
@@ -3777,13 +3765,15 @@ function clearMarkers() {
               <p>${priceText}</p>
             </div>
             <div class="detail-panel">
-              <h4>Contractor Used</h4>
-              <p>${item.contractor_name || 'Contractor not shown yet'} • ⭐ ${Number(item.contractor_rating || item.rating || 0).toFixed(1)}</p>
+              <h4>Contractor</h4>
+              <p><strong>${item.contractor_name || item.company || 'Verified Contractor'}</strong><br>
+              ⭐ ${Number(item.contractor_rating || item.rating || 0).toFixed(1)} rating${item.contractor_reviews ? ` • ${item.contractor_reviews} reviews` : ''}<br>
+              ${item.contractor_bio || item.bio || 'Contractor profile details will appear here when connected to a verified contractor profile.'}</p>
             </div>
           </div>
           <div class="detail-panel">
-            <h4>Map Layer</h4>
-            <p>${item.heatmap_opt_in ? 'This homeowner also opted into future Neighborhood Project Heat Map totals.' : 'This homeowner did not opt into heat map totals.'}</p>
+            <h4>Project Showcase</h4>
+            <p>${item.heatmap_opt_in ? 'Included in future neighborhood project totals.' : 'Shared as a project inspiration card only.'}</p>
           </div>
           <div class="card-actions">
             <button class="mini-btn primary" data-action="activity-inspire" data-id="${item.id}">Save Idea</button>
@@ -4249,13 +4239,13 @@ function activityCardHtml(item) {
           <div class="meta-value">${priceText}</div>
         </div>
         <div class="meta-box">
-          <div class="meta-label">Privacy</div>
-          <div class="meta-value" style="font-size:12px;line-height:1.15;">Contractor hidden</div>
+          <div class="meta-label">Shared</div>
+          <div class="meta-value" style="font-size:12px;line-height:1.15;">${item.completed_ago || 'Recently'}</div>
         </div>
       </div>
       <div class="info-row">
-        <span><strong>Shared:</strong> ${item.completed_ago || 'Recently'}</span>
-        <span><strong>Privacy:</strong> Approx. area only</span>
+        <span><strong>Type:</strong> ${getCompactTradeLabel(item)}</span>
+        <span><strong>Area:</strong> ${getDisplayCity(item)}</span>
       </div>
       <div class="card-actions">
         <button class="mini-btn secondary" data-action="activity-details" data-id="${item.id}">View</button>
