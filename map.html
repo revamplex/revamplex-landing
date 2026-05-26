@@ -798,6 +798,95 @@
 }
 
 
+
+
+/* ===== PHASE 1: BUILD ACTIVITY AROUND ME ===== */
+.activity-toggle-btn {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(249,115,22,.22);
+  background: rgba(255,247,237,.96);
+  color: #9a3412;
+  font-size: 13px;
+  font-weight: 900;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.activity-toggle-btn.active {
+  background: linear-gradient(135deg,var(--brand),var(--brand-dark));
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(249,115,22,.22);
+}
+.activity-share-box {
+  grid-column: 1 / -1;
+  border: 1px solid rgba(249,115,22,.20);
+  background: #fff7ed;
+  border-radius: 18px;
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+.activity-share-title {
+  font-weight: 900;
+  color: #9a3412;
+  margin-bottom: 2px;
+}
+.activity-share-sub {
+  color: #7c2d12;
+  font-size: 12px;
+  line-height: 1.35;
+}
+.activity-check-row {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  color: #431407;
+  font-size: 13px;
+  font-weight: 800;
+}
+.activity-check-row input { margin-top: 2px; }
+.activity-price-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.activity-card .card-inner {
+  border-color: rgba(34,197,94,.18);
+  box-shadow: 0 18px 36px rgba(34,197,94,.12), 0 10px 24px rgba(15,23,42,.10);
+}
+.activity-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: rgba(22, 101, 52, 0.92);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.activity-privacy-note {
+  margin-top: 8px;
+  padding: 9px 10px;
+  border-radius: 13px;
+  background: #f8fafc;
+  border: 1px solid rgba(15,23,42,.08);
+  color: #475569;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+@media (max-width:640px){
+  .activity-price-row { grid-template-columns: 1fr; }
+  .activity-toggle-btn { font-size: 12px; padding: 0 10px; }
+}
+
 /* ===== REVAMPLEX BID LIMIT CONTROLS ===== */
 .submit-bid-btn.closed,
 .mini-btn[disabled]{
@@ -2017,6 +2106,7 @@
     <option value="4.0">4.0+ stars</option>
     <option value="3.5">3.5+ stars</option>
   </select>
+  <button class="activity-toggle-btn active" id="activityToggleBtn" type="button">🔥 Build Activity</button>
   <div class="mode-inline">
   <button class="mode-btn active" id="homeownerMode">🏠 Homeowner</button>
   <button class="mode-btn" id="contractorMode">🛠 Contractor</button>
@@ -2157,6 +2247,29 @@
         <div class="field full">
           <label class="label" for="jobDescription">Project description</label>
           <textarea class="textarea" id="jobDescription" placeholder="Describe the project scope, materials, timing, and any special details..."></textarea>
+        </div>
+
+        <div class="activity-share-box">
+          <div>
+            <div class="activity-share-title">Build Activity Around Me</div>
+            <div class="activity-share-sub">Optional public showcase. RevampLEX only shows an approximate area — never your exact address.</div>
+          </div>
+          <label class="activity-check-row">
+            <input type="checkbox" id="jobShareActivity" checked>
+            <span>Share this project as neighborhood build activity so nearby homeowners can discover it.</span>
+          </label>
+          <label class="activity-check-row">
+            <input type="checkbox" id="jobRevealPrice">
+            <span>Show my budget/price publicly on the activity card.</span>
+          </label>
+          <label class="activity-check-row">
+            <input type="checkbox" id="jobHeatMapOptIn">
+            <span>Allow this project to count toward future Neighborhood Project Heat Map totals.</span>
+          </label>
+          <div class="activity-price-row">
+            <input class="input" id="jobActivityPhoto" placeholder="Optional photo URL / before-after image">
+            <input class="input" id="jobContractorUsed" placeholder="Contractor used (optional later)">
+          </div>
         </div>
       </div>
 
@@ -3156,6 +3269,91 @@ function extendTriStateDemoData() {
 
 extendTriStateDemoData();
 
+const DEMO_ACTIVITY = [
+  {
+    id: "activity-demo-bath-hackensack",
+    type: "activity",
+    title: "Bathroom Remodel Completed",
+    trade: "Bathroom Renovation",
+    city: "Hackensack, NJ",
+    lat: 40.8859,
+    lng: -74.0435,
+    budget: "$14k–$18k",
+    price_visible: true,
+    contractor_name: "NorthStar Remodelers",
+    contractor_rating: 4.9,
+    image_url: "images/jobs/bathroom.jpg",
+    description: "New tile shower, vanity, lighting, paint, and waterproofing. Shared by homeowner as neighborhood inspiration.",
+    completed_ago: "2 weeks ago",
+    heatmap_opt_in: true,
+    is_demo: true
+  },
+  {
+    id: "activity-demo-kitchen-paramus",
+    type: "activity",
+    title: "Kitchen Refresh Shared Nearby",
+    trade: "Kitchen Renovation",
+    city: "Paramus, NJ",
+    lat: 40.9445,
+    lng: -74.0754,
+    budget: "$28k–$36k",
+    price_visible: true,
+    contractor_name: "MetroBuild Kitchens",
+    contractor_rating: 4.8,
+    image_url: "images/jobs/kitchen.jpg",
+    description: "Cabinet update, counters, backsplash, sink, under-cabinet lighting, and flooring refresh.",
+    completed_ago: "1 month ago",
+    heatmap_opt_in: true,
+    is_demo: true
+  },
+  {
+    id: "activity-demo-deck-wayne",
+    type: "activity",
+    title: "Composite Deck Repair",
+    trade: "Decks & Porches",
+    city: "Wayne, NJ",
+    lat: 40.9254,
+    lng: -74.2765,
+    budget: "Price hidden",
+    price_visible: false,
+    contractor_name: "Summit Deck & Carpentry",
+    contractor_rating: 4.9,
+    image_url: "images/jobs/decks-porches.jpg",
+    description: "Homeowner shared before/after deck repair photos while keeping project cost private.",
+    completed_ago: "3 weeks ago",
+    heatmap_opt_in: false,
+    is_demo: true
+  }
+];
+
+function getBuildActivityItems() {
+  const isDemo = localStorage.getItem('revamplex_demo') === 'true';
+  const stored = JSON.parse(localStorage.getItem('revamplex_local_activity') || '[]');
+  const liveSharedJobs = jobs
+    .filter(job => job.share_activity === true || job.activity_public === true || job.public_showcase === true)
+    .map(job => ({
+      ...job,
+      id: `activity-${job.id}`,
+      source_job_id: job.id,
+      type: 'activity',
+      title: job.activity_title || job.title || 'Shared Neighborhood Project',
+      budget: (job.reveal_price || job.price_visible) ? (job.budget || 'Price shared') : 'Price hidden',
+      price_visible: Boolean(job.reveal_price || job.price_visible),
+      image_url: job.activity_photo_url || job.image_url || job.image || getJobImage(job),
+      contractor_name: job.contractor_used || job.contractor_name || 'Contractor not shown yet',
+      contractor_rating: job.contractor_rating || job.rating || 5,
+      completed_ago: job.completed_ago || job.posted_ago || 'Recently shared',
+      heatmap_opt_in: Boolean(job.heatmap_opt_in)
+    }));
+
+  return [
+    ...(isDemo ? DEMO_ACTIVITY : []),
+    ...stored,
+    ...liveSharedJobs
+  ];
+}
+
+
 
     let map;
     let contractors = [];
@@ -3176,6 +3374,7 @@ extendTriStateDemoData();
     let uiCollapsed = false;
     let selectedWelcomeRole = null;
     let currentMode = 'homeowner';
+    let showBuildActivity = localStorage.getItem('revamplex_show_activity') !== 'false';
     let suppressScrollActivationUntil = 0;
 
     const app = document.getElementById('app');
@@ -3195,6 +3394,7 @@ extendTriStateDemoData();
     const tradeFilter = document.getElementById('tradeFilter');
     const distanceFilter = document.getElementById('distanceFilter');
     const ratingFilter = document.getElementById('ratingFilter');
+    const activityToggleBtn = document.getElementById('activityToggleBtn');
     const sortDistanceBtn = document.getElementById('sortDistance');
     const sortRatingBtn = document.getElementById('sortRating');
     const resetFiltersBtn = document.getElementById('resetFilters');
@@ -3279,7 +3479,10 @@ async function getCurrentDataset() {
     }
 
     if (mode === 'homeowner') {
-      dataset = DEMO_CONTRACTORS.map(i => ({ ...i, type: 'contractor' }));
+      dataset = [
+        ...DEMO_CONTRACTORS.map(i => ({ ...i, type: 'contractor' })),
+        ...(showBuildActivity ? getBuildActivityItems() : [])
+      ];
     }
   } else {
     const { data: { session } } = await supabaseClient.auth.getSession();
@@ -3292,7 +3495,10 @@ async function getCurrentDataset() {
     }
 
     if (mode === 'homeowner') {
-      dataset = contractors.map(i => ({ ...i, type: 'contractor' }));
+      dataset = [
+        ...contractors.map(i => ({ ...i, type: 'contractor' })),
+        ...(showBuildActivity ? getBuildActivityItems() : [])
+      ];
     }
   }
 
@@ -3331,6 +3537,11 @@ async function getCurrentDataset() {
         ? 'Swipe left ↔ right to browse contractors'
         : 'Swipe left ↔ right to browse customer jobs';
       postJobBtn.style.display = currentMode === 'homeowner' ? 'inline-flex' : 'none';
+      if (activityToggleBtn) {
+        activityToggleBtn.style.display = currentMode === 'homeowner' ? 'inline-flex' : 'none';
+        activityToggleBtn.classList.toggle('active', showBuildActivity);
+        activityToggleBtn.textContent = showBuildActivity ? '🔥 Build Activity' : '○ Build Activity';
+      }
     }
 
     function collapseUI() {
@@ -3551,6 +3762,37 @@ function clearMarkers() {
 }
 
     function getPopupHtml(item) {
+      if (item.type === 'activity') {
+        detailTitle.textContent = item.title || 'Build Activity';
+        const priceText = item.price_visible === false ? 'Homeowner chose to hide the price.' : `Shared price/budget: ${item.budget || 'Not listed'}`;
+        detailContent.innerHTML = `
+          <div class="detail-panel">
+            <h4>${getFullTradeText(item) || getCompactTradeLabel(item)} • ${getDisplayCity(item)}</h4>
+            <p>${item.description || 'A homeowner shared this project as neighborhood inspiration.'}</p>
+            <div class="activity-privacy-note">Privacy protected: RevampLEX shows only an approximate area, never the homeowner's exact address.</div>
+          </div>
+          <div class="modal-grid">
+            <div class="detail-panel">
+              <h4>Project Cost</h4>
+              <p>${priceText}</p>
+            </div>
+            <div class="detail-panel">
+              <h4>Contractor Used</h4>
+              <p>${item.contractor_name || 'Contractor not shown yet'} • ⭐ ${Number(item.contractor_rating || item.rating || 0).toFixed(1)}</p>
+            </div>
+          </div>
+          <div class="detail-panel">
+            <h4>Map Layer</h4>
+            <p>${item.heatmap_opt_in ? 'This homeowner also opted into future Neighborhood Project Heat Map totals.' : 'This homeowner did not opt into heat map totals.'}</p>
+          </div>
+          <div class="card-actions">
+            <button class="mini-btn secondary" data-action="activity-inspire" data-id="${item.id}">Save Inspiration</button>
+            <button class="mini-btn primary" data-action="activity-request" data-id="${item.id}">Request Similar Quote</button>
+          </div>
+        `;
+        return;
+      }
+
       if (item.type === 'contractor') {
         return `
           <div>
@@ -3584,10 +3826,12 @@ function renderMarkers(items) {
     const spreadIndex = group.indexOf(key);
     const coords = offsetCoords(baseCoords, spreadIndex, group.length);
 
+    const activityColor = item.type === 'activity' ? '#16a34a' : '#f97316';
+
     const core = L.circle(coords, {
       radius: 400,
-      color: '#f97316',
-      fillColor: '#f97316',
+      color: activityColor,
+      fillColor: activityColor,
       fillOpacity: 0.35,
       weight: 0,
       interactive: false
@@ -3595,8 +3839,8 @@ function renderMarkers(items) {
 
     const glow = L.circle(coords, {
       radius: 900,
-      color: '#f97316',
-      fillColor: '#f97316',
+      color: activityColor,
+      fillColor: activityColor,
       fillOpacity: 0.18,
       weight: 0,
       interactive: false
@@ -3680,7 +3924,7 @@ function formatCount() {
 
   const mode = lockedRole || currentMode;
   const label = mode === 'homeowner'
-    ? 'contractors'
+    ? 'contractors/projects'
     : 'jobs';
 
   document.getElementById('resultsCount').innerText =
@@ -3981,11 +4225,53 @@ function canIncreaseBidLimit(item) {
       `;
     }
 
+
+
+function activityCardHtml(item) {
+  const imageSrc = item.image_url || getJobImage(item);
+  const priceText = item.price_visible === false ? 'Price hidden' : (item.budget || 'Price optional');
+  const contractor = item.contractor_name || 'Contractor not shown yet';
+  return `
+    <div class="card-image-wrap">
+      <span class="activity-badge">Build Activity</span>
+      ${item.is_demo ? `<span class="featured-badge">Sample</span>` : ``}
+      <img src="${imageSrc}" onerror="hideMissingCardImage(this)">
+    </div>
+    <div class="card-top">
+      <div class="card-title-wrap">
+        <h3 class="card-title">${item.title || 'Shared Project'}</h3>
+        <p class="card-sub">${getCompactTradeLabel(item)} • ${getDisplayCity(item)}</p>
+      </div>
+      <div class="rating-pill">🔥</div>
+    </div>
+    <div class="card-body">
+      <div class="meta-grid">
+        <div class="meta-box">
+          <div class="meta-label">Project</div>
+          <div class="meta-value">${priceText}</div>
+        </div>
+        <div class="meta-box">
+          <div class="meta-label">Built By</div>
+          <div class="meta-value" style="font-size:12px;line-height:1.15;">${contractor}</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <span><strong>Shared:</strong> ${item.completed_ago || 'Recently'}</span>
+        <span><strong>Privacy:</strong> Approx. area only</span>
+      </div>
+      <div class="card-actions">
+        <button class="mini-btn secondary" data-action="activity-details" data-id="${item.id}">View</button>
+        <button class="mini-btn primary" data-action="activity-inspire" data-id="${item.id}">Save Idea</button>
+      </div>
+    </div>
+  `;
+}
+
 function renderCards(items) {
   cardsRow.replaceChildren();
 
   items = items.filter(item => {
-    if (lockedRole === 'homeowner') return item.type === 'contractor';
+    if (lockedRole === 'homeowner') return item.type === 'contractor' || item.type === 'activity';
     if (lockedRole === 'contractor') return item.type === 'job';
     return true;
   });
@@ -4002,10 +4288,10 @@ function renderCards(items) {
   }
 
   cardsRow.innerHTML = items.map(item => `
-    <div class="listing-card ${`${item.type}-${item.id}` === activeId ? 'active' : ''}" 
+    <div class="listing-card ${item.type === 'activity' ? 'activity-card' : ''} ${`${item.type}-${item.id}` === activeId ? 'active' : ''}" 
          data-id="${item.type}-${item.id}">
       <div class="card-inner">
-        ${item.type === 'contractor' ? contractorCardHtml(item) : jobCardHtml(item)}
+        ${item.type === 'contractor' ? contractorCardHtml(item) : item.type === 'activity' ? activityCardHtml(item) : jobCardHtml(item)}
       </div>
     </div>
   `).join('');
@@ -4147,7 +4433,7 @@ filteredItems = cleanSource;
 
     // 🔥 FILTER CLEAN DATA (NOT BEFORE DEDUPE)
     filteredItems = filteredItems.filter(item => {
-      if (mode === 'homeowner' && item.type !== 'contractor') return false;
+      if (mode === 'homeowner' && item.type !== 'contractor' && item.type !== 'activity') return false;
       if (mode === 'contractor' && item.type !== 'job') return false;
 
       if (mode === 'contractor' && isJobBidClosed(item)) {
@@ -4156,7 +4442,9 @@ filteredItems = cleanSource;
 
       const haystack = item.type === 'contractor'
         ? [item.name, getFullTradeText(item), getCompactTradeLabel(item), getDisplayCity(item), item.bio].join(' ').toLowerCase()
-        : [item.title, item.trade, item.city, item.customer_name, item.description].join(' ').toLowerCase();
+        : item.type === 'activity'
+          ? [item.title, item.trade, item.city, item.description, item.contractor_name].join(' ').toLowerCase()
+          : [item.title, item.trade, item.city, item.customer_name, item.description].join(' ').toLowerCase();
 
       const matchesQuery = !query || haystack.includes(query);
       const matchesTrade =
@@ -4172,7 +4460,7 @@ filteredItems = cleanSource;
     sortItems(filteredItems);
     syncModeUI();
 
-    if (!filteredItems.some(item => String(item.id) === String(activeId))) {
+    if (!filteredItems.some(item => `${item.type}-${item.id}` === String(activeId))) {
       activeId = filteredItems[0] ? `${filteredItems[0].type}-${filteredItems[0].id}` : null;
     }
 
@@ -4231,6 +4519,16 @@ function setSort(type) {
       document.getElementById('jobTrade').selectedIndex = 0;
       const maxBidsEl = document.getElementById('jobMaxBids');
       if (maxBidsEl) maxBidsEl.value = '5';
+      const shareEl = document.getElementById('jobShareActivity');
+      const priceEl = document.getElementById('jobRevealPrice');
+      const heatEl = document.getElementById('jobHeatMapOptIn');
+      const photoEl = document.getElementById('jobActivityPhoto');
+      const contractorEl = document.getElementById('jobContractorUsed');
+      if (shareEl) shareEl.checked = true;
+      if (priceEl) priceEl.checked = false;
+      if (heatEl) heatEl.checked = false;
+      if (photoEl) photoEl.value = '';
+      if (contractorEl) contractorEl.value = '';
     }
 
 async function createJobFromForm() {
@@ -4248,6 +4546,11 @@ async function createJobFromForm() {
   const description = document.getElementById('jobDescription').value.trim() || 'Customer posted a new project on Revamp.';
   const selectedMaxBids = Number(document.getElementById('jobMaxBids')?.value || 5);
   const maxBids = [3, 5, 7].includes(selectedMaxBids) ? selectedMaxBids : 5;
+  const shareActivity = document.getElementById('jobShareActivity')?.checked === true;
+  const revealPrice = document.getElementById('jobRevealPrice')?.checked === true;
+  const heatmapOptIn = document.getElementById('jobHeatMapOptIn')?.checked === true;
+  const activityPhotoUrl = document.getElementById('jobActivityPhoto')?.value.trim() || '';
+  const contractorUsed = document.getElementById('jobContractorUsed')?.value.trim() || '';
   const center = map.getCenter();
 
   const payload = {
@@ -4277,12 +4580,57 @@ async function createJobFromForm() {
     is_live: true
   };
 
-  const { error } = await supabaseClient.from('jobs').insert([payload]);
+  const activityPayload = {
+    ...payload,
+    share_activity: shareActivity,
+    activity_public: shareActivity,
+    reveal_price: revealPrice,
+    price_visible: revealPrice,
+    heatmap_opt_in: heatmapOptIn,
+    activity_photo_url: activityPhotoUrl,
+    contractor_used: contractorUsed
+  };
 
-  if (error) {
-    console.error("JOB POST ERROR:", error);
-    alert(error.message);
+  let activityFieldsSaved = true;
+  let insertResult = await supabaseClient.from('jobs').insert([activityPayload]).select().maybeSingle();
+
+  // If Supabase does not have the Phase 1 columns yet, do not break job posting.
+  // Retry with the existing safe payload and keep the activity card locally for the map preview.
+  if (insertResult.error) {
+    activityFieldsSaved = false;
+    console.warn("JOB POST WITH ACTIVITY FIELDS FAILED, retrying base job:", insertResult.error);
+    insertResult = await supabaseClient.from('jobs').insert([payload]).select().maybeSingle();
+  }
+
+  if (insertResult.error) {
+    console.error("JOB POST ERROR:", insertResult.error);
+    alert(insertResult.error.message);
     return;
+  }
+
+  if (shareActivity && !activityFieldsSaved) {
+    const savedJob = insertResult.data || payload;
+    const localItems = JSON.parse(localStorage.getItem('revamplex_local_activity') || '[]');
+    localItems.unshift({
+      id: `local-activity-${Date.now()}`,
+      source_job_id: savedJob.id || null,
+      type: 'activity',
+      title,
+      trade,
+      budget: revealPrice ? budget : 'Price hidden',
+      price_visible: revealPrice,
+      city,
+      description,
+      lat: Number(center.lat.toFixed(6)),
+      lng: Number(center.lng.toFixed(6)),
+      contractor_name: contractorUsed || 'Contractor not shown yet',
+      contractor_rating: 5,
+      image_url: activityPhotoUrl || getJobImage(trade),
+      completed_ago: 'Just shared',
+      heatmap_opt_in: heatmapOptIn,
+      is_demo: false
+    });
+    localStorage.setItem('revamplex_local_activity', JSON.stringify(localItems.slice(0, 12)));
   }
 
   closeJobForm();
@@ -4644,6 +4992,28 @@ const bidsHtml = visibleBids.length
 
   if (action === 'increase-bid-limit') {
     increaseBidLimit(cleanId);
+    return;
+  }
+
+  if (action === 'activity-details') {
+    const item = getBuildActivityItems().find(entry =>
+      String(entry.id) === rawId ||
+      String(entry.id) === cleanId ||
+      `activity-${entry.id}` === rawId
+    );
+    if (item) openDetailModal(item);
+    else showStatus('Activity not found');
+    return;
+  }
+
+  if (action === 'activity-inspire') {
+    showStatus('Saved to inspiration');
+    return;
+  }
+
+  if (action === 'activity-request') {
+    showStatus('Post a similar project to request quotes');
+    openJobModal();
     return;
   }
 
@@ -5337,6 +5707,15 @@ searchInput.addEventListener('keydown', async (e) => {
     tradeFilter.addEventListener('change', applyFilters);
     distanceFilter.addEventListener('change', applyFilters);
     ratingFilter.addEventListener('change', applyFilters);
+if (activityToggleBtn) {
+  activityToggleBtn.addEventListener('click', () => {
+    showBuildActivity = !showBuildActivity;
+    localStorage.setItem('revamplex_show_activity', String(showBuildActivity));
+    __lastRenderKey = '';
+    syncModeUI();
+    applyFilters();
+  });
+}
 if (sortDistanceBtn) {
   sortDistanceBtn.addEventListener('click', () => setSort('distance'));
 }
