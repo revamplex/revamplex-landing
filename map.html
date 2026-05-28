@@ -2349,70 +2349,85 @@
 }
 
 
-/* ===== REVAMPLEX ZOOM-BASED MAP CLUSTERING ===== */
+/* ================================
+   REVAMPLEX PIN CLUSTERS
+================================ */
+
+.cluster-pin,
+.pin-badge,
+.leaflet-marker-icon.cluster-marker {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
 .revamp-map-cluster {
-  --cluster-main: #f97316;
-  --cluster-dark: #ea580c;
-  --cluster-glow: rgba(249,115,22,.30);
+  position: relative;
   width: 54px;
-  height: 54px;
-  border-radius: 999px;
+  height: 68px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+}
+
+.revamp-map-cluster::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(180deg,#ff9f43,#ff6b00);
+  border-radius: 50% 50% 50% 0;
+  transform: translateX(-50%) rotate(-45deg);
+  box-shadow:
+    0 0 18px rgba(255,120,0,.55),
+    0 0 35px rgba(255,120,0,.25);
+}
+
+.revamp-map-cluster.activity::before {
+  background: linear-gradient(180deg,#7dff55,#44c11b);
+}
+
+.revamp-map-cluster.mixed::before {
+  background: linear-gradient(180deg,#ff9f43,#44c11b);
+}
+
+.revamp-map-cluster .cluster-count {
+  position: relative;
+  z-index: 5;
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 900;
   color: #fff;
-  font-size: 15px;
-  font-weight: 950;
-  background:
-    radial-gradient(circle at 30% 22%, rgba(255,255,255,.55), transparent 30%),
-    linear-gradient(135deg, var(--cluster-main), var(--cluster-dark));
-  border: 3px solid rgba(255,255,255,.94);
-  box-shadow:
-    0 0 0 7px rgba(249,115,22,.10),
-    0 0 28px var(--cluster-glow),
-    0 14px 28px rgba(15,23,42,.18);
-  cursor: pointer;
-  transform: translateZ(0);
-  transition: transform .18s ease, box-shadow .18s ease;
-}
-
-.revamp-map-cluster:hover {
-  transform: scale(1.08);
-  box-shadow:
-    0 0 0 9px rgba(249,115,22,.12),
-    0 0 34px var(--cluster-glow),
-    0 18px 34px rgba(15,23,42,.22);
-}
-
-.revamp-map-cluster.activity {
-  --cluster-main: #65d11f;
-  --cluster-dark: #43b915;
-  --cluster-glow: rgba(101,209,31,.30);
-  box-shadow:
-    0 0 0 7px rgba(101,209,31,.10),
-    0 0 28px var(--cluster-glow),
-    0 14px 28px rgba(15,23,42,.18);
-}
-
-.revamp-map-cluster.mixed {
-  --cluster-main: #f97316;
-  --cluster-dark: #43b915;
-  --cluster-glow: rgba(249,115,22,.25);
+  line-height: 1;
+  text-align: center;
 }
 
 .revamp-map-cluster small {
   display: block;
-  margin-top: -2px;
-  font-size: 9px;
-  font-weight: 900;
-  line-height: 1;
-  opacity: .92;
+  font-size: 8px;
+  margin-top: 2px;
+  opacity: .95;
 }
 
-.revamp-map-cluster .cluster-count {
-  display: grid;
-  place-items: center;
-  line-height: .95;
+.revamp-map-cluster::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(255,140,0,.96);
+  box-shadow:
+    0 0 12px rgba(255,140,0,.65),
+    0 0 24px rgba(255,140,0,.35);
+}
+
+.revamp-map-cluster.activity::after {
+  background: rgba(101,209,31,.96);
 }
 
 
@@ -2425,19 +2440,6 @@
       filter: blur(2px);
     }
 
-    .custom-cluster {
-      width:42px;
-      height:42px;
-      border-radius:50%;
-      background:rgba(249,115,22,.92);
-      color:white;
-      border:4px solid rgba(255,255,255,.95);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:900;
-      box-shadow:0 10px 20px rgba(249,115,22,.28);
-    }
 
     .leaflet-popup-content-wrapper {
       border-radius:16px;
