@@ -2133,115 +2133,221 @@
     }
 
 
-/* ===== REVAMPLEX ILLUMINATED HOUSE MAP PINS ===== */
+/* ===== REVAMPLEX UPRIGHT ILLUMINATED HOUSE MAP PINS ===== */
+.revamp-pin-icon,
+.revamp-pin-icon * {
+  box-sizing: border-box;
+}
+
 .revamp-map-pin {
+  --pin-main: #f97316;
+  --pin-dark: #ea580c;
+  --pin-soft: rgba(249,115,22,.26);
+  --pin-glow: rgba(249,115,22,.56);
   position: relative;
-  width: 46px;
-  height: 58px;
-  transform: translate(-50%, -100%);
+  width: 66px;
+  height: 86px;
   pointer-events: auto;
-  filter: drop-shadow(0 14px 18px rgba(249,115,22,.34));
+  transform: translateZ(0);
+  filter: drop-shadow(0 14px 18px var(--pin-soft));
+}
+
+.revamp-map-pin.activity {
+  --pin-main: #65d11f;
+  --pin-dark: #43b915;
+  --pin-soft: rgba(101,209,31,.28);
+  --pin-glow: rgba(101,209,31,.58);
 }
 
 .revamp-map-pin .pin-glow {
   position: absolute;
   left: 50%;
-  top: 4px;
-  width: 58px;
-  height: 58px;
+  top: 2px;
+  width: 72px;
+  height: 72px;
   transform: translateX(-50%);
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(255,237,213,.75) 0%, rgba(249,115,22,.34) 34%, rgba(249,115,22,0) 72%);
-  filter: blur(7px);
-  opacity: .92;
-  animation: revampPinGlow 2.6s ease-in-out infinite;
+  background: radial-gradient(circle, rgba(255,255,255,.78) 0%, var(--pin-glow) 34%, rgba(255,255,255,0) 72%);
+  filter: blur(9px);
+  opacity: .84;
+  animation: revampPinGlow 2.7s ease-in-out infinite;
 }
 
-.revamp-map-pin .pin-drop {
+.revamp-map-pin .pin-svg {
   position: absolute;
   left: 50%;
   top: 0;
-  width: 40px;
-  height: 40px;
-  transform: translateX(-50%) rotate(45deg);
-  border-radius: 50% 50% 50% 7px;
-  background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 36%, #f97316 100%);
-  border: 2px solid rgba(255,255,255,.96);
-  box-shadow:
-    0 0 0 3px rgba(249,115,22,.18),
-    0 0 22px rgba(249,115,22,.62),
-    inset 0 0 15px rgba(255,255,255,.62);
+  width: 54px;
+  height: 68px;
+  transform: translateX(-50%);
+  overflow: visible;
+  display: block;
+}
+
+.revamp-map-pin .pin-shape {
+  fill: url(#pinGradientOrange);
+  stroke: rgba(255,255,255,.96);
+  stroke-width: 2.35;
+  filter: drop-shadow(0 0 14px var(--pin-glow));
+}
+
+.revamp-map-pin.activity .pin-shape {
+  fill: url(#pinGradientGreen);
+}
+
+.revamp-map-pin .pin-inner {
+  fill: rgba(255,255,255,.97);
+  filter: drop-shadow(0 0 10px rgba(255,255,255,.70));
 }
 
 .revamp-map-pin .pin-house {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transform: rotate(-45deg);
-  color: #f97316;
-}
-
-.revamp-map-pin .pin-house svg {
-  width: 21px;
-  height: 21px;
-  display: block;
-  filter: drop-shadow(0 0 8px rgba(255,255,255,.85));
+  fill: var(--pin-main);
 }
 
 .revamp-map-pin .pin-base {
   position: absolute;
   left: 50%;
-  bottom: -2px;
-  width: 58px;
-  height: 17px;
+  bottom: 7px;
+  width: 78px;
+  height: 25px;
   transform: translateX(-50%);
   border-radius: 999px;
-  border: 2px solid rgba(249,115,22,.62);
-  background: radial-gradient(circle, rgba(255,237,213,.58) 0%, rgba(249,115,22,.22) 44%, rgba(249,115,22,0) 74%);
-  box-shadow:
-    0 0 22px rgba(249,115,22,.45),
-    inset 0 0 14px rgba(249,115,22,.30);
+  pointer-events: none;
+}
+
+.revamp-map-pin .pin-base::before,
+.revamp-map-pin .pin-base::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  border: 2px solid rgba(255,255,255,.92);
+  box-shadow: 0 0 18px var(--pin-glow), inset 0 0 12px var(--pin-soft);
+}
+
+.revamp-map-pin .pin-base::before {
+  width: 70px;
+  height: 20px;
+  opacity: .92;
+}
+
+.revamp-map-pin .pin-base::after {
+  width: 48px;
+  height: 13px;
+  opacity: .78;
   animation: revampPinBase 2.8s ease-in-out infinite;
 }
 
 .revamp-map-pin.active {
-  width: 58px;
-  height: 72px;
-  z-index: 10;
-  filter: drop-shadow(0 18px 24px rgba(249,115,22,.48));
+  width: 76px;
+  height: 98px;
+  filter: drop-shadow(0 18px 24px var(--pin-glow));
 }
 
-.revamp-map-pin.active .pin-drop {
-  width: 50px;
-  height: 50px;
-  box-shadow:
-    0 0 0 4px rgba(249,115,22,.20),
-    0 0 32px rgba(249,115,22,.78),
-    inset 0 0 18px rgba(255,255,255,.72);
-}
-
-.revamp-map-pin.active .pin-house svg {
-  width: 25px;
-  height: 25px;
+.revamp-map-pin.active .pin-svg {
+  width: 64px;
+  height: 80px;
 }
 
 .revamp-map-pin.active .pin-base {
-  width: 76px;
-  height: 22px;
-  bottom: -3px;
+  width: 92px;
+  bottom: 5px;
+}
+
+.revamp-map-pin.active .pin-base::before {
+  width: 86px;
+  height: 24px;
+}
+
+.revamp-map-pin.active .pin-base::after {
+  width: 60px;
+  height: 16px;
 }
 
 @keyframes revampPinGlow {
-  0%, 100% { opacity: .72; transform: translateX(-50%) scale(.94); }
+  0%, 100% { opacity: .68; transform: translateX(-50%) scale(.94); }
   50% { opacity: 1; transform: translateX(-50%) scale(1.06); }
 }
 
 @keyframes revampPinBase {
-  0%, 100% { opacity: .74; transform: translateX(-50%) scale(.92); }
-  50% { opacity: 1; transform: translateX(-50%) scale(1.08); }
+  0%, 100% { opacity: .64; transform: translate(-50%, -50%) scale(.92); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
 }
+
+.revamp-map-legend {
+  position: absolute;
+  left: 18px;
+  bottom: 54px;
+  z-index: 980;
+  display: grid;
+  gap: 12px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(15,23,42,.08);
+  box-shadow: 0 14px 34px rgba(15,23,42,.12);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 800;
+  pointer-events: none;
+}
+
+.revamp-map-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.revamp-map-legend-dot {
+  position: relative;
+  width: 23px;
+  height: 28px;
+  flex: 0 0 auto;
+}
+
+.revamp-map-legend-dot::before {
+  content: "";
+  position: absolute;
+  inset: 1px 3px 6px;
+  border-radius: 50% 50% 50% 7px;
+  transform: rotate(45deg);
+  background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 34%, #f97316 100%);
+  border: 2px solid #fff;
+  box-shadow: 0 0 12px rgba(249,115,22,.55);
+}
+
+.revamp-map-legend-dot::after {
+  content: "⌂";
+  position: absolute;
+  left: 50%;
+  top: 7px;
+  transform: translateX(-50%);
+  color: #fff;
+  font-size: 15px;
+  line-height: 1;
+  font-weight: 950;
+}
+
+.revamp-map-legend-dot.green::before {
+  background: linear-gradient(135deg, #f0fdf4 0%, #bbf7d0 34%, #65d11f 100%);
+  box-shadow: 0 0 12px rgba(101,209,31,.55);
+}
+
+@media (max-width: 640px) {
+  .revamp-map-legend {
+    left: 10px;
+    bottom: 84px;
+    padding: 12px 13px;
+    font-size: 12px;
+    border-radius: 16px;
+  }
+}
+
 
         .job-pulse-core {
       pointer-events: none;
@@ -4544,6 +4650,11 @@ function clearMarkers() {
 
   activeCircles = [];
 
+  if (activeHighlight && map.hasLayer(activeHighlight)) {
+    map.removeLayer(activeHighlight);
+  }
+  activeHighlight = null;
+
   markerIndex.clear();
   circleIndex.clear();
 }
@@ -4690,33 +4801,108 @@ function clearMarkers() {
       `;
     }
 
-// ===== PREMIUM ILLUMINATED HOUSE PIN MAP ENGINE =====
+// ===== REVAMPLEX UPRIGHT ILLUMINATED HOUSE PIN MAP ENGINE =====
+function getMapPinColor(item) {
+  return item?.type === 'activity' ? '#65d11f' : '#f97316';
+}
+
+function getMapPinSoftColor(item) {
+  return item?.type === 'activity' ? 'rgba(101,209,31,.12)' : 'rgba(249,115,22,.10)';
+}
+
 function getRevampPinIcon(item, isActive = false) {
   const activeClass = isActive ? 'active' : '';
+  const activityClass = item?.type === 'activity' ? 'activity' : '';
 
   return L.divIcon({
     className: 'revamp-pin-icon',
     html: `
-      <div class="revamp-map-pin ${activeClass}">
+      <div class="revamp-map-pin ${activityClass} ${activeClass}">
         <div class="pin-glow"></div>
-        <div class="pin-drop">
-          <div class="pin-house" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="currentColor" role="img">
-              <path d="M3 11.4 12 4l9 7.4-1.35 1.6L18.4 12v7.5h-4.85v-5.2h-3.1v5.2H5.6V12l-1.25 1L3 11.4Z"/>
-            </svg>
-          </div>
-        </div>
+        <svg class="pin-svg" viewBox="0 0 64 82" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="pinGradientOrange" x1="15%" y1="8%" x2="80%" y2="92%">
+              <stop offset="0%" stop-color="#fff7ed"/>
+              <stop offset="38%" stop-color="#fed7aa"/>
+              <stop offset="100%" stop-color="#f97316"/>
+            </linearGradient>
+            <linearGradient id="pinGradientGreen" x1="15%" y1="8%" x2="80%" y2="92%">
+              <stop offset="0%" stop-color="#f0fdf4"/>
+              <stop offset="38%" stop-color="#bbf7d0"/>
+              <stop offset="100%" stop-color="#65d11f"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Upright pin shape. No CSS rotation, so it cannot turn sideways. -->
+          <path class="pin-shape" d="M32 3C18.2 3 7 14.2 7 28c0 18.9 25 49.5 25 49.5S57 46.9 57 28C57 14.2 45.8 3 32 3Z"/>
+          <circle class="pin-inner" cx="32" cy="28" r="16.8"/>
+          <path class="pin-house" d="M20 29.4 32 19.5l12 9.9-2.1 2.45-1.75-1.45v10.05h-6.35v-6.65h-3.6v6.65h-6.35V30.4l-1.75 1.45L20 29.4Z"/>
+        </svg>
         <div class="pin-base"></div>
       </div>
     `,
-    iconSize: isActive ? [58, 72] : [46, 58],
-    iconAnchor: isActive ? [29, 69] : [23, 55]
+    iconSize: isActive ? [76, 98] : [66, 86],
+    iconAnchor: isActive ? [38, 91] : [33, 79],
+    popupAnchor: [0, -76]
+  });
+}
+
+function createRevampMapLegend() {
+  if (document.getElementById('revampMapLegend')) return;
+
+  const legend = document.createElement('div');
+  legend.id = 'revampMapLegend';
+  legend.className = 'revamp-map-legend';
+  legend.innerHTML = `
+    <div class="revamp-map-legend-row">
+      <span class="revamp-map-legend-dot"></span>
+      <span>Contractor / Project</span>
+    </div>
+    <div class="revamp-map-legend-row">
+      <span class="revamp-map-legend-dot green"></span>
+      <span>Revamp Activity</span>
+    </div>
+  `;
+
+  const appEl = document.getElementById('app');
+  if (appEl) appEl.appendChild(legend);
+}
+
+function updateMarkerStates() {
+  circleIndex.forEach(({ core, glow, marker }, key) => {
+    const item = filteredItems.find(entry => `${entry.type}-${entry.id}` === key);
+    if (!item) return;
+
+    const isActive = key === activeId || key === selectedId;
+    const pinColor = getMapPinColor(item);
+
+    if (core) {
+      core.setStyle({
+        color: pinColor,
+        fillColor: pinColor,
+        fillOpacity: isActive ? 0.24 : 0.105
+      });
+    }
+
+    if (glow) {
+      glow.setStyle({
+        color: pinColor,
+        fillColor: pinColor,
+        fillOpacity: isActive ? 0.105 : 0.045
+      });
+    }
+
+    if (marker) {
+      marker.setIcon(getRevampPinIcon(item, isActive));
+      marker.setZIndexOffset(isActive ? 1300 : 700);
+    }
   });
 }
 
 function renderMarkers(items) {
 
   clearMarkers();
+  createRevampMapLegend();
 
   const spreadGroups = buildSpreadGroups(items);
 
@@ -4728,50 +4914,46 @@ function renderMarkers(items) {
     const spreadIndex = group.indexOf(key);
     const coords = offsetCoords(baseCoords, spreadIndex, group.length);
 
-    // Keep the privacy glow, but make it lighter so the house pin stands out.
-    const glowColor = '#f97316';
+    const pinColor = getMapPinColor(item);
+    const isActivity = item.type === 'activity';
+    const isActive = selectedId === key || activeId === key;
 
+    // Soft privacy/coverage glow below every pin. Revamp Activity is green.
     const core = L.circle(coords, {
-      radius: 340,
-      color: glowColor,
-      fillColor: glowColor,
-      fillOpacity: 0.16,
+      radius: isActivity ? 360 : 340,
+      color: pinColor,
+      fillColor: pinColor,
+      fillOpacity: isActive ? 0.24 : 0.105,
       weight: 0,
       interactive: false
     }).addTo(map);
 
     const glow = L.circle(coords, {
-      radius: 820,
-      color: glowColor,
-      fillColor: glowColor,
-      fillOpacity: 0.075,
+      radius: isActivity ? 850 : 820,
+      color: pinColor,
+      fillColor: pinColor,
+      fillOpacity: isActive ? 0.105 : 0.045,
       weight: 0,
       interactive: false
     }).addTo(map);
 
+    // The actual upright illuminated pin. Every circle gets one.
     const pinMarker = L.marker(coords, {
-      icon: getRevampPinIcon(item, selectedId === key || activeId === key),
+      icon: getRevampPinIcon(item, isActive),
       interactive: true,
       keyboard: false,
       riseOnHover: true,
-      zIndexOffset: selectedId === key ? 1000 : 500
+      zIndexOffset: isActive ? 1300 : 700
     }).addTo(map);
 
+    // Invisible large hit area for easy hover/click without hiding the pin.
     const interactionLayer = L.circle(coords, {
-      radius: 2000,
+      radius: 1800,
       opacity: 0,
       fillOpacity: 0,
       interactive: true,
       bubblingMouseEvents: false
     }).addTo(map);
-
-    setTimeout(() => {
-      glow.bringToBack();
-      core.bringToFront();
-      pinMarker.setZIndexOffset(selectedId === key ? 1200 : 650);
-      interactionLayer.bringToFront();
-      pinMarker.getElement()?.style?.setProperty('z-index', selectedId === key ? '1200' : '650');
-    }, 0);
 
     activeCircles.push(core, glow, interactionLayer, pinMarker);
     markerIndex.set(key, pinMarker);
@@ -4780,10 +4962,10 @@ function renderMarkers(items) {
     const hoverOn = () => {
       if (selectedId === key) return;
 
-      core.setStyle({ fillOpacity: 0.28 });
-      glow.setStyle({ fillOpacity: 0.13 });
+      core.setStyle({ fillOpacity: 0.20 });
+      glow.setStyle({ fillOpacity: 0.095 });
       pinMarker.setIcon(getRevampPinIcon(item, true));
-      pinMarker.setZIndexOffset(1100);
+      pinMarker.setZIndexOffset(1200);
 
       document.querySelectorAll('.listing-card').forEach(c => c.classList.remove('hovered'));
       const card = document.querySelector(`.listing-card[data-id="${key}"]`);
@@ -4796,10 +4978,10 @@ function renderMarkers(items) {
     const hoverOff = () => {
       if (selectedId === key) return;
 
-      core.setStyle({ fillOpacity: 0.16 });
-      glow.setStyle({ fillOpacity: 0.075 });
+      core.setStyle({ fillOpacity: activeId === key ? 0.24 : 0.105 });
+      glow.setStyle({ fillOpacity: activeId === key ? 0.105 : 0.045 });
       pinMarker.setIcon(getRevampPinIcon(item, activeId === key));
-      pinMarker.setZIndexOffset(650);
+      pinMarker.setZIndexOffset(activeId === key ? 1200 : 700);
       document.querySelectorAll('.listing-card').forEach(c => c.classList.remove('hovered'));
     };
 
@@ -4807,21 +4989,7 @@ function renderMarkers(items) {
       selectedId = key;
       setActive(key, true);
       scrollCardIntoView(key);
-
-      circleIndex.forEach(({ core: otherCore, glow: otherGlow, marker: otherMarker }, otherKey) => {
-        otherCore.setStyle({ fillOpacity: 0.16 });
-        otherGlow.setStyle({ fillOpacity: 0.075 });
-        if (otherMarker) {
-          otherMarker.setIcon(getRevampPinIcon(item, otherKey === key));
-          otherMarker.setZIndexOffset(otherKey === key ? 1200 : 650);
-        }
-      });
-
-      core.setStyle({ fillOpacity: 0.34 });
-      glow.setStyle({ fillOpacity: 0.17 });
-      pinMarker.setIcon(getRevampPinIcon(item, true));
-      pinMarker.setZIndexOffset(1200);
-      core.bringToFront();
+      updateMarkerStates();
     };
 
     interactionLayer.on('mouseover', hoverOn);
@@ -4832,10 +5000,11 @@ function renderMarkers(items) {
     pinMarker.on('click', selectPin);
   });
 
+  updateMarkerStates();
   fitMapToItems(items);
 }
 
-// ===== END: PREMIUM ILLUMINATED HOUSE PIN MAP ENGINE =====
+// ===== END: REVAMPLEX UPRIGHT ILLUMINATED HOUSE PIN MAP ENGINE =====
 
     function fitMapToItems(items) {
       if (!items.length) return;
@@ -4846,10 +5015,6 @@ function renderMarkers(items) {
         maxZoom: 12
       });
     }
-
-function updateMarkerStates() {
-  // 🔥 CLEAN — no icon logic anymore
-}
 
 function formatCount() {
 
@@ -5256,6 +5421,8 @@ function setActive(id, shouldSelect = false, options = {}) {
     card.classList.toggle('active', String(card.dataset.id) === String(id));
   });
 
+  updateMarkerStates();
+
   const item = filteredItems.find(entry => `${entry.type}-${entry.id}` === id);
   if (!item) return;
 
@@ -5278,17 +5445,19 @@ function setActive(id, shouldSelect = false, options = {}) {
     map.removeLayer(activeHighlight);
   }
 
+  const activeColor = getMapPinColor(item);
+
   activeHighlight = L.circle([displayLat, displayLng], {
-    radius: 1600,
-    color: '#f97316',
-    fillColor: '#f97316',
-    fillOpacity: 0.15,
+    radius: item.type === 'activity' ? 1650 : 1600,
+    color: activeColor,
+    fillColor: activeColor,
+    fillOpacity: 0.10,
     weight: 0,
     interactive: false
   }).addTo(map);
 
   activeHighlight.bringToFront();
-  }
+}
     function scrollCardIntoView(id) {
       const target = [...document.querySelectorAll('.listing-card[data-id]')].find(card => card.dataset.id === id);
       if (!target) return;
