@@ -2145,11 +2145,11 @@
   --pin-soft: rgba(249,115,22,.26);
   --pin-glow: rgba(249,115,22,.56);
   position: relative;
-  width: 66px;
-  height: 86px;
+  width: 56px;   /* 15% smaller */
+  height: 73px;  /* 15% smaller */
   pointer-events: auto;
   transform: translateZ(0);
-  filter: drop-shadow(0 14px 18px var(--pin-soft));
+  filter: drop-shadow(0 12px 15px var(--pin-soft));
 }
 
 .revamp-map-pin.activity {
@@ -2163,12 +2163,12 @@
   position: absolute;
   left: 50%;
   top: 2px;
-  width: 72px;
-  height: 72px;
+  width: 61px;   /* 15% smaller */
+  height: 61px;  /* 15% smaller */
   transform: translateX(-50%);
   border-radius: 999px;
   background: radial-gradient(circle, rgba(255,255,255,.78) 0%, var(--pin-glow) 34%, rgba(255,255,255,0) 72%);
-  filter: blur(9px);
+  filter: blur(8px);
   opacity: .84;
   animation: revampPinGlow 2.7s ease-in-out infinite;
 }
@@ -2177,8 +2177,8 @@
   position: absolute;
   left: 50%;
   top: 0;
-  width: 54px;
-  height: 68px;
+  width: 46px;   /* 15% smaller */
+  height: 58px;  /* 15% smaller */
   transform: translateX(-50%);
   overflow: visible;
   display: block;
@@ -2188,7 +2188,7 @@
   fill: url(#pinGradientOrange);
   stroke: rgba(255,255,255,.96);
   stroke-width: 2.35;
-  filter: drop-shadow(0 0 14px var(--pin-glow));
+  filter: drop-shadow(0 0 12px var(--pin-glow));
 }
 
 .revamp-map-pin.activity .pin-shape {
@@ -2197,19 +2197,20 @@
 
 .revamp-map-pin .pin-inner {
   fill: rgba(255,255,255,.97);
-  filter: drop-shadow(0 0 10px rgba(255,255,255,.70));
+  filter: drop-shadow(0 0 9px rgba(255,255,255,.70));
 }
 
 .revamp-map-pin .pin-house {
   fill: var(--pin-main);
 }
 
+/* Circular glow under the pin — replaces the wider rectangular/oval footprint */
 .revamp-map-pin .pin-base {
   position: absolute;
   left: 50%;
-  bottom: 7px;
-  width: 78px;
-  height: 25px;
+  bottom: 1px;
+  width: 52px;
+  height: 52px;
   transform: translateX(-50%);
   border-radius: 999px;
   pointer-events: none;
@@ -2224,46 +2225,47 @@
   border-radius: 999px;
   transform: translate(-50%, -50%);
   border: 2px solid rgba(255,255,255,.92);
-  box-shadow: 0 0 18px var(--pin-glow), inset 0 0 12px var(--pin-soft);
+  box-shadow: 0 0 16px var(--pin-glow), inset 0 0 10px var(--pin-soft);
 }
 
 .revamp-map-pin .pin-base::before {
-  width: 70px;
-  height: 20px;
-  opacity: .92;
+  width: 44px;
+  height: 44px;
+  opacity: .88;
 }
 
 .revamp-map-pin .pin-base::after {
-  width: 48px;
-  height: 13px;
-  opacity: .78;
+  width: 30px;
+  height: 30px;
+  opacity: .72;
   animation: revampPinBase 2.8s ease-in-out infinite;
 }
 
 .revamp-map-pin.active {
-  width: 76px;
-  height: 98px;
-  filter: drop-shadow(0 18px 24px var(--pin-glow));
+  width: 65px;   /* 15% smaller */
+  height: 83px;  /* 15% smaller */
+  filter: drop-shadow(0 15px 20px var(--pin-glow));
 }
 
 .revamp-map-pin.active .pin-svg {
-  width: 64px;
-  height: 80px;
+  width: 54px;   /* 15% smaller */
+  height: 68px;  /* 15% smaller */
 }
 
 .revamp-map-pin.active .pin-base {
-  width: 92px;
-  bottom: 5px;
+  width: 60px;
+  height: 60px;
+  bottom: 0;
 }
 
 .revamp-map-pin.active .pin-base::before {
-  width: 86px;
-  height: 24px;
+  width: 52px;
+  height: 52px;
 }
 
 .revamp-map-pin.active .pin-base::after {
-  width: 60px;
-  height: 16px;
+  width: 36px;
+  height: 36px;
 }
 
 @keyframes revampPinGlow {
@@ -4841,9 +4843,9 @@ function getRevampPinIcon(item, isActive = false) {
         <div class="pin-base"></div>
       </div>
     `,
-    iconSize: isActive ? [76, 98] : [66, 86],
-    iconAnchor: isActive ? [38, 91] : [33, 79],
-    popupAnchor: [0, -76]
+    iconSize: isActive ? [65, 83] : [56, 73],
+    iconAnchor: isActive ? [33, 77] : [28, 67],
+    popupAnchor: [0, -64]
   });
 }
 
