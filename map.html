@@ -2207,11 +2207,11 @@
 .revamp-map-pin .pin-base {
   position: absolute;
   left: 50%;
-  bottom: 1px;
-  width: 58px;
-  height: 58px;
+  bottom: 7px;
+  width: 78px;
+  height: 25px;
   transform: translateX(-50%);
-  border-radius: 50%;
+  border-radius: 999px;
   pointer-events: none;
 }
 
@@ -2221,25 +2221,22 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  border-radius: 50%;
+  border-radius: 999px;
   transform: translate(-50%, -50%);
-  border: 2.5px solid rgba(255,255,255,.92);
-  background: transparent;
-  box-shadow:
-    0 0 18px var(--pin-glow),
-    inset 0 0 12px var(--pin-soft);
+  border: 2px solid rgba(255,255,255,.92);
+  box-shadow: 0 0 18px var(--pin-glow), inset 0 0 12px var(--pin-soft);
 }
 
 .revamp-map-pin .pin-base::before {
-  width: 54px;
-  height: 54px;
-  opacity: .90;
+  width: 70px;
+  height: 20px;
+  opacity: .92;
 }
 
 .revamp-map-pin .pin-base::after {
-  width: 30px;
-  height: 30px;
-  opacity: .82;
+  width: 48px;
+  height: 13px;
+  opacity: .78;
   animation: revampPinBase 2.8s ease-in-out infinite;
 }
 
@@ -2255,19 +2252,18 @@
 }
 
 .revamp-map-pin.active .pin-base {
-  width: 68px;
-  height: 68px;
-  bottom: 0;
+  width: 92px;
+  bottom: 5px;
 }
 
 .revamp-map-pin.active .pin-base::before {
-  width: 64px;
-  height: 64px;
+  width: 86px;
+  height: 24px;
 }
 
 .revamp-map-pin.active .pin-base::after {
-  width: 36px;
-  height: 36px;
+  width: 60px;
+  height: 16px;
 }
 
 @keyframes revampPinGlow {
@@ -2276,8 +2272,8 @@
 }
 
 @keyframes revampPinBase {
-  0%, 100% { opacity: .62; transform: translate(-50%, -50%) scale(.92); }
-  50% { opacity: .98; transform: translate(-50%, -50%) scale(1.06); }
+  0%, 100% { opacity: .64; transform: translate(-50%, -50%) scale(.92); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
 }
 
 .revamp-map-legend {
@@ -2354,12 +2350,15 @@
 
 
 /* ================================
-   REVAMPLEX PIN CLUSTERS
+   REVAMPLEX CLUSTER CIRCLES
+   Simple numbered circles only.
+   Single house pins + bullseye base stay unchanged.
 ================================ */
 
 .cluster-pin,
 .pin-badge,
-.leaflet-marker-icon.cluster-marker {
+.leaflet-marker-icon.cluster-marker,
+.leaflet-marker-icon .revamp-map-cluster {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -2368,80 +2367,55 @@
 .revamp-map-cluster {
   position: relative;
   width: 54px;
-  height: 68px;
+  height: 54px;
+  border-radius: 50%;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-}
-
-.revamp-map-cluster::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 42px;
-  height: 42px;
-  background: linear-gradient(180deg,#ff9f43,#ff6b00);
-  border-radius: 50% 50% 50% 0;
-  transform: translateX(-50%) rotate(-45deg);
+  background: linear-gradient(135deg, #ff9f43, #ff6b00);
+  border: 4px solid rgba(255,255,255,.96);
   box-shadow:
-    0 0 18px rgba(255,120,0,.55),
-    0 0 35px rgba(255,120,0,.25);
+    0 0 16px rgba(255,120,0,.58),
+    0 0 34px rgba(255,120,0,.30),
+    0 12px 24px rgba(15,23,42,.18);
 }
 
-.revamp-map-cluster.activity::before {
-  background: linear-gradient(180deg,#7dff55,#44c11b);
+.revamp-map-cluster.activity {
+  background: linear-gradient(135deg, #7dff55, #44c11b);
+  box-shadow:
+    0 0 16px rgba(101,209,31,.58),
+    0 0 34px rgba(101,209,31,.30),
+    0 12px 24px rgba(15,23,42,.18);
 }
 
-.revamp-map-cluster.mixed::before {
-  background: linear-gradient(180deg,#ff9f43,#44c11b);
+.revamp-map-cluster.mixed {
+  background: linear-gradient(135deg, #ff9f43 0%, #ff6b00 48%, #65d11f 52%, #44c11b 100%);
+}
+
+.revamp-map-cluster::before,
+.revamp-map-cluster::after {
+  display: none !important;
+  content: none !important;
 }
 
 .revamp-map-cluster .cluster-count {
   position: relative;
   z-index: 5;
-  margin-top: 8px;
-  font-size: 14px;
-  font-weight: 900;
+  margin: 0;
+  font-size: 17px;
+  font-weight: 950;
   color: #fff;
   line-height: 1;
   text-align: center;
+  text-shadow: 0 1px 2px rgba(15,23,42,.22);
 }
 
 .revamp-map-cluster small {
-  display: block;
-  font-size: 8px;
-  margin-top: 2px;
-  opacity: .95;
+  display: none !important;
 }
 
-.revamp-map-cluster::after {
-  content: "";
-  position: absolute;
-  bottom: -4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle,
-      rgba(255,255,255,.96) 0 15%,
-      transparent 16% 34%,
-      rgba(255,255,255,.90) 35% 43%,
-      transparent 44% 66%,
-      rgba(255,255,255,.82) 67% 76%,
-      transparent 77%);
-  box-shadow:
-    0 0 14px rgba(255,140,0,.60),
-    0 0 28px rgba(255,140,0,.30);
-}
 
-.revamp-map-cluster.activity::after {
-  box-shadow:
-    0 0 14px rgba(101,209,31,.60),
-    0 0 28px rgba(101,209,31,.30);
-}
+
 
 
         .job-pulse-core {
@@ -5069,7 +5043,7 @@ function getMapClusterIcon(group) {
     className: '',
     html: `
       <div class="revamp-map-cluster ${clusterClass}">
-        <span class="cluster-count">${group.count}<small>${group.count === 1 ? 'pin' : 'pins'}</small></span>
+        <span class="cluster-count">${group.count}</span>
       </div>
     `,
     iconSize: [size, size],
