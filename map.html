@@ -2139,215 +2139,161 @@
   box-sizing: border-box;
 }
 
-.revamp-map-pin {
-  --pin-main: #f97316;
-  --pin-dark: #ea580c;
-  --pin-soft: rgba(249,115,22,.26);
-  --pin-glow: rgba(249,115,22,.56);
-  position: relative;
-  width: 66px;
-  height: 86px;
-  pointer-events: auto;
-  transform: translateZ(0);
-  filter: drop-shadow(0 14px 18px var(--pin-soft));
+/* ===== REVAMPLEX PREMIUM MAP PINS ===== */
+
+.revamp-pin-icon,
+.revamp-pin-icon *{
+  box-sizing:border-box;
 }
 
-.revamp-map-pin.activity {
-  --pin-main: #65d11f;
-  --pin-dark: #43b915;
-  --pin-soft: rgba(101,209,31,.28);
-  --pin-glow: rgba(101,209,31,.58);
+.revamp-map-pin{
+  --pin-main:#f97316;
+  --pin-dark:#ea580c;
+  --pin-soft:rgba(249,115,22,.28);
+  --pin-glow:rgba(249,115,22,.62);
+
+  position:relative;
+  width:66px;
+  height:86px;
+  pointer-events:auto;
+  transform:translateZ(0);
+
+  filter:
+    drop-shadow(0 14px 20px rgba(249,115,22,.25))
+    drop-shadow(0 0 18px rgba(249,115,22,.35));
 }
 
-.revamp-map-pin .pin-glow {
-  position: absolute;
-  left: 50%;
-  top: 2px;
-  width: 72px;
-  height: 72px;
-  transform: translateX(-50%);
-  border-radius: 999px;
-  background: radial-gradient(circle, rgba(255,255,255,.78) 0%, var(--pin-glow) 34%, rgba(255,255,255,0) 72%);
-  filter: blur(9px);
-  opacity: .84;
-  animation: revampPinGlow 2.7s ease-in-out infinite;
+.revamp-map-pin.contractor{
+  --pin-main:#f97316;
+  --pin-dark:#ea580c;
+  --pin-soft:rgba(249,115,22,.28);
+  --pin-glow:rgba(249,115,22,.62);
 }
 
-.revamp-map-pin .pin-svg {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: 54px;
-  height: 68px;
-  transform: translateX(-50%);
-  overflow: visible;
-  display: block;
+.revamp-map-pin.activity{
+  --pin-main:#65d11f;
+  --pin-dark:#43b915;
+  --pin-soft:rgba(101,209,31,.28);
+  --pin-glow:rgba(101,209,31,.58);
 }
 
-.revamp-map-pin .pin-shape {
-  fill: url(#pinGradientOrange);
-  stroke: rgba(255,255,255,.96);
-  stroke-width: 2.35;
-  filter: drop-shadow(0 0 14px var(--pin-glow));
+.revamp-map-pin .pin-glow{
+  position:absolute;
+  left:50%;
+  top:2px;
+
+  width:74px;
+  height:74px;
+
+  transform:translateX(-50%);
+  border-radius:999px;
+
+  background:
+    radial-gradient(circle,
+    rgba(255,255,255,.82) 0%,
+    var(--pin-glow) 34%,
+    rgba(255,255,255,0) 72%);
+
+  filter:blur(10px);
+
+  opacity:.88;
+
+  animation:revampPinGlow 2.8s ease-in-out infinite;
 }
 
-.revamp-map-pin.activity .pin-shape {
-  fill: url(#pinGradientGreen);
+.revamp-map-pin .pin-svg{
+  position:absolute;
+  left:50%;
+  top:0;
+
+  width:54px;
+  height:68px;
+
+  transform:translateX(-50%);
+  overflow:visible;
 }
 
-.revamp-map-pin .pin-inner {
-  fill: rgba(255,255,255,.97);
-  filter: drop-shadow(0 0 10px rgba(255,255,255,.70));
+.revamp-map-pin .pin-shape{
+  fill:url(#pinGradientOrange);
+
+  stroke:rgba(255,255,255,.96);
+  stroke-width:2.35;
+
+  filter:
+    drop-shadow(0 0 14px var(--pin-glow))
+    drop-shadow(0 0 24px var(--pin-glow));
 }
 
-.revamp-map-pin .pin-house {
-  fill: var(--pin-main);
+.revamp-map-pin.activity .pin-shape{
+  fill:url(#pinGradientGreen);
 }
 
-.revamp-map-pin .pin-base {
-  position: absolute;
-  left: 50%;
-  bottom: 7px;
-  width: 78px;
-  height: 25px;
-  transform: translateX(-50%);
-  border-radius: 999px;
-  pointer-events: none;
+.revamp-map-pin .pin-inner{
+  fill:rgba(255,255,255,.98);
+
+  filter:
+    drop-shadow(0 0 10px rgba(255,255,255,.74));
 }
 
-.revamp-map-pin .pin-base::before,
-.revamp-map-pin .pin-base::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  border-radius: 999px;
-  transform: translate(-50%, -50%);
-  border: 2px solid rgba(255,255,255,.92);
-  box-shadow: 0 0 18px var(--pin-glow), inset 0 0 12px var(--pin-soft);
+.revamp-map-pin .pin-house{
+  fill:var(--pin-main);
 }
 
-.revamp-map-pin .pin-base::before {
-  width: 70px;
-  height: 20px;
-  opacity: .92;
+.revamp-map-pin .pin-base{
+  position:absolute;
+
+  left:50%;
+  bottom:6px;
+
+  width:78px;
+  height:24px;
+
+  transform:translateX(-50%);
+
+  border-radius:999px;
+
+  background:
+    radial-gradient(circle,
+    rgba(255,255,255,.42) 0%,
+    var(--pin-glow) 36%,
+    rgba(255,255,255,0) 72%);
+
+  filter:blur(7px);
+
+  opacity:.8;
+
+  animation:revampPinBase 2.8s ease-in-out infinite;
 }
 
-.revamp-map-pin .pin-base::after {
-  width: 48px;
-  height: 13px;
-  opacity: .78;
-  animation: revampPinBase 2.8s ease-in-out infinite;
+.revamp-map-pin.active{
+  transform:translateZ(0) scale(1.12);
+
+  z-index:999;
 }
 
-.revamp-map-pin.active {
-  width: 76px;
-  height: 98px;
-  filter: drop-shadow(0 18px 24px var(--pin-glow));
-}
+@keyframes revampPinGlow{
+  0%,100%{
+    opacity:.74;
+    transform:translateX(-50%) scale(.95);
+  }
 
-.revamp-map-pin.active .pin-svg {
-  width: 64px;
-  height: 80px;
-}
-
-.revamp-map-pin.active .pin-base {
-  width: 92px;
-  bottom: 5px;
-}
-
-.revamp-map-pin.active .pin-base::before {
-  width: 86px;
-  height: 24px;
-}
-
-.revamp-map-pin.active .pin-base::after {
-  width: 60px;
-  height: 16px;
-}
-
-@keyframes revampPinGlow {
-  0%, 100% { opacity: .68; transform: translateX(-50%) scale(.94); }
-  50% { opacity: 1; transform: translateX(-50%) scale(1.06); }
-}
-
-@keyframes revampPinBase {
-  0%, 100% { opacity: .64; transform: translate(-50%, -50%) scale(.92); }
-  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
-}
-
-.revamp-map-legend {
-  position: absolute;
-  left: 18px;
-  bottom: 54px;
-  z-index: 980;
-  display: grid;
-  gap: 12px;
-  padding: 16px 18px;
-  border-radius: 18px;
-  background: rgba(255,255,255,.92);
-  border: 1px solid rgba(15,23,42,.08);
-  box-shadow: 0 14px 34px rgba(15,23,42,.12);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  color: #0f172a;
-  font-size: 13px;
-  font-weight: 800;
-  pointer-events: none;
-}
-
-.revamp-map-legend-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  white-space: nowrap;
-}
-
-.revamp-map-legend-dot {
-  position: relative;
-  width: 23px;
-  height: 28px;
-  flex: 0 0 auto;
-}
-
-.revamp-map-legend-dot::before {
-  content: "";
-  position: absolute;
-  inset: 1px 3px 6px;
-  border-radius: 50% 50% 50% 7px;
-  transform: rotate(45deg);
-  background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 34%, #f97316 100%);
-  border: 2px solid #fff;
-  box-shadow: 0 0 12px rgba(249,115,22,.55);
-}
-
-.revamp-map-legend-dot::after {
-  content: "⌂";
-  position: absolute;
-  left: 50%;
-  top: 7px;
-  transform: translateX(-50%);
-  color: #fff;
-  font-size: 15px;
-  line-height: 1;
-  font-weight: 950;
-}
-
-.revamp-map-legend-dot.green::before {
-  background: linear-gradient(135deg, #f0fdf4 0%, #bbf7d0 34%, #65d11f 100%);
-  box-shadow: 0 0 12px rgba(101,209,31,.55);
-}
-
-@media (max-width: 640px) {
-  .revamp-map-legend {
-    left: 10px;
-    bottom: 84px;
-    padding: 12px 13px;
-    font-size: 12px;
-    border-radius: 16px;
+  50%{
+    opacity:1;
+    transform:translateX(-50%) scale(1.08);
   }
 }
 
+@keyframes revampPinBase{
+  0%,100%{
+    opacity:.65;
+    transform:translateX(-50%) scale(.92);
+  }
+
+  50%{
+    opacity:1;
+    transform:translateX(-50%) scale(1.08);
+  }
+}
 
 /* ================================
    REVAMPLEX CLUSTER CIRCLES
@@ -4869,43 +4815,65 @@ function getMapPinSoftColor(item) {
   return item?.type === 'activity' ? 'rgba(101,209,31,.12)' : 'rgba(249,115,22,.10)';
 }
 
-function getRevampPinIcon(item, isActive = false) {
-  const activeClass = isActive ? 'active' : '';
-  const activityClass = item?.type === 'activity' ? 'activity' : '';
+function getRevampPinIcon(item, isActive = false){
+
+  const isActivity = item.type === 'activity';
 
   return L.divIcon({
-    className: 'revamp-pin-icon',
-    html: `
-      <div class="revamp-map-pin ${activityClass} ${activeClass}">
+    className:'revamp-pin-icon',
+
+    html:`
+      <div class="revamp-map-pin ${isActivity ? 'activity' : 'contractor'} ${isActive ? 'active' : ''}">
+
         <div class="pin-glow"></div>
-        <svg class="pin-svg" viewBox="0 0 64 82" aria-hidden="true" focusable="false">
+
+        <svg class="pin-svg" viewBox="0 0 64 82" xmlns="http://www.w3.org/2000/svg">
+
           <defs>
-            <linearGradient id="pinGradientOrange" x1="15%" y1="8%" x2="80%" y2="92%">
-              <stop offset="0%" stop-color="#fff7ed"/>
-              <stop offset="38%" stop-color="#fed7aa"/>
+
+            <linearGradient id="pinGradientOrange" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#fdba74"/>
+              <stop offset="45%" stop-color="#fb923c"/>
               <stop offset="100%" stop-color="#f97316"/>
             </linearGradient>
-            <linearGradient id="pinGradientGreen" x1="15%" y1="8%" x2="80%" y2="92%">
+
+            <linearGradient id="pinGradientGreen" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0%" stop-color="#f0fdf4"/>
               <stop offset="38%" stop-color="#bbf7d0"/>
               <stop offset="100%" stop-color="#65d11f"/>
             </linearGradient>
+
           </defs>
 
-          <!-- Upright pin shape. No CSS rotation, so it cannot turn sideways. -->
-          <path class="pin-shape" d="M32 3C18.2 3 7 14.2 7 28c0 18.9 25 49.5 25 49.5S57 46.9 57 28C57 14.2 45.8 3 32 3Z"/>
-          <circle class="pin-inner" cx="32" cy="28" r="16.8"/>
-          <path class="pin-house" d="M20 29.4 32 19.5l12 9.9-2.1 2.45-1.75-1.45v10.05h-6.35v-6.65h-3.6v6.65h-6.35V30.4l-1.75 1.45L20 29.4Z"/>
+          <path
+            class="pin-shape"
+            d="M32 3C18.2 3 7 14.2 7 28c0 18.9 25 49.5 25 49.5S57 46.9 57 28C57 14.2 45.8 3 32 3Z"
+          />
+
+          <circle
+            class="pin-inner"
+            cx="32"
+            cy="28"
+            r="16.8"
+          />
+
+          <path
+            class="pin-house"
+            d="M20 29.4 32 19.5l12 9.9-2.1 2.45-1.75-1.45v10.05h-6.35v-6.65h-3.6v6.65h-6.35V30.4l-1.75 1.45L20 29.4Z"
+          />
+
         </svg>
+
         <div class="pin-base"></div>
+
       </div>
     `,
-    iconSize: isActive ? [76, 98] : [66, 86],
-    iconAnchor: isActive ? [38, 91] : [33, 79],
-    popupAnchor: [0, -76]
+
+    iconSize:isActive ? [76,98] : [66,86],
+    iconAnchor:isActive ? [38,91] : [33,79],
+    popupAnchor:[0,-76]
   });
 }
-
 function createRevampMapLegend() {
   if (document.getElementById('revampMapLegend')) return;
 
