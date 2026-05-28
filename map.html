@@ -2236,90 +2236,19 @@
   filter:drop-shadow(0 0 8px rgba(255,255,255,.60));
 }
 
-.revamp-map-pin .pin-base {
-  position:absolute;
-  left:50%;
-  bottom:0;
-  width:64px;
-  height:64px;
-  transform:translateX(-50%);
-  border-radius:50%;
-  pointer-events:none;
-}
-
-.revamp-map-pin .pin-base::before,
-.revamp-map-pin .pin-base::after {
-  content:"";
-  position:absolute;
-  left:50%;
-  top:50%;
-  border-radius:50%;
-  transform:translate(-50%,-50%);
-  background:transparent;
-  border:2.35px solid rgba(255,255,255,.88);
-  box-shadow:
-    0 0 12px var(--pin-glow),
-    0 0 24px var(--pin-soft),
-    inset 0 0 10px var(--pin-soft);
-}
-
-.revamp-map-pin .pin-base::before {
-  width:58px;
-  height:58px;
-  opacity:.72;
-}
-
-.revamp-map-pin .pin-base::after {
-  width:34px;
-  height:34px;
-  opacity:.88;
-  animation:revampPinBase 2.8s ease-in-out infinite;
-}
-
-.revamp-map-pin.active {
-  transform:translateZ(0) scale(1.12);
-  z-index:999;
-}
-
-.revamp-map-pin.active .pin-base {
-  width:72px;
-  height:72px;
-}
-
-.revamp-map-pin.active .pin-base::before {
-  width:66px;
-  height:66px;
-}
-
-.revamp-map-pin.active .pin-base::after {
-  width:40px;
-  height:40px;
-}
-
-@keyframes revampPinGlow {
-  0%,100% {
-    opacity:.70;
-    transform:translateX(-50%) scale(.95);
+@keyframes revampPinBase{
+  0%,100%{
+    opacity:.88;
+    transform:translateX(-50%) scale(.92);
+    filter:blur(.15px);
   }
 
-  50% {
+  50%{
     opacity:1;
     transform:translateX(-50%) scale(1.08);
+    filter:blur(0px);
   }
 }
-
-@keyframes revampPinBase {
-  0%,100% {
-    opacity:.62;
-    transform:translate(-50%,-50%) scale(.92);
-  }
-
-  50% {
-    opacity:1;
-    transform:translate(-50%,-50%) scale(1.08);
-  }
-}
-
 /* ===== REVAMPLEX CLUSTER CIRCLES ===== */
 
 .marker-cluster,
