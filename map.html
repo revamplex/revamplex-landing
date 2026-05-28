@@ -2145,11 +2145,11 @@
   --pin-soft: rgba(249,115,22,.26);
   --pin-glow: rgba(249,115,22,.56);
   position: relative;
-  width: 56px;   /* 15% smaller */
-  height: 73px;  /* 15% smaller */
+  width: 66px;
+  height: 86px;
   pointer-events: auto;
   transform: translateZ(0);
-  filter: drop-shadow(0 12px 15px var(--pin-soft));
+  filter: drop-shadow(0 14px 18px var(--pin-soft));
 }
 
 .revamp-map-pin.activity {
@@ -2163,12 +2163,12 @@
   position: absolute;
   left: 50%;
   top: 2px;
-  width: 61px;   /* 15% smaller */
-  height: 61px;  /* 15% smaller */
+  width: 72px;
+  height: 72px;
   transform: translateX(-50%);
   border-radius: 999px;
   background: radial-gradient(circle, rgba(255,255,255,.78) 0%, var(--pin-glow) 34%, rgba(255,255,255,0) 72%);
-  filter: blur(8px);
+  filter: blur(9px);
   opacity: .84;
   animation: revampPinGlow 2.7s ease-in-out infinite;
 }
@@ -2177,8 +2177,8 @@
   position: absolute;
   left: 50%;
   top: 0;
-  width: 46px;   /* 15% smaller */
-  height: 58px;  /* 15% smaller */
+  width: 54px;
+  height: 68px;
   transform: translateX(-50%);
   overflow: visible;
   display: block;
@@ -2188,7 +2188,7 @@
   fill: url(#pinGradientOrange);
   stroke: rgba(255,255,255,.96);
   stroke-width: 2.35;
-  filter: drop-shadow(0 0 12px var(--pin-glow));
+  filter: drop-shadow(0 0 14px var(--pin-glow));
 }
 
 .revamp-map-pin.activity .pin-shape {
@@ -2197,20 +2197,19 @@
 
 .revamp-map-pin .pin-inner {
   fill: rgba(255,255,255,.97);
-  filter: drop-shadow(0 0 9px rgba(255,255,255,.70));
+  filter: drop-shadow(0 0 10px rgba(255,255,255,.70));
 }
 
 .revamp-map-pin .pin-house {
   fill: var(--pin-main);
 }
 
-/* Circular glow under the pin — replaces the wider rectangular/oval footprint */
 .revamp-map-pin .pin-base {
   position: absolute;
   left: 50%;
-  bottom: 1px;
-  width: 52px;
-  height: 52px;
+  bottom: 7px;
+  width: 78px;
+  height: 25px;
   transform: translateX(-50%);
   border-radius: 999px;
   pointer-events: none;
@@ -2225,47 +2224,46 @@
   border-radius: 999px;
   transform: translate(-50%, -50%);
   border: 2px solid rgba(255,255,255,.92);
-  box-shadow: 0 0 16px var(--pin-glow), inset 0 0 10px var(--pin-soft);
+  box-shadow: 0 0 18px var(--pin-glow), inset 0 0 12px var(--pin-soft);
 }
 
 .revamp-map-pin .pin-base::before {
-  width: 44px;
-  height: 44px;
-  opacity: .88;
+  width: 70px;
+  height: 20px;
+  opacity: .92;
 }
 
 .revamp-map-pin .pin-base::after {
-  width: 30px;
-  height: 30px;
-  opacity: .72;
+  width: 48px;
+  height: 13px;
+  opacity: .78;
   animation: revampPinBase 2.8s ease-in-out infinite;
 }
 
 .revamp-map-pin.active {
-  width: 65px;   /* 15% smaller */
-  height: 83px;  /* 15% smaller */
-  filter: drop-shadow(0 15px 20px var(--pin-glow));
+  width: 76px;
+  height: 98px;
+  filter: drop-shadow(0 18px 24px var(--pin-glow));
 }
 
 .revamp-map-pin.active .pin-svg {
-  width: 54px;   /* 15% smaller */
-  height: 68px;  /* 15% smaller */
+  width: 64px;
+  height: 80px;
 }
 
 .revamp-map-pin.active .pin-base {
-  width: 60px;
-  height: 60px;
-  bottom: 0;
+  width: 92px;
+  bottom: 5px;
 }
 
 .revamp-map-pin.active .pin-base::before {
-  width: 52px;
-  height: 52px;
+  width: 86px;
+  height: 24px;
 }
 
 .revamp-map-pin.active .pin-base::after {
-  width: 36px;
-  height: 36px;
+  width: 60px;
+  height: 16px;
 }
 
 @keyframes revampPinGlow {
@@ -2348,6 +2346,73 @@
     font-size: 12px;
     border-radius: 16px;
   }
+}
+
+
+/* ===== REVAMPLEX ZOOM-BASED MAP CLUSTERING ===== */
+.revamp-map-cluster {
+  --cluster-main: #f97316;
+  --cluster-dark: #ea580c;
+  --cluster-glow: rgba(249,115,22,.30);
+  width: 54px;
+  height: 54px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 950;
+  background:
+    radial-gradient(circle at 30% 22%, rgba(255,255,255,.55), transparent 30%),
+    linear-gradient(135deg, var(--cluster-main), var(--cluster-dark));
+  border: 3px solid rgba(255,255,255,.94);
+  box-shadow:
+    0 0 0 7px rgba(249,115,22,.10),
+    0 0 28px var(--cluster-glow),
+    0 14px 28px rgba(15,23,42,.18);
+  cursor: pointer;
+  transform: translateZ(0);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.revamp-map-cluster:hover {
+  transform: scale(1.08);
+  box-shadow:
+    0 0 0 9px rgba(249,115,22,.12),
+    0 0 34px var(--cluster-glow),
+    0 18px 34px rgba(15,23,42,.22);
+}
+
+.revamp-map-cluster.activity {
+  --cluster-main: #65d11f;
+  --cluster-dark: #43b915;
+  --cluster-glow: rgba(101,209,31,.30);
+  box-shadow:
+    0 0 0 7px rgba(101,209,31,.10),
+    0 0 28px var(--cluster-glow),
+    0 14px 28px rgba(15,23,42,.18);
+}
+
+.revamp-map-cluster.mixed {
+  --cluster-main: #f97316;
+  --cluster-dark: #43b915;
+  --cluster-glow: rgba(249,115,22,.25);
+}
+
+.revamp-map-cluster small {
+  display: block;
+  margin-top: -2px;
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+  opacity: .92;
+}
+
+.revamp-map-cluster .cluster-count {
+  display: grid;
+  place-items: center;
+  line-height: .95;
 }
 
 
@@ -4271,6 +4336,7 @@ function getBuildActivityItems() {
     let currentMode = 'homeowner';
     let showBuildActivity = localStorage.getItem('revamplex_show_activity') !== 'false';
     let suppressScrollActivationUntil = 0;
+    let __mapZoomRenderTimer = null;
 
     const app = document.getElementById('app');
     const cardsRow = document.getElementById('cardsRow');
@@ -4336,6 +4402,8 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   subdomains: 'abcd',
   maxZoom: 20
 }).addTo(map);
+
+map.on('zoomend', refreshMarkersForZoom);
 
     function showLogoFallback() {
       if (logoImg) logoImg.style.display = 'none';
@@ -4843,9 +4911,9 @@ function getRevampPinIcon(item, isActive = false) {
         <div class="pin-base"></div>
       </div>
     `,
-    iconSize: isActive ? [65, 83] : [56, 73],
-    iconAnchor: isActive ? [33, 77] : [28, 67],
-    popupAnchor: [0, -64]
+    iconSize: isActive ? [76, 98] : [66, 86],
+    iconAnchor: isActive ? [38, 91] : [33, 79],
+    popupAnchor: [0, -76]
   });
 }
 
@@ -4901,45 +4969,177 @@ function updateMarkerStates() {
   });
 }
 
-function renderMarkers(items) {
+
+function getMapClusterCellSize() {
+  const zoom = map ? map.getZoom() : 10;
+
+  if (zoom >= 12) return 0;
+  if (zoom <= 6) return 0.95;
+  if (zoom === 7) return 0.62;
+  if (zoom === 8) return 0.38;
+  if (zoom === 9) return 0.22;
+  if (zoom === 10) return 0.13;
+  return 0.075;
+}
+
+function getClusterGroupKey(coords, cellSize) {
+  if (!cellSize) return `${coords[0]}:${coords[1]}`;
+  const latBucket = Math.round(coords[0] / cellSize);
+  const lngBucket = Math.round(coords[1] / cellSize);
+  return `${latBucket}:${lngBucket}`;
+}
+
+function buildZoomMapGroups(items) {
+  const cellSize = getMapClusterCellSize();
+
+  if (!cellSize) {
+    return items.map(item => ({
+      type: 'single',
+      item,
+      items: [item],
+      coords: getDisplayCoords(item),
+      count: 1
+    }));
+  }
+
+  const groups = new Map();
+
+  items.forEach(item => {
+    const coords = getDisplayCoords(item);
+    const key = getClusterGroupKey(coords, cellSize);
+
+    if (!groups.has(key)) {
+      groups.set(key, {
+        type: 'cluster',
+        items: [],
+        coordsSum: [0, 0],
+        coords: coords,
+        count: 0
+      });
+    }
+
+    const group = groups.get(key);
+    group.items.push(item);
+    group.coordsSum[0] += coords[0];
+    group.coordsSum[1] += coords[1];
+    group.count += 1;
+  });
+
+  return Array.from(groups.values()).map(group => {
+    if (group.count === 1) {
+      return {
+        type: 'single',
+        item: group.items[0],
+        items: group.items,
+        coords: getDisplayCoords(group.items[0]),
+        count: 1
+      };
+    }
+
+    return {
+      ...group,
+      coords: [group.coordsSum[0] / group.count, group.coordsSum[1] / group.count]
+    };
+  });
+}
+
+function getMapClusterIcon(group) {
+  const hasActivity = group.items.some(item => item.type === 'activity');
+  const hasNonActivity = group.items.some(item => item.type !== 'activity');
+  const clusterClass = hasActivity && !hasNonActivity ? 'activity' : hasActivity && hasNonActivity ? 'mixed' : '';
+
+  const size = group.count >= 25 ? 66 : group.count >= 10 ? 60 : 54;
+
+  return L.divIcon({
+    className: '',
+    html: `
+      <div class="revamp-map-cluster ${clusterClass}">
+        <span class="cluster-count">${group.count}<small>${group.count === 1 ? 'pin' : 'pins'}</small></span>
+      </div>
+    `,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2]
+  });
+}
+
+function zoomIntoCluster(group) {
+  const nextZoom = Math.min((map.getZoom() || 8) + 2, 13);
+  map.flyTo(group.coords, nextZoom, {
+    duration: 0.55,
+    easeLinearity: 0.25
+  });
+}
+
+function refreshMarkersForZoom() {
+  if (!Array.isArray(filteredItems) || !filteredItems.length) return;
+  clearTimeout(__mapZoomRenderTimer);
+  __mapZoomRenderTimer = setTimeout(() => {
+    renderMarkers(filteredItems, { fit: false });
+  }, 120);
+}
+
+function renderMarkers(items, options = {}) {
+  const { fit = true } = options;
 
   clearMarkers();
   createRevampMapLegend();
 
+  const groups = buildZoomMapGroups(items);
   const spreadGroups = buildSpreadGroups(items);
 
-  items.forEach((item) => {
+  groups.forEach((group) => {
+    if (group.type === 'cluster') {
+      const clusterMarker = L.marker(group.coords, {
+        icon: getMapClusterIcon(group),
+        interactive: true,
+        keyboard: false,
+        riseOnHover: true,
+        zIndexOffset: 1000
+      }).addTo(map);
+
+      clusterMarker.on('click', () => zoomIntoCluster(group));
+      clusterMarker.on('mouseover', () => clusterMarker.setZIndexOffset(1500));
+      clusterMarker.on('mouseout', () => clusterMarker.setZIndexOffset(1000));
+
+      activeCircles.push(clusterMarker);
+      return;
+    }
+
+    const item = group.item;
     const key = `${item.type}-${item.id}`;
     const baseCoords = getDisplayCoords(item);
     const groupKey = getClusterKey(baseCoords);
-    const group = spreadGroups[groupKey] || [key];
-    const spreadIndex = group.indexOf(key);
-    const coords = offsetCoords(baseCoords, spreadIndex, group.length);
+    const spreadGroup = spreadGroups[groupKey] || [key];
+    const spreadIndex = spreadGroup.indexOf(key);
+    const coords = offsetCoords(baseCoords, spreadIndex, spreadGroup.length);
 
     const pinColor = getMapPinColor(item);
     const isActivity = item.type === 'activity';
     const isActive = selectedId === key || activeId === key;
 
-    // Soft privacy/coverage glow below every pin. Revamp Activity is green.
+    const zoom = map ? map.getZoom() : 10;
+    const zoomScale = zoom >= 12 ? 1 : zoom >= 10 ? 0.82 : 0.68;
+
+    // Soft privacy/coverage glow below every visible pin. Circles shrink when zoomed out.
     const core = L.circle(coords, {
-      radius: isActivity ? 360 : 340,
+      radius: (isActivity ? 360 : 340) * zoomScale,
       color: pinColor,
       fillColor: pinColor,
-      fillOpacity: isActive ? 0.24 : 0.105,
+      fillOpacity: isActive ? 0.20 : 0.075,
       weight: 0,
       interactive: false
     }).addTo(map);
 
     const glow = L.circle(coords, {
-      radius: isActivity ? 850 : 820,
+      radius: (isActivity ? 850 : 820) * zoomScale,
       color: pinColor,
       fillColor: pinColor,
-      fillOpacity: isActive ? 0.105 : 0.045,
+      fillOpacity: isActive ? 0.075 : 0.028,
       weight: 0,
       interactive: false
     }).addTo(map);
 
-    // The actual upright illuminated pin. Every circle gets one.
+    // The actual upright illuminated pin. Every visible circle gets one.
     const pinMarker = L.marker(coords, {
       icon: getRevampPinIcon(item, isActive),
       interactive: true,
@@ -4950,7 +5150,7 @@ function renderMarkers(items) {
 
     // Invisible large hit area for easy hover/click without hiding the pin.
     const interactionLayer = L.circle(coords, {
-      radius: 1800,
+      radius: 1300 * zoomScale,
       opacity: 0,
       fillOpacity: 0,
       interactive: true,
@@ -4964,8 +5164,8 @@ function renderMarkers(items) {
     const hoverOn = () => {
       if (selectedId === key) return;
 
-      core.setStyle({ fillOpacity: 0.20 });
-      glow.setStyle({ fillOpacity: 0.095 });
+      core.setStyle({ fillOpacity: 0.16 });
+      glow.setStyle({ fillOpacity: 0.065 });
       pinMarker.setIcon(getRevampPinIcon(item, true));
       pinMarker.setZIndexOffset(1200);
 
@@ -4980,8 +5180,8 @@ function renderMarkers(items) {
     const hoverOff = () => {
       if (selectedId === key) return;
 
-      core.setStyle({ fillOpacity: activeId === key ? 0.24 : 0.105 });
-      glow.setStyle({ fillOpacity: activeId === key ? 0.105 : 0.045 });
+      core.setStyle({ fillOpacity: activeId === key ? 0.20 : 0.075 });
+      glow.setStyle({ fillOpacity: activeId === key ? 0.075 : 0.028 });
       pinMarker.setIcon(getRevampPinIcon(item, activeId === key));
       pinMarker.setZIndexOffset(activeId === key ? 1200 : 700);
       document.querySelectorAll('.listing-card').forEach(c => c.classList.remove('hovered'));
@@ -5003,7 +5203,7 @@ function renderMarkers(items) {
   });
 
   updateMarkerStates();
-  fitMapToItems(items);
+  if (fit) fitMapToItems(items);
 }
 
 // ===== END: REVAMPLEX UPRIGHT ILLUMINATED HOUSE PIN MAP ENGINE =====
