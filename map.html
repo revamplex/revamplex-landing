@@ -2207,11 +2207,11 @@
 .revamp-map-pin .pin-base {
   position: absolute;
   left: 50%;
-  bottom: 7px;
-  width: 78px;
-  height: 25px;
+  bottom: 1px;
+  width: 58px;
+  height: 58px;
   transform: translateX(-50%);
-  border-radius: 999px;
+  border-radius: 50%;
   pointer-events: none;
 }
 
@@ -2221,22 +2221,25 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  border-radius: 999px;
+  border-radius: 50%;
   transform: translate(-50%, -50%);
-  border: 2px solid rgba(255,255,255,.92);
-  box-shadow: 0 0 18px var(--pin-glow), inset 0 0 12px var(--pin-soft);
+  border: 2.5px solid rgba(255,255,255,.92);
+  background: transparent;
+  box-shadow:
+    0 0 18px var(--pin-glow),
+    inset 0 0 12px var(--pin-soft);
 }
 
 .revamp-map-pin .pin-base::before {
-  width: 70px;
-  height: 20px;
-  opacity: .92;
+  width: 54px;
+  height: 54px;
+  opacity: .90;
 }
 
 .revamp-map-pin .pin-base::after {
-  width: 48px;
-  height: 13px;
-  opacity: .78;
+  width: 30px;
+  height: 30px;
+  opacity: .82;
   animation: revampPinBase 2.8s ease-in-out infinite;
 }
 
@@ -2252,18 +2255,19 @@
 }
 
 .revamp-map-pin.active .pin-base {
-  width: 92px;
-  bottom: 5px;
+  width: 68px;
+  height: 68px;
+  bottom: 0;
 }
 
 .revamp-map-pin.active .pin-base::before {
-  width: 86px;
-  height: 24px;
+  width: 64px;
+  height: 64px;
 }
 
 .revamp-map-pin.active .pin-base::after {
-  width: 60px;
-  height: 16px;
+  width: 36px;
+  height: 36px;
 }
 
 @keyframes revampPinGlow {
@@ -2272,8 +2276,8 @@
 }
 
 @keyframes revampPinBase {
-  0%, 100% { opacity: .64; transform: translate(-50%, -50%) scale(.92); }
-  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+  0%, 100% { opacity: .62; transform: translate(-50%, -50%) scale(.92); }
+  50% { opacity: .98; transform: translate(-50%, -50%) scale(1.06); }
 }
 
 .revamp-map-legend {
@@ -2414,20 +2418,29 @@
 .revamp-map-cluster::after {
   content: "";
   position: absolute;
-  bottom: 0;
+  bottom: -4px;
   left: 50%;
   transform: translateX(-50%);
-  width: 16px;
-  height: 16px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  background: rgba(255,140,0,.96);
+  background:
+    radial-gradient(circle,
+      rgba(255,255,255,.96) 0 15%,
+      transparent 16% 34%,
+      rgba(255,255,255,.90) 35% 43%,
+      transparent 44% 66%,
+      rgba(255,255,255,.82) 67% 76%,
+      transparent 77%);
   box-shadow:
-    0 0 12px rgba(255,140,0,.65),
-    0 0 24px rgba(255,140,0,.35);
+    0 0 14px rgba(255,140,0,.60),
+    0 0 28px rgba(255,140,0,.30);
 }
 
 .revamp-map-cluster.activity::after {
-  background: rgba(101,209,31,.96);
+  box-shadow:
+    0 0 14px rgba(101,209,31,.60),
+    0 0 28px rgba(101,209,31,.30);
 }
 
 
