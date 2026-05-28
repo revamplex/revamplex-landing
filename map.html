@@ -2132,6 +2132,117 @@
       border-width:4px;
     }
 
+
+/* ===== REVAMPLEX ILLUMINATED HOUSE MAP PINS ===== */
+.revamp-map-pin {
+  position: relative;
+  width: 46px;
+  height: 58px;
+  transform: translate(-50%, -100%);
+  pointer-events: auto;
+  filter: drop-shadow(0 14px 18px rgba(249,115,22,.34));
+}
+
+.revamp-map-pin .pin-glow {
+  position: absolute;
+  left: 50%;
+  top: 4px;
+  width: 58px;
+  height: 58px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255,237,213,.75) 0%, rgba(249,115,22,.34) 34%, rgba(249,115,22,0) 72%);
+  filter: blur(7px);
+  opacity: .92;
+  animation: revampPinGlow 2.6s ease-in-out infinite;
+}
+
+.revamp-map-pin .pin-drop {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 40px;
+  height: 40px;
+  transform: translateX(-50%) rotate(45deg);
+  border-radius: 50% 50% 50% 7px;
+  background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 36%, #f97316 100%);
+  border: 2px solid rgba(255,255,255,.96);
+  box-shadow:
+    0 0 0 3px rgba(249,115,22,.18),
+    0 0 22px rgba(249,115,22,.62),
+    inset 0 0 15px rgba(255,255,255,.62);
+}
+
+.revamp-map-pin .pin-house {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-45deg);
+  color: #f97316;
+}
+
+.revamp-map-pin .pin-house svg {
+  width: 21px;
+  height: 21px;
+  display: block;
+  filter: drop-shadow(0 0 8px rgba(255,255,255,.85));
+}
+
+.revamp-map-pin .pin-base {
+  position: absolute;
+  left: 50%;
+  bottom: -2px;
+  width: 58px;
+  height: 17px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  border: 2px solid rgba(249,115,22,.62);
+  background: radial-gradient(circle, rgba(255,237,213,.58) 0%, rgba(249,115,22,.22) 44%, rgba(249,115,22,0) 74%);
+  box-shadow:
+    0 0 22px rgba(249,115,22,.45),
+    inset 0 0 14px rgba(249,115,22,.30);
+  animation: revampPinBase 2.8s ease-in-out infinite;
+}
+
+.revamp-map-pin.active {
+  width: 58px;
+  height: 72px;
+  z-index: 10;
+  filter: drop-shadow(0 18px 24px rgba(249,115,22,.48));
+}
+
+.revamp-map-pin.active .pin-drop {
+  width: 50px;
+  height: 50px;
+  box-shadow:
+    0 0 0 4px rgba(249,115,22,.20),
+    0 0 32px rgba(249,115,22,.78),
+    inset 0 0 18px rgba(255,255,255,.72);
+}
+
+.revamp-map-pin.active .pin-house svg {
+  width: 25px;
+  height: 25px;
+}
+
+.revamp-map-pin.active .pin-base {
+  width: 76px;
+  height: 22px;
+  bottom: -3px;
+}
+
+@keyframes revampPinGlow {
+  0%, 100% { opacity: .72; transform: translateX(-50%) scale(.94); }
+  50% { opacity: 1; transform: translateX(-50%) scale(1.06); }
+}
+
+@keyframes revampPinBase {
+  0%, 100% { opacity: .74; transform: translateX(-50%) scale(.92); }
+  50% { opacity: 1; transform: translateX(-50%) scale(1.08); }
+}
+
         .job-pulse-core {
       pointer-events: none;
     }
@@ -4579,7 +4690,30 @@ function clearMarkers() {
       `;
     }
 
-// ===== PREMIUM GLOW MAP (FINAL CLEAN VERSION) =====
+// ===== PREMIUM ILLUMINATED HOUSE PIN MAP ENGINE =====
+function getRevampPinIcon(item, isActive = false) {
+  const activeClass = isActive ? 'active' : '';
+
+  return L.divIcon({
+    className: 'revamp-pin-icon',
+    html: `
+      <div class="revamp-map-pin ${activeClass}">
+        <div class="pin-glow"></div>
+        <div class="pin-drop">
+          <div class="pin-house" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor" role="img">
+              <path d="M3 11.4 12 4l9 7.4-1.35 1.6L18.4 12v7.5h-4.85v-5.2h-3.1v5.2H5.6V12l-1.25 1L3 11.4Z"/>
+            </svg>
+          </div>
+        </div>
+        <div class="pin-base"></div>
+      </div>
+    `,
+    iconSize: isActive ? [58, 72] : [46, 58],
+    iconAnchor: isActive ? [29, 69] : [23, 55]
+  });
+}
+
 function renderMarkers(items) {
 
   clearMarkers();
@@ -4594,24 +4728,33 @@ function renderMarkers(items) {
     const spreadIndex = group.indexOf(key);
     const coords = offsetCoords(baseCoords, spreadIndex, group.length);
 
-    const activityColor = item.type === 'activity' ? '#16a34a' : '#f97316';
+    // Keep the privacy glow, but make it lighter so the house pin stands out.
+    const glowColor = '#f97316';
 
     const core = L.circle(coords, {
-      radius: 400,
-      color: activityColor,
-      fillColor: activityColor,
-      fillOpacity: 0.35,
+      radius: 340,
+      color: glowColor,
+      fillColor: glowColor,
+      fillOpacity: 0.16,
       weight: 0,
       interactive: false
     }).addTo(map);
 
     const glow = L.circle(coords, {
-      radius: 900,
-      color: activityColor,
-      fillColor: activityColor,
-      fillOpacity: 0.18,
+      radius: 820,
+      color: glowColor,
+      fillColor: glowColor,
+      fillOpacity: 0.075,
       weight: 0,
       interactive: false
+    }).addTo(map);
+
+    const pinMarker = L.marker(coords, {
+      icon: getRevampPinIcon(item, selectedId === key || activeId === key),
+      interactive: true,
+      keyboard: false,
+      riseOnHover: true,
+      zIndexOffset: selectedId === key ? 1000 : 500
     }).addTo(map);
 
     const interactionLayer = L.circle(coords, {
@@ -4622,17 +4765,25 @@ function renderMarkers(items) {
       bubblingMouseEvents: false
     }).addTo(map);
 
-    setTimeout(() => interactionLayer.bringToFront(), 0);
+    setTimeout(() => {
+      glow.bringToBack();
+      core.bringToFront();
+      pinMarker.setZIndexOffset(selectedId === key ? 1200 : 650);
+      interactionLayer.bringToFront();
+      pinMarker.getElement()?.style?.setProperty('z-index', selectedId === key ? '1200' : '650');
+    }, 0);
 
-    activeCircles.push(core, glow, interactionLayer);
-    markerIndex.set(key, interactionLayer);
-    circleIndex.set(key, { core, glow, interactionLayer, coords });
+    activeCircles.push(core, glow, interactionLayer, pinMarker);
+    markerIndex.set(key, pinMarker);
+    circleIndex.set(key, { core, glow, interactionLayer, marker: pinMarker, coords });
 
-    interactionLayer.on('mouseover', () => {
+    const hoverOn = () => {
       if (selectedId === key) return;
 
-      core.setStyle({ fillOpacity: 0.6 });
-      glow.setStyle({ fillOpacity: 0.3 });
+      core.setStyle({ fillOpacity: 0.28 });
+      glow.setStyle({ fillOpacity: 0.13 });
+      pinMarker.setIcon(getRevampPinIcon(item, true));
+      pinMarker.setZIndexOffset(1100);
 
       document.querySelectorAll('.listing-card').forEach(c => c.classList.remove('hovered'));
       const card = document.querySelector(`.listing-card[data-id="${key}"]`);
@@ -4640,37 +4791,51 @@ function renderMarkers(items) {
 
       setActive(key, false, { pan: false, highlight: false });
       scrollCardIntoView(key);
-    });
+    };
 
-    interactionLayer.on('mouseout', () => {
+    const hoverOff = () => {
       if (selectedId === key) return;
 
-      core.setStyle({ fillOpacity: 0.35 });
-      glow.setStyle({ fillOpacity: 0.18 });
+      core.setStyle({ fillOpacity: 0.16 });
+      glow.setStyle({ fillOpacity: 0.075 });
+      pinMarker.setIcon(getRevampPinIcon(item, activeId === key));
+      pinMarker.setZIndexOffset(650);
       document.querySelectorAll('.listing-card').forEach(c => c.classList.remove('hovered'));
-    });
+    };
 
-    interactionLayer.on('click', () => {
+    const selectPin = () => {
       selectedId = key;
       setActive(key, true);
       scrollCardIntoView(key);
 
-      circleIndex.forEach(({ core: otherCore, glow: otherGlow }) => {
-        otherCore.setStyle({ fillOpacity: 0.35 });
-        otherGlow.setStyle({ fillOpacity: 0.18 });
+      circleIndex.forEach(({ core: otherCore, glow: otherGlow, marker: otherMarker }, otherKey) => {
+        otherCore.setStyle({ fillOpacity: 0.16 });
+        otherGlow.setStyle({ fillOpacity: 0.075 });
+        if (otherMarker) {
+          otherMarker.setIcon(getRevampPinIcon(item, otherKey === key));
+          otherMarker.setZIndexOffset(otherKey === key ? 1200 : 650);
+        }
       });
 
-      core.setStyle({ fillOpacity: 0.75 });
-      glow.setStyle({ fillOpacity: 0.45 });
+      core.setStyle({ fillOpacity: 0.34 });
+      glow.setStyle({ fillOpacity: 0.17 });
+      pinMarker.setIcon(getRevampPinIcon(item, true));
+      pinMarker.setZIndexOffset(1200);
       core.bringToFront();
-      glow.bringToFront();
-    });
+    };
+
+    interactionLayer.on('mouseover', hoverOn);
+    interactionLayer.on('mouseout', hoverOff);
+    interactionLayer.on('click', selectPin);
+    pinMarker.on('mouseover', hoverOn);
+    pinMarker.on('mouseout', hoverOff);
+    pinMarker.on('click', selectPin);
   });
 
   fitMapToItems(items);
 }
 
-// ===== END: TRUE ZILLOW MAP ENGINE =====
+// ===== END: PREMIUM ILLUMINATED HOUSE PIN MAP ENGINE =====
 
     function fitMapToItems(items) {
       if (!items.length) return;
