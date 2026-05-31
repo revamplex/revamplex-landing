@@ -2995,6 +2995,8 @@
 .premium-thumb { height:58px; border-radius:12px; overflow:hidden; border:2px solid rgba(15,23,42,.08); background:#e2e8f0; }
 .premium-thumb.active { border-color:var(--brand); box-shadow:0 0 0 3px rgba(249,115,22,.12); }
 .premium-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+.premium-thumb { cursor:pointer; }
+.portfolio-thumb .portfolio-delete-btn { cursor:pointer; }
 .premium-action-panel {
   border:1px solid rgba(15,23,42,.10);
   border-radius:22px;
@@ -5571,17 +5573,37 @@ function getContractorProfilePhotos(item) {
   return [...new Set([cover, ...photos].filter(Boolean))];
 }
 
-function renderPortfolioPhotoThumb(src, item) {
+function renderPortfolioPhotoThumb(src, item, index = 0) {
   const safeSrc = normalizeContractorAssetUrl(src);
   const canDelete = canEditItem(item);
   const encoded = encodeURIComponent(safeSrc);
 
   return `
-    <div class="premium-thumb portfolio-thumb">
+    <div class="premium-thumb portfolio-thumb" data-action="set-gallery-photo" data-src="${encoded}" data-index="${index}">
       <img src="${safeSrc}" onerror="hideMissingCardImage(this)">
       ${canDelete ? `<button class="portfolio-delete-btn" type="button" data-action="delete-portfolio-photo" data-id="${item.id}" data-photo="${encoded}" title="Delete this portfolio photo">×</button>` : ``}
     </div>
   `;
+}
+
+function setLargeCardHeroImage(button) {
+  const src = decodeURIComponent(button.dataset.src || '');
+  if (!src) return;
+
+  const panel = button.closest('.premium-detail-right') || detailContent;
+  const heroImg = panel.querySelector('.premium-hero-large img');
+  if (heroImg) {
+    heroImg.classList.remove('is-missing');
+    heroImg.src = src;
+  }
+
+  panel.querySelectorAll('.premium-thumb').forEach(thumb => thumb.classList.remove('active'));
+  button.classList.add('active');
+
+  const count = panel.querySelector('.premium-photo-count');
+  const total = panel.querySelectorAll('.premium-thumb[data-action="set-gallery-photo"]').length;
+  const index = Number(button.dataset.index || 0) + 1;
+  if (count && total) count.textContent = `📷 ${index} / ${total}`;
 }
 
 function getContractorTrustBadges(item) {
@@ -6690,7 +6712,7 @@ async function increaseBidLimit(jobId) {
 
               <div class="premium-thumb-row">
                 ${galleryPhotos.slice(0, 6).map((src, index) => `
-                  <div class="premium-thumb ${index === 0 ? 'active' : ''}">
+                  <div class="premium-thumb ${index === 0 ? 'active' : ''}" data-action="set-gallery-photo" data-src="${encodeURIComponent(src)}" data-index="${index}">
                     <img src="${src}" onerror="hideMissingCardImage(this)">
                   </div>
                 `).join('')}
@@ -6723,7 +6745,7 @@ async function increaseBidLimit(jobId) {
                 <div class="premium-section">
                   <h4>Portfolio Photos</h4>
                   <div class="premium-thumb-row">
-                    ${profilePhotos.slice(0, 12).map(src => renderPortfolioPhotoThumb(src, item)).join('')}
+                    ${profilePhotos.slice(0, 12).map((src, index) => renderPortfolioPhotoThumb(src, item, index)).join('')}
                   </div>
                 </div>
               ` : ``}
@@ -7613,6 +7635,11 @@ detailContent.addEventListener('click', e => {
   e.preventDefault();
   e.stopPropagation();
 
+  if (button.dataset.action === 'set-gallery-photo') {
+    setLargeCardHeroImage(button);
+    return;
+  }
+
   if (button.dataset.action === 'delete-my-job') {
     deleteMyJob(button.dataset.id);
     return;
@@ -7900,7 +7927,7 @@ async function applyPublicReviewStatsToMapItems() {
       </div>
       <div class="premium-thumb-row">
         ${[0,1,2,3,4,5].map(n => `
-          <div class="premium-thumb ${n === 0 ? 'active' : ''}">
+          <div class="premium-thumb ${n === 0 ? 'active' : ''}" data-action="set-gallery-photo" data-src="${encodeURIComponent(imageSrc)}" data-index="${n}">
             <img src="${imageSrc}" onerror="hideMissingCardImage(this)">
           </div>
         `).join('')}
@@ -7977,7 +8004,7 @@ async function applyPublicReviewStatsToMapItems() {
             </div>
             <div class="premium-thumb-row">
               ${galleryPhotos.slice(0,6).map((src, n) => `
-                <div class="premium-thumb ${n === 0 ? 'active' : ''}">
+                <div class="premium-thumb ${n === 0 ? 'active' : ''}" data-action="set-gallery-photo" data-src="${encodeURIComponent(src)}" data-index="${n}">
                   <img src="${src}" onerror="hideMissingCardImage(this)">
                 </div>
               `).join('')}
@@ -8006,7 +8033,7 @@ async function applyPublicReviewStatsToMapItems() {
               <div class="premium-section">
                 <h4>Portfolio Photos</h4>
                 <div class="premium-thumb-row">
-                  ${profilePhotos.slice(0,12).map(src => renderPortfolioPhotoThumb(src, item)).join('')}
+                  ${profilePhotos.slice(0,12).map((src, index) => renderPortfolioPhotoThumb(src, item, index)).join('')}
                 </div>
               </div>
             ` : ''}
@@ -8122,4 +8149,3 @@ async function applyPublicReviewStatsToMapItems() {
 </body>
 </html>
 
-Make the pins look like this image.. the cluster circles should have a gradient effect if multi colored
