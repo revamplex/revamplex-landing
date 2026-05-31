@@ -5440,9 +5440,8 @@ function getDisplayCity(item) {
 }
 
 function getContractorImage(item) {
-  if (item.image_url) return item.image_url;
-  if (item.image) return item.image;
-
+  // Keep map contractor cards generic.
+  // Do NOT use contractor uploaded cover photos, logos, or profile images here.
   const trades = splitTrades(item.trades_full || item.trade || '');
 
   if (trades.length > 1) {
@@ -7744,3 +7743,5 @@ async function applyPublicReviewStatsToMapItems() {
 
 </body>
 </html>
+
+Make the pins look like this image.. the cluster circles should have a gradient effect if multi colored
