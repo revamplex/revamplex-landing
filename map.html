@@ -5440,8 +5440,8 @@ function getDisplayCity(item) {
 }
 
 function getContractorImage(item) {
-  // Keep map contractor cards generic.
-  // Do NOT use contractor uploaded cover photos, logos, or profile images here.
+  // Keep map contractor cards on RevampLEX default trade images only.
+  // Do NOT use uploaded contractor cover photos, portfolio images, logos, or image_url values here.
   const trades = splitTrades(item.trades_full || item.trade || '');
 
   if (trades.length > 1) {
@@ -5449,6 +5449,116 @@ function getContractorImage(item) {
   }
 
   return getJobImage(getPrimaryTrade(item));
+}
+
+
+function normalizeContractorAssetUrl(value) {
+  const url = String(value || '').trim();
+  if (!url || url === '-' || url.toLowerCase() === 'null' || url.toLowerCase() === 'undefined') return '';
+  return url;
+}
+
+function getProfileArrayValue(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.map(normalizeContractorAssetUrl).filter(Boolean);
+  if (typeof value === 'string') {
+    const raw = value.trim();
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.map(normalizeContractorAssetUrl).filter(Boolean);
+    } catch (e) {}
+    return raw.split(/[\n,]+/).map(normalizeContractorAssetUrl).filter(Boolean);
+  }
+  return [];
+}
+
+function getContractorLogoUrl(item) {
+  return normalizeContractorAssetUrl(
+    item.logo_url ||
+    item.company_logo_url ||
+    item.logo ||
+    item.company_logo ||
+    item.photo_url ||
+    item.avatar_url ||
+    ''
+  );
+}
+
+function getContractorCoverUrl(item) {
+  return normalizeContractorAssetUrl(
+    item.cover_photo_url ||
+    item.featured_photo_url ||
+    item.cover_url ||
+    item.featured_image_url ||
+    item.hero_image_url ||
+    ''
+  );
+}
+
+function getContractorPortfolioPhotos(item) {
+  const photos = [
+    ...getProfileArrayValue(item.portfolio_photos),
+    ...getProfileArrayValue(item.portfolio_photo_urls),
+    ...getProfileArrayValue(item.gallery_photos),
+    ...getProfileArrayValue(item.project_photos),
+    ...getProfileArrayValue(item.photo_urls)
+  ];
+  return [...new Set(photos)].filter(Boolean);
+}
+
+function getContractorProfilePhotos(item) {
+  const cover = getContractorCoverUrl(item);
+  const photos = getContractorPortfolioPhotos(item);
+  return [...new Set([cover, ...photos].filter(Boolean))];
+}
+
+function getContractorTrustBadges(item) {
+  const badges = [];
+  if (item.licensed || item.license || item.license_number) badges.push('✓ Licensed');
+  if (item.insured || item.insurance_company || item.insurance_expiration) badges.push('✓ Insured');
+  if (item.verified || item.is_approved || item.can_go_live) badges.push('✓ Verified');
+  if (!badges.length) badges.push('Verified Contractor');
+  return badges;
+}
+
+function getContractorDisplayName(item) {
+  return item.company || item.business_name || item.name || item.full_name || 'Verified Contractor';
+}
+
+async function mergeContractorProfileAssets(contractorRows) {
+  const rows = contractorRows || [];
+  const ids = [...new Set(rows.map(row => row.id || row.user_id || row.profile_id).filter(Boolean))];
+  if (!ids.length) return rows;
+
+  const { data: profileRows, error } = await supabaseClient
+    .from('profiles')
+    .select('*')
+    .in('id', ids);
+
+  if (error || !profileRows) {
+    if (error) console.warn('contractor profile asset merge skipped:', error.message || error);
+    return rows;
+  }
+
+  const profilesById = profileRows.reduce((acc, profile) => {
+    acc[String(profile.id)] = profile;
+    return acc;
+  }, {});
+
+  return rows.map(row => {
+    const profile = profilesById[String(row.id || row.user_id || row.profile_id)] || {};
+    return {
+      ...profile,
+      ...row,
+      logo_url: row.logo_url || row.company_logo_url || profile.logo_url || profile.company_logo_url || profile.logo || profile.company_logo || '',
+      company_logo_url: row.company_logo_url || row.logo_url || profile.company_logo_url || profile.logo_url || profile.company_logo || profile.logo || '',
+      cover_photo_url: row.cover_photo_url || row.featured_photo_url || profile.cover_photo_url || profile.featured_photo_url || profile.cover_url || '',
+      featured_photo_url: row.featured_photo_url || row.cover_photo_url || profile.featured_photo_url || profile.cover_photo_url || profile.cover_url || '',
+      portfolio_photos: row.portfolio_photos || row.portfolio_photo_urls || profile.portfolio_photos || profile.portfolio_photo_urls || profile.gallery_photos || [],
+      portfolio_photo_urls: row.portfolio_photo_urls || row.portfolio_photos || profile.portfolio_photo_urls || profile.portfolio_photos || profile.gallery_photos || []
+    };
+  });
 }
 
 function hideMissingCardImage(img) {
@@ -6254,6 +6364,7 @@ async function increaseBidLimit(jobId) {
       expandUI();
       detailModal.classList.add('show');
       detailModal.classList.remove('activity-modal');
+      detailModal.classList.remove('detail-premium-modal');
 
       if (item.type === 'activity') {
         detailModal.classList.add('activity-modal');
@@ -6371,34 +6482,127 @@ async function increaseBidLimit(jobId) {
       }
 
       if (item.type === 'contractor') {
-        detailTitle.textContent = anonymizeContractorName(item);
+        detailModal.classList.add('detail-premium-modal');
+
+        const companyName = getContractorDisplayName(item);
+        const locationText = getDisplayCity(item) || 'Service Area';
+        const tradeText = getFullTradeText(item) || getCompactTradeLabel(item);
+        const coverUrl = getContractorCoverUrl(item) || getContractorImage(item);
+        const logoUrl = getContractorLogoUrl(item);
+        const profilePhotos = getContractorProfilePhotos(item);
+        const galleryPhotos = profilePhotos.length ? profilePhotos : [coverUrl];
+        const logoInitial = String(companyName || 'R').trim().charAt(0).toUpperCase() || 'R';
+        const badges = getContractorTrustBadges(item);
+        const specialties = splitTrades(tradeText).length ? splitTrades(tradeText) : (item.tags || []);
+
+        detailTitle.textContent = '';
         detailContent.innerHTML = `
-          <div class="detail-panel">
-            <h4>${getFullTradeText(item) || getCompactTradeLabel(item)} • ${getDisplayCity(item)}</h4>
-            <p>${item.bio || ''}</p>
-          </div>
-          <div class="modal-grid">
-            <div class="detail-panel">
-              <h4>Reputation</h4>
-              <p>⭐ ${Number(item.rating || 0).toFixed(1)} rating with ${item.reviews || 0} reviews.</p>
+          <div class="premium-detail-wrap">
+            <div class="premium-detail-left">
+              <div class="premium-kicker">Verified Contractor</div>
+              <h3 class="premium-big-title">${companyName}</h3>
+
+              <div class="premium-location-line">
+                <span>📍 ${locationText}</span>
+                <span>•</span>
+                <span>${getCompactTradeLabel(item)}</span>
+              </div>
+
+              <div class="premium-stats-row">
+                <div class="premium-stat-pill">
+                  <div class="premium-stat-icon">⭐</div>
+                  <span>Rating</span>
+                  <strong>${Number(item.rating || 0).toFixed(1)}</strong>
+                </div>
+                <div class="premium-stat-pill">
+                  <div class="premium-stat-icon">💬</div>
+                  <span>Reviews</span>
+                  <strong>${item.reviews || 0}</strong>
+                </div>
+                <div class="premium-stat-pill">
+                  <div class="premium-stat-icon">📍</div>
+                  <span>Distance</span>
+                  <strong>${formatDistance(item)}</strong>
+                </div>
+              </div>
+
+              <div class="premium-section">
+                <h4>About This Contractor</h4>
+                <p>${item.bio || item.why_choose_us || 'No contractor bio has been added yet.'}</p>
+              </div>
+
+              <div class="premium-section">
+                <h4>Specialties</h4>
+                <div class="premium-highlight-tags">
+                  ${specialties.map(tag => `<span>✓ ${tag}</span>`).join('') || `<span>✓ ${getCompactTradeLabel(item)}</span>`}
+                </div>
+              </div>
+
+              <div class="premium-section">
+                <h4>Qualifications</h4>
+                <div class="premium-highlight-tags">
+                  ${badges.map(badge => `<span>${badge}</span>`).join('')}
+                </div>
+              </div>
             </div>
-            <div class="detail-panel">
-              <h4>Performance</h4>
-              <p>${item.projects_completed || 0} completed projects and average response time of ${item.response_time || '—'}.</p>
+
+            <div class="premium-detail-right">
+              <div class="premium-hero-large">
+                <img src="${coverUrl}" onerror="hideMissingCardImage(this)">
+                <div class="premium-photo-count">📷 ${galleryPhotos.length ? `1 / ${galleryPhotos.length}` : '0 / 0'}</div>
+              </div>
+
+              <div class="premium-thumb-row">
+                ${galleryPhotos.slice(0, 6).map((src, index) => `
+                  <div class="premium-thumb ${index === 0 ? 'active' : ''}">
+                    <img src="${src}" onerror="hideMissingCardImage(this)">
+                  </div>
+                `).join('')}
+              </div>
+
+              <div class="premium-pro-card">
+                <div class="premium-pro-main">
+                  <div class="premium-pro-logo">
+                    ${logoUrl ? `<img src="${logoUrl}" onerror="this.outerHTML='${logoInitial}'">` : logoInitial}
+                  </div>
+
+                  <div class="premium-pro-copy">
+                    <h3>${companyName}</h3>
+                    <div>⭐ ${Number(item.rating || 0).toFixed(1)} (${item.reviews || 0} reviews)</div>
+                    <div class="premium-badge-row">
+                      ${badges.map(badge => `<span>${badge}</span>`).join('')}
+                    </div>
+                    <p>${tradeText} • ${locationText}</p>
+                  </div>
+
+                  <div class="premium-pro-stats">
+                    <div><strong>${item.projects_completed || 0}</strong><span>Projects Completed</span></div>
+                    <div><strong>${item.response_time || '—'}</strong><span>Response Time</span></div>
+                    <div><strong>${item.price || '$$'}</strong><span>Budget Tier</span></div>
+                  </div>
+                </div>
+              </div>
+
+              ${profilePhotos.length ? `
+                <div class="premium-section">
+                  <h4>Portfolio Photos</h4>
+                  <div class="premium-thumb-row">
+                    ${profilePhotos.slice(0, 6).map(src => `
+                      <div class="premium-thumb"><img src="${src}" onerror="hideMissingCardImage(this)"></div>
+                    `).join('')}
+                  </div>
+                </div>
+              ` : ``}
+
+              <div class="premium-action-panel">
+                <h4>Next Step</h4>
+                <div class="premium-action-grid">
+                  ${canEditItem(item) ? `<button class="mini-btn secondary" data-action="edit" data-id="${item.id}">Edit</button>` : ''}
+                  <button class="mini-btn primary wide" data-action="message" data-id="${item.id}">Message</button>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="detail-panel">
-            <h4>Qualifications</h4>
-            <p>${item.licensed ? 'Licensed' : 'Unlicensed'} • ${item.insured ? 'Insured' : 'Not insured'} • Budget tier ${item.price || '$$'}</p>
-          </div>
-          <div class="detail-panel">
-            <h4>Specialties</h4>
-            <div class="detail-tags">${(item.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
-          </div>
-          <div class="card-actions">
-  ${canEditItem(item) ? `<button class="mini-btn secondary" data-action="edit" data-id="${item.id}">Edit</button>` : ''}
-  <button class="mini-btn primary" data-action="message" data-id="${item.id}">Message</button>
-</div>
         `;
       } else {
         const visibleBids = (item.bids || []).filter(bid => {
@@ -6455,6 +6659,7 @@ const bidsHtml = visibleBids.length
     function closeDetails() {
       detailModal.classList.remove('show');
       detailModal.classList.remove('activity-modal');
+      detailModal.classList.remove('detail-premium-modal');
     }
 
    function handleCardAction(action, id) {
@@ -7003,7 +7208,8 @@ async function loadContractors() {
     const { data: demoData, error: demoError } = await query.eq('is_demo', true);
 
     if (!demoError && demoData && demoData.length) {
-      return demoData.map(item => {
+      const mergedDemoData = await mergeContractorProfileAssets(demoData);
+      return mergedDemoData.map(item => {
         const publicLocation = getPublicLocation(item);
         return {
           ...item,
@@ -7025,7 +7231,8 @@ async function loadContractors() {
       return [];
     }
 
-    return (allData || []).map(item => {
+    const mergedAllData = await mergeContractorProfileAssets(allData || []);
+    return mergedAllData.map(item => {
       const publicLocation = getPublicLocation(item);
       return {
         ...item,
@@ -7052,11 +7259,15 @@ async function loadContractors() {
     return [];
   }
 
-  return (data || []).filter(item => {
+  const eligibleContractors = (data || []).filter(item => {
     if (item.subscription_status === "active") return true;
     if (item.trial_end && new Date(item.trial_end) > new Date()) return true;
     return false;
-  }).map(item => {
+  });
+
+  const mergedContractors = await mergeContractorProfileAssets(eligibleContractors);
+
+  return mergedContractors.map(item => {
     const publicLocation = getPublicLocation(item);
 
     return {
@@ -7572,13 +7783,17 @@ async function applyPublicReviewStatsToMapItems() {
     detailModal.classList.add('detail-premium-modal');
 
     if (item.type === 'contractor') {
-      const imageSrc = getContractorImage(item);
       const displayCity = getDisplayCity(item) || 'Nearby area';
       const tradeText = getFullTradeText(item) || getCompactTradeLabel(item);
-      const proName = anonymizeContractorName(item);
-      const initials = String(item.company || item.name || 'R').trim().charAt(0).toUpperCase() || 'R';
+      const proName = getContractorDisplayName(item);
+      const logoUrl = getContractorLogoUrl(item);
+      const coverUrl = getContractorCoverUrl(item) || getContractorImage(item);
+      const profilePhotos = getContractorProfilePhotos(item);
+      const galleryPhotos = profilePhotos.length ? profilePhotos : [coverUrl];
+      const initials = String(proName || 'R').trim().charAt(0).toUpperCase() || 'R';
       const rating = Number(item.rating || 0).toFixed(1);
-      const tags = item.tags && item.tags.length ? item.tags : splitTrades(tradeText).slice(0,4);
+      const tags = item.tags && item.tags.length ? item.tags : splitTrades(tradeText).slice(0,8);
+      const badges = getContractorTrustBadges(item);
 
       detailTitle.textContent = '';
       detailContent.innerHTML = `
@@ -7598,7 +7813,7 @@ async function applyPublicReviewStatsToMapItems() {
 
             <div class="premium-section">
               <h4>About This Contractor</h4>
-              <p>${item.bio || 'Verified RevampLEX contractor with project experience, homeowner communication, and local service coverage.'}</p>
+              <p>${item.bio || item.why_choose_us || 'Verified RevampLEX contractor with project experience, homeowner communication, and local service coverage.'}</p>
             </div>
 
             <div class="premium-section">
@@ -7607,21 +7822,36 @@ async function applyPublicReviewStatsToMapItems() {
                 ${tags.map(tag => `<span>✓ ${tag}</span>`).join('') || '<span>✓ General Contractor</span>'}
               </div>
             </div>
+
+            <div class="premium-section">
+              <h4>Qualifications</h4>
+              <div class="premium-highlight-tags">
+                ${badges.map(badge => `<span>${badge}</span>`).join('')}
+              </div>
+            </div>
           </div>
 
           <div class="premium-detail-right">
-            ${revampPremiumImageStrip(imageSrc)}
+            <div class="premium-hero-large">
+              <img src="${coverUrl}" onerror="hideMissingCardImage(this)">
+              <div class="premium-photo-count">📷 ${galleryPhotos.length ? `1 / ${galleryPhotos.length}` : '0 / 0'}</div>
+            </div>
+            <div class="premium-thumb-row">
+              ${galleryPhotos.slice(0,6).map((src, n) => `
+                <div class="premium-thumb ${n === 0 ? 'active' : ''}">
+                  <img src="${src}" onerror="hideMissingCardImage(this)">
+                </div>
+              `).join('')}
+            </div>
 
             <div class="premium-pro-card">
               <div class="premium-pro-main">
-                <div class="premium-pro-logo">${initials}</div>
+                <div class="premium-pro-logo">${logoUrl ? `<img src="${logoUrl}" onerror="this.outerHTML='${initials}'">` : initials}</div>
                 <div class="premium-pro-copy">
-                  <h3>${item.company || item.name || 'Verified Pro'}</h3>
+                  <h3>${proName}</h3>
                   <div>⭐ ${rating} ${item.reviews ? `(${item.reviews} reviews)` : ''}</div>
                   <div class="premium-badge-row">
-                    ${item.licensed ? '<span>✓ Licensed</span>' : ''}
-                    ${item.insured ? '<span>✓ Insured</span>' : ''}
-                    ${item.verified ? '<span>✓ Verified</span>' : ''}
+                    ${badges.map(badge => `<span>${badge}</span>`).join('')}
                   </div>
                   <p>${tradeText} • ${displayCity}</p>
                 </div>
@@ -7632,6 +7862,15 @@ async function applyPublicReviewStatsToMapItems() {
                 </div>
               </div>
             </div>
+
+            ${profilePhotos.length ? `
+              <div class="premium-section">
+                <h4>Portfolio Photos</h4>
+                <div class="premium-thumb-row">
+                  ${profilePhotos.slice(0,6).map(src => `<div class="premium-thumb"><img src="${src}" onerror="hideMissingCardImage(this)"></div>`).join('')}
+                </div>
+              </div>
+            ` : ''}
 
             <div class="premium-action-panel">
               <h4>Next Step</h4>
