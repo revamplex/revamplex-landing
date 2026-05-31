@@ -2133,13 +2133,12 @@
     }
 
 
-/* ===== REVAMPLEX UPRIGHT ILLUMINATED HOUSE MAP PINS ===== */
+
+/* ===== REVAMPLEX CINEMATIC LIGHTBEAM MAP PINS ===== */
 .revamp-pin-icon,
 .revamp-pin-icon * {
   box-sizing: border-box;
 }
-
-/* ===== REVAMPLEX TRANSPARENT LIGHTBULB MAP PINS ===== */
 
 .revamp-pin-icon {
   background: transparent !important;
@@ -2149,108 +2148,166 @@
 .revamp-map-pin {
   --pin-main:#f97316;
   --pin-mid:#fb923c;
-  --pin-dark:#ea580c;
-  --pin-glow:rgba(249,115,22,.72);
-  --pin-soft:rgba(249,115,22,.22);
-  --pin-core:rgba(255,255,255,.92);
+  --pin-dark:#c2410c;
+  --pin-hot:#fff7ed;
+  --pin-glow:rgba(249,115,22,.88);
+  --pin-ray:rgba(249,115,22,.42);
+  --pin-core:rgba(255,237,213,.98);
 
   position:relative;
-  width:58px;
-  height:82px;
+  width:76px;
+  height:104px;
   pointer-events:auto;
   transform:translateZ(0);
   filter:
-    drop-shadow(0 0 12px var(--pin-glow))
-    drop-shadow(0 12px 20px rgba(15,23,42,.16));
-}
-
-.revamp-map-pin.contractor {
-  --pin-main:#f97316;
-  --pin-mid:#fb923c;
-  --pin-dark:#ea580c;
-  --pin-glow:rgba(249,115,22,.74);
-  --pin-soft:rgba(249,115,22,.22);
+    drop-shadow(0 0 10px rgba(255,255,255,.42))
+    drop-shadow(0 0 18px var(--pin-glow))
+    drop-shadow(0 16px 22px rgba(15,23,42,.18));
 }
 
 .revamp-map-pin.activity {
   --pin-main:#65d11f;
-  --pin-mid:#84cc16;
-  --pin-dark:#43b915;
-  --pin-glow:rgba(101,209,31,.70);
-  --pin-soft:rgba(101,209,31,.22);
+  --pin-mid:#a3e635;
+  --pin-dark:#15803d;
+  --pin-hot:#f7fee7;
+  --pin-glow:rgba(101,209,31,.78);
+  --pin-ray:rgba(101,209,31,.34);
+  --pin-core:rgba(247,254,231,.98);
 }
 
-.revamp-map-pin .pin-glow {
+.revamp-map-pin.active {
+  transform:translateZ(0) scale(1.10);
+  filter:
+    drop-shadow(0 0 14px rgba(255,255,255,.65))
+    drop-shadow(0 0 28px var(--pin-glow))
+    drop-shadow(0 18px 26px rgba(15,23,42,.20));
+}
+
+.revamp-map-pin .pin-rays {
   position:absolute;
   left:50%;
-  top:-2px;
-  width:76px;
-  height:76px;
+  top:5px;
+  width:138px;
+  height:138px;
   transform:translateX(-50%);
   border-radius:50%;
+  pointer-events:none;
+  opacity:.74;
+  background:
+    linear-gradient(22deg, transparent 46%, var(--pin-ray) 49%, transparent 53%),
+    linear-gradient(-22deg, transparent 46%, var(--pin-ray) 49%, transparent 53%),
+    linear-gradient(70deg, transparent 47%, rgba(255,255,255,.35) 50%, transparent 53%),
+    linear-gradient(-70deg, transparent 47%, rgba(255,255,255,.30) 50%, transparent 53%),
+    radial-gradient(circle, rgba(255,255,255,.48) 0%, var(--pin-glow) 24%, transparent 62%);
+  filter:blur(2.5px);
+  animation:revampPinRays 3.4s ease-in-out infinite;
+}
+
+.revamp-map-pin .pin-aura {
+  position:absolute;
+  left:50%;
+  top:-5px;
+  width:112px;
+  height:112px;
+  transform:translateX(-50%);
+  border-radius:50%;
+  pointer-events:none;
   background:
     radial-gradient(circle,
-      rgba(255,255,255,.62) 0%,
-      var(--pin-glow) 30%,
-      rgba(255,255,255,0) 68%);
-  filter:blur(12px);
-  opacity:.82;
-  animation:revampPinGlow 2.8s ease-in-out infinite;
+      rgba(255,255,255,.82) 0%,
+      rgba(255,247,237,.55) 12%,
+      var(--pin-glow) 34%,
+      rgba(255,255,255,0) 70%);
+  filter:blur(13px);
+  opacity:.92;
+  animation:revampPinAura 2.7s ease-in-out infinite;
 }
 
 .revamp-map-pin .pin-svg {
   position:absolute;
   left:50%;
   top:0;
-  width:58px;
-  height:74px;
+  width:76px;
+  height:96px;
   transform:translateX(-50%);
   overflow:visible;
 }
 
-.revamp-map-pin .pin-shape {
-  fill:rgba(249,115,22,.18);
-  stroke:rgba(255,255,255,.94);
-  stroke-width:2.45;
+.revamp-map-pin .pin-glass {
+  fill:url(#revampPinFill);
+  stroke:url(#revampPinStroke);
+  stroke-width:3.8;
+  stroke-linejoin:round;
   filter:
-    drop-shadow(0 0 8px rgba(255,255,255,.72))
-    drop-shadow(0 0 18px var(--pin-glow))
+    drop-shadow(0 0 7px rgba(255,255,255,.72))
+    drop-shadow(0 0 15px var(--pin-glow))
     drop-shadow(0 0 32px var(--pin-glow));
 }
 
-.revamp-map-pin.activity .pin-shape {
-  fill:rgba(101,209,31,.18);
-}
-
-.revamp-map-pin .pin-inner {
-  fill:rgba(255,255,255,.16);
-  stroke:var(--pin-main);
-  stroke-width:2.15;
+.revamp-map-pin .pin-center {
+  fill:var(--pin-core);
   filter:
-    drop-shadow(0 0 8px var(--pin-glow))
-    drop-shadow(0 0 14px rgba(255,255,255,.32));
+    drop-shadow(0 0 5px rgba(255,255,255,.82))
+    drop-shadow(0 0 14px var(--pin-glow));
 }
 
 .revamp-map-pin .pin-house {
-  fill:rgba(255,255,255,.98);
-  filter:drop-shadow(0 0 8px rgba(255,255,255,.60));
+  fill:var(--pin-dark);
+  filter:drop-shadow(0 0 5px rgba(255,255,255,.40));
+}
+
+.revamp-map-pin .pin-tip-flare {
+  position:absolute;
+  left:50%;
+  bottom:7px;
+  width:48px;
+  height:22px;
+  transform:translateX(-50%);
+  border-radius:50%;
+  pointer-events:none;
+  background:radial-gradient(circle, rgba(255,255,255,.95) 0%, var(--pin-glow) 35%, transparent 72%);
+  filter:blur(5px);
+  opacity:.95;
+}
+
+.revamp-map-pin .pin-base {
+  position:absolute;
+  left:50%;
+  bottom:-6px;
+  width:106px;
+  height:42px;
+  transform:translateX(-50%);
+  border-radius:50%;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at center,
+      rgba(255,255,255,.70) 0%,
+      var(--pin-glow) 18%,
+      rgba(249,115,22,.28) 38%,
+      transparent 68%);
+  box-shadow:
+    0 0 12px var(--pin-glow),
+    0 0 36px var(--pin-glow),
+    0 0 76px rgba(249,115,22,.36);
+  animation:revampPinBase 2.5s ease-in-out infinite;
+}
+
+@keyframes revampPinAura{
+  0%,100%{ opacity:.78; transform:translateX(-50%) scale(.94); }
+  50%{ opacity:1; transform:translateX(-50%) scale(1.08); }
+}
+
+@keyframes revampPinRays{
+  0%,100%{ opacity:.52; transform:translateX(-50%) rotate(-2deg) scale(.94); }
+  50%{ opacity:.88; transform:translateX(-50%) rotate(2deg) scale(1.04); }
 }
 
 @keyframes revampPinBase{
-  0%,100%{
-    opacity:.88;
-    transform:translateX(-50%) scale(.92);
-    filter:blur(.15px);
-  }
-
-  50%{
-    opacity:1;
-    transform:translateX(-50%) scale(1.08);
-    filter:blur(0px);
-  }
+  0%,100%{ opacity:.74; transform:translateX(-50%) scale(.88); filter:blur(.4px); }
+  50%{ opacity:1; transform:translateX(-50%) scale(1.12); filter:blur(0); }
 }
-/* ===== REVAMPLEX CLUSTER CIRCLES ===== */
 
+/* ===== REVAMPLEX CINEMATIC CLUSTER CIRCLES ===== */
 .marker-cluster,
 .marker-cluster div,
 .marker-cluster span,
@@ -2272,8 +2329,9 @@
 .marker-cluster-orange div,
 .marker-cluster-green div,
 .marker-cluster-mixed div {
-  width:48px;
-  height:48px;
+  position:relative;
+  width:54px;
+  height:54px;
   border-radius:50%;
   color:#fff;
   display:flex;
@@ -2282,146 +2340,130 @@
   font-weight:950;
   font-size:17px;
   line-height:1;
-  text-shadow:0 2px 4px rgba(0,0,0,.28);
-  transition:transform .18s ease, box-shadow .18s ease;
+  overflow:visible;
+  border:3px solid rgba(255,255,255,.96);
+  text-shadow:0 2px 5px rgba(0,0,0,.34);
+  transition:transform .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+
+.marker-cluster-orange div::before,
+.marker-cluster-green div::before,
+.marker-cluster-mixed div::before {
+  content:"";
+  position:absolute;
+  inset:-14px;
+  border-radius:50%;
+  z-index:-1;
+  opacity:.78;
+  filter:blur(10px);
+}
+
+.marker-cluster-orange div::after,
+.marker-cluster-green div::after,
+.marker-cluster-mixed div::after {
+  content:"";
+  position:absolute;
+  inset:5px;
+  border-radius:50%;
+  pointer-events:none;
+  background:radial-gradient(circle at 30% 24%, rgba(255,255,255,.72), transparent 30%);
 }
 
 .marker-cluster-orange div {
   background:
-    radial-gradient(circle at 32% 24%, rgba(255,255,255,.55), transparent 29%),
-    radial-gradient(circle at 50% 50%, #fb923c 0%, #f97316 48%, #c2410c 100%);
-  border:3px solid rgba(255,255,255,.94);
+    radial-gradient(circle at 30% 24%, rgba(255,255,255,.72), transparent 25%),
+    radial-gradient(circle at 50% 55%, #fdba74 0%, #fb923c 36%, #f97316 63%, #9a3412 100%);
   box-shadow:
-    0 0 0 4px rgba(249,115,22,.18),
-    0 0 16px rgba(249,115,22,.65),
-    0 0 34px rgba(249,115,22,.34),
-    0 12px 24px rgba(15,23,42,.16);
+    0 0 0 6px rgba(249,115,22,.13),
+    0 0 18px rgba(249,115,22,.72),
+    0 0 42px rgba(249,115,22,.42),
+    0 14px 26px rgba(15,23,42,.18);
+}
+.marker-cluster-orange div::before {
+  background:radial-gradient(circle, rgba(255,255,255,.60), rgba(249,115,22,.72) 34%, transparent 72%);
 }
 
 .marker-cluster-green div {
   background:
-    radial-gradient(circle at 32% 24%, rgba(255,255,255,.50), transparent 29%),
-    radial-gradient(circle at 50% 50%, #84cc16 0%, #65d11f 48%, #15803d 100%);
-  border:3px solid rgba(255,255,255,.94);
+    radial-gradient(circle at 30% 24%, rgba(255,255,255,.70), transparent 25%),
+    radial-gradient(circle at 50% 55%, #d9f99d 0%, #84cc16 36%, #65d11f 63%, #15803d 100%);
   box-shadow:
-    0 0 0 4px rgba(101,209,31,.18),
-    0 0 16px rgba(101,209,31,.62),
-    0 0 34px rgba(101,209,31,.32),
-    0 12px 24px rgba(15,23,42,.16);
+    0 0 0 6px rgba(101,209,31,.13),
+    0 0 18px rgba(101,209,31,.66),
+    0 0 42px rgba(101,209,31,.36),
+    0 14px 26px rgba(15,23,42,.18);
+}
+.marker-cluster-green div::before {
+  background:radial-gradient(circle, rgba(255,255,255,.56), rgba(101,209,31,.66) 34%, transparent 72%);
 }
 
 .marker-cluster-mixed div {
   background:
-    linear-gradient(90deg, #f97316 0 50%, #65d11f 50% 100%);
-  border:3px solid rgba(255,255,255,.94);
+    radial-gradient(circle at 30% 24%, rgba(255,255,255,.72), transparent 25%),
+    conic-gradient(from 210deg,
+      #f97316 0deg,
+      #fb923c 82deg,
+      #65d11f 148deg,
+      #84cc16 225deg,
+      #f97316 360deg);
   box-shadow:
-    0 0 0 4px rgba(249,115,22,.14),
-    0 0 18px rgba(249,115,22,.42),
-    0 0 18px rgba(101,209,31,.35),
-    0 12px 24px rgba(15,23,42,.16);
+    0 0 0 6px rgba(255,255,255,.13),
+    0 0 20px rgba(249,115,22,.58),
+    0 0 26px rgba(101,209,31,.48),
+    0 14px 26px rgba(15,23,42,.18);
+}
+.marker-cluster-mixed div::before {
+  background:
+    radial-gradient(circle at 40% 50%, rgba(255,255,255,.52), transparent 24%),
+    conic-gradient(from 210deg,
+      rgba(249,115,22,.65),
+      rgba(101,209,31,.60),
+      rgba(249,115,22,.65));
 }
 
 .marker-cluster-orange div:hover,
 .marker-cluster-green div:hover,
 .marker-cluster-mixed div:hover {
-  transform:scale(1.08);
+  transform:scale(1.10);
+  filter:saturate(1.12) brightness(1.05);
 }
 
-
-
-.marker-cluster{
-  background:transparent !important;
-  border:none !important;
-  box-shadow:none !important;
+.revamp-map-legend {
+  position:absolute;
+  left:14px;
+  bottom:18px;
+  z-index:850;
+  display:grid;
+  gap:7px;
+  padding:10px 12px;
+  border-radius:16px;
+  background:rgba(255,255,255,.88);
+  border:1px solid rgba(255,255,255,.78);
+  box-shadow:0 12px 26px rgba(15,23,42,.13);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  color:#0f172a;
+  font-size:12px;
+  font-weight:850;
+  pointer-events:none;
 }
-
-/* ORANGE CONTRACTOR / PROJECT CLUSTERS */
-
-.marker-cluster-orange{
-  background:transparent !important;
-}
-
-.marker-cluster-orange div{
-
-  width:44px;
-  height:44px;
-
+.revamp-map-legend-row{ display:flex; align-items:center; gap:8px; }
+.revamp-map-legend-dot{
+  width:13px;
+  height:13px;
   border-radius:50%;
-
-  background:
-    radial-gradient(circle at 30% 30%,
-    #fdba74 0%,
-    #fb923c 42%,
-    #f97316 100%);
-
-  border:3px solid rgba(255,255,255,.96);
-
-  color:#fff;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  font-weight:900;
-  font-size:16px;
-
-  text-shadow:0 1px 2px rgba(0,0,0,.25);
-
-  box-shadow:
-    0 0 8px rgba(249,115,22,.30),
-    0 0 18px rgba(249,115,22,.40),
-    0 0 32px rgba(249,115,22,.28);
-
-  transition:.18s ease;
+  background:radial-gradient(circle at 30% 25%, #fed7aa, #f97316 55%, #9a3412);
+  box-shadow:0 0 12px rgba(249,115,22,.66);
+}
+.revamp-map-legend-dot.green{
+  background:radial-gradient(circle at 30% 25%, #d9f99d, #65d11f 55%, #15803d);
+  box-shadow:0 0 12px rgba(101,209,31,.58);
+}
+@media(max-width:640px){
+  .revamp-map-legend{ display:none; }
 }
 
-.marker-cluster-orange div:hover{
-  transform:scale(1.08);
-}
 
-/* GREEN ACTIVITY CLUSTERS */
-
-.marker-cluster-green{
-  background:transparent !important;
-}
-
-.marker-cluster-green div{
-
-  width:44px;
-  height:44px;
-
-  border-radius:50%;
-
-  background:
-    radial-gradient(circle at 30% 30%,
-    #bbf7d0 0%,
-    #65d11f 42%,
-    #43b915 100%);
-
-  border:3px solid rgba(255,255,255,.96);
-
-  color:#fff;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  font-weight:900;
-  font-size:16px;
-
-  text-shadow:0 1px 2px rgba(0,0,0,.25);
-
-  box-shadow:
-    0 0 8px rgba(101,209,31,.30),
-    0 0 18px rgba(101,209,31,.40),
-    0 0 32px rgba(101,209,31,.28);
-
-  transition:.18s ease;
-}
-
-.marker-cluster-green div:hover{
-  transform:scale(1.08);
-}
 
 
 
@@ -4881,42 +4923,55 @@ function getMapPinSoftColor(item) {
 function getRevampPinIcon(item, isActive = false){
 
   const isActivity = item.type === 'activity';
+  const size = isActive ? [92, 122] : [76, 104];
+  const anchor = isActive ? [46, 116] : [38, 99];
 
   return L.divIcon({
     className:'revamp-pin-icon',
 
     html:`
       <div class="revamp-map-pin ${isActivity ? 'activity' : 'contractor'} ${isActive ? 'active' : ''}">
+        <div class="pin-rays"></div>
+        <div class="pin-aura"></div>
 
-        <div class="pin-glow"></div>
-
-        <svg class="pin-svg" viewBox="0 0 64 84" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <svg class="pin-svg" viewBox="0 0 76 96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <radialGradient id="revampPinFill" cx="50%" cy="32%" r="68%">
+              <stop offset="0%" style="stop-color:rgba(255,255,255,.28)" />
+              <stop offset="22%" style="stop-color:rgba(255,247,237,.22)" />
+              <stop offset="58%" style="stop-color:var(--pin-main);stop-opacity:.26" />
+              <stop offset="100%" style="stop-color:var(--pin-dark);stop-opacity:.40" />
+            </radialGradient>
+            <linearGradient id="revampPinStroke" x1="12" y1="5" x2="64" y2="92" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" style="stop-color:rgba(255,255,255,.96)" />
+              <stop offset="18%" style="stop-color:var(--pin-hot)" />
+              <stop offset="46%" style="stop-color:var(--pin-mid)" />
+              <stop offset="76%" style="stop-color:var(--pin-main)" />
+              <stop offset="100%" style="stop-color:rgba(255,255,255,.88)" />
+            </linearGradient>
+          </defs>
 
           <path
-            class="pin-shape"
-            d="M32 3.2C17.9 3.2 6.5 14.6 6.5 28.7c0 19.4 25.5 51.6 25.5 51.6S57.5 48.1 57.5 28.7C57.5 14.6 46.1 3.2 32 3.2Z"
+            class="pin-glass"
+            d="M38 4.4C20.7 4.4 6.8 18.3 6.8 35.6c0 23.6 31.2 56.3 31.2 56.3s31.2-32.7 31.2-56.3C69.2 18.3 55.3 4.4 38 4.4Z"
           />
 
-          <path
-            class="pin-inner"
-            d="M32 13.4C23.8 13.4 17.2 20 17.2 28.2c0 11.3 14.8 29.8 14.8 29.8s14.8-18.5 14.8-29.8c0-8.2-6.6-14.8-14.8-14.8Z"
-          />
+          <circle class="pin-center" cx="38" cy="33" r="18.2" />
 
           <path
             class="pin-house"
-            d="M21.5 29.3 32 20.6l10.5 8.7-1.9 2.2-1.55-1.28v9.1h-5.55v-5.95h-3.05v5.95H24.9v-9.1l-1.55 1.28-1.85-2.2Z"
+            d="M25.3 33.1 38 22.7l12.7 10.4-2.28 2.65-1.82-1.5v11.15h-6.55v-7.2h-4.1v7.2H29.4V34.25l-1.82 1.5-2.28-2.65Zm8.1 2.15h3.6v-3.45h-3.6v3.45Zm5.6 0h3.6v-3.45H39v3.45Z"
           />
-
         </svg>
 
+        <div class="pin-tip-flare"></div>
         <div class="pin-base"></div>
-
       </div>
     `,
 
-    iconSize:isActive ? [72,94] : [58,82],
-    iconAnchor:isActive ? [36,89] : [29,78],
-    popupAnchor:[0,-76]
+    iconSize:size,
+    iconAnchor:anchor,
+    popupAnchor:[0,-88]
   });
 }
 function createRevampMapLegend() {
@@ -5055,7 +5110,7 @@ function getMapClusterIcon(group) {
       ? 'marker-cluster-green'
       : 'marker-cluster-orange';
 
-  const size = group.count >= 25 ? 58 : group.count >= 10 ? 52 : 48;
+  const size = group.count >= 25 ? 60 : group.count >= 10 ? 56 : 54;
 
   return L.divIcon({
     className: clusterClass,
@@ -5384,149 +5439,9 @@ function getDisplayCity(item) {
   return getPublicLocation(item);
 }
 
-
-function firstRealAssetUrl(...values) {
-  for (const value of values) {
-    if (!value) continue;
-
-    if (Array.isArray(value)) {
-      const found = firstRealAssetUrl(...value);
-      if (found) return found;
-      continue;
-    }
-
-    if (typeof value === 'object') {
-      const found = firstRealAssetUrl(
-        value.url,
-        value.publicUrl,
-        value.public_url,
-        value.src,
-        value.path,
-        value.image_url
-      );
-      if (found) return found;
-      continue;
-    }
-
-    const text = String(value || '').trim();
-    if (!text || text === '-' || text.toLowerCase() === 'null' || text.toLowerCase() === 'undefined') continue;
-
-    const parts = text
-      .split(/\n|,/)
-      .map(part => part.trim())
-      .filter(Boolean);
-
-    for (const part of parts) {
-      if (/^https?:\/\//i.test(part) || part.startsWith('data:image/')) return part;
-    }
-  }
-
-  return '';
-}
-
-function getAssetArray(...values) {
-  const output = [];
-
-  values.forEach(value => {
-    if (!value) return;
-
-    if (Array.isArray(value)) {
-      value.forEach(item => {
-        const url = firstRealAssetUrl(item);
-        if (url) output.push(url);
-      });
-      return;
-    }
-
-    if (typeof value === 'object') {
-      const url = firstRealAssetUrl(value);
-      if (url) output.push(url);
-      return;
-    }
-
-    String(value)
-      .split(/\n|,/)
-      .map(part => part.trim())
-      .filter(Boolean)
-      .forEach(part => {
-        const url = firstRealAssetUrl(part);
-        if (url) output.push(url);
-      });
-  });
-
-  return Array.from(new Set(output));
-}
-
-function getContractorLogoUrl(item) {
-  return firstRealAssetUrl(
-    item.company_logo_url,
-    item.company_logo,
-    item.logo_url,
-    item.logo,
-    item.logoUrl,
-    item.profile_logo_url,
-    item.contractor_logo_url,
-    item.avatar_url
-  );
-}
-
-function getContractorCoverUrl(item) {
-  return firstRealAssetUrl(
-    item.cover_photo_url,
-    item.cover_photo,
-    item.featured_photo_url,
-    item.featured_photo,
-    item.featured_image_url,
-    item.featured_image,
-    item.cover_url,
-    item.banner_url,
-    item.hero_image_url,
-    item.hero_image,
-    item.profile_image_url,
-    item.photo_url
-  );
-}
-
-function getContractorPortfolioUrls(item) {
-  return getAssetArray(
-    item.portfolio_photos,
-    item.portfolio_photo_urls,
-    item.portfolio_urls,
-    item.project_photos,
-    item.project_photo_urls,
-    item.gallery_photos,
-    item.gallery_urls,
-    item.photos,
-    item.photo_urls,
-    item.images,
-    item.image_urls,
-    item.work_photos
-  );
-}
-
-function getContractorProfileImages(item) {
-  const cover = getContractorCoverUrl(item);
-  const portfolio = getContractorPortfolioUrls(item);
-  const fallback = getJobImage(getPrimaryTrade(item));
-  const photos = Array.from(new Set([cover, ...portfolio].filter(Boolean)));
-  return photos.length ? photos : [fallback];
-}
-
-function getContractorLogoHtml(item, className = "premium-pro-logo") {
-  const logoUrl = getContractorLogoUrl(item);
-  const initial = String(item.company || item.name || 'R').trim().charAt(0).toUpperCase() || 'R';
-
-  if (logoUrl) {
-    return `<div class="${className}"><img src="${logoUrl}" alt="${item.company || 'Company logo'}" onerror="this.closest('.${className}').textContent='${initial}'"></div>`;
-  }
-
-  return `<div class="${className}">${initial}</div>`;
-}
-
 function getContractorImage(item) {
-  if (item.image_url) return item.image_url;
-  if (item.image) return item.image;
-
+  // Keep map contractor cards generic.
+  // Do NOT use contractor uploaded cover photos, logos, or profile images here.
   const trades = splitTrades(item.trades_full || item.trade || '');
 
   if (trades.length > 1) {
@@ -6456,121 +6371,34 @@ async function increaseBidLimit(jobId) {
       }
 
       if (item.type === 'contractor') {
-        detailModal.classList.add('detail-premium-modal');
-
-        const companyName = item.company || item.name || anonymizeContractorName(item);
-        const displayCity = getDisplayCity(item) || 'Service area';
-        const tradeText = getFullTradeText(item) || getCompactTradeLabel(item);
-        const photos = getContractorProfileImages(item);
-        const heroPhoto = photos[0];
-        const thumbPhotos = photos.length ? photos.slice(0, 6) : [heroPhoto];
-        const logoHtml = getContractorLogoHtml(item, 'premium-pro-logo');
-        const ratingText = Number(item.rating || 0).toFixed(1);
-        const reviewCount = item.reviews || 0;
-        const projectsCompleted = item.projects_completed || item.completed_projects || 0;
-        const responseTime = item.response_time || item.responseTime || '—';
-        const budgetTier = item.price || item.budget_tier || '$$';
-        const bioText = item.bio || item.company_description || item.description || '';
-        const specialtyTags = splitTrades(tradeText).slice(0, 10);
-        const badgeHtml = `
-          ${item.licensed ? '<span>✓ Licensed</span>' : ''}
-          ${item.insured ? '<span>✓ Insured</span>' : ''}
-          ${item.verified !== false ? '<span>✓ Verified</span>' : ''}
-        `;
-
-        detailTitle.textContent = companyName;
+        detailTitle.textContent = anonymizeContractorName(item);
         detailContent.innerHTML = `
-          <div class="premium-detail-wrap">
-            <div class="premium-detail-left">
-              <div class="premium-kicker dark">Verified Contractor</div>
-              <h3 class="premium-big-title">${companyName}</h3>
-
-              <div class="premium-location-line">
-                <span>📍 ${displayCity}</span>
-                <span>•</span>
-                <span>${getCompactTradeLabel(item)}</span>
-              </div>
-
-              <div class="premium-stats-row">
-                <div class="premium-stat-pill">
-                  <div class="premium-stat-icon">⭐</div>
-                  <span>Rating</span>
-                  <strong>${ratingText}</strong>
-                </div>
-                <div class="premium-stat-pill">
-                  <div class="premium-stat-icon">💬</div>
-                  <span>Reviews</span>
-                  <strong>${reviewCount}</strong>
-                </div>
-                <div class="premium-stat-pill">
-                  <div class="premium-stat-icon">📍</div>
-                  <span>Distance</span>
-                  <strong>${formatDistance(item)}</strong>
-                </div>
-              </div>
-
-              <div class="premium-section">
-                <h4>About This Contractor</h4>
-                <p>${bioText || 'No company bio has been added yet.'}</p>
-              </div>
-
-              <div class="premium-section">
-                <h4>Specialties</h4>
-                <div class="premium-highlight-tags">
-                  ${(specialtyTags.length ? specialtyTags : [getCompactTradeLabel(item)]).map(tag => `<span>✓ ${tag}</span>`).join('')}
-                </div>
-              </div>
-
-              <div class="premium-section">
-                <h4>Qualifications</h4>
-                <p>${item.licensed ? 'Licensed' : 'License not shown'} • ${item.insured ? 'Insured' : 'Insurance not shown'} • Budget tier ${budgetTier}</p>
-              </div>
+          <div class="detail-panel">
+            <h4>${getFullTradeText(item) || getCompactTradeLabel(item)} • ${getDisplayCity(item)}</h4>
+            <p>${item.bio || ''}</p>
+          </div>
+          <div class="modal-grid">
+            <div class="detail-panel">
+              <h4>Reputation</h4>
+              <p>⭐ ${Number(item.rating || 0).toFixed(1)} rating with ${item.reviews || 0} reviews.</p>
             </div>
-
-            <div class="premium-detail-right">
-              <div class="premium-hero-large">
-                <img src="${heroPhoto}" alt="${companyName} featured photo" onerror="this.src='${getJobImage(getPrimaryTrade(item))}'">
-                <div class="premium-photo-count">📷 1 / ${Math.max(thumbPhotos.length, 1)}</div>
-              </div>
-
-              <div class="premium-thumb-row">
-                ${thumbPhotos.map((src, index) => `
-                  <div class="premium-thumb ${index === 0 ? 'active' : ''}">
-                    <img src="${src}" alt="${companyName} project photo ${index + 1}" onerror="hideMissingCardImage(this)">
-                  </div>
-                `).join('')}
-              </div>
-
-              <div class="premium-pro-card">
-                <div class="premium-pro-main">
-                  ${logoHtml}
-
-                  <div class="premium-pro-copy">
-                    <h3>${companyName}</h3>
-                    <div>⭐ ${ratingText} (${reviewCount} reviews)</div>
-                    <div class="premium-badge-row">
-                      ${badgeHtml || '<span>RevampLEX Contractor</span>'}
-                    </div>
-                    <p>${tradeText} • ${displayCity}</p>
-                  </div>
-
-                  <div class="premium-pro-stats">
-                    <div><strong>${projectsCompleted}</strong><span>Projects Completed</span></div>
-                    <div><strong>${responseTime}</strong><span>Response Time</span></div>
-                    <div><strong>${budgetTier}</strong><span>Budget Tier</span></div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="premium-action-panel">
-                <h4>Next Step</h4>
-                <div class="premium-action-grid">
-                  ${canEditItem(item) ? `<button class="mini-btn secondary" data-action="edit" data-id="${item.id}">Edit</button>` : ''}
-                  <button class="mini-btn primary wide modal-message-btn" data-contractor-id="${item.id}">Message</button>
-                </div>
-              </div>
+            <div class="detail-panel">
+              <h4>Performance</h4>
+              <p>${item.projects_completed || 0} completed projects and average response time of ${item.response_time || '—'}.</p>
             </div>
           </div>
+          <div class="detail-panel">
+            <h4>Qualifications</h4>
+            <p>${item.licensed ? 'Licensed' : 'Unlicensed'} • ${item.insured ? 'Insured' : 'Not insured'} • Budget tier ${item.price || '$$'}</p>
+          </div>
+          <div class="detail-panel">
+            <h4>Specialties</h4>
+            <div class="detail-tags">${(item.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
+          </div>
+          <div class="card-actions">
+  ${canEditItem(item) ? `<button class="mini-btn secondary" data-action="edit" data-id="${item.id}">Edit</button>` : ''}
+  <button class="mini-btn primary" data-action="message" data-id="${item.id}">Message</button>
+</div>
         `;
       } else {
         const visibleBids = (item.bids || []).filter(bid => {
@@ -7163,51 +6991,6 @@ async function saveEdit(id, type) {
     type: 'job'
   }));
 }
-
-async function mergeContractorProfileAssets(contractorRows) {
-  const rows = contractorRows || [];
-  const ids = rows.map(row => row.id || row.user_id || row.profile_id).filter(Boolean);
-
-  if (!ids.length) return rows;
-
-  try {
-    const { data: profiles, error } = await supabaseClient
-      .from('profiles')
-      .select('*')
-      .in('id', ids);
-
-    if (error || !profiles) {
-      if (error) console.warn('profile asset merge skipped:', error.message || error);
-      return rows;
-    }
-
-    const profilesById = new Map(profiles.map(profile => [String(profile.id), profile]));
-
-    return rows.map(row => {
-      const profile = profilesById.get(String(row.id)) ||
-        profilesById.get(String(row.user_id)) ||
-        profilesById.get(String(row.profile_id));
-
-      if (!profile) return row;
-
-      return {
-        ...row,
-        company_logo_url: row.company_logo_url || profile.company_logo_url || profile.company_logo || profile.logo_url || profile.logo,
-        logo_url: row.logo_url || profile.logo_url || profile.company_logo_url || profile.company_logo || profile.logo,
-        cover_photo_url: row.cover_photo_url || profile.cover_photo_url || profile.cover_photo || profile.featured_photo_url || profile.featured_photo,
-        featured_photo_url: row.featured_photo_url || profile.featured_photo_url || profile.featured_photo || profile.cover_photo_url || profile.cover_photo,
-        portfolio_photos: row.portfolio_photos || profile.portfolio_photos || profile.project_photos || profile.photo_urls || profile.photos,
-        project_photo_urls: row.project_photo_urls || profile.project_photo_urls || profile.portfolio_photo_urls || profile.photo_urls,
-        photos: row.photos || profile.photos,
-        image_urls: row.image_urls || profile.image_urls
-      };
-    });
-  } catch (err) {
-    console.warn('profile asset merge failed:', err);
-    return rows;
-  }
-}
-
 async function loadContractors() {
   const isDemo = localStorage.getItem('revamplex_demo') === 'true';
 
@@ -7269,9 +7052,7 @@ async function loadContractors() {
     return [];
   }
 
-  const mergedData = await mergeContractorProfileAssets(data || []);
-
-  return (mergedData || []).filter(item => {
+  return (data || []).filter(item => {
     if (item.subscription_status === "active") return true;
     if (item.trial_end && new Date(item.trial_end) > new Date()) return true;
     return false;
