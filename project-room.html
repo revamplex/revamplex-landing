@@ -4731,70 +4731,6 @@ body.light-room.command-room #contractorSnapshotPanel #contractorProjects{
   color:#0f172a !important;
 }
 
-
-
-/* ===== CONTRACTOR SNAPSHOT PROJECT PHOTOS ===== */
-.contractor-snapshot-photos{
-  width:100%;
-  margin-bottom:14px;
-  border:1px solid var(--line);
-  border-radius:18px;
-  background:linear-gradient(180deg,#fff,#fff7ed);
-  padding:14px;
-}
-.contractor-snapshot-photos h4{
-  margin:0 0 6px;
-  font-size:1rem;
-}
-.contractor-snapshot-photos p{
-  margin:0 0 12px;
-  color:var(--muted);
-  font-size:.9rem;
-  line-height:1.35;
-}
-.contractor-snapshot-photo-grid{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:10px;
-}
-.contractor-snapshot-photo{
-  min-height:86px;
-  border:1px solid var(--line);
-  border-radius:14px;
-  overflow:hidden;
-  background:#f8fafc;
-  display:grid;
-  place-items:center;
-  color:var(--muted);
-  font-size:.82rem;
-  font-weight:800;
-  text-align:center;
-}
-.contractor-snapshot-photo img{
-  width:100%;
-  height:100%;
-  min-height:86px;
-  object-fit:cover;
-  display:block;
-}
-body.command-room #contractorSnapshotPanel .contractor-snapshot-photos{
-  background:rgba(255,255,255,.06);
-  border-color:rgba(255,255,255,.12);
-}
-body.command-room #contractorSnapshotPanel .contractor-snapshot-photos h4{color:#fff;}
-body.command-room #contractorSnapshotPanel .contractor-snapshot-photos p{color:#cbd5e1;}
-body.command-room #contractorSnapshotPanel .contractor-snapshot-photo{
-  background:rgba(15,23,42,.55);
-  border-color:rgba(255,255,255,.12);
-  color:#cbd5e1;
-}
-@media(max-width:768px){
-  .contractor-snapshot-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
-}
-@media(max-width:480px){
-  .contractor-snapshot-photo-grid{grid-template-columns:1fr;}
-}
-
 @media(max-width:768px){
   .contractor-snapshot{
     flex-direction:column;
@@ -5014,6 +4950,16 @@ Contractor Name
 <p id="contractorBio">
 Contractor bio appears here...
 </p>
+
+<div class="contractor-full-profile-grid">
+  <div><strong>Primary Trade</strong><br><span id="contractorPrimaryTrade">-</span></div>
+  <div><strong>Service Area</strong><br><span id="contractorServiceArea">-</span></div>
+  <div><strong>Phone</strong><br><span id="contractorPhone">-</span></div>
+  <div><strong>Website</strong><br><span id="contractorWebsite">-</span></div>
+  <div><strong>Years in Business</strong><br><span id="contractorYearsBusiness">-</span></div>
+  <div><strong>License</strong><br><span id="contractorLicenseNumber">-</span></div>
+  <div class="full"><strong>Why Choose Us</strong><br><span id="contractorWhyChooseUs">-</span></div>
+</div>
 
 <div class="contractor-snapshot-photos">
   <h4>Project Photos</h4>
@@ -6284,7 +6230,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
 
 /* ===== REVAMPLEX CONTRACTOR SNAPSHOT LOADER ===== */
-function loadContractorSnapshot(){
+async function loadContractorSnapshot(){
 
   let contractor = null;
 
@@ -6297,8 +6243,43 @@ function loadContractorSnapshot(){
   const panel = document.getElementById("contractorSnapshotPanel");
   if(!panel) return;
 
-  // Fallbacks from already-visible proposal fields keep the card useful even when
-  // the contractor was loaded from Supabase instead of sessionStorage.
+  const params = new URLSearchParams(window.location.search);
+  const currentUserId = window.__currentUserId || null;
+  const roomId = params.get("room") || params.get("project_room") || params.get("room_id") || params.get("id");
+  const contractorParam = params.get("contractor") || params.get("contractor_id") || contractor?.id || contractor?.contractor_id || "";
+  const activeJobId = params.get("job") || window.currentJob?.id || "";
+
+  async function maybeSingle(query){
+    try{ const {data,error}=await query.maybeSingle(); if(error) console.warn(error); return data || null; }
+    catch(err){ console.warn(err); return null; }
+  }
+
+  async function fetchContractorById(id){
+    if(!id || !window.supabaseClient) return null;
+    let row = await maybeSingle(window.supabaseClient.from("contractors").select("*").eq("id", id));
+    if(row) return row;
+    row = await maybeSingle(window.supabaseClient.from("contractors").select("*").eq("user_id", id));
+    if(row) return row;
+    row = await maybeSingle(window.supabaseClient.from("profiles").select("*").eq("id", id));
+    return row;
+  }
+
+  try{
+    if(window.supabaseClient){
+      let found = null;
+      if(roomId){
+        const room = await maybeSingle(window.supabaseClient.from("project_rooms").select("*").eq("id", roomId));
+        if(room?.contractor_id) found = await fetchContractorById(room.contractor_id);
+      }
+      if(!found && contractorParam) found = await fetchContractorById(contractorParam);
+      if(!found && activeJobId && currentUserId){
+        const room = await maybeSingle(window.supabaseClient.from("project_rooms").select("*").eq("job_id", activeJobId).or(`contractor_id.eq.${currentUserId},homeowner_id.eq.${currentUserId}`).order("created_at", {ascending:false}).limit(1));
+        if(room?.contractor_id) found = await fetchContractorById(room.contractor_id);
+      }
+      if(found) contractor = {...(contractor||{}), ...found};
+    }
+  }catch(err){ console.warn("Contractor Supabase lookup failed:", err); }
+
   const companyField = document.getElementById("contractorCompany")?.value?.trim() || "";
   const nameField = document.getElementById("contractorName")?.value?.trim() || "";
   const emailField = document.getElementById("contractorEmail")?.value?.trim() || "";
@@ -6307,7 +6288,6 @@ function loadContractorSnapshot(){
     contractor = {
       company: companyField || nameField || "Verified Contractor",
       name: nameField || companyField || "Verified Contractor",
-      image_url: "",
       rating: "0",
       reviews: "0",
       projects_completed: 0,
@@ -6318,9 +6298,10 @@ function loadContractorSnapshot(){
     };
   }
 
+  const clean = v => String(v ?? "").trim();
   const setText = (id, value) => {
     const el = document.getElementById(id);
-    if(el) el.innerText = value;
+    if(el) el.innerText = clean(value) || "-";
   };
 
   const setDisplay = (id, show) => {
@@ -6328,21 +6309,42 @@ function loadContractorSnapshot(){
     if(el) el.style.display = show ? "" : "none";
   };
 
+  const getArray = value => Array.isArray(value) ? value.filter(Boolean) : String(value||"").split("\n").join(",").split(",").map(v=>v.trim()).filter(Boolean);
+  const logoUrl = clean(contractor.logo_url || contractor.company_logo_url || contractor.logo || contractor.company_logo || contractor.photo_url || "");
+  const photos = getArray(contractor.portfolio_photos || contractor.portfolio_photo_urls || contractor.gallery_photos || contractor.project_photos);
+
   setText("contractorCompanyName", contractor.company || contractor.company_name || contractor.business_name || contractor.name || "Contractor");
 
   const photo = document.getElementById("contractorPhoto");
   if(photo){
-    photo.src = contractor.image_url || contractor.image || contractor.logo_url || contractor.photo_url || "https://placehold.co/120x120";
+    photo.src = logoUrl || "https://placehold.co/120x120?text=Logo";
   }
 
   setText("contractorRating", contractor.rating || "0");
   setText("contractorReviews", contractor.reviews || contractor.review_count || "0");
   setText("contractorProjects", `${contractor.projects_completed || contractor.projects || 0} completed projects`);
   setText("contractorBio", contractor.bio || contractor.description || "No contractor bio available.");
+  setText("contractorPrimaryTrade", contractor.primary_trade || contractor.trade || "-");
+  setText("contractorServiceArea", contractor.location || contractor.city || contractor.service_area || "-");
+  setText("contractorPhone", contractor.phone || "-");
+  setText("contractorWebsite", contractor.website_url || contractor.website || "-");
+  setText("contractorYearsBusiness", contractor.years_in_business || "-");
+  setText("contractorLicenseNumber", contractor.license_number || contractor.license || "-");
+  setText("contractorWhyChooseUs", contractor.why_choose_us || "-");
 
-  setDisplay("verifiedBadge", contractor.verified !== false);
-  setDisplay("insuredBadge", !!contractor.insured);
-  setDisplay("licensedBadge", !!contractor.licensed);
+  const licensed = !!(contractor.licensed || contractor.license_number || contractor.license_document_url || contractor.license);
+  const insured = !!(contractor.insured || contractor.insurance_company || contractor.insurance_document_url);
+  const verified = contractor.verified !== false && (contractor.is_approved === true || contractor.can_go_live === true || contractor.verified === true || licensed || insured);
+  setDisplay("verifiedBadge", verified);
+  setDisplay("insuredBadge", insured);
+  setDisplay("licensedBadge", licensed);
+
+  const grid = document.getElementById("contractorSnapshotPhotos");
+  if(grid){
+    grid.innerHTML = photos.length
+      ? photos.slice(0, 9).map(src => `<div class="contractor-snapshot-photo"><img src="${String(src).replace(/"/g,'&quot;')}" alt="Project photo"></div>`).join("")
+      : '<div class="contractor-snapshot-photo">No project photos yet.</div>';
+  }
 }
 
 document.addEventListener("DOMContentLoaded", loadContractorSnapshot);
@@ -13839,103 +13841,6 @@ document.addEventListener("DOMContentLoaded", function(){
     }
   }, 1200);
 });
-</script>
-
-<script>
-/* ===== CONTRACTOR SNAPSHOT PROJECT PHOTOS MIRROR ===== */
-(function(){
-  function escapeSnapshotHTML(value){
-    return String(value || '').replace(/[&<>"']/g, function(ch){
-      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
-    });
-  }
-
-  async function snapshotRoomId(){
-    if(window.currentProjectRoomId) return window.currentProjectRoomId;
-    if(typeof ensureProjectRoom === 'function'){
-      try{ return await ensureProjectRoom(); }catch(err){ console.warn('Could not resolve project room for contractor photos:', err); }
-    }
-    const params = new URLSearchParams(window.location.search);
-    return params.get('room') || params.get('project_room_id') || null;
-  }
-
-  async function snapshotFileUrl(path){
-    if(!path || !window.supabaseClient) return '#';
-    try{
-      const signed = await supabaseClient.storage.from('project-files').createSignedUrl(path, 3600);
-      if(!signed.error && signed.data && signed.data.signedUrl) return signed.data.signedUrl;
-    }catch(err){}
-    try{
-      const pub = supabaseClient.storage.from('project-files').getPublicUrl(path);
-      return (pub.data && pub.data.publicUrl) || '#';
-    }catch(err){
-      return '#';
-    }
-  }
-
-  window.loadContractorSnapshotPhotos = async function(){
-    const grid = document.getElementById('contractorSnapshotPhotos');
-    if(!grid) return;
-
-    if(!window.supabaseClient){
-      grid.innerHTML = '<div class="contractor-snapshot-photo">Photos load after project room connects.</div>';
-      return;
-    }
-
-    const roomId = await snapshotRoomId();
-    if(!roomId){
-      grid.innerHTML = '<div class="contractor-snapshot-photo">No project room connected yet.</div>';
-      return;
-    }
-
-    const { data, error } = await supabaseClient
-      .from('project_room_files')
-      .select('*')
-      .eq('project_room_id', roomId)
-      .order('created_at', { ascending:false })
-      .limit(24);
-
-    if(error){
-      console.warn('Contractor snapshot photo load failed:', error);
-      grid.innerHTML = '<div class="contractor-snapshot-photo">Project photos unavailable.</div>';
-      return;
-    }
-
-    const photos = (data || []).filter(function(file){
-      const type = String(file.file_type || '').toLowerCase();
-      const cat = String(file.file_category || '').toLowerCase();
-      const name = String(file.file_name || '').toLowerCase();
-      return type.indexOf('image/') === 0 || cat === 'photo' || /\.(jpg|jpeg|png|webp|gif)$/i.test(name);
-    }).slice(0,6);
-
-    if(!photos.length){
-      grid.innerHTML = '<div class="contractor-snapshot-photo">No project photos yet.</div>';
-      return;
-    }
-
-    const cards = await Promise.all(photos.map(async function(file){
-      const href = await snapshotFileUrl(file.file_path);
-      const title = escapeSnapshotHTML(file.file_name || 'Project photo');
-      return '<a class="contractor-snapshot-photo" href="'+href+'" target="_blank" rel="noopener" title="'+title+'"><img src="'+href+'" alt="'+title+'"></a>';
-    }));
-
-    grid.innerHTML = cards.join('');
-  };
-
-  const oldLoader = window.loadProjectRoomFiles;
-  if(typeof oldLoader === 'function' && oldLoader.datasetSnapshotPhotosWrapped !== 'true'){
-    const wrapped = async function(){
-      const result = await oldLoader.apply(this, arguments);
-      try{ await window.loadContractorSnapshotPhotos(); }catch(err){ console.warn(err); }
-      return result;
-    };
-    wrapped.datasetSnapshotPhotosWrapped = 'true';
-    window.loadProjectRoomFiles = wrapped;
-  }
-
-  document.addEventListener('DOMContentLoaded', function(){ setTimeout(window.loadContractorSnapshotPhotos, 900); });
-  window.addEventListener('load', function(){ setTimeout(window.loadContractorSnapshotPhotos, 1200); });
-})();
 </script>
 
 </body>
