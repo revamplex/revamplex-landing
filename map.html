@@ -3055,6 +3055,35 @@
   .premium-thumb-row { grid-template-columns:repeat(3,1fr) !important; }
 }
 
+
+
+/* ===== REVAMPLEX PORTFOLIO PHOTO DELETE BUTTON ===== */
+.portfolio-thumb{
+  position:relative !important;
+  overflow:hidden !important;
+}
+.portfolio-delete-btn{
+  position:absolute !important;
+  top:6px !important;
+  right:6px !important;
+  width:26px !important;
+  height:26px !important;
+  border:0 !important;
+  border-radius:999px !important;
+  display:grid !important;
+  place-items:center !important;
+  background:rgba(15,23,42,.86) !important;
+  color:#fff !important;
+  font-size:20px !important;
+  line-height:1 !important;
+  font-weight:900 !important;
+  cursor:pointer !important;
+  z-index:3 !important;
+  box-shadow:0 8px 18px rgba(0,0,0,.25) !important;
+}
+.portfolio-delete-btn:hover{
+  background:#dc2626 !important;
+}
 </style>
 </head>
 <body>
@@ -5455,6 +5484,25 @@ function getContractorImage(item) {
 function normalizeContractorAssetUrl(value) {
   const url = String(value || '').trim();
   if (!url || url === '-' || url.toLowerCase() === 'null' || url.toLowerCase() === 'undefined') return '';
+
+  // Already a browser-ready URL.
+  if (/^(https?:|data:|blob:)/i.test(url)) return url;
+
+  // If Supabase stored only a storage path, convert it to a public URL.
+  // Dashboard uploads use the contractor-assets bucket. Some older rows may
+  // include the bucket name in the path, so support both formats.
+  try {
+    if (window.supabaseClient) {
+      const cleanPath = url.replace(/^contractor-assets\//, '').replace(/^public\//, '');
+      const { data } = window.supabaseClient.storage
+        .from('contractor-assets')
+        .getPublicUrl(cleanPath);
+      if (data && data.publicUrl) return data.publicUrl;
+    }
+  } catch (err) {
+    console.warn('Could not build contractor asset public URL:', err);
+  }
+
   return url;
 }
 
@@ -5497,20 +5545,43 @@ function getContractorCoverUrl(item) {
 }
 
 function getContractorPortfolioPhotos(item) {
+  const cover = getContractorCoverUrl(item);
+  const logo = getContractorLogoUrl(item);
+  const blocked = new Set([cover, logo].filter(Boolean));
+
   const photos = [
     ...getProfileArrayValue(item.portfolio_photos),
     ...getProfileArrayValue(item.portfolio_photo_urls),
-    ...getProfileArrayValue(item.gallery_photos),
     ...getProfileArrayValue(item.project_photos),
+    ...getProfileArrayValue(item.project_photo_urls),
+    ...getProfileArrayValue(item.project_images),
+    ...getProfileArrayValue(item.gallery_photos),
     ...getProfileArrayValue(item.photo_urls)
   ];
-  return [...new Set(photos)].filter(Boolean);
+
+  // Portfolio album should be project photos only.
+  // Do not repeat the cover/featured photo or company logo in this album.
+  return [...new Set(photos)].filter(src => src && !blocked.has(src));
 }
 
 function getContractorProfilePhotos(item) {
+  // This is the hero gallery: cover first, then portfolio photos.
   const cover = getContractorCoverUrl(item);
   const photos = getContractorPortfolioPhotos(item);
   return [...new Set([cover, ...photos].filter(Boolean))];
+}
+
+function renderPortfolioPhotoThumb(src, item) {
+  const safeSrc = normalizeContractorAssetUrl(src);
+  const canDelete = canEditItem(item);
+  const encoded = encodeURIComponent(safeSrc);
+
+  return `
+    <div class="premium-thumb portfolio-thumb">
+      <img src="${safeSrc}" onerror="hideMissingCardImage(this)">
+      ${canDelete ? `<button class="portfolio-delete-btn" type="button" data-action="delete-portfolio-photo" data-id="${item.id}" data-photo="${encoded}" title="Delete this portfolio photo">×</button>` : ``}
+    </div>
+  `;
 }
 
 function getContractorTrustBadges(item) {
@@ -5555,8 +5626,10 @@ async function mergeContractorProfileAssets(contractorRows) {
       company_logo_url: row.company_logo_url || row.logo_url || profile.company_logo_url || profile.logo_url || profile.company_logo || profile.logo || '',
       cover_photo_url: row.cover_photo_url || row.featured_photo_url || profile.cover_photo_url || profile.featured_photo_url || profile.cover_url || '',
       featured_photo_url: row.featured_photo_url || row.cover_photo_url || profile.featured_photo_url || profile.cover_photo_url || profile.cover_url || '',
-      portfolio_photos: row.portfolio_photos || row.portfolio_photo_urls || profile.portfolio_photos || profile.portfolio_photo_urls || profile.gallery_photos || [],
-      portfolio_photo_urls: row.portfolio_photo_urls || row.portfolio_photos || profile.portfolio_photo_urls || profile.portfolio_photos || profile.gallery_photos || []
+      portfolio_photos: row.portfolio_photos || row.portfolio_photo_urls || row.project_photos || row.project_photo_urls || profile.portfolio_photos || profile.portfolio_photo_urls || profile.project_photos || profile.project_photo_urls || profile.gallery_photos || [],
+      portfolio_photo_urls: row.portfolio_photo_urls || row.portfolio_photos || row.project_photo_urls || row.project_photos || profile.portfolio_photo_urls || profile.portfolio_photos || profile.project_photo_urls || profile.project_photos || profile.gallery_photos || [],
+      project_photos: row.project_photos || row.project_photo_urls || profile.project_photos || profile.project_photo_urls || row.portfolio_photos || profile.portfolio_photos || [],
+      project_photo_urls: row.project_photo_urls || row.project_photos || profile.project_photo_urls || profile.project_photos || row.portfolio_photo_urls || profile.portfolio_photo_urls || []
     };
   });
 }
@@ -6297,6 +6370,69 @@ function canEditItem(item) {
   return String(item.user_id || item.owner_id || item.profile_id || item.contractor_id || '') === String(currentUserId);
 }
 
+
+async function deleteContractorPortfolioPhoto(contractorId, encodedPhotoUrl) {
+  try {
+    const photoUrl = decodeURIComponent(encodedPhotoUrl || '');
+    if (!photoUrl) return;
+
+    const rawId = String(contractorId || '');
+    const cleanId = rawId.replace(/^contractor-/, '');
+    const item = contractors.find(entry =>
+      String(entry.id) === rawId ||
+      String(entry.id) === cleanId ||
+      `contractor-${entry.id}` === rawId
+    );
+
+    if (!item || !canEditItem(item)) {
+      alert('Only the contractor who owns this profile can delete portfolio photos.');
+      return;
+    }
+
+    if (!confirm('Delete this portfolio photo from your album?')) return;
+
+    const remaining = getContractorPortfolioPhotos(item).filter(src => src !== photoUrl);
+
+    // Update local display first so the card feels instant.
+    item.portfolio_photos = remaining;
+    item.portfolio_photo_urls = remaining;
+    item.project_photos = remaining;
+    item.project_photo_urls = remaining;
+
+    const updatePayload = {
+      portfolio_photos: remaining,
+      portfolio_photo_urls: remaining,
+      project_photos: remaining,
+      project_photo_urls: remaining
+    };
+
+    const currentUserId = window.__currentUserId || item.user_id || item.profile_id || item.id;
+
+    // Try both places because your app has used both profiles and contractors.
+    const updates = [];
+    if (window.supabaseClient && currentUserId) {
+      updates.push(window.supabaseClient.from('profiles').update(updatePayload).eq('id', currentUserId));
+      updates.push(window.supabaseClient.from('contractors').update(updatePayload).eq('id', item.id));
+      if (item.user_id) updates.push(window.supabaseClient.from('contractors').update(updatePayload).eq('user_id', item.user_id));
+    }
+
+    const results = await Promise.allSettled(updates);
+    const saved = results.some(result => result.status === 'fulfilled' && !result.value?.error);
+
+    if (!saved && updates.length) {
+      console.warn('Portfolio delete update results:', results);
+      alert('The photo was removed from the card, but Supabase did not save the delete. Check that profiles/contractors have portfolio photo columns and update policies.');
+    } else {
+      showStatus('Portfolio photo deleted');
+    }
+
+    openDetailModal(item);
+  } catch (err) {
+    console.error('Delete portfolio photo failed:', err);
+    alert(err.message || 'Could not delete this portfolio photo.');
+  }
+}
+
 async function increaseBidLimit(jobId) {
   try {
     const rawId = String(jobId || '');
@@ -6489,8 +6625,8 @@ async function increaseBidLimit(jobId) {
         const tradeText = getFullTradeText(item) || getCompactTradeLabel(item);
         const coverUrl = getContractorCoverUrl(item) || getContractorImage(item);
         const logoUrl = getContractorLogoUrl(item);
-        const profilePhotos = getContractorProfilePhotos(item);
-        const galleryPhotos = profilePhotos.length ? profilePhotos : [coverUrl];
+        const profilePhotos = getContractorPortfolioPhotos(item);
+        const galleryPhotos = getContractorProfilePhotos(item).length ? getContractorProfilePhotos(item) : [coverUrl].filter(Boolean);
         const logoInitial = String(companyName || 'R').trim().charAt(0).toUpperCase() || 'R';
         const badges = getContractorTrustBadges(item);
         const specialties = splitTrades(tradeText).length ? splitTrades(tradeText) : (item.tags || []);
@@ -6587,9 +6723,7 @@ async function increaseBidLimit(jobId) {
                 <div class="premium-section">
                   <h4>Portfolio Photos</h4>
                   <div class="premium-thumb-row">
-                    ${profilePhotos.slice(0, 6).map(src => `
-                      <div class="premium-thumb"><img src="${src}" onerror="hideMissingCardImage(this)"></div>
-                    `).join('')}
+                    ${profilePhotos.slice(0, 12).map(src => renderPortfolioPhotoThumb(src, item)).join('')}
                   </div>
                 </div>
               ` : ``}
@@ -7489,6 +7623,11 @@ detailContent.addEventListener('click', e => {
     return;
   }
 
+  if (button.dataset.action === 'delete-portfolio-photo') {
+    deleteContractorPortfolioPhoto(button.dataset.id, button.dataset.photo);
+    return;
+  }
+
   handleCardAction(button.dataset.action, button.dataset.id);
 });
 
@@ -7788,8 +7927,8 @@ async function applyPublicReviewStatsToMapItems() {
       const proName = getContractorDisplayName(item);
       const logoUrl = getContractorLogoUrl(item);
       const coverUrl = getContractorCoverUrl(item) || getContractorImage(item);
-      const profilePhotos = getContractorProfilePhotos(item);
-      const galleryPhotos = profilePhotos.length ? profilePhotos : [coverUrl];
+      const profilePhotos = getContractorPortfolioPhotos(item);
+      const galleryPhotos = getContractorProfilePhotos(item).length ? getContractorProfilePhotos(item) : [coverUrl].filter(Boolean);
       const initials = String(proName || 'R').trim().charAt(0).toUpperCase() || 'R';
       const rating = Number(item.rating || 0).toFixed(1);
       const tags = item.tags && item.tags.length ? item.tags : splitTrades(tradeText).slice(0,8);
@@ -7867,7 +8006,7 @@ async function applyPublicReviewStatsToMapItems() {
               <div class="premium-section">
                 <h4>Portfolio Photos</h4>
                 <div class="premium-thumb-row">
-                  ${profilePhotos.slice(0,6).map(src => `<div class="premium-thumb"><img src="${src}" onerror="hideMissingCardImage(this)"></div>`).join('')}
+                  ${profilePhotos.slice(0,12).map(src => renderPortfolioPhotoThumb(src, item)).join('')}
                 </div>
               </div>
             ` : ''}
