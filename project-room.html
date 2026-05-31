@@ -4731,6 +4731,70 @@ body.light-room.command-room #contractorSnapshotPanel #contractorProjects{
   color:#0f172a !important;
 }
 
+
+
+/* ===== CONTRACTOR SNAPSHOT PROJECT PHOTOS ===== */
+.contractor-snapshot-photos{
+  width:100%;
+  margin-bottom:14px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:linear-gradient(180deg,#fff,#fff7ed);
+  padding:14px;
+}
+.contractor-snapshot-photos h4{
+  margin:0 0 6px;
+  font-size:1rem;
+}
+.contractor-snapshot-photos p{
+  margin:0 0 12px;
+  color:var(--muted);
+  font-size:.9rem;
+  line-height:1.35;
+}
+.contractor-snapshot-photo-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+.contractor-snapshot-photo{
+  min-height:86px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  overflow:hidden;
+  background:#f8fafc;
+  display:grid;
+  place-items:center;
+  color:var(--muted);
+  font-size:.82rem;
+  font-weight:800;
+  text-align:center;
+}
+.contractor-snapshot-photo img{
+  width:100%;
+  height:100%;
+  min-height:86px;
+  object-fit:cover;
+  display:block;
+}
+body.command-room #contractorSnapshotPanel .contractor-snapshot-photos{
+  background:rgba(255,255,255,.06);
+  border-color:rgba(255,255,255,.12);
+}
+body.command-room #contractorSnapshotPanel .contractor-snapshot-photos h4{color:#fff;}
+body.command-room #contractorSnapshotPanel .contractor-snapshot-photos p{color:#cbd5e1;}
+body.command-room #contractorSnapshotPanel .contractor-snapshot-photo{
+  background:rgba(15,23,42,.55);
+  border-color:rgba(255,255,255,.12);
+  color:#cbd5e1;
+}
+@media(max-width:768px){
+  .contractor-snapshot-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media(max-width:480px){
+  .contractor-snapshot-photo-grid{grid-template-columns:1fr;}
+}
+
 @media(max-width:768px){
   .contractor-snapshot{
     flex-direction:column;
@@ -4951,6 +5015,13 @@ Contractor Name
 Contractor bio appears here...
 </p>
 
+<div class="contractor-snapshot-photos">
+  <h4>Project Photos</h4>
+  <p>Recent project photos shared in this private room.</p>
+  <div id="contractorSnapshotPhotos" class="contractor-snapshot-photo-grid">
+    <div class="contractor-snapshot-photo">No project photos yet.</div>
+  </div>
+</div>
 
 </div>
 
@@ -13768,6 +13839,103 @@ document.addEventListener("DOMContentLoaded", function(){
     }
   }, 1200);
 });
+</script>
+
+<script>
+/* ===== CONTRACTOR SNAPSHOT PROJECT PHOTOS MIRROR ===== */
+(function(){
+  function escapeSnapshotHTML(value){
+    return String(value || '').replace(/[&<>"']/g, function(ch){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+    });
+  }
+
+  async function snapshotRoomId(){
+    if(window.currentProjectRoomId) return window.currentProjectRoomId;
+    if(typeof ensureProjectRoom === 'function'){
+      try{ return await ensureProjectRoom(); }catch(err){ console.warn('Could not resolve project room for contractor photos:', err); }
+    }
+    const params = new URLSearchParams(window.location.search);
+    return params.get('room') || params.get('project_room_id') || null;
+  }
+
+  async function snapshotFileUrl(path){
+    if(!path || !window.supabaseClient) return '#';
+    try{
+      const signed = await supabaseClient.storage.from('project-files').createSignedUrl(path, 3600);
+      if(!signed.error && signed.data && signed.data.signedUrl) return signed.data.signedUrl;
+    }catch(err){}
+    try{
+      const pub = supabaseClient.storage.from('project-files').getPublicUrl(path);
+      return (pub.data && pub.data.publicUrl) || '#';
+    }catch(err){
+      return '#';
+    }
+  }
+
+  window.loadContractorSnapshotPhotos = async function(){
+    const grid = document.getElementById('contractorSnapshotPhotos');
+    if(!grid) return;
+
+    if(!window.supabaseClient){
+      grid.innerHTML = '<div class="contractor-snapshot-photo">Photos load after project room connects.</div>';
+      return;
+    }
+
+    const roomId = await snapshotRoomId();
+    if(!roomId){
+      grid.innerHTML = '<div class="contractor-snapshot-photo">No project room connected yet.</div>';
+      return;
+    }
+
+    const { data, error } = await supabaseClient
+      .from('project_room_files')
+      .select('*')
+      .eq('project_room_id', roomId)
+      .order('created_at', { ascending:false })
+      .limit(24);
+
+    if(error){
+      console.warn('Contractor snapshot photo load failed:', error);
+      grid.innerHTML = '<div class="contractor-snapshot-photo">Project photos unavailable.</div>';
+      return;
+    }
+
+    const photos = (data || []).filter(function(file){
+      const type = String(file.file_type || '').toLowerCase();
+      const cat = String(file.file_category || '').toLowerCase();
+      const name = String(file.file_name || '').toLowerCase();
+      return type.indexOf('image/') === 0 || cat === 'photo' || /\.(jpg|jpeg|png|webp|gif)$/i.test(name);
+    }).slice(0,6);
+
+    if(!photos.length){
+      grid.innerHTML = '<div class="contractor-snapshot-photo">No project photos yet.</div>';
+      return;
+    }
+
+    const cards = await Promise.all(photos.map(async function(file){
+      const href = await snapshotFileUrl(file.file_path);
+      const title = escapeSnapshotHTML(file.file_name || 'Project photo');
+      return '<a class="contractor-snapshot-photo" href="'+href+'" target="_blank" rel="noopener" title="'+title+'"><img src="'+href+'" alt="'+title+'"></a>';
+    }));
+
+    grid.innerHTML = cards.join('');
+  };
+
+  const oldLoader = window.loadProjectRoomFiles;
+  if(typeof oldLoader === 'function' && oldLoader.datasetSnapshotPhotosWrapped !== 'true'){
+    const wrapped = async function(){
+      const result = await oldLoader.apply(this, arguments);
+      try{ await window.loadContractorSnapshotPhotos(); }catch(err){ console.warn(err); }
+      return result;
+    };
+    wrapped.datasetSnapshotPhotosWrapped = 'true';
+    window.loadProjectRoomFiles = wrapped;
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(window.loadContractorSnapshotPhotos, 900); });
+  window.addEventListener('load', function(){ setTimeout(window.loadContractorSnapshotPhotos, 1200); });
+})();
 </script>
 
 </body>
