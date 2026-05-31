@@ -52,6 +52,35 @@ function setText(id,v){const el=document.getElementById(id);if(el)el.innerText=c
 function safeClientText(v){return cleanDisplayText(v).replace(/[<>&"']/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;","'":"&#039;"}[c]))}
 function cleanProfileObject(obj){if(!obj)return obj;['website','website_url','years_in_business','team_size','why_choose_us','insurance_company','bio','company','name','full_name','location','city','phone','service_radius','license','license_number','primary_trade','trade','trades_full'].forEach(k=>{if(typeof obj[k]==='string')obj[k]=cleanDisplayText(obj[k])});return obj}
 
+async function upsertWithSchemaRetry(tableName,payload,options={selectSingle:false}){
+  let cleanPayload={...(payload||{})};
+  const removed=[];
+
+  for(let attempt=0;attempt<80;attempt++){
+    let query=client.from(tableName).upsert(cleanPayload);
+    let result=options.selectSingle?await query.select('*').single():await query;
+
+    if(!result.error){
+      if(removed.length) console.warn(`Skipped columns not found on ${tableName}:`,removed);
+      return result;
+    }
+
+    const message=String(result.error.message||'');
+    const match=message.match(/Could not find the '([^']+)' column/i);
+
+    if(match&&match[1]&&Object.prototype.hasOwnProperty.call(cleanPayload,match[1])){
+      removed.push(match[1]);
+      delete cleanPayload[match[1]];
+      continue;
+    }
+
+    return result;
+  }
+
+  return {data:null,error:{message:`Could not save ${tableName}: too many missing columns. Removed: ${removed.join(', ')}`}};
+}
+
+
 function getProfileArray(value){if(Array.isArray(value))return value.filter(Boolean);return String(value||'').split('\n').join(',').split(',').map(v=>v.trim()).filter(Boolean)}
 function normalizeContractorAssetUrl(v){return cleanText(v||'')}
 function pickLogoUrl(profile){const candidates=[profile?.logo_url,profile?.company_logo_url,profile?.logo,profile?.company_logo,profile?.photo_url];return normalizeContractorAssetUrl(candidates.find(Boolean)||'')}
