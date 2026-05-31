@@ -6256,12 +6256,11 @@ async function loadContractorSnapshot(){
 
   async function fetchContractorById(id){
     if(!id || !window.supabaseClient) return null;
-    let row = await maybeSingle(window.supabaseClient.from("contractors").select("*").eq("id", id));
-    if(row) return row;
-    row = await maybeSingle(window.supabaseClient.from("contractors").select("*").eq("user_id", id));
-    if(row) return row;
-    row = await maybeSingle(window.supabaseClient.from("profiles").select("*").eq("id", id));
-    return row;
+    const contractorById = await maybeSingle(window.supabaseClient.from("contractors").select("*").eq("id", id));
+    const contractorByUser = contractorById ? null : await maybeSingle(window.supabaseClient.from("contractors").select("*").eq("user_id", id));
+    const profile = await maybeSingle(window.supabaseClient.from("profiles").select("*").eq("id", id));
+    /* Merge both tables so logo / featured photo / portfolio photos still show even when one table is missing columns. */
+    return {...(contractorByUser || contractorById || {}), ...(profile || {})};
   }
 
   try{
@@ -6310,8 +6309,8 @@ async function loadContractorSnapshot(){
   };
 
   const getArray = value => Array.isArray(value) ? value.filter(Boolean) : String(value||"").split("\n").join(",").split(",").map(v=>v.trim()).filter(Boolean);
-  const logoUrl = clean(contractor.logo_url || contractor.company_logo_url || contractor.logo || contractor.company_logo || contractor.photo_url || "");
-  const photos = getArray(contractor.portfolio_photos || contractor.portfolio_photo_urls || contractor.gallery_photos || contractor.project_photos);
+  const logoUrl = clean(contractor.logo_url || contractor.company_logo_url || contractor.logo || contractor.company_logo || contractor.profile_logo_url || contractor.photo_url || "");
+  const photos = getArray(contractor.portfolio_photos || contractor.portfolio_photo_urls || contractor.gallery_photos || contractor.project_photos || contractor.project_photo_urls);
 
   setText("contractorCompanyName", contractor.company || contractor.company_name || contractor.business_name || contractor.name || "Contractor");
 
