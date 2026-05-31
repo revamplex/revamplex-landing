@@ -5440,9 +5440,8 @@ function getDisplayCity(item) {
 }
 
 function getContractorImage(item) {
-  if (item.image_url) return item.image_url;
-  if (item.image) return item.image;
-
+  // Keep map contractor cards on RevampLEX default trade images only.
+  // Do NOT use uploaded contractor cover photos, portfolio images, logos, or image_url values here.
   const trades = splitTrades(item.trades_full || item.trade || '');
 
   if (trades.length > 1) {
