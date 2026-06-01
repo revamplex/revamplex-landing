@@ -1385,211 +1385,6 @@
       background: var(--bg);
       color: var(--text);
     }
-
-
-/* ===== REVAMPLEX LIGHT / DARK THEME TOGGLE ===== */
-body.revamplex-dark {
-  --bg: #020617;
-  --card: rgba(15, 23, 42, 0.96);
-  --text: #f8fafc;
-  --muted: #cbd5e1;
-  --line: rgba(148, 163, 184, 0.22);
-  --shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
-  --shadow-soft: 0 10px 24px rgba(0, 0, 0, 0.34);
-  background:
-    radial-gradient(circle at top left, rgba(249,115,22,.15), transparent 34%),
-    radial-gradient(circle at bottom right, rgba(59,130,246,.11), transparent 36%),
-    #020617;
-  color: var(--text);
-}
-
-
-.results-title{
-  color:#000 !important;
-  font-weight:800;
-}
-.action-btn{
-  color:#000 !important;
-}
-body.revamplex-dark .results-title,
-body.revamplex-dark .action-btn{
-  color:#f8fafc !important;
-}
-
-.theme-toggle-btn {
-  height: 34px;
-  padding: 0 12px;
-  border: 1px solid rgba(249,115,22,.24);
-  border-radius: 999px;
-  background: rgba(255,247,237,.96);
-  color: #9a3412;
-  font-size: 12px;
-  font-weight: 900;
-  white-space: nowrap;
-  cursor: pointer;
-  box-shadow: 0 8px 18px rgba(15,23,42,.10);
-}
-
-.theme-toggle-btn:hover {
-  transform: translateY(-1px);
-}
-
-body.revamplex-dark .theme-toggle-btn {
-  background: rgba(15,23,42,.92);
-  color: #fed7aa;
-  border-color: rgba(249,115,22,.38);
-  box-shadow: 0 10px 24px rgba(0,0,0,.35);
-}
-
-body.revamplex-dark .topbar-inner,
-body.revamplex-dark .results-title,
-body.revamplex-dark .action-btn,
-body.revamplex-dark .restore-ui-btn,
-body.revamplex-dark .revamp-map-legend {
-  background: rgba(15, 23, 42, 0.90) !important;
-  border-color: rgba(148, 163, 184, 0.22) !important;
-  color: var(--text) !important;
-  box-shadow: var(--shadow-soft) !important;
-}
-
-body.revamplex-dark .logo-wrap,
-body.revamplex-dark .search-box,
-body.revamplex-dark .filter-select,
-body.revamplex-dark .filter-pill,
-body.revamplex-dark .mini-btn.secondary,
-body.revamplex-dark .favorite-btn,
-body.revamplex-dark .modal-btn.secondary,
-body.revamplex-dark .welcome-back-btn,
-body.revamplex-dark .activity-stat-pill,
-body.revamplex-dark .premium-stat-pill,
-body.revamplex-dark .premium-highlight-tags span,
-body.revamplex-dark .activity-highlight-tags span,
-body.revamplex-dark .premium-bid-item,
-body.revamplex-dark .plan-card {
-  background: rgba(15, 23, 42, 0.96) !important;
-  color: var(--text) !important;
-  border-color: var(--line) !important;
-}
-
-body.revamplex-dark .card-inner,
-body.revamplex-dark .modal-card,
-body.revamplex-dark .welcomeCard,
-body.revamplex-dark .site-footer,
-body.revamplex-dark .premium-action-panel,
-body.revamplex-dark .premium-pro-card,
-body.revamplex-dark .activity-contractor-panel,
-body.revamplex-dark .detail-panel,
-body.revamplex-dark .workflow-card {
-  background:
-    radial-gradient(circle at top right, rgba(249,115,22,.10), transparent 34%),
-    rgba(15, 23, 42, 0.97) !important;
-  color: var(--text) !important;
-  border-color: var(--line) !important;
-}
-
-body.revamplex-dark .map-results-section,
-body.revamplex-dark .map-footer-section {
-  background: linear-gradient(180deg, #020617 0%, #0f172a 100%) !important;
-  border-color: rgba(148, 163, 184, 0.18) !important;
-}
-
-body.revamplex-dark .footer-cta {
-  background:
-    radial-gradient(circle at top right, rgba(249,115,22,0.20), transparent 38%),
-    #020617 !important;
-  border: 1px solid rgba(148,163,184,.18);
-}
-
-body.revamplex-dark .meta-box,
-body.revamplex-dark .input,
-body.revamplex-dark .textarea,
-body.revamplex-dark .select,
-body.revamplex-dark .welcomeInput,
-body.revamplex-dark .welcomeSelect,
-body.revamplex-dark .welcomeTextarea,
-body.revamplex-dark .social-links a {
-  background: rgba(2, 6, 23, 0.82) !important;
-  color: var(--text) !important;
-  border-color: var(--line) !important;
-}
-
-body.revamplex-dark .search-box input,
-body.revamplex-dark input,
-body.revamplex-dark textarea,
-body.revamplex-dark select {
-  color: var(--text) !important;
-}
-
-body.revamplex-dark .search-box input::placeholder,
-body.revamplex-dark input::placeholder,
-body.revamplex-dark textarea::placeholder {
-  color: #94a3b8 !important;
-}
-
-body.revamplex-dark .card-sub,
-body.revamplex-dark .info-row,
-body.revamplex-dark .meta-label,
-body.revamplex-dark .footer-brand p,
-body.revamplex-dark .footer-col a,
-body.revamplex-dark .footer-bottom,
-body.revamplex-dark .premium-section p,
-body.revamplex-dark .activity-section p,
-body.revamplex-dark .workflow-card p,
-body.revamplex-dark .detail-panel p,
-body.revamplex-dark .welcomeSub,
-body.revamplex-dark .demoBtn {
-  color: var(--muted) !important;
-}
-
-body.revamplex-dark .footer-col h4,
-body.revamplex-dark .footer-brand strong,
-body.revamplex-dark .card-title,
-body.revamplex-dark .meta-value,
-body.revamplex-dark .modal-title,
-body.revamplex-dark .welcomeTitle,
-body.revamplex-dark .premium-big-title,
-body.revamplex-dark .activity-big-title,
-body.revamplex-dark .premium-section h4,
-body.revamplex-dark .activity-section h4,
-body.revamplex-dark .premium-pro-copy h3,
-body.revamplex-dark .activity-contractor-copy h3,
-body.revamplex-dark .premium-pro-stats strong,
-body.revamplex-dark .activity-contractor-stats strong,
-body.revamplex-dark .label,
-body.revamplex-dark .welcomeLabel,
-body.revamplex-dark .logo-fallback .revamp {
-  color: var(--text) !important;
-}
-
-body.revamplex-dark .rating-pill {
-  background: rgba(148,163,184,.14) !important;
-  color: var(--text) !important;
-}
-
-body.revamplex-dark .leaflet-container {
-  background: #020617 !important;
-}
-
-body.revamplex-dark .leaflet-control-zoom a,
-body.revamplex-dark .leaflet-popup-content-wrapper {
-  background: #0f172a !important;
-  color: #f8fafc !important;
-  border-color: rgba(148,163,184,.25) !important;
-}
-
-body.revamplex-dark .leaflet-control-attribution {
-  background: rgba(15,23,42,.86) !important;
-  color: #cbd5e1 !important;
-}
-
-@media (max-width: 640px) {
-  .theme-toggle-btn {
-    height: 32px !important;
-    padding: 0 9px !important;
-    font-size: 11px !important;
-  }
-}
-
     button, input, select, textarea { font: inherit; }
 
 #app {
@@ -3291,6 +3086,195 @@ body.revamplex-dark .leaflet-control-attribution {
 .portfolio-delete-btn:hover{
   background:#dc2626 !important;
 }
+
+/* ===== REVAMPLEX LIGHT / DARK THEME TOGGLE ===== */
+/* Light mode remains the default. Dark mode is activated by adding .revamplex-dark to <body>. */
+.theme-toggle-btn{
+  flex:0 0 auto;
+  height:40px !important;
+  padding:0 14px !important;
+  border-radius:14px !important;
+  border:1px solid rgba(249,115,22,.34) !important;
+  background:#fff7ed !important;
+  color:#7c2d12 !important;
+  font-size:13px !important;
+  font-weight:900 !important;
+  box-shadow:0 8px 18px rgba(15,23,42,.10);
+  cursor:pointer;
+  white-space:nowrap;
+}
+
+.map-results-section .results-header-map-float .results-title{
+  color:#000 !important;
+  text-shadow:none !important;
+}
+.map-results-section .results-header-map-float .action-btn{
+  color:#000 !important;
+}
+
+body.revamplex-dark{
+  --bg:#070b14;
+  --card:rgba(15,23,42,.98);
+  --text:#f8fafc;
+  --muted:#94a3b8;
+  --line:rgba(148,163,184,.18);
+  --shadow:0 20px 48px rgba(0,0,0,.42);
+  --shadow-soft:0 12px 28px rgba(0,0,0,.34);
+  background:#070b14;
+  color:#f8fafc;
+}
+
+body.revamplex-dark #map{
+  background:#111827;
+  filter:saturate(1.05) contrast(1.08) brightness(.82);
+}
+
+/* subtle charcoal overlay so dark tiles look like the provided reference, not pure black */
+body.revamplex-dark #map::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:450;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 58% 42%, rgba(249,115,22,.12), transparent 24%),
+    linear-gradient(180deg, rgba(8,13,24,.16), rgba(8,13,24,.28));
+  mix-blend-mode:screen;
+}
+
+body.revamplex-dark .topbar-inner{
+  background:rgba(11,18,32,.94) !important;
+  border-color:rgba(148,163,184,.16) !important;
+  box-shadow:0 20px 44px rgba(0,0,0,.38) !important;
+}
+
+body.revamplex-dark .logo-wrap,
+body.revamplex-dark .search-box,
+body.revamplex-dark .filter-select,
+body.revamplex-dark .filter-pill,
+body.revamplex-dark .action-btn,
+body.revamplex-dark .favorite-btn,
+body.revamplex-dark .modal-card,
+body.revamplex-dark .welcomeCard{
+  background:#111827 !important;
+  color:#f8fafc !important;
+  border-color:rgba(148,163,184,.18) !important;
+}
+
+body.revamplex-dark .search-box input,
+body.revamplex-dark .input,
+body.revamplex-dark .textarea,
+body.revamplex-dark .select,
+body.revamplex-dark .welcomeInput,
+body.revamplex-dark .welcomeSelect,
+body.revamplex-dark .welcomeTextarea{
+  background:#0b1220 !important;
+  color:#f8fafc !important;
+  border-color:rgba(148,163,184,.22) !important;
+}
+
+body.revamplex-dark .search-box input::placeholder,
+body.revamplex-dark input::placeholder,
+body.revamplex-dark textarea::placeholder{
+  color:#94a3b8 !important;
+}
+
+body.revamplex-dark .theme-toggle-btn{
+  background:linear-gradient(135deg,#f97316,#ea580c) !important;
+  color:#fff !important;
+  border-color:rgba(255,255,255,.14) !important;
+  box-shadow:0 10px 22px rgba(249,115,22,.24);
+}
+
+body.revamplex-dark .map-results-section{
+  background:#070b14 !important;
+  border-top-color:rgba(148,163,184,.16) !important;
+}
+
+body.revamplex-dark .map-results-section .results-header-map-float .results-title{
+  background:rgba(255,255,255,.96) !important;
+  color:#000 !important;
+  border-color:rgba(255,255,255,.18) !important;
+  box-shadow:0 14px 34px rgba(0,0,0,.36) !important;
+}
+
+body.revamplex-dark .map-results-section .results-header-map-float .action-btn{
+  background:rgba(255,255,255,.96) !important;
+  color:#000 !important;
+  border-color:rgba(255,255,255,.18) !important;
+}
+
+body.revamplex-dark .card-inner{
+  background:#101827 !important;
+  border-color:rgba(249,115,22,.28) !important;
+  box-shadow:
+    0 22px 46px rgba(0,0,0,.38),
+    0 14px 34px rgba(249,115,22,.12) !important;
+}
+
+body.revamplex-dark .card-title,
+body.revamplex-dark .meta-value,
+body.revamplex-dark .info-row strong,
+body.revamplex-dark .label,
+body.revamplex-dark .welcomeLabel,
+body.revamplex-dark .footer-col h4{
+  color:#f8fafc !important;
+}
+
+body.revamplex-dark .card-sub,
+body.revamplex-dark .info-row,
+body.revamplex-dark .meta-label,
+body.revamplex-dark .welcomeSub,
+body.revamplex-dark .footer-brand p,
+body.revamplex-dark .footer-col a,
+body.revamplex-dark .footer-bottom{
+  color:#94a3b8 !important;
+}
+
+body.revamplex-dark .meta-box,
+body.revamplex-dark .detail-panel,
+body.revamplex-dark .workflow-card{
+  background:#0b1220 !important;
+  border-color:rgba(148,163,184,.16) !important;
+}
+
+body.revamplex-dark .mini-btn.secondary,
+body.revamplex-dark .modal-btn.secondary,
+body.revamplex-dark .welcome-back-btn{
+  background:#111827 !important;
+  color:#f8fafc !important;
+  border-color:rgba(148,163,184,.18) !important;
+}
+
+body.revamplex-dark .revamp-map-legend{
+  background:rgba(11,18,32,.90) !important;
+  border-color:rgba(148,163,184,.16) !important;
+  color:#f8fafc !important;
+}
+
+body.revamplex-dark .count-pill{
+  background:rgba(15,23,42,.88) !important;
+  color:#fff !important;
+}
+
+body.revamplex-dark .site-footer{
+  background:#0b1220 !important;
+  border-color:rgba(148,163,184,.16) !important;
+}
+
+body.revamplex-dark .map-footer-section{
+  background:linear-gradient(180deg,#070b14 0%,#0b1220 100%) !important;
+  border-top-color:rgba(148,163,184,.16) !important;
+}
+
+@media(max-width:640px){
+  .theme-toggle-btn{
+    height:34px !important;
+    padding:0 10px !important;
+    font-size:12px !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -4642,7 +4626,6 @@ function getBuildActivityItems() {
     const scrollLeftBtn = document.getElementById('scrollLeftBtn');
     const scrollRightBtn = document.getElementById('scrollRightBtn');
     const locateBtn = document.getElementById('locateBtn');
-    const themeToggleBtn = document.getElementById('themeToggleBtn');
 
     const postJobBtn = document.getElementById('postJobBtn');
     const jobModal = document.getElementById('jobModal');
@@ -4676,42 +4659,64 @@ map = L.map('map', { zoomControl: false, attributionControl: true }).setView([40
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 // 🔥 CLICK MAP TO CLOSE CLUSTERS
 
-const MAP_TILE_THEMES = {
+const REVAMPLEX_TILE_URLS = {
   light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-  dark: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
-};
-let baseMapLayer = null;
 
-function setBaseMapTheme(theme) {
-  const selectedTheme = theme === 'dark' ? 'dark' : 'light';
-  if (baseMapLayer) map.removeLayer(baseMapLayer);
-  baseMapLayer = L.tileLayer(MAP_TILE_THEMES[selectedTheme], {
+  /*
+    Dark map is intentionally charcoal/gray with visible roads and labels,
+    closer to the reference image than a flat black map.
+    This stays free/no API key and works with the current Leaflet setup.
+  */
+  dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+};
+
+let revamplexTileLayer = L.tileLayer(REVAMPLEX_TILE_URLS.light, {
+  attribution: '&copy; OpenStreetMap &copy; CARTO',
+  subdomains: 'abcd',
+  maxZoom: 20
+}).addTo(map);
+
+function setRevampTheme(theme) {
+  const mode = theme === 'dark' ? 'dark' : 'light';
+  const btn = document.getElementById('themeToggleBtn');
+
+  document.body.classList.toggle('revamplex-dark', mode === 'dark');
+
+  if (revamplexTileLayer && map.hasLayer(revamplexTileLayer)) {
+    map.removeLayer(revamplexTileLayer);
+  }
+
+  revamplexTileLayer = L.tileLayer(REVAMPLEX_TILE_URLS[mode], {
     attribution: '&copy; OpenStreetMap &copy; CARTO',
     subdomains: 'abcd',
     maxZoom: 20
   }).addTo(map);
+
+  revamplexTileLayer.bringToBack();
+
+  if (btn) {
+    btn.textContent = mode === 'dark' ? '☀️ Light' : '🌙 Dark';
+    btn.setAttribute('aria-label', mode === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+  }
+
+  localStorage.setItem('revamplex_theme', mode);
 }
 
-function applyRevampTheme(theme) {
-  const selectedTheme = theme === 'dark' ? 'dark' : 'light';
-  document.body.classList.toggle('revamplex-dark', selectedTheme === 'dark');
-  localStorage.setItem('revamplex_theme', selectedTheme);
-  setBaseMapTheme(selectedTheme);
+function initRevampThemeToggle() {
+  const savedTheme = localStorage.getItem('revamplex_theme') || 'light';
+  const btn = document.getElementById('themeToggleBtn');
 
-  if (themeToggleBtn) {
-    themeToggleBtn.textContent = selectedTheme === 'dark' ? '☀️ Light' : '🌙 Dark';
-    themeToggleBtn.setAttribute('aria-label', selectedTheme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+  setRevampTheme(savedTheme);
+
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const nextTheme = document.body.classList.contains('revamplex-dark') ? 'light' : 'dark';
+      setRevampTheme(nextTheme);
+    });
   }
 }
 
-if (themeToggleBtn) {
-  themeToggleBtn.addEventListener('click', () => {
-    const nextTheme = document.body.classList.contains('revamplex-dark') ? 'light' : 'dark';
-    applyRevampTheme(nextTheme);
-  });
-}
-
-applyRevampTheme(localStorage.getItem('revamplex_theme') || 'light');
+initRevampThemeToggle();
 
 map.on('zoomend', refreshMarkersForZoom);
 
