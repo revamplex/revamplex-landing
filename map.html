@@ -1385,6 +1385,198 @@
       background: var(--bg);
       color: var(--text);
     }
+
+
+/* ===== REVAMPLEX LIGHT / DARK THEME TOGGLE ===== */
+body.revamplex-dark {
+  --bg: #020617;
+  --card: rgba(15, 23, 42, 0.96);
+  --text: #f8fafc;
+  --muted: #cbd5e1;
+  --line: rgba(148, 163, 184, 0.22);
+  --shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+  --shadow-soft: 0 10px 24px rgba(0, 0, 0, 0.34);
+  background:
+    radial-gradient(circle at top left, rgba(249,115,22,.15), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(59,130,246,.11), transparent 36%),
+    #020617;
+  color: var(--text);
+}
+
+.theme-toggle-btn {
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(249,115,22,.24);
+  border-radius: 999px;
+  background: rgba(255,247,237,.96);
+  color: #9a3412;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(15,23,42,.10);
+}
+
+.theme-toggle-btn:hover {
+  transform: translateY(-1px);
+}
+
+body.revamplex-dark .theme-toggle-btn {
+  background: rgba(15,23,42,.92);
+  color: #fed7aa;
+  border-color: rgba(249,115,22,.38);
+  box-shadow: 0 10px 24px rgba(0,0,0,.35);
+}
+
+body.revamplex-dark .topbar-inner,
+body.revamplex-dark .results-title,
+body.revamplex-dark .action-btn,
+body.revamplex-dark .restore-ui-btn,
+body.revamplex-dark .revamp-map-legend {
+  background: rgba(15, 23, 42, 0.90) !important;
+  border-color: rgba(148, 163, 184, 0.22) !important;
+  color: var(--text) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+body.revamplex-dark .logo-wrap,
+body.revamplex-dark .search-box,
+body.revamplex-dark .filter-select,
+body.revamplex-dark .filter-pill,
+body.revamplex-dark .mini-btn.secondary,
+body.revamplex-dark .favorite-btn,
+body.revamplex-dark .modal-btn.secondary,
+body.revamplex-dark .welcome-back-btn,
+body.revamplex-dark .activity-stat-pill,
+body.revamplex-dark .premium-stat-pill,
+body.revamplex-dark .premium-highlight-tags span,
+body.revamplex-dark .activity-highlight-tags span,
+body.revamplex-dark .premium-bid-item,
+body.revamplex-dark .plan-card {
+  background: rgba(15, 23, 42, 0.96) !important;
+  color: var(--text) !important;
+  border-color: var(--line) !important;
+}
+
+body.revamplex-dark .card-inner,
+body.revamplex-dark .modal-card,
+body.revamplex-dark .welcomeCard,
+body.revamplex-dark .site-footer,
+body.revamplex-dark .premium-action-panel,
+body.revamplex-dark .premium-pro-card,
+body.revamplex-dark .activity-contractor-panel,
+body.revamplex-dark .detail-panel,
+body.revamplex-dark .workflow-card {
+  background:
+    radial-gradient(circle at top right, rgba(249,115,22,.10), transparent 34%),
+    rgba(15, 23, 42, 0.97) !important;
+  color: var(--text) !important;
+  border-color: var(--line) !important;
+}
+
+body.revamplex-dark .map-results-section,
+body.revamplex-dark .map-footer-section {
+  background: linear-gradient(180deg, #020617 0%, #0f172a 100%) !important;
+  border-color: rgba(148, 163, 184, 0.18) !important;
+}
+
+body.revamplex-dark .footer-cta {
+  background:
+    radial-gradient(circle at top right, rgba(249,115,22,0.20), transparent 38%),
+    #020617 !important;
+  border: 1px solid rgba(148,163,184,.18);
+}
+
+body.revamplex-dark .meta-box,
+body.revamplex-dark .input,
+body.revamplex-dark .textarea,
+body.revamplex-dark .select,
+body.revamplex-dark .welcomeInput,
+body.revamplex-dark .welcomeSelect,
+body.revamplex-dark .welcomeTextarea,
+body.revamplex-dark .social-links a {
+  background: rgba(2, 6, 23, 0.82) !important;
+  color: var(--text) !important;
+  border-color: var(--line) !important;
+}
+
+body.revamplex-dark .search-box input,
+body.revamplex-dark input,
+body.revamplex-dark textarea,
+body.revamplex-dark select {
+  color: var(--text) !important;
+}
+
+body.revamplex-dark .search-box input::placeholder,
+body.revamplex-dark input::placeholder,
+body.revamplex-dark textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+body.revamplex-dark .card-sub,
+body.revamplex-dark .info-row,
+body.revamplex-dark .meta-label,
+body.revamplex-dark .footer-brand p,
+body.revamplex-dark .footer-col a,
+body.revamplex-dark .footer-bottom,
+body.revamplex-dark .premium-section p,
+body.revamplex-dark .activity-section p,
+body.revamplex-dark .workflow-card p,
+body.revamplex-dark .detail-panel p,
+body.revamplex-dark .welcomeSub,
+body.revamplex-dark .demoBtn {
+  color: var(--muted) !important;
+}
+
+body.revamplex-dark .footer-col h4,
+body.revamplex-dark .footer-brand strong,
+body.revamplex-dark .card-title,
+body.revamplex-dark .meta-value,
+body.revamplex-dark .modal-title,
+body.revamplex-dark .welcomeTitle,
+body.revamplex-dark .premium-big-title,
+body.revamplex-dark .activity-big-title,
+body.revamplex-dark .premium-section h4,
+body.revamplex-dark .activity-section h4,
+body.revamplex-dark .premium-pro-copy h3,
+body.revamplex-dark .activity-contractor-copy h3,
+body.revamplex-dark .premium-pro-stats strong,
+body.revamplex-dark .activity-contractor-stats strong,
+body.revamplex-dark .label,
+body.revamplex-dark .welcomeLabel,
+body.revamplex-dark .logo-fallback .revamp {
+  color: var(--text) !important;
+}
+
+body.revamplex-dark .rating-pill {
+  background: rgba(148,163,184,.14) !important;
+  color: var(--text) !important;
+}
+
+body.revamplex-dark .leaflet-container {
+  background: #020617 !important;
+}
+
+body.revamplex-dark .leaflet-control-zoom a,
+body.revamplex-dark .leaflet-popup-content-wrapper {
+  background: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: rgba(148,163,184,.25) !important;
+}
+
+body.revamplex-dark .leaflet-control-attribution {
+  background: rgba(15,23,42,.86) !important;
+  color: #cbd5e1 !important;
+}
+
+@media (max-width: 640px) {
+  .theme-toggle-btn {
+    height: 32px !important;
+    padding: 0 9px !important;
+    font-size: 11px !important;
+  }
+}
+
     button, input, select, textarea { font: inherit; }
 
 #app {
@@ -3106,6 +3298,8 @@
     <input id="searchInput" type="text" placeholder="Search..." />
   </div>
 
+  <button class="theme-toggle-btn" id="themeToggleBtn" type="button" aria-label="Switch to dark theme">🌙 Dark</button>
+
   <!-- 🔥 AUTH NOW LIVES HERE -->
   <!-- 🔥 AUTH NOW LIVES HERE -->
   <div id="authContainer" style="display:flex; gap:8px; align-items:center;"></div>
@@ -4435,6 +4629,7 @@ function getBuildActivityItems() {
     const scrollLeftBtn = document.getElementById('scrollLeftBtn');
     const scrollRightBtn = document.getElementById('scrollRightBtn');
     const locateBtn = document.getElementById('locateBtn');
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
 
     const postJobBtn = document.getElementById('postJobBtn');
     const jobModal = document.getElementById('jobModal');
@@ -4468,11 +4663,42 @@ map = L.map('map', { zoomControl: false, attributionControl: true }).setView([40
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 // 🔥 CLICK MAP TO CLOSE CLUSTERS
 
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; OpenStreetMap &copy; CARTO',
-  subdomains: 'abcd',
-  maxZoom: 20
-}).addTo(map);
+const MAP_TILE_THEMES = {
+  light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+  dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+};
+let baseMapLayer = null;
+
+function setBaseMapTheme(theme) {
+  const selectedTheme = theme === 'dark' ? 'dark' : 'light';
+  if (baseMapLayer) map.removeLayer(baseMapLayer);
+  baseMapLayer = L.tileLayer(MAP_TILE_THEMES[selectedTheme], {
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+    subdomains: 'abcd',
+    maxZoom: 20
+  }).addTo(map);
+}
+
+function applyRevampTheme(theme) {
+  const selectedTheme = theme === 'dark' ? 'dark' : 'light';
+  document.body.classList.toggle('revamplex-dark', selectedTheme === 'dark');
+  localStorage.setItem('revamplex_theme', selectedTheme);
+  setBaseMapTheme(selectedTheme);
+
+  if (themeToggleBtn) {
+    themeToggleBtn.textContent = selectedTheme === 'dark' ? '☀️ Light' : '🌙 Dark';
+    themeToggleBtn.setAttribute('aria-label', selectedTheme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+  }
+}
+
+if (themeToggleBtn) {
+  themeToggleBtn.addEventListener('click', () => {
+    const nextTheme = document.body.classList.contains('revamplex-dark') ? 'light' : 'dark';
+    applyRevampTheme(nextTheme);
+  });
+}
+
+applyRevampTheme(localStorage.getItem('revamplex_theme') || 'light');
 
 map.on('zoomend', refreshMarkersForZoom);
 
@@ -8148,4 +8374,3 @@ async function applyPublicReviewStatsToMapItems() {
 
 </body>
 </html>
-
