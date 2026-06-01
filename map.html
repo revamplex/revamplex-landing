@@ -3125,11 +3125,20 @@ body.revamplex-dark{
 }
 
 body.revamplex-dark #map{
-  background:#111827;
-  filter:saturate(1.05) contrast(1.08) brightness(.82);
+  background:#1f2937;
+  filter:none !important;
 }
 
-/* subtle charcoal overlay so dark tiles look like the provided reference, not pure black */
+/* Grey dark-map look: uses the normal light tiles, then dims them into charcoal grey.
+   This prevents the map from becoming pitch black while keeping roads/labels visible. */
+body.revamplex-dark .leaflet-tile{
+  filter:
+    grayscale(.72)
+    brightness(.48)
+    contrast(1.18)
+    saturate(.72) !important;
+}
+
 body.revamplex-dark #map::after{
   content:"";
   position:absolute;
@@ -3137,9 +3146,9 @@ body.revamplex-dark #map::after{
   z-index:450;
   pointer-events:none;
   background:
-    radial-gradient(circle at 58% 42%, rgba(249,115,22,.12), transparent 24%),
-    linear-gradient(180deg, rgba(8,13,24,.16), rgba(8,13,24,.28));
-  mix-blend-mode:screen;
+    radial-gradient(circle at 58% 42%, rgba(249,115,22,.10), transparent 24%),
+    linear-gradient(180deg, rgba(31,41,55,.08), rgba(15,23,42,.18));
+  mix-blend-mode:multiply;
 }
 
 body.revamplex-dark .topbar-inner{
@@ -3187,7 +3196,7 @@ body.revamplex-dark .theme-toggle-btn{
 }
 
 body.revamplex-dark .map-results-section{
-  background:#070b14 !important;
+  background:#1f2937 !important;
   border-top-color:rgba(148,163,184,.16) !important;
 }
 
@@ -3273,6 +3282,19 @@ body.revamplex-dark .map-footer-section{
     padding:0 10px !important;
     font-size:12px !important;
   }
+}
+
+
+/* ===== REVAMPLEX GREY MAP READABILITY PATCH ===== */
+body.revamplex-dark .map-results-section .results-header-map-float .results-title,
+body.revamplex-dark .map-results-section .results-header-map-float .action-btn{
+  background:rgba(255,255,255,.96) !important;
+  color:#000 !important;
+  text-shadow:none !important;
+}
+
+body.revamplex-dark .leaflet-container{
+  background:#1f2937 !important;
 }
 
 </style>
@@ -4667,7 +4689,7 @@ const REVAMPLEX_TILE_URLS = {
     closer to the reference image than a flat black map.
     This stays free/no API key and works with the current Leaflet setup.
   */
-  dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+  dark: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
 };
 
 let revamplexTileLayer = L.tileLayer(REVAMPLEX_TILE_URLS.light, {
