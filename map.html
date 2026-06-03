@@ -3319,272 +3319,317 @@ body.revamplex-dark .leaflet-container{
 
 </style>
 
+<style>
+/* ===== REVAMPLEX PREMIUM DARK FOOTER — MATCH SOCIAL BRAND MOCKUP ===== */
+.map-footer-section.revamp-social-footer,
+.revamp-social-footer {
+  background:
+    radial-gradient(circle at 18% 8%, rgba(249,115,22,.16), transparent 20%),
+    radial-gradient(circle at 78% 72%, rgba(249,115,22,.08), transparent 28%),
+    linear-gradient(180deg, #06101f 0%, #030914 100%) !important;
+  padding: clamp(42px, 6vw, 86px) clamp(18px, 7vw, 120px) 34px !important;
+  border-top: 1px solid rgba(255,255,255,.08) !important;
+  color: #ffffff !important;
+}
+
+.revamp-social-footer .footer-cta {
+  display: none !important;
+}
+
+.revamp-social-footer .site-footer {
+  max-width: 1320px !important;
+  margin: 0 auto !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+}
+
+.revamp-social-footer .footer-main {
+  display: block !important;
+  padding: 0 !important;
+}
+
+.revamp-social-footer .footer-col {
+  display: none !important;
+}
+
+.revamp-social-footer .footer-brand {
+  max-width: 1080px;
+}
+
+.revamp-social-footer .footer-brand img {
+  width: min(720px, 86vw) !important;
+  max-width: 100% !important;
+  height: auto !important;
+  margin: 0 0 clamp(44px, 5vw, 72px) !important;
+  display: block !important;
+  filter:
+    drop-shadow(0 18px 28px rgba(0,0,0,.48))
+    drop-shadow(0 0 18px rgba(249,115,22,.16));
+}
+
+.revamp-social-footer .footer-brand strong {
+  display: block !important;
+  margin: 0 0 28px !important;
+  color: #ffffff !important;
+  font-size: clamp(42px, 6vw, 78px) !important;
+  line-height: 1.02 !important;
+  font-weight: 950 !important;
+  letter-spacing: -0.055em !important;
+  text-shadow: 0 10px 26px rgba(0,0,0,.42);
+}
+
+.revamp-social-footer .footer-brand p {
+  max-width: 1040px !important;
+  margin: 0 0 clamp(42px, 6vw, 76px) !important;
+  color: rgba(226,232,240,.74) !important;
+  font-size: clamp(27px, 4vw, 48px) !important;
+  line-height: 1.55 !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.035em !important;
+}
+
+.revamp-social-footer .social-links {
+  display: flex !important;
+  gap: clamp(18px, 3.7vw, 58px) !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  margin-top: 0 !important;
+}
+
+.revamp-social-footer .social-links a {
+  width: clamp(72px, 8.5vw, 132px) !important;
+  height: clamp(72px, 8.5vw, 132px) !important;
+  margin: 0 !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background:
+    radial-gradient(circle at 32% 20%, rgba(255,255,255,.24), transparent 24%),
+    linear-gradient(145deg, #ff6a1a 0%, #f97316 45%, #d84208 100%) !important;
+  color: #ffffff !important;
+  border: clamp(2px, .35vw, 4px) solid rgba(255,255,255,.90) !important;
+  box-shadow:
+    0 16px 30px rgba(0,0,0,.38),
+    0 0 22px rgba(249,115,22,.28),
+    inset 0 1px 0 rgba(255,255,255,.34) !important;
+  text-decoration: none !important;
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease !important;
+}
+
+.revamp-social-footer .social-links a i {
+  font-size: clamp(34px, 4.9vw, 70px) !important;
+  line-height: 1 !important;
+}
+
+.revamp-social-footer .social-links a:hover {
+  transform: translateY(-6px) scale(1.04) !important;
+  filter: brightness(1.06) saturate(1.1) !important;
+  box-shadow:
+    0 24px 42px rgba(0,0,0,.44),
+    0 0 34px rgba(249,115,22,.42),
+    inset 0 1px 0 rgba(255,255,255,.38) !important;
+}
+
+.revamp-social-footer .footer-bottom {
+  max-width: 1320px !important;
+  margin: clamp(36px, 5vw, 70px) auto 0 !important;
+  padding: 20px 0 0 !important;
+  border-top: 1px solid rgba(255,255,255,.10) !important;
+  color: rgba(226,232,240,.62) !important;
+  font-size: 14px !important;
+}
+
+.revamp-social-footer .footer-bottom a {
+  color: rgba(226,232,240,.72) !important;
+}
+
+.revamp-social-footer .footer-bottom a:hover {
+  color: #ffffff !important;
+}
+
+body.revamplex-dark .revamp-social-footer {
+  background:
+    radial-gradient(circle at 18% 8%, rgba(249,115,22,.16), transparent 20%),
+    radial-gradient(circle at 78% 72%, rgba(249,115,22,.08), transparent 28%),
+    linear-gradient(180deg, #06101f 0%, #030914 100%) !important;
+}
+
+@media (max-width: 760px) {
+  .revamp-social-footer {
+    padding: 38px 22px 26px !important;
+  }
+
+  .revamp-social-footer .footer-brand img {
+    width: min(390px, 92vw) !important;
+    margin-bottom: 38px !important;
+  }
+
+  .revamp-social-footer .footer-brand strong {
+    font-size: 42px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .revamp-social-footer .footer-brand p {
+    font-size: 26px !important;
+    line-height: 1.45 !important;
+    margin-bottom: 38px !important;
+  }
+
+  .revamp-social-footer .social-links {
+    gap: 16px !important;
+    justify-content: space-between !important;
+  }
+
+  .revamp-social-footer .social-links a {
+    width: 72px !important;
+    height: 72px !important;
+  }
+
+  .revamp-social-footer .social-links a i {
+    font-size: 34px !important;
+  }
+}
+</style>
+
 
 <style>
-/* ===== REVAMPLEX FOOTER RESTORE PATCH — COMPACT, LINKS VISIBLE, SOCIAL ICONS CLEAN ===== */
+/* ===== REVAMPLEX FINAL FOOTER SOCIAL ICON OVERRIDE ===== */
+/* Footer social icons only. Does not touch cards, map, pins, links, or functionality. */
 
-/* Keep job/customer cards using normal clean web font. */
-.listing-card,
-.listing-card *,
-.card-inner,
-.card-inner *,
-.map-results-section,
-.map-results-section *{
-  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, Helvetica, sans-serif !important;
-  font-style: normal !important;
-  font-variant: normal !important;
-}
-
-.listing-card .card-title,
-.listing-card .card-sub,
-.listing-card .info-row,
-.listing-card .meta-value,
-.listing-card .mini-btn,
-.listing-card .rating-pill{
-  text-transform:none !important;
-  letter-spacing:normal !important;
-}
-
-/* Restore normal footer size and keep the CTA + all footer columns visible. */
-.map-footer-section.revamp-social-footer,
-.revamp-social-footer{
-  background:
-    radial-gradient(circle at 12% 18%, rgba(249,115,22,.10), transparent 24%),
-    linear-gradient(180deg, #07111f 0%, #050b15 100%) !important;
-  padding:46px 18px 22px !important;
-  border-top:1px solid rgba(255,255,255,.08) !important;
-  color:#f8fafc !important;
-}
-
-.revamp-social-footer .footer-cta{
-  display:grid !important;
-  max-width:1180px !important;
-  margin:0 auto 26px !important;
-  border-radius:28px !important;
-  padding:26px !important;
-  background:
-    radial-gradient(circle at top right, rgba(249,115,22,.20), transparent 36%),
-    #111827 !important;
-  color:#fff !important;
-}
-
-.revamp-social-footer .site-footer{
-  max-width:1180px !important;
-  margin:0 auto !important;
-  border-radius:28px !important;
-  background:#07111f !important;
-  border:1px solid rgba(148,163,184,.18) !important;
-  box-shadow:0 12px 30px rgba(0,0,0,.22) !important;
-  overflow:hidden !important;
-}
-
-.revamp-social-footer .footer-main{
-  display:grid !important;
-  grid-template-columns:1.2fr repeat(3, minmax(160px, 1fr)) !important;
-  gap:24px !important;
-  padding:28px !important;
-}
-
-.revamp-social-footer .footer-col{
-  display:block !important;
-}
-
-.revamp-social-footer .footer-brand{
-  max-width:none !important;
-}
-
-.revamp-social-footer .footer-brand img{
-  width:215px !important;
-  max-width:100% !important;
-  height:auto !important;
-  display:block !important;
-  margin:0 0 14px !important;
-  padding:8px 10px !important;
-  background:#ffffff !important;
-  border-radius:16px !important;
-  box-shadow:0 10px 24px rgba(0,0,0,.22) !important;
-  filter:none !important;
-  opacity:1 !important;
-}
-
-.revamp-social-footer .footer-brand strong{
-  display:block !important;
-  margin:0 0 8px !important;
-  color:#ffffff !important;
-  font-size:1rem !important;
-  line-height:1.2 !important;
-  font-weight:900 !important;
-  letter-spacing:normal !important;
-  text-shadow:none !important;
-}
-
-.revamp-social-footer .footer-brand p{
-  margin:0 !important;
-  max-width:none !important;
-  color:#94a3b8 !important;
-  line-height:1.5 !important;
-  font-size:.92rem !important;
-  font-weight:500 !important;
-  letter-spacing:normal !important;
-}
-
-.revamp-social-footer .footer-col h4{
-  color:#ffffff !important;
-  font-size:.95rem !important;
-  font-weight:900 !important;
-  margin:0 0 12px !important;
-}
-
-.revamp-social-footer .footer-col a{
-  display:block !important;
-  color:#94a3b8 !important;
-  text-decoration:none !important;
-  font-size:.92rem !important;
-  font-weight:700 !important;
-  margin-bottom:10px !important;
-}
-
-.revamp-social-footer .footer-col a:hover{
-  color:#f97316 !important;
-}
-
-/* Social icons: orange circles, normal size, visible logos. */
-.revamp-social-footer .social-links{
+.revamp-social-footer .footer-brand .social-links{
   display:flex !important;
-  gap:14px !important;
-  flex-wrap:nowrap !important;
-  margin-top:16px !important;
+  flex-direction:row !important;
   align-items:center !important;
   justify-content:flex-start !important;
-  overflow-x:auto !important;
-  scrollbar-width:none !important;
+  gap:12px !important;
+  flex-wrap:wrap !important;
+  margin-top:16px !important;
+  padding:6px 0 !important;
+  overflow:visible !important;
+  line-height:1 !important;
 }
 
-.revamp-social-footer .social-links::-webkit-scrollbar{
-  display:none !important;
-}
+.revamp-social-footer .footer-brand .social-links a{
+  width:43px !important;
+  height:43px !important;
+  min-width:43px !important;
+  min-height:43px !important;
+  max-width:43px !important;
+  max-height:43px !important;
 
-.revamp-social-footer .social-links a{
-  width:54px !important;
-  height:54px !important;
-  min-width:54px !important;
-  min-height:54px !important;
-  border-radius:999px !important;
+  padding:0 !important;
+  margin:0 !important;
+
+  border:none !important;
+  outline:none !important;
+  border-radius:50% !important;
+
   display:inline-flex !important;
   align-items:center !important;
   justify-content:center !important;
-  background:
-    radial-gradient(circle at 30% 22%, rgba(255,255,255,.30), transparent 28%),
-    linear-gradient(135deg,#ff7a1f,#ea580c) !important;
+
+  background:linear-gradient(135deg,#ff7a1f 0%,#f97316 48%,#ea580c 100%) !important;
   color:#ffffff !important;
-  border:2px solid rgba(255,255,255,.92) !important;
+
   box-shadow:
-    0 12px 22px rgba(249,115,22,.26),
-    0 0 22px rgba(249,115,22,.18) !important;
+    0 8px 18px rgba(249,115,22,.24),
+    0 0 16px rgba(249,115,22,.16) !important;
+
+  overflow:visible !important;
   text-decoration:none !important;
+  line-height:1 !important;
+  transform:none !important;
+  vertical-align:middle !important;
+}
+
+.revamp-social-footer .footer-brand .social-links a::before,
+.revamp-social-footer .footer-brand .social-links a::after{
+  display:none !important;
+  content:none !important;
+}
+
+.revamp-social-footer .footer-brand .social-links a i{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  width:43px !important;
+  height:43px !important;
+
+  margin:0 !important;
+  padding:0 !important;
+
+  font-family:"Font Awesome 6 Brands" !important;
+  font-weight:400 !important;
+  font-size:21px !important;
+  line-height:43px !important;
+
+  color:#ffffff !important;
+  text-align:center !important;
+
+  position:relative !important;
+  left:0 !important;
+  top:0 !important;
   transform:none !important;
 }
 
-.revamp-social-footer .social-links a i{
-  font-family:"Font Awesome 6 Brands" !important;
-  font-weight:400 !important;
-  font-size:27px !important;
-  line-height:1 !important;
-  color:#ffffff !important;
+/* Tiny optical adjustments so each brand mark appears centered. */
+.revamp-social-footer .footer-brand .social-links a .fa-facebook-f{
+  font-size:22px !important;
+  top:1px !important;
 }
 
-.revamp-social-footer .social-links a:hover{
-  background:linear-gradient(135deg,#ff7a1f,#f97316) !important;
+.revamp-social-footer .footer-brand .social-links a .fa-instagram{
+  font-size:22px !important;
+}
+
+.revamp-social-footer .footer-brand .social-links a .fa-linkedin-in{
+  font-size:21px !important;
+  top:1px !important;
+}
+
+.revamp-social-footer .footer-brand .social-links a .fa-youtube{
+  font-size:20px !important;
+}
+
+.revamp-social-footer .footer-brand .social-links a .fa-tiktok{
+  font-size:21px !important;
+}
+
+.revamp-social-footer .footer-brand .social-links a .fa-x-twitter{
+  font-size:20px !important;
+}
+
+.revamp-social-footer .footer-brand .social-links a:hover{
+  background:linear-gradient(135deg,#ff8a2a 0%,#f97316 48%,#ea580c 100%) !important;
   transform:translateY(-2px) !important;
 }
 
-.revamp-social-footer .footer-bottom{
-  border-top:1px solid rgba(148,163,184,.16) !important;
-  padding:16px 28px !important;
-  display:flex !important;
-  justify-content:space-between !important;
-  gap:12px !important;
-  flex-wrap:wrap !important;
-  color:#94a3b8 !important;
-  font-size:.82rem !important;
-}
-
-.revamp-social-footer .footer-bottom a{
-  color:#94a3b8 !important;
-  text-decoration:none !important;
-  font-weight:800 !important;
-}
-
-.revamp-social-footer .footer-bottom a:hover{
-  color:#ffffff !important;
-}
-
-/* Dark mode should not hide footer links or turn social circles white. */
-body.revamplex-dark .revamp-social-footer .footer-col,
-body.revamplex-dark .revamp-social-footer .footer-cta{
-  display:block;
-}
-
-body.revamplex-dark .revamp-social-footer .footer-main{
-  display:grid !important;
-}
-
-@media (max-width:900px){
-  .revamp-social-footer .footer-cta{
-    grid-template-columns:1fr !important;
-  }
-
-  .revamp-social-footer .footer-cta-actions{
-    justify-content:flex-start !important;
-  }
-
-  .revamp-social-footer .footer-main{
-    grid-template-columns:1fr 1fr !important;
-  }
-}
-
+/* Mobile stays clean and centered without oversized balls. */
 @media (max-width:640px){
-  .map-footer-section.revamp-social-footer,
-  .revamp-social-footer{
-    padding:28px 10px 16px !important;
+  .revamp-social-footer .footer-brand .social-links{
+    gap:10px !important;
+    padding:5px 0 !important;
   }
 
-  .revamp-social-footer .footer-cta{
-    padding:20px !important;
-    border-radius:22px !important;
+  .revamp-social-footer .footer-brand .social-links a{
+    width:40px !important;
+    height:40px !important;
+    min-width:40px !important;
+    min-height:40px !important;
+    max-width:40px !important;
+    max-height:40px !important;
   }
 
-  .revamp-social-footer .site-footer{
-    border-radius:22px !important;
-  }
-
-  .revamp-social-footer .footer-main{
-    grid-template-columns:1fr !important;
-    padding:22px !important;
-  }
-
-  .revamp-social-footer .footer-bottom{
-    padding:14px 22px !important;
-    display:grid !important;
-  }
-
-  .revamp-social-footer .social-links{
-    gap:8px !important;
-  }
-
-  .revamp-social-footer .social-links a{
-    width:44px !important;
-    height:44px !important;
-    min-width:44px !important;
-    min-height:44px !important;
-  }
-
-  .revamp-social-footer .social-links a i{
-    font-size:22px !important;
-  }
-
-  .revamp-social-footer .footer-brand img{
-    width:210px !important;
+  .revamp-social-footer .footer-brand .social-links a i{
+    width:40px !important;
+    height:40px !important;
+    line-height:40px !important;
+    font-size:20px !important;
   }
 }
 </style>
