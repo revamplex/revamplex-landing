@@ -3394,11 +3394,15 @@ body.revamplex-dark .leaflet-container{
 }
 
 .revamp-social-footer .footer-brand img{
-  width:170px !important;
+  width:215px !important;
   max-width:100% !important;
   height:auto !important;
   display:block !important;
-  margin:0 0 12px !important;
+  margin:0 0 14px !important;
+  padding:8px 10px !important;
+  background:#ffffff !important;
+  border-radius:16px !important;
+  box-shadow:0 10px 24px rgba(0,0,0,.22) !important;
   filter:none !important;
   opacity:1 !important;
 }
@@ -3447,26 +3451,36 @@ body.revamplex-dark .leaflet-container{
 /* Social icons: orange circles, normal size, visible logos. */
 .revamp-social-footer .social-links{
   display:flex !important;
-  gap:10px !important;
-  flex-wrap:wrap !important;
-  margin-top:14px !important;
+  gap:14px !important;
+  flex-wrap:nowrap !important;
+  margin-top:16px !important;
   align-items:center !important;
   justify-content:flex-start !important;
+  overflow-x:auto !important;
+  scrollbar-width:none !important;
+}
+
+.revamp-social-footer .social-links::-webkit-scrollbar{
+  display:none !important;
 }
 
 .revamp-social-footer .social-links a{
-  width:42px !important;
-  height:42px !important;
-  min-width:42px !important;
-  min-height:42px !important;
+  width:54px !important;
+  height:54px !important;
+  min-width:54px !important;
+  min-height:54px !important;
   border-radius:999px !important;
   display:inline-flex !important;
   align-items:center !important;
   justify-content:center !important;
-  background:linear-gradient(135deg,#f97316,#ea580c) !important;
+  background:
+    radial-gradient(circle at 30% 22%, rgba(255,255,255,.30), transparent 28%),
+    linear-gradient(135deg,#ff7a1f,#ea580c) !important;
   color:#ffffff !important;
   border:2px solid rgba(255,255,255,.92) !important;
-  box-shadow:0 8px 18px rgba(249,115,22,.22) !important;
+  box-shadow:
+    0 12px 22px rgba(249,115,22,.26),
+    0 0 22px rgba(249,115,22,.18) !important;
   text-decoration:none !important;
   transform:none !important;
 }
@@ -3474,7 +3488,7 @@ body.revamplex-dark .leaflet-container{
 .revamp-social-footer .social-links a i{
   font-family:"Font Awesome 6 Brands" !important;
   font-weight:400 !important;
-  font-size:22px !important;
+  font-size:27px !important;
   line-height:1 !important;
   color:#ffffff !important;
 }
@@ -3554,13 +3568,23 @@ body.revamplex-dark .revamp-social-footer .footer-main{
     display:grid !important;
   }
 
+  .revamp-social-footer .social-links{
+    gap:8px !important;
+  }
+
   .revamp-social-footer .social-links a{
-    width:42px !important;
-    height:42px !important;
+    width:44px !important;
+    height:44px !important;
+    min-width:44px !important;
+    min-height:44px !important;
   }
 
   .revamp-social-footer .social-links a i{
     font-size:22px !important;
+  }
+
+  .revamp-social-footer .footer-brand img{
+    width:210px !important;
   }
 }
 </style>
@@ -3670,7 +3694,7 @@ body.revamplex-dark .revamp-social-footer .footer-main{
         <div class="footer-brand">
           <img src="revamplex-logo.png" alt="RevampLEX Logo" onerror="this.style.display='none'">
           <strong>Revamp LEX</strong>
-          <p>Location • Estimation • eXecution. A smarter way for homeowners and contractors to connect and manage renovation projects.</p>
+          <p>Location • Estimation • Xecution. A smarter way for homeowners and contractors to connect and manage renovation projects.</p>
           <div class="social-links">
 
 <a href="https://www.facebook.com/revamplex" target="_blank">
