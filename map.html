@@ -3125,18 +3125,18 @@ body.revamplex-dark{
 }
 
 body.revamplex-dark #map{
-  background:#4b5563;
+  background:#1f2937;
+  filter:none !important;
 }
 
 /* Grey dark-map look: uses the normal light tiles, then dims them into charcoal grey.
    This prevents the map from becoming pitch black while keeping roads/labels visible. */
-
 body.revamplex-dark .leaflet-tile{
   filter:
-    grayscale(.55)
-    brightness(.78)
-    contrast(1.08)
-    saturate(.85) !important;
+    grayscale(.72)
+    brightness(.48)
+    contrast(1.18)
+    saturate(.72) !important;
 }
 
 body.revamplex-dark #map::after{
