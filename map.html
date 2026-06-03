@@ -10,6 +10,9 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
 <!-- 🔥 ADD THIS INSIDE YOUR TOP NAV / HEADER AREA -->
 
 <style>
@@ -200,31 +203,49 @@
 }
 
 .social-links {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 8px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:8px;
 }
 
-.social-links a {
-  width: 40px;
-  height: 40px;
-  margin: 0;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #f8fafc;
-  border: 1px solid rgba(15,23,42,0.08);
-  color: var(--text);
-  font-size: 18px;
-  text-decoration: none;
-  font-weight: 900;
+.social-links a{
+  width:40px;
+  height:40px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+
+  background:#f8fafc;
+  color:#0f172a;
+
+  border:1px solid rgba(15,23,42,.08);
+
+  transition:.2s;
 }
 
-.social-links a:hover {
-  background: var(--brand-soft);
-  color: var(--brand-dark);
+.social-links a i{
+  font-size:18px;
+}
+
+.social-links a:hover{
+  background:#fff7ed;
+  color:#f97316;
+}
+
+/* DARK MODE */
+
+body.revamplex-dark .social-links a{
+  background:#1f2937;
+  color:#ffffff;
+  border:1px solid rgba(255,255,255,.15);
+}
+
+body.revamplex-dark .social-links a:hover{
+  background:#f97316;
+  color:#ffffff;
 }
 
 .footer-bottom {
@@ -3403,14 +3424,34 @@ body.revamplex-dark .leaflet-container{
           <img src="revamplex-logo.png" alt="RevampLEX Logo" onerror="this.style.display='none'">
           <strong>Revamp LEX</strong>
           <p>Location • Estimation • eXecution. A smarter way for homeowners and contractors to connect and manage renovation projects.</p>
-          <div class="social-links" aria-label="Social media links">
-            <a href="https://www.facebook.com/revamplex" target="_blank" rel="noopener" aria-label="Facebook">f</a>
-            <a href="https://www.instagram.com/revamplex" target="_blank" rel="noopener" aria-label="Instagram">◎</a>
-            <a href="https://www.linkedin.com/company/revamplex" target="_blank" rel="noopener" aria-label="LinkedIn">in</a>
-            <a href="https://www.youtube.com/@revamplex" target="_blank" rel="noopener" aria-label="YouTube">▶</a>
-            <a href="https://www.tiktok.com/@revamplex" target="_blank" rel="noopener" aria-label="TikTok">♪</a>
-            <a href="https://x.com/revamplex" target="_blank" rel="noopener" aria-label="X">𝕏</a>
-          </div>
+          <div class="social-links">
+
+<a href="https://www.facebook.com/revamplex" target="_blank">
+<i class="fab fa-facebook-f"></i>
+</a>
+
+<a href="https://www.instagram.com/revamplex" target="_blank">
+<i class="fab fa-instagram"></i>
+</a>
+
+<a href="https://www.linkedin.com/company/revamplex" target="_blank">
+<i class="fab fa-linkedin-in"></i>
+</a>
+
+<a href="https://www.youtube.com/@revamplex" target="_blank">
+<i class="fab fa-youtube"></i>
+</a>
+
+<a href="https://www.tiktok.com/@revamplex" target="_blank">
+<i class="fab fa-tiktok"></i>
+</a>
+
+<a href="https://x.com/revamplex" target="_blank">
+<i class="fab fa-x-twitter"></i>
+</a>
+
+</div>
+          
         </div>
 
         <div class="footer-col">
