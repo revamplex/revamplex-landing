@@ -3810,6 +3810,47 @@ body.revamplex-dark .revamp-social-footer .footer-bottom a {
 }
 </style>
 
+
+<style>
+/* ===== REVAMPLEX CARD FONT RESET PATCH ===== */
+/* Forces every small map card to use plain readable text instead of any funky/futuristic fallback font. */
+.map-results-section,
+.cards-row,
+.listing-card,
+.listing-card *,
+.card-inner,
+.card-title,
+.card-sub,
+.meta-label,
+.meta-value,
+.info-row,
+.info-row *,
+.rating-pill,
+.demo-mini-tag,
+.featured-badge,
+.activity-badge,
+.mini-btn,
+.submit-bid-btn {
+  font-family: Arial, Helvetica, sans-serif !important;
+}
+
+.card-title {
+  letter-spacing: normal !important;
+  font-weight: 900 !important;
+}
+
+.card-sub,
+.meta-label,
+.meta-value,
+.info-row {
+  letter-spacing: normal !important;
+}
+
+.meta-label {
+  text-transform: uppercase !important;
+}
+</style>
+
 </head>
 <body>
   <div id="app">
