@@ -3634,6 +3634,182 @@ body.revamplex-dark .revamp-social-footer {
 }
 </style>
 
+
+<style>
+/* ===== REVAMPLEX FOOTER RESTORE PATCH — LINKS + PLAIN WHITE FOOTER ===== */
+/* Restores footer links, removes oversized/funky dark social-footer layout, and keeps the bottom logo on a white background like the top logo. */
+.map-footer-section.revamp-social-footer,
+.revamp-social-footer,
+body.revamplex-dark .revamp-social-footer {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
+  border-top: 1px solid rgba(15, 23, 42, 0.08) !important;
+  color: var(--text) !important;
+  padding: 28px 18px 18px !important;
+}
+
+.revamp-social-footer .footer-cta {
+  display: grid !important;
+}
+
+.revamp-social-footer .site-footer,
+body.revamplex-dark .revamp-social-footer .site-footer {
+  max-width: 1180px !important;
+  margin: 0 auto !important;
+  border-radius: 22px !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08) !important;
+  overflow: hidden !important;
+}
+
+.revamp-social-footer .footer-main {
+  display: grid !important;
+  grid-template-columns: 1.2fr repeat(3, minmax(160px, 1fr)) !important;
+  gap: 24px !important;
+  padding: 24px 28px !important;
+}
+
+.revamp-social-footer .footer-col {
+  display: block !important;
+}
+
+.revamp-social-footer .footer-col h4 {
+  margin: 0 0 12px !important;
+  color: #0f172a !important;
+  font-size: 0.95rem !important;
+  font-weight: 900 !important;
+}
+
+.revamp-social-footer .footer-col a {
+  display: block !important;
+  color: #64748b !important;
+  text-decoration: none !important;
+  font-size: 0.92rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 10px !important;
+}
+
+.revamp-social-footer .footer-col a:hover {
+  color: #ea580c !important;
+}
+
+.revamp-social-footer .footer-brand {
+  max-width: none !important;
+}
+
+.revamp-social-footer .footer-brand img {
+  width: 170px !important;
+  max-width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  margin: 0 0 12px !important;
+  padding: 8px 12px !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 2px 6px rgba(15,23,42,.04) !important;
+  filter: none !important;
+}
+
+.revamp-social-footer .footer-brand strong {
+  display: block !important;
+  margin: 0 0 8px !important;
+  color: #0f172a !important;
+  font-size: 1rem !important;
+  line-height: 1.25 !important;
+  font-weight: 900 !important;
+  letter-spacing: normal !important;
+  text-shadow: none !important;
+}
+
+.revamp-social-footer .footer-brand p {
+  max-width: none !important;
+  margin: 0 0 12px !important;
+  color: #64748b !important;
+  font-size: 0.92rem !important;
+  line-height: 1.5 !important;
+  font-weight: 400 !important;
+  letter-spacing: normal !important;
+}
+
+.revamp-social-footer .footer-brand .social-links {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+  margin-top: 8px !important;
+  padding: 0 !important;
+}
+
+.revamp-social-footer .footer-bottom {
+  max-width: none !important;
+  margin: 0 !important;
+  border-top: 1px solid rgba(15, 23, 42, 0.08) !important;
+  padding: 14px 28px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  flex-wrap: wrap !important;
+  color: #64748b !important;
+  font-size: 0.82rem !important;
+}
+
+.revamp-social-footer .footer-bottom a {
+  color: #64748b !important;
+}
+
+.revamp-social-footer .footer-bottom a:hover {
+  color: #ea580c !important;
+}
+
+body.revamplex-dark .revamp-social-footer .site-footer,
+body.revamplex-dark .revamp-social-footer .footer-main,
+body.revamplex-dark .revamp-social-footer .footer-bottom {
+  background: #ffffff !important;
+}
+
+body.revamplex-dark .revamp-social-footer .footer-brand strong,
+body.revamplex-dark .revamp-social-footer .footer-col h4 {
+  color: #0f172a !important;
+}
+
+body.revamplex-dark .revamp-social-footer .footer-brand p,
+body.revamplex-dark .revamp-social-footer .footer-col a,
+body.revamplex-dark .revamp-social-footer .footer-bottom,
+body.revamplex-dark .revamp-social-footer .footer-bottom a {
+  color: #64748b !important;
+}
+
+@media (max-width: 900px) {
+  .revamp-social-footer .footer-main {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .map-footer-section.revamp-social-footer,
+  .revamp-social-footer {
+    padding: 18px 10px 14px !important;
+  }
+
+  .revamp-social-footer .footer-main {
+    grid-template-columns: 1fr !important;
+    padding: 20px !important;
+  }
+
+  .revamp-social-footer .footer-bottom {
+    padding: 14px 20px !important;
+    display: grid !important;
+  }
+
+  .revamp-social-footer .footer-brand img {
+    width: 150px !important;
+  }
+}
+</style>
+
 </head>
 <body>
   <div id="app">
