@@ -3849,6 +3849,55 @@ body.revamplex-dark .revamp-social-footer .footer-bottom a {
 .meta-label {
   text-transform: uppercase !important;
 }
+
+
+/* ===== REVAMPLEX JOB FEATURE PHOTO UPLOAD PATCH ===== */
+.activity-upload-wrap{
+  display:grid;
+  gap:8px;
+  min-width:0;
+}
+.activity-file-input{
+  position:absolute;
+  left:-9999px;
+  width:1px;
+  height:1px;
+  opacity:0;
+  pointer-events:none;
+}
+.activity-upload-btn{
+  width:100%;
+  min-height:46px;
+  border:1px solid rgba(249,115,22,.28);
+  border-radius:14px;
+  background:linear-gradient(135deg,#fff7ed,#ffffff);
+  color:#9a3412;
+  font-weight:900;
+  font-size:14px;
+  cursor:pointer;
+  box-shadow:0 8px 18px rgba(249,115,22,.10);
+}
+.activity-upload-btn:hover{
+  background:#fff7ed;
+}
+.activity-upload-status{
+  color:#7c2d12;
+  font-size:12px;
+  font-weight:800;
+  line-height:1.25;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+body.revamplex-dark .activity-upload-btn{
+  background:#111827;
+  color:#ffffff;
+  border-color:rgba(249,115,22,.40);
+}
+body.revamplex-dark .activity-upload-status{
+  color:#fed7aa;
+}
+
 </style>
 
 </head>
@@ -4076,7 +4125,12 @@ body.revamplex-dark .revamp-social-footer .footer-bottom a {
             <span>Allow this project to count toward future Neighborhood Project Heat Map totals.</span>
           </label>
           <div class="activity-price-row">
-            <input class="input" id="jobActivityPhoto" placeholder="Optional photo URL / before-after image">
+            <div class="activity-upload-wrap">
+              <input class="input" id="jobActivityPhoto" type="hidden">
+              <input class="activity-file-input" id="jobActivityPhotoFile" type="file" accept="image/*">
+              <button class="activity-upload-btn" id="jobActivityPhotoUploadBtn" type="button">📷 Upload feature photo</button>
+              <div class="activity-upload-status" id="jobActivityPhotoStatus">No photo selected</div>
+            </div>
             <input class="input" id="jobContractorUsed" placeholder="Contractor used (optional later)">
           </div>
         </div>
@@ -5228,6 +5282,10 @@ function getBuildActivityItems() {
     const cancelJobBtn = document.getElementById('cancelJobBtn');
     const submitJobBtn = document.getElementById('submitJobBtn');
     const jobTradeSelect = document.getElementById('jobTrade');
+    const jobActivityPhotoInput = document.getElementById('jobActivityPhoto');
+    const jobActivityPhotoFile = document.getElementById('jobActivityPhotoFile');
+    const jobActivityPhotoUploadBtn = document.getElementById('jobActivityPhotoUploadBtn');
+    const jobActivityPhotoStatus = document.getElementById('jobActivityPhotoStatus');
 
     const detailModal = document.getElementById('detailModal');
     const detailTitle = document.getElementById('detailTitle');
@@ -6932,8 +6990,58 @@ function setSort(type) {
       if (priceEl) priceEl.checked = false;
       if (heatEl) heatEl.checked = false;
       if (photoEl) photoEl.value = '';
+      if (jobActivityPhotoFile) jobActivityPhotoFile.value = '';
+      if (jobActivityPhotoStatus) jobActivityPhotoStatus.textContent = 'No photo selected';
       if (contractorEl) contractorEl.value = '';
     }
+
+async function uploadJobActivityFeaturePhoto(file) {
+  if (!file) return '';
+
+  if (!file.type || !file.type.startsWith('image/')) {
+    alert('Please choose an image file.');
+    return '';
+  }
+
+  const maxBytes = 8 * 1024 * 1024;
+  if (file.size > maxBytes) {
+    alert('Please choose an image under 8 MB.');
+    return '';
+  }
+
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) {
+    alert('Please log in before uploading a project photo.');
+    openWelcomeAuth('login');
+    return '';
+  }
+
+  const safeExt = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+  const filePath = `job-activity/${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${safeExt}`;
+
+  if (jobActivityPhotoStatus) jobActivityPhotoStatus.textContent = 'Uploading photo...';
+
+  const { error: uploadError } = await supabaseClient.storage
+    .from('contractor-assets')
+    .upload(filePath, file, { cacheControl: '3600', upsert: true });
+
+  if (uploadError) {
+    console.error('JOB FEATURE PHOTO UPLOAD ERROR:', uploadError);
+    if (jobActivityPhotoStatus) jobActivityPhotoStatus.textContent = 'Upload failed';
+    alert('Photo upload failed. Make sure the Supabase Storage bucket contractor-assets exists and is public.');
+    return '';
+  }
+
+  const { data } = supabaseClient.storage
+    .from('contractor-assets')
+    .getPublicUrl(filePath);
+
+  const publicUrl = data?.publicUrl || '';
+  if (jobActivityPhotoInput) jobActivityPhotoInput.value = publicUrl;
+  if (jobActivityPhotoStatus) jobActivityPhotoStatus.textContent = `Uploaded: ${file.name}`;
+
+  return publicUrl;
+}
 
 async function createJobFromForm() {
   const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
@@ -8439,6 +8547,15 @@ contractorModeBtn.addEventListener('click', () => {
     closeJobModal.addEventListener('click', closeJobForm);
     cancelJobBtn.addEventListener('click', closeJobForm);
     submitJobBtn.addEventListener('click', createJobFromForm);
+    if (jobActivityPhotoUploadBtn && jobActivityPhotoFile) {
+      jobActivityPhotoUploadBtn.addEventListener('click', () => jobActivityPhotoFile.click());
+    }
+    if (jobActivityPhotoFile) {
+      jobActivityPhotoFile.addEventListener('change', async () => {
+        const file = jobActivityPhotoFile.files && jobActivityPhotoFile.files[0];
+        await uploadJobActivityFeaturePhoto(file);
+      });
+    }
     restoreUiBtn.addEventListener('click', expandUI);
     closeDetailModal.addEventListener('click', closeDetails);
 
