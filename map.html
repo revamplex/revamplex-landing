@@ -5364,14 +5364,16 @@ map = L.map('map', { zoomControl: false, attributionControl: true }).setView([40
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 // 🔥 CLICK MAP TO CLOSE CLUSTERS
 
+const CARTO_API_KEY = 'cb1_4dda_1_e2dbe62192f2c4d32a6f7b13';
+
 const REVAMPLEX_TILE_URLS = {
-  light: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-  dark: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+  light: `https://basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`,
+  dark: `https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`
 };
 
 let revamplexTileLayer = L.tileLayer(REVAMPLEX_TILE_URLS.light, {
-  attribution: '&copy; OpenStreetMap contributors',
-maxZoom: 19
+  attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+  maxZoom: 20
 }).addTo(map);
 
 function setRevampTheme(theme) {
@@ -5384,10 +5386,12 @@ function setRevampTheme(theme) {
     map.removeLayer(revamplexTileLayer);
   }
 
-  revamplexTileLayer = L.tileLayer(REVAMPLEX_TILE_URLS.light, {
-  attribution: '&copy; OpenStreetMap contributors',
-maxZoom: 19
-}).addTo(map);
+  revamplexTileLayer = L.tileLayer(REVAMPLEX_TILE_URLS[mode], {
+    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+    maxZoom: 20
+  }).addTo(map);
+
+  revamplexTileLayer.bringToBack();
 
   revamplexTileLayer.bringToBack();
 
