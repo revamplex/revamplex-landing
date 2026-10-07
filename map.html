@@ -5365,20 +5365,13 @@ map = L.map('map', { zoomControl: false, attributionControl: true }).setView([40
 // 🔥 CLICK MAP TO CLOSE CLUSTERS
 
 const REVAMPLEX_TILE_URLS = {
-  light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-
-  /*
-    Dark map is intentionally charcoal/gray with visible roads and labels,
-    closer to the reference image than a flat black map.
-    This stays free/no API key and works with the current Leaflet setup.
-  */
-  dark: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+  light: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+  dark: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
 };
 
 let revamplexTileLayer = L.tileLayer(REVAMPLEX_TILE_URLS.light, {
-  attribution: '&copy; OpenStreetMap &copy; CARTO',
-  subdomains: 'abcd',
-  maxZoom: 20
+  attribution: '&copy; OpenStreetMap contributors',
+maxZoom: 19
 }).addTo(map);
 
 function setRevampTheme(theme) {
@@ -5391,11 +5384,10 @@ function setRevampTheme(theme) {
     map.removeLayer(revamplexTileLayer);
   }
 
-  revamplexTileLayer = L.tileLayer(REVAMPLEX_TILE_URLS[mode], {
-    attribution: '&copy; OpenStreetMap &copy; CARTO',
-    subdomains: 'abcd',
-    maxZoom: 20
-  }).addTo(map);
+  revamplexTileLayer = L.tileLayer(REVAMPLEX_TILE_URLS.light, {
+  attribution: '&copy; OpenStreetMap contributors',
+maxZoom: 19
+}).addTo(map);
 
   revamplexTileLayer.bringToBack();
 
