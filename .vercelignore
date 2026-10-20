@@ -1,4 +1,5 @@
 tests
-scripts
+scripts/*
+!scripts/verify-deployment-config.mjs
 supabase
 docs
