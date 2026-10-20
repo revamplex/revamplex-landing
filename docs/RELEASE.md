@@ -1,58 +1,41 @@
 # ReVampLEX interactive release
 
-Approved design source: e9c93a7deedef2ca19719285d6cb90bb740d2c58.
-Production base: 5bb103fd2ac97a845cdb7414715dc05c7fc92a45.
-
 ## Changes
 
-A new branded homepage and inspiration feed, consistent navigation, map/list browsing, clearer project posting, organized Project Rooms, all 16 existing calculators, editable quantities and saved estimate drafts, and improved takeoff and AI request handling. Existing billing and deployment integrations are retained. Project images are optimized.
+The approved redesign adds a branded homepage and inspiration feed, consistent navigation, map/list browsing, clearer project posting, organized Project Rooms, all 16 existing trade calculators, editable quantities and saved estimate drafts, and improved takeoff and AI request handling. Existing services and billing plans are retained. Project images are optimized.
 
-This release contains production source. The isolated review data, review build, and Sites hosting manifest are excluded.
+This release contains production source. Isolated review data, review adapters, and the Sites hosting manifest are excluded.
 
-## Validation
+## Verification
 
-`npm run verify` checks all 14 HTML pages and local assets, parses classic scripts, and runs 16 calculator/AI/account-link checks plus 13 notification authorization and error-handling checks. Notification requests are mocked; no real emails are sent during tests.
+`npm run verify` checks 14 HTML pages, 29 classic scripts, and 110 local links, then runs 16 calculator/AI/account-link checks, 13 notification checks, and 13 billing checks.
 
-Browser end-to-end testing and live AI/notification calls remain unverified. The community database permissions have been tested with simulated authenticated and anonymous database roles in a rolled-back transaction. There is no available supported internal browser-preview workflow in this environment.
+Billing tests verify signed payloads, successful and pending payments, current subscription status, cancellation, duplicate and delayed delivery, replacement subscriptions, unknown prices, and failed database writes. Tests use local fixtures and mocked external requests; they do not charge customers, send emails, or change live profiles.
 
-## Database dependency
+Both included database migrations have been applied to the existing database. Rolled-back permission tests cover owner-controlled sharing, comments and reactions, anonymous write rejection, room creation, and participant identity protection. Existing projects remain unshared by default, existing rooms were retained, and no fixture records remain.
 
-Applied `supabase/migrations/20261020033931_community.sql` to the existing live database, project `dezvwoedboikshqttdqu`, on 2026-10-20 UTC. The migration adds optional sharing fields and comments/reactions with row-level security, explicit grants, foreign keys, and indexes. Existing projects remain unshared by default. The local migration filename matches Supabase's recorded migration version.
+The Vercel connection now has access to the existing project. The preview homepage returns HTTP 200. A live HTTP check verified that the notification API rejects unauthenticated requests. The estimator returned a response, and takeoff returned 200 square feet with source page 7 for a synthetic drawing labeled 20 by 10 feet. No customer files were used. Browser end-to-end testing remains unavailable in this environment; HTTP and server checks do not establish every interactive workflow.
 
-Supabase access is now correctly authorized for `revamplex's Org` (`ztwoimwdtdfjxtkcwfxu`). The similarly named organization `revamplex` contains a different inactive project and is not used by the site.
+## Billing repair
 
-Inspection found a pre-existing permissive jobs UPDATE policy. A security-invoker trigger now protects job ownership, sharing consent, and the fields displayed on shared stories independently of that policy, while retaining existing signature/completion updates. Community queries request only shared projects and the fields needed by the feed.
+The existing payment webhook crashed during module loading and placed subscription updates outside its request handler. Event processing now runs after signature verification, reads current subscription state, maps configured prices consistently, handles delayed payments, and reports failed database writes for retry. An old cancellation cannot change a replacement subscription.
 
-`tests/community-permissions.sql` passed on the live database using a rolled-back transaction: owner opt-in, author ownership, private-project visibility, anonymous write rejection, protected sharing choices and story content, own-row deletion, and withdrawal of consent. No test accounts were created or emails sent, and zero fixture rows remained. All 11 existing jobs remain unshared; both new community tables are empty.
+The Stripe SDK is pinned to 23.0.0 with a lockfile. Checkout retains the existing plans and adds the supported integration identifier. No real checkout, payment, refund, or subscription change was performed during release preparation.
 
-Applied `supabase/migrations/20261020034735_project_identity.sql` to the same project. Client-created jobs must belong to the signed-in user; new rooms must match the job owner and valid participant accounts; room participant IDs cannot be replaced from the client. Existing rooms are retained. `tests/project-identity.sql` passed in a rolled-back transaction, including valid homeowner/contractor room creation and rejected identity substitutions. Contractor listing UUIDs now resolve through their `profile_id` before opening a room.
+## Notification setup before release
 
-The security advisor introduced no new findings. Existing notices remain for an unused review table, trigger-function execution grants, and password protection. See [RLS policies](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy), [function execution grants](https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable), and [password protection](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection).
+Project notifications use the authenticated server endpoint `/api/project-notification`. The caller's account and room membership are checked before looking up the partner's confirmed account email. User-editable contact fields are not notification destinations.
 
-## GitHub connection
+The required private notification webhook setting is still missing from the hosting project. Configure the replacement webhook in the existing project's Preview and Production environments, and confirm that the email action uses the `recipient_email` field. Live notification delivery remains unverified.
 
-The ReVampLEX account has installed the ChatGPT Codex Connector with access to `revamplex/revamplex-landing`. The release is saved in [PR #5](https://github.com/revamplex/revamplex-landing/pull/5). Vercel successfully built the initial preview at https://revamplex-landing-git-codex-interact-3e5ad8-revamplexs-projects.vercel.app. The preview requires Vercel sign-in; build success is not a substitute for authenticated workflow verification.
+## Preview and publication
 
-## Notification configuration
+Release review: [PR #5](https://github.com/revamplex/revamplex-landing/pull/5).
 
-Project notifications now pass through `/api/project-notification`. The endpoint verifies the user's session with Supabase Auth and checks membership and job ownership under the user's existing row-level permissions. It then resolves the other participant's confirmed account email through the server-only Auth admin API. Editable public contact fields are never used as destinations. Client-supplied recipients, identities, and destination links are ignored. Failed submissions are shown as errors instead of successful invitations.
+Preview: https://revamplex-landing-git-codex-interact-3e5ad8-revamplexs-projects.vercel.app
 
-Set `ZAPIER_NOTIFICATION_WEBHOOK` as an encrypted Vercel environment variable for the existing Preview and Production environments before deploying. Never place this value in browser files or public environment variables. The previously published browser webhook remains in repository history; rotate it in Zapier and configure the replacement before production release. The endpoint preserves existing form field names, including `recipient_email`, `contractor_email`, `invite_type`, and `project_room_url`. Confirm the Zap email action uses `recipient_email` so contractor-to-homeowner notifications reach the correct partner.
+The preview uses Vercel sign-in or an owner-issued temporary share link. The production website has not been updated.
 
-Verify that the existing server-only `SUPABASE_SERVICE_ROLE_KEY` used by Stripe integration is configured for the same live Supabase project in the required Vercel environments. Notifications reuse it only for the specific recipient lookup after caller authorization; all project-data reads still use the caller's JWT and RLS. Never expose or prefix this key for client use. Missing configuration or an unverified partner account returns a clear failure.
+After the remaining notification configuration and release checks are complete, merge the release into `main` using the existing GitHub/Vercel integration. Confirm that the production deployment is ready and revamplex.com serves the approved homepage.
 
-Validate authorized two-party invitations and notifications against the live project schema before merging. Missing partner contact data returns a clear error. No live notification or email has been sent as part of release preparation.
-
-Live room identity and consent guards have passed database permission tests. Auth admin lookup and webhook delivery have passed mocked tests; live delivery and Vercel environment configuration remain unverified.
-
-## Vercel connection
-
-The connected account can list team `revamplexs-projects` (`team_sqSrTeRhaY9OAbEfFEmSsaqY`), but that team's accessible project list is empty. The existing project ID, confirmed by Vercel's GitHub preview comment, is `prj_cWW4JlBqUX1pHiwmMkTMdOScVDbH`. Requests by both project name and ID return HTTP 404. GitHub integration can create previews, but connector access must be extended to this project before runtime configuration and authenticated preview verification. No replacement project has been created and no production deployment has been changed.
-
-## Release and rollback
-
-Use the existing Vercel project `revamplexs-projects/revamplex-landing`. Confirm the preview build and existing runtime environment before merging. Do not deploy review sample data or create a replacement database.
-
-After database verification and successful preview checks, merge this branch into `main` to use the existing GitHub/Vercel deployment. Confirm revamplex.com serves the approved homepage and the production deployment is ready.
-
-If a release regression appears, restore the last working Vercel deployment or revert the release commit. The database addition is backward compatible; keep user-created community data rather than dropping its tables during a frontend rollback.
+If a regression appears, restore the previous working deployment or revert the release commit. Keep user-created community data during a frontend rollback.

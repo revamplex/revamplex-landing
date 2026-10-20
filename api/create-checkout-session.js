@@ -35,6 +35,7 @@ export default async function handler(req, res) {
     const origin = req.headers.origin || "https://revamplex.com";
 
     const session = await stripe.checkout.sessions.create({
+      integration_identifier: "revamplex_checkout_vhkmqxsa",
       mode: "subscription",
       line_items: [
         {
