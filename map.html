@@ -6,9 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>RevampLEX Map v9</title>
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <link rel="stylesheet" href="assets/vendor/leaflet.css" />
+  <link rel="stylesheet" href="assets/vendor/MarkerCluster.css" />
+  <link rel="stylesheet" href="assets/vendor/MarkerCluster.Default.css" />
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
@@ -4153,7 +4153,7 @@ body.revamplex-dark .activity-upload-status{
             <div class="activity-share-sub">Optional public showcase. RevampLEX only shows an approximate area — never your exact address.</div>
           </div>
           <label class="activity-check-row">
-            <input type="checkbox" id="jobShareActivity" checked>
+            <input type="checkbox" id="jobShareActivity">
             <span>Share this project to Revamp Activity so nearby homeowners can discover it.</span>
           </label>
           <label class="activity-check-row">
@@ -4397,8 +4397,8 @@ body.revamplex-dark .activity-upload-status{
     </div>
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script src="assets/vendor/leaflet.js"></script>
+  <script src="assets/vendor/leaflet.markercluster.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
   <script>
@@ -9138,5 +9138,7 @@ async function applyPublicReviewStatsToMapItems() {
 })();
 </script>
 
+
+<link rel="stylesheet" href="assets/experience.css"><script src="assets/revamp-core.js"></script><script src="assets/experience.js"></script>
 </body>
 </html>

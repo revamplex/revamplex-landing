@@ -1,0 +1,4 @@
+{
+  "buildCommand": "node scripts/verify-deployment-config.mjs",
+  "outputDirectory": "."
+}

@@ -1,0 +1,1 @@
+globalThis.REVAMP_CONFIG={"url": "https://dezvwoedboikshqttdqu.supabase.co", "key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlenZ3b2VkYm9pa3NocXR0ZHF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDMzNzQsImV4cCI6MjA4ODU3OTM3NH0.5SGfJadjBug9oDOrdvjIM36SwFxe1_yzpry0q67iM-E"};
