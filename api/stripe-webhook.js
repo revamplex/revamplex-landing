@@ -1,4 +1,5 @@
 import Stripe from 'stripe';
+import { getStripeWebhookSecret } from '../lib/billing-config.js';
 
 export const config = { api: { bodyParser: false } };
 const supported = new Set(['checkout.session.completed', 'checkout.session.async_payment_succeeded', 'customer.subscription.updated', 'customer.subscription.deleted']);
@@ -26,7 +27,7 @@ export function createWebhookHandler({ env = process.env, fetcher = (...args) =>
       return res.status(405).json({ error: 'Method not allowed.' });
     }
     const key = env.STRIPE_SECRET_KEY || env.STRIPE_SECRET_KEY_;
-    const secret = (env.STRIPE_WEBHOOK_SECRET || env.STRIPE_WEBHOOK_SECRET_ || '').trim();
+    const secret = getStripeWebhookSecret(env);
     if (!key || !secret) return res.status(503).json({ error: 'Billing webhook is not configured.' });
     const stripe = makeStripe(key);
     let event;

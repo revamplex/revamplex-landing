@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict';
 import { Readable } from 'node:stream';
+import { spawnSync } from 'node:child_process';
 import Stripe from 'stripe';
 import webhook, { createWebhookHandler } from '../api/stripe-webhook.js';
+import '../assets/service-config.js';
 
-const env = { STRIPE_SECRET_KEY_: 'sk_test_local_fixture', STRIPE_WEBHOOK_SECRET_: 'whsec_local_fixture',
+const env = { STRIPE_SECRET_KEY_: 'sk_test_local_fixture', STRIPE_WEBHOOK_SECRET_: 'whsec_local_fixture_only_1234',
   STRIPE_PRICE_BASIC: 'price_basic', STRIPE_PRICE_PRO_: 'price_pro', STRIPE_PRICE_ELITE_: 'price_elite',
   SUPABASE_URL: 'https://billing-fixture.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'local-fixture-only' };
 const verifier = new Stripe(env.STRIPE_SECRET_KEY_);
@@ -15,7 +17,7 @@ async function call(input, options = {}) {
   const payload = JSON.stringify(input);
   const request = Readable.from([Buffer.from(options.tamper ? payload + ' ' : payload)]);
   request.method = options.method || 'POST';
-  request.headers = { 'stripe-signature': verifier.webhooks.generateTestHeaderString({ payload, secret: env.STRIPE_WEBHOOK_SECRET_ }) };
+  request.headers = { 'stripe-signature': verifier.webhooks.generateTestHeaderString({ payload, secret: options.signingSecret || env.STRIPE_WEBHOOK_SECRET_ }) };
   const calls = [], reads = [];
   const handler = createWebhookHandler({ env: options.env || env,
     makeStripe: key => { assert.equal(key, env.STRIPE_SECRET_KEY_); return { webhooks: verifier.webhooks, subscriptions: { retrieve: async id => {
@@ -52,6 +54,35 @@ await check('Existing checkout and billing portal routes load with the pinned St
 });
 await check('Missing webhook configuration cannot process events', async () => {
   const result = await call(event('checkout.session.completed'), { env: {} }); assert.equal(result.code, 503); assert.equal(result.calls.length, 0);
+});
+await check('A malformed primary setting uses the valid trimmed legacy signing secret', async () => {
+  const result = await call(event('customer.created'), { env: { ...env, STRIPE_WEBHOOK_SECRET: 'invalid-setting', STRIPE_WEBHOOK_SECRET_: `  ${env.STRIPE_WEBHOOK_SECRET_}\n` } });
+  assert.equal(result.code, 200); assert.equal(result.calls.length, 0);
+});
+await check('A valid primary signing secret takes precedence over the legacy setting', async () => {
+  const primary = 'whsec_primary_fixture_only_5678';
+  const config = { ...env, STRIPE_WEBHOOK_SECRET: ` ${primary} ` };
+  const accepted = await call(event('customer.created'), { env: config, signingSecret: primary });
+  const rejected = await call(event('customer.created'), { env: config });
+  assert.equal(accepted.code, 200); assert.equal(rejected.code, 400);
+  assert.equal(rejected.reads.length, 0); assert.equal(rejected.calls.length, 0);
+});
+await check('Two malformed signing settings cannot process events', async () => {
+  const result = await call(event('checkout.session.completed'), { env: { ...env, STRIPE_WEBHOOK_SECRET: 'invalid-primary', STRIPE_WEBHOOK_SECRET_: 'whsec_short' } });
+  assert.equal(result.code, 503); assert.equal(result.reads.length, 0); assert.equal(result.calls.length, 0);
+});
+await check('The deployment gate accepts the same valid fallback and rejects malformed secrets', async () => {
+  const config = { ...env, STRIPE_SECRET_KEY_: 'sk_test_local_fixture_only_1234', STRIPE_WEBHOOK_SECRET: 'invalid-primary',
+    SUPABASE_URL: globalThis.REVAMP_CONFIG.url, OPENAI_API_KEY: 'local-fixture-only',
+    ZAPIER_NOTIFICATION_WEBHOOK: 'https://hooks.zapier.com/hooks/catch/local-fixture/never-called/' };
+  for (const valid of [true, false]) {
+    const result = spawnSync(process.execPath, [new URL('../scripts/verify-deployment-config.mjs', import.meta.url).pathname], {
+      env: { ...config, STRIPE_WEBHOOK_SECRET_: valid ? ` ${env.STRIPE_WEBHOOK_SECRET_} ` : 'invalid-legacy' }, encoding: 'utf8'
+    });
+    assert.equal(result.status, valid ? 0 : 1);
+    assert.ok(result.stdout.includes(`"billingSigningSecretFormat":${valid}`));
+    assert.ok(!result.stdout.includes(env.STRIPE_WEBHOOK_SECRET_));
+  }
 });
 await check('Modified signed bodies cannot update billing data', async () => {
   const result = await call(event('checkout.session.completed'), { tamper: true }); assert.equal(result.code, 400); assert.equal(result.reads.length, 0); assert.equal(result.calls.length, 0);

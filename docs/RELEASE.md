@@ -8,7 +8,7 @@ This release contains production source. Isolated review data, review adapters, 
 
 ## Verification
 
-`npm run verify` checks 14 HTML pages, 29 classic scripts, and 110 local links, then runs 16 calculator/AI/account-link checks, 13 notification checks, and 13 billing checks.
+`npm run verify` checks 14 HTML pages, 29 classic scripts, and 110 local links, then runs 16 calculator/AI/account-link checks, 13 notification checks, and 17 billing and configuration checks.
 
 Billing tests verify signed payloads, successful and pending payments, current subscription status, cancellation, duplicate and delayed delivery, replacement subscriptions, unknown prices, and failed database writes. Tests use local fixtures and mocked external requests; they do not charge customers, send emails, or change live profiles.
 
@@ -20,13 +20,13 @@ The Vercel connection now has access to the existing project. The preview homepa
 
 The existing payment webhook crashed during module loading and placed subscription updates outside its request handler. Event processing now runs after signature verification, reads current subscription state, maps configured prices consistently, handles delayed payments, and reports failed database writes for retry. An old cancellation cannot change a replacement subscription.
 
-The Stripe SDK is pinned to 23.0.0 with a lockfile. Checkout retains the existing plans and adds the supported integration identifier. No real checkout, payment, refund, or subscription change was performed during release preparation.
+The Stripe SDK is pinned to 23.0.0 with a lockfile. Checkout retains the existing plans and adds the supported integration identifier. Deployment validation and the webhook share one signing-secret selector: a valid primary setting takes precedence, a valid legacy setting is supported, and malformed values are rejected. No real checkout, payment, refund, or subscription change was performed during release preparation.
 
-## Notification setup before release
+## Notification configuration
 
 Project notifications use the authenticated server endpoint `/api/project-notification`. The caller's account and room membership are checked before looking up the partner's confirmed account email. User-editable contact fields are not notification destinations.
 
-The required private notification webhook setting is still missing from the hosting project. Configure the replacement webhook in the existing project's Preview and Production environments, and confirm that the email action uses the `recipient_email` field. Live notification delivery remains unverified.
+The private notification webhook setting has been added to the hosting project. The deployment gate validates the required settings without logging credentials or sending notifications. The email workflow must use the `recipient_email` field. Live notification delivery remains unverified.
 
 ## Preview and publication
 
@@ -34,8 +34,8 @@ Release review: [PR #5](https://github.com/revamplex/revamplex-landing/pull/5).
 
 Preview: https://revamplex-landing-git-codex-interact-3e5ad8-revamplexs-projects.vercel.app
 
-The preview uses Vercel sign-in or an owner-issued temporary share link. The production website has not been updated.
+The preview uses Vercel sign-in or an owner-issued temporary share link.
 
-After the remaining notification configuration and release checks are complete, merge the release into `main` using the existing GitHub/Vercel integration. Confirm that the production deployment is ready and revamplex.com serves the approved homepage.
+After configuration validation and release checks pass, merge the release into `main` using the existing GitHub/Vercel integration. Confirm that the production deployment is ready and revamplex.com serves the approved homepage.
 
 If a regression appears, restore the previous working deployment or revert the release commit. Keep user-created community data during a frontend rollback.
