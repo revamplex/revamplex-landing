@@ -5716,10 +5716,10 @@ Mark Project Complete
 </main>
     </div>
 
-    <p class="footer-note">Revamp Project Room prototype • Private homeowner + contractor workspace • Ready to connect to Supabase / auth / database next</p>
+    <p class="footer-note">ReVampLEX · Private Project Room</p>
   </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="assets/vendor/pdf.min.js"></script>
+<script src="assets/vendor/jspdf.umd.min.js"></script>
 <script>
 function scrollToSection(id) {
   const el = document.getElementById(id);
@@ -6038,7 +6038,7 @@ function buildCommandDeck() {
     dashboard.parentNode.insertBefore(deck, dashboard);
   }
 
-  const activePanel = deck ? deck.querySelector('.command-active-panel') : null;
+  const retainedPanels = deck ? Array.from(deck.querySelectorAll('.command-stage > [id]')) : [];
   const steps = getCommandSteps();
   const role = getCommandRole();
   const cards = steps.map((step, index) => [
@@ -6060,10 +6060,8 @@ function buildCommandDeck() {
     '<div class="command-stage" id="commandStage"></div>'
   ].join('');
 
-  if (activePanel) {
-    const stage = deck.querySelector('#commandStage');
-    if (stage) stage.appendChild(activePanel);
-  }
+  const retainedStage = deck.querySelector('#commandStage');
+  if (retainedStage) retainedPanels.forEach(panel => retainedStage.appendChild(panel));
 
   deck.querySelectorAll('[data-command-target]').forEach(button => {
     button.addEventListener('click', () => showCommandStage(button.dataset.commandTarget));
@@ -6818,215 +6816,30 @@ const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null
 /* ---------- MODE SWITCH ---------- */
 
 
-/* ---------- ZAPIER NOTIFICATION CENTER ---------- */
-const REVAMP_ZAPIER_NOTIFICATION_WEBHOOK = "https://hooks.zapier.com/hooks/catch/27422517/uvgb5l2/";
-
-function revampSafeText(value, fallback = ""){
-  return String(value ?? fallback).trim();
-}
-
-async function revampGetNotificationContext(extra = {}){
-  const params = new URLSearchParams(window.location.search);
-  const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null");
-  const savedContractor = JSON.parse(sessionStorage.getItem("revampSelectedContractor") || "null");
-  const job = window.currentJob || savedJob || {};
-  const role = typeof getWorkspaceRole === "function" ? getWorkspaceRole() : (params.get("mode") || "contractor");
-
-  let currentUser = null;
+/* ---------- PROJECT NOTIFICATIONS ---------- */
+async function sendRevampZapierNotification(notificationType, extra = {}) {
   try {
-    const { data } = await supabaseClient.auth.getUser();
-    currentUser = data?.user || null;
-  } catch(err) {
-    console.warn("Zapier context auth lookup skipped:", err);
-  }
-
-  let room = null;
-  let roomId = params.get("room") || params.get("room_id") || params.get("project_room") || params.get("id") || extra.project_room_id || extra.room_id || null;
-
-  try {
-    if (!roomId && typeof ensureProjectRoom === "function") {
-      roomId = await ensureProjectRoom();
-    }
-  } catch(err) {
-    console.warn("Zapier context room lookup skipped:", err);
-  }
-
-  try {
-    if (roomId && window.supabaseClient) {
-      const { data } = await supabaseClient
-        .from("project_rooms")
-        .select("*")
-        .eq("id", roomId)
-        .maybeSingle();
-      room = data || null;
-    }
-  } catch(err) {
-    console.warn("Zapier context project room fetch skipped:", err);
-  }
-
-  const notificationJobId = extra.job_id || room?.job_id || job.id || params.get("job") || "";
-  const contractorId = extra.contractor_id || room?.contractor_id || params.get("contractor") || savedContractor?.id || "";
-
-  // If this page was opened by project room id (?id=roomId), window.currentJob can be empty.
-  // Pull the real job row before choosing homeowner/contractor recipient emails.
-  let notificationJob = job || {};
-  try {
-    if (notificationJobId && (!notificationJob?.customer_email || !notificationJob?.title) && window.supabaseClient) {
-      const { data } = await supabaseClient
-        .from("jobs")
-        .select("*")
-        .eq("id", notificationJobId)
-        .maybeSingle();
-      if (data) notificationJob = data;
-    }
-  } catch(err) {
-    console.warn("Zapier job email lookup skipped:", err);
-  }
-
-  const homeownerId = extra.homeowner_id || room?.homeowner_id || notificationJob.user_id || notificationJob.homeowner_id || notificationJob.customer_id || "";
-
-  let homeownerEmail = revampSafeText(notificationJob.customer_email || notificationJob.homeowner_email || notificationJob.email || "");
-  let homeownerName = revampSafeText(job.customer_name || job.homeowner_name || "Homeowner");
-  let contractorEmail = revampSafeText(savedContractor?.email || document.getElementById("contractorEmail")?.value || "");
-  let contractorName = revampSafeText(savedContractor?.company || savedContractor?.name || document.getElementById("contractorCompany")?.value || document.getElementById("contractorName")?.value || "Contractor");
-
-  try {
-    if ((!homeownerEmail || homeownerName === "Homeowner") && homeownerId) {
-      const { data } = await supabaseClient
-        .from("profiles")
-        .select("email,full_name,name")
-        .eq("id", homeownerId)
-        .maybeSingle();
-      homeownerEmail = homeownerEmail || revampSafeText(data?.email || "");
-      homeownerName = homeownerName !== "Homeowner" ? homeownerName : revampSafeText(data?.full_name || data?.name || data?.email || "Homeowner");
-    }
-  } catch(err) {
-    console.warn("Zapier homeowner profile lookup skipped:", err);
-  }
-
-  try {
-    if ((!contractorEmail || contractorName === "Contractor") && contractorId) {
-      const { data } = await supabaseClient
-        .from("profiles")
-        .select("email,full_name,name,company_name,business_name,company")
-        .eq("id", contractorId)
-        .maybeSingle();
-      contractorEmail = contractorEmail || revampSafeText(data?.email || "");
-      contractorName = contractorName !== "Contractor" ? contractorName : revampSafeText(data?.company_name || data?.business_name || data?.company || data?.full_name || data?.name || data?.email || "Contractor");
-    }
-  } catch(err) {
-    console.warn("Zapier contractor profile lookup skipped:", err);
-  }
-
-  try {
-    if ((!contractorEmail || contractorName === "Contractor") && contractorId) {
-      const { data } = await supabaseClient
-        .from("contractors")
-        .select("email,name,company,full_name,business_name,company_name")
-        .eq("id", contractorId)
-        .maybeSingle();
-      contractorEmail = contractorEmail || revampSafeText(data?.email || "");
-      contractorName = contractorName !== "Contractor" ? contractorName : revampSafeText(data?.company_name || data?.business_name || data?.company || data?.full_name || data?.name || "Contractor");
-    }
-  } catch(err) {
-    console.warn("Zapier contractor table lookup skipped:", err);
-  }
-
-  const projectRoomUrl = `${window.location.origin}${window.location.pathname}?mode=${encodeURIComponent(role === "homeowner" ? "homeowner" : "contractor")}&job=${encodeURIComponent(notificationJobId || "")}${contractorId ? "&contractor=" + encodeURIComponent(contractorId) : ""}${roomId ? "&room=" + encodeURIComponent(roomId) : ""}`;
-
-  return {
-    app: "RevampLEX",
-    source: "project-room.html",
-    sent_at: new Date().toISOString(),
-    sender_role: role,
-    sender_user_id: currentUser?.id || "",
-    sender_email: currentUser?.email || "",
-    job_id: notificationJobId || "",
-    project_room_id: roomId || "",
-    contractor_id: contractorId || "",
-    homeowner_id: homeownerId || "",
-    job_title: notificationJob.title || extra.job_title || "Revamp Project",
-    trade: notificationJob.trade || "",
-    city: notificationJob.city || "",
-    budget: notificationJob.budget || "",
-    homeowner_email: homeownerEmail,
-    homeowner_name: homeownerName,
-    contractor_email: contractorEmail,
-    contractor_name: contractorName,
-    project_room_url: projectRoomUrl,
-    recipient_email: role === "homeowner" ? contractorEmail : homeownerEmail,
-    recipient_name: role === "homeowner" ? contractorName : homeownerName,
-    other_party_email: role === "homeowner" ? contractorEmail : homeownerEmail,
-    other_party_name: role === "homeowner" ? contractorName : homeownerName,
-    ...extra
-  };
-}
-
-async function sendRevampZapierNotification(notificationType, extra = {}){
-  try {
-    if (!REVAMP_ZAPIER_NOTIFICATION_WEBHOOK || REVAMP_ZAPIER_NOTIFICATION_WEBHOOK === "PASTE_ZAPIER_WEBHOOK_URL_HERE") {
-      console.warn("Zapier notification webhook missing.");
-      return false;
-    }
-
-    const context = await revampGetNotificationContext(extra);
-    const payload = {
-      notification_type: notificationType,
-      event_type: notificationType,
-      subject: extra.subject || `RevampLEX notification: ${notificationType}`,
-      message: extra.message || "A RevampLEX project-room event needs attention.",
-      ...context
-    };
-
-    // Final recipient safety net.
-    // Zapier email steps fail silently when the mapped recipient is blank.
-    if (!payload.recipient_email) {
-      console.warn("RevampLEX notification has no recipient_email. Payload:", payload);
-      const status = document.getElementById("privateChatStatus") || document.getElementById("calendarSyncStatus") || document.getElementById("signatureStatus");
-      if (status) {
-        status.textContent = "Notification warning: no recipient email found for the other party. Make sure jobs.customer_email and contractor/profile email are saved.";
-      }
-    }
-
-    // Zapier browser-safe format:
-    // JSON with no-cors often reaches Zapier as raw text and fields may not map.
-    // URLSearchParams sends normal form fields so Zapier can map recipient_email,
-    // subject, message, job_title, project_room_url, etc.
-    const formBody = new URLSearchParams();
-    Object.entries(payload).forEach(([key, value]) => {
-      if (value === undefined || value === null) {
-        formBody.append(key, "");
-      } else if (typeof value === "object") {
-        formBody.append(key, JSON.stringify(value));
-      } else {
-        formBody.append(key, String(value));
-      }
-    });
-
-    await fetch(REVAMP_ZAPIER_NOTIFICATION_WEBHOOK, {
+    const { data, error } = await supabaseClient.auth.getSession();
+    if (error || !data?.session?.access_token) throw new Error("Sign in to send a project notification.");
+    const params = new URLSearchParams(window.location.search);
+    const roomId = window.__revampProjectRoomId || params.get("room") || params.get("room_id") || await ensureProjectRoom();
+    if (!roomId) throw new Error("Open a shared Project Room with your project partner before sending a notification.");
+    const response = await fetch("/api/project-notification", {
       method: "POST",
-      mode: "no-cors",
-      body: formBody
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.session.access_token}` },
+      body: JSON.stringify({ notification_type: notificationType, project_room_id: roomId, extra }),
+      signal: AbortSignal.timeout(30000)
     });
-
-    console.log("Zapier notification submitted:", notificationType, payload);
-    window.__lastRevampNotificationPayload = payload;
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || result.ok !== true) throw new Error(result.error || "The notification could not be submitted. Please try again.");
     return true;
-  } catch(err) {
-    console.warn("Zapier notification failed safely:", notificationType, err);
+  } catch (error) {
+    const message = error.name === "TimeoutError" ? "The notification took too long. Please try again." : error.message || "The notification could not be submitted.";
+    if (window.RevampUX?.toast) window.RevampUX.toast(message);
+    else alert(message);
     return false;
   }
 }
-
-// Run this from Chrome console to test Zapier without sending a chat:
-// testRevampZapierNotification()
-window.testRevampZapierNotification = async function(){
-  return await sendRevampZapierNotification("test_notification", {
-    subject: "RevampLEX Zapier test",
-    message: "This is a test notification from project-room.html.",
-    test_mode: "true"
-  });
-};
 
 function getWorkspaceRole() {
   const params = new URLSearchParams(window.location.search);
@@ -7048,94 +6861,18 @@ function getWorkspaceRole() {
 }
 
 async function inviteContractorToProjectRoom() {
-  const params = new URLSearchParams(window.location.search);
-  const workspaceRole = getWorkspaceRole();
-
-  const savedContractor = JSON.parse(sessionStorage.getItem("revampSelectedContractor") || "null");
-  const savedJob = JSON.parse(sessionStorage.getItem("revampSelectedJob") || "null");
-
-  const job = window.currentJob || savedJob || {};
-  const contractor = savedContractor || window.selectedContractor || {};
-
-  const contractorId = params.get("contractor") || contractor.id || "";
-  const jobId = params.get("job") || job.id || "";
-
-  let contractorEmail = contractor.email || "";
-  let contractorName = contractor.name || contractor.company || contractor.full_name || "Contractor";
-
-  let homeownerEmail = job.customer_email || job.email || job.homeowner_email || "";
-  let homeownerName = job.customer_name || job.homeowner_name || "Homeowner";
-
-  // If homeowner is inviting a contractor from an email/direct link, sessionStorage may be empty.
-  // Pull contractor email directly from Supabase using the contractor URL parameter.
-  if (workspaceRole === "homeowner" && !contractorEmail && contractorId && contractorId !== "no-contractor" && !String(contractorId).startsWith("demo")) {
-    const { data, error } = await supabaseClient
-      .from("contractors")
-      .select("email,name,company,full_name")
-      .eq("id", contractorId)
-      .maybeSingle();
-
-    if (!error && data) {
-      contractorEmail = data.email || "";
-      contractorName = data.name || data.company || data.full_name || contractorName;
-    }
-  }
-
-  const inviteMode = workspaceRole === "homeowner" ? "contractor" : "homeowner";
-  const inviteUrl = `${window.location.origin}/project-room.html?mode=${inviteMode}&job=${encodeURIComponent(jobId)}&contractor=${encodeURIComponent(contractorId)}`;
-
-  // Keep the original contractor_email fields because your published Zap currently uses them.
-  // Also send recipient_email fields for the future contractor -> homeowner invite upgrade.
-  const payload = {
-    invite_type: workspaceRole === "contractor"
-      ? "homeowner_project_room_invite"
-      : "contractor_project_room_invite",
-
-    contractor_email: contractorEmail,
-    contractor_name: contractorName,
-
-    recipient_email: workspaceRole === "contractor" ? homeownerEmail : contractorEmail,
-    recipient_name: workspaceRole === "contractor" ? homeownerName : contractorName,
-    sender_role: workspaceRole,
-
-    job_title: job.title || "Revamp Project",
-    trade: job.trade || "",
-    city: job.city || "",
-    project_room_url: inviteUrl
-  };
-
-  if (workspaceRole === "homeowner" && !payload.contractor_email) {
-    alert("No contractor email found. Make sure this contractor has an email saved in Supabase.");
-    return;
-  }
-
-  if (workspaceRole === "contractor" && !payload.recipient_email) {
-    alert("No homeowner email found yet. Add customer_email to the jobs table before contractor-to-homeowner invites.");
-    return;
-  }
-
-  const zapierUrl = "https://hooks.zapier.com/hooks/catch/27422517/uvgb5l2/";
-
-  if (!zapierUrl || zapierUrl === "PASTE_ZAPIER_WEBHOOK_URL_HERE") {
-    alert("Paste your Zapier webhook URL inside project-room.html first.");
-    return;
-  }
-
+  const button = document.getElementById("inviteBtn");
+  if (button?.disabled) return;
+  if (button) button.disabled = true;
   try {
-    const formBody = new URLSearchParams();
-    Object.entries(payload).forEach(([key, value]) => formBody.append(key, value == null ? "" : String(value)));
-
-    await fetch(zapierUrl, {
-      method: "POST",
-      mode: "no-cors",
-      body: formBody
-    });
-
-    console.log("Invite notification submitted to Zapier:", payload);
-    alert("Invite submitted. If no email arrives, check the Zap History and make sure recipient_email is mapped in the Gmail step.");
-  } catch (err) {
-    console.error("Zapier invite failed:", err);
-    alert("Invite failed because Zapier blocked the browser request. We may need to send this through Vercel/Supabase instead.");
+    const type = getWorkspaceRole() === "contractor" ? "homeowner_project_room_invite" : "contractor_project_room_invite";
+    if (await sendRevampZapierNotification(type)) {
+      const message = "Your project invitation has been submitted.";
+      if (window.RevampUX?.toast) window.RevampUX.toast(message);
+      else alert(message);
+    }
+  } finally {
+    if (button) button.disabled = false;
   }
 }
 
@@ -7327,7 +7064,7 @@ async function renderPdfFirstPageToDataUrl(file){
     throw new Error("PDF.js did not load. Make sure the PDF.js script is included, or upload a JPG/PNG screenshot of the plan.");
   }
 
-  window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/vendor/pdf.worker.min.js";
   const buffer = await file.arrayBuffer();
   const pdf = await window.pdfjsLib.getDocument({ data: buffer }).promise;
   const page = await pdf.getPage(1);
@@ -7404,7 +7141,7 @@ function normalizeTakeoffItems(data){
   return items.map((item, index) => ({
     id: item.id || `takeoff-${index + 1}`,
     name: item.name || item.item || "Take-off item",
-    qty: Number(item.quantity || item.qty || 1) || 1,
+    qty: Number(item.quantity ?? item.qty ?? 0),
     unit: item.unit || "unit",
     unitCost: Number(item.suggested_material_unit_cost || item.unitCost || item.material_unit_cost || 0) || 0,
     laborHours: Number(item.suggested_labor_hours || item.laborHours || 0) || 0,
@@ -7461,14 +7198,14 @@ async function ensureRevampPdfJsLoaded() {
 
   await new Promise((resolve, reject) => {
     const script = document.createElement("script");
-    script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+    script.src = "assets/vendor/pdf.min.js";
     script.onload = resolve;
     script.onerror = () => reject(new Error("Could not load PDF.js"));
     document.head.appendChild(script);
   });
 
   window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    "assets/vendor/pdf.worker.min.js";
 }
 
 function readFileAsDataURLRevamp(file) {
@@ -8077,7 +7814,7 @@ const calculatorConfigs = {
       const hours = getNumber("crewSize") * getNumber("workDays") * getNumber("hoursPerDay");
       const laborCost = hours * getNumber("laborRate");
       const total = laborCost + getNumber("disposalCost") + getNumber("miscCost");
-      lastCalcLineItem = { item:"General Labor / Project Allowance", qty:hours.toFixed(2), unit:"hours", unitCost:0, laborHours:hours.toFixed(2), laborRate:getNumber("laborRate") };
+      lastCalcLineItem = { item:"General Labor + Disposal / Misc Allowance", qty:1, unit:"lot", unitCost:getNumber("disposalCost")+getNumber("miscCost"), laborHours:hours.toFixed(2), laborRate:getNumber("laborRate") };
       return [
         ["Total Labor Hours", hours.toFixed(2) + " hours"],
         ["Labor Cost", currency(laborCost)],
@@ -9546,7 +9283,7 @@ async function sendAIMessage(forceEstimatePrompt=false){
 
     const data = await res.json();
 
-    console.log("AI RESPONSE:", data);
+    
 
     if (!res.ok || data.error) {
       const msg = data.error || "Request failed";
@@ -12245,7 +11982,7 @@ body.command-room #completionPanel .summary-box * {
   }
 
   function initProjectRoomThemeToggle() {
-    const savedTheme = localStorage.getItem(THEME_KEY) || "dark";
+    const savedTheme = localStorage.getItem(THEME_KEY) || "light";
     applyProjectRoomTheme(savedTheme);
 
     const btn = document.getElementById("themeToggleBtn");
@@ -13842,5 +13579,7 @@ document.addEventListener("DOMContentLoaded", function(){
 });
 </script>
 
+
+<link rel="stylesheet" href="assets/experience.css"><script src="assets/revamp-core.js"></script><script src="assets/experience.js"></script><script src="assets/room-ux.js"></script>
 </body>
 </html>

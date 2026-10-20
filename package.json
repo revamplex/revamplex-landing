@@ -4,5 +4,8 @@
   "type": "module",
   "dependencies": {
     "stripe": "^18.0.0"
+  },
+  "scripts": {
+    "verify": "node scripts/verify-source.mjs && node tests/experience.test.mjs && node tests/notifications.test.mjs"
   }
 }
