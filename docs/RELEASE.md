@@ -11,33 +11,43 @@ This release contains production source. The isolated review data, review build,
 
 ## Validation
 
-`npm run verify` checks all 14 HTML pages and local assets, parses classic scripts, and runs 14 calculator/AI handling checks plus 11 notification authorization and error-handling checks. Notification requests are mocked; no real emails are sent during tests.
+`npm run verify` checks all 14 HTML pages and local assets, parses classic scripts, and runs 16 calculator/AI/account-link checks plus 13 notification authorization and error-handling checks. Notification requests are mocked; no real emails are sent during tests.
 
-Browser end-to-end testing, live AI calls, and authenticated cross-account database workflows remain unverified. There is no available supported internal browser-preview workflow in this environment.
+Browser end-to-end testing and live AI/notification calls remain unverified. The community database permissions have been tested with simulated authenticated and anonymous database roles in a rolled-back transaction. There is no available supported internal browser-preview workflow in this environment.
 
 ## Database dependency
 
-Apply `supabase/migrations/20261020013000_community.sql` to the database used by the existing site, project `dezvwoedboikshqttdqu`. The migration adds optional sharing fields and comments/reactions with row-level security. Existing projects remain unshared by default, and existing jobs policies remain in place. Verify consent visibility and own-user insert/delete behavior before production release.
+Applied `supabase/migrations/20261020033931_community.sql` to the existing live database, project `dezvwoedboikshqttdqu`, on 2026-10-20 UTC. The migration adds optional sharing fields and comments/reactions with row-level security, explicit grants, foreign keys, and indexes. Existing projects remain unshared by default. The local migration filename matches Supabase's recorded migration version.
 
-Read-only checks confirmed the live jobs table exists, but `share_activity`, `community_reactions`, and `community_comments` are missing. The initially connected Supabase account exposes only the inactive project `euejzhwtewygotgkylal`; it cannot administer the live site database. Do not switch the app to that inactive database.
+Supabase access is now correctly authorized for `revamplex's Org` (`ztwoimwdtdfjxtkcwfxu`). The similarly named organization `revamplex` contains a different inactive project and is not used by the site.
 
-After the Supabase/Vercel reconnection on 2026-10-20, the live database request still returned a permission error and the accessible project list still contained only the inactive project above. No migration has been applied.
+Inspection found a pre-existing permissive jobs UPDATE policy. A security-invoker trigger now protects job ownership, sharing consent, and the fields displayed on shared stories independently of that policy, while retaining existing signature/completion updates. Community queries request only shared projects and the fields needed by the feed.
+
+`tests/community-permissions.sql` passed on the live database using a rolled-back transaction: owner opt-in, author ownership, private-project visibility, anonymous write rejection, protected sharing choices and story content, own-row deletion, and withdrawal of consent. No test accounts were created or emails sent, and zero fixture rows remained. All 11 existing jobs remain unshared; both new community tables are empty.
+
+Applied `supabase/migrations/20261020034735_project_identity.sql` to the same project. Client-created jobs must belong to the signed-in user; new rooms must match the job owner and valid participant accounts; room participant IDs cannot be replaced from the client. Existing rooms are retained. `tests/project-identity.sql` passed in a rolled-back transaction, including valid homeowner/contractor room creation and rejected identity substitutions. Contractor listing UUIDs now resolve through their `profile_id` before opening a room.
+
+The security advisor introduced no new findings. Existing notices remain for an unused review table, trigger-function execution grants, and password protection. See [RLS policies](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy), [function execution grants](https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable), and [password protection](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection).
 
 ## GitHub connection
 
-The ReVampLEX account has installed the ChatGPT Codex Connector with access to `revamplex/revamplex-landing`. Repository authorization was verified on 2026-10-20. Upload this source to the release branch for a Vercel preview; production remains gated on the database migration and live integration checks above.
+The ReVampLEX account has installed the ChatGPT Codex Connector with access to `revamplex/revamplex-landing`. The release is saved in [PR #5](https://github.com/revamplex/revamplex-landing/pull/5). Vercel successfully built the initial preview at https://revamplex-landing-git-codex-interact-3e5ad8-revamplexs-projects.vercel.app. The preview requires Vercel sign-in; build success is not a substitute for authenticated workflow verification.
 
 ## Notification configuration
 
-Project notifications now pass through `/api/project-notification`. The endpoint verifies the user's session with Supabase Auth, checks membership and job ownership under the user's existing row-level permissions, and resolves the other participant's saved email on the server. Client-supplied recipients, identities, and destination links are ignored. Failed submissions are shown as errors instead of successful invitations.
+Project notifications now pass through `/api/project-notification`. The endpoint verifies the user's session with Supabase Auth and checks membership and job ownership under the user's existing row-level permissions. It then resolves the other participant's confirmed account email through the server-only Auth admin API. Editable public contact fields are never used as destinations. Client-supplied recipients, identities, and destination links are ignored. Failed submissions are shown as errors instead of successful invitations.
 
 Set `ZAPIER_NOTIFICATION_WEBHOOK` as an encrypted Vercel environment variable for the existing Preview and Production environments before deploying. Never place this value in browser files or public environment variables. The previously published browser webhook remains in repository history; rotate it in Zapier and configure the replacement before production release. The endpoint preserves existing form field names, including `recipient_email`, `contractor_email`, `invite_type`, and `project_room_url`. Confirm the Zap email action uses `recipient_email` so contractor-to-homeowner notifications reach the correct partner.
 
+Verify that the existing server-only `SUPABASE_SERVICE_ROLE_KEY` used by Stripe integration is configured for the same live Supabase project in the required Vercel environments. Notifications reuse it only for the specific recipient lookup after caller authorization; all project-data reads still use the caller's JWT and RLS. Never expose or prefix this key for client use. Missing configuration or an unverified partner account returns a clear failure.
+
 Validate authorized two-party invitations and notifications against the live project schema before merging. Missing partner contact data returns a clear error. No live notification or email has been sent as part of release preparation.
+
+Live room identity and consent guards have passed database permission tests. Auth admin lookup and webhook delivery have passed mocked tests; live delivery and Vercel environment configuration remain unverified.
 
 ## Vercel connection
 
-The connected account can list team `revamplexs-projects` (`team_sqSrTeRhaY9OAbEfFEmSsaqY`), but that team's accessible project list is empty. Requests for `revamplex-landing` and the last known production deployment return HTTP 404. Access to the existing project must be resolved before deployment; no replacement project has been created and no production deployment has been changed.
+The connected account can list team `revamplexs-projects` (`team_sqSrTeRhaY9OAbEfFEmSsaqY`), but that team's accessible project list is empty. The existing project ID, confirmed by Vercel's GitHub preview comment, is `prj_cWW4JlBqUX1pHiwmMkTMdOScVDbH`. Requests by both project name and ID return HTTP 404. GitHub integration can create previews, but connector access must be extended to this project before runtime configuration and authenticated preview verification. No replacement project has been created and no production deployment has been changed.
 
 ## Release and rollback
 

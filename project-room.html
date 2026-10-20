@@ -9665,19 +9665,19 @@ async function getCurrentProjectUser(){
 }
 
 async function findContractorAuthIdFromParam(contractorParam){
-  if (!contractorParam) return null;
-  if (isProbablyUUID(contractorParam)) return contractorParam;
+  if (!contractorParam || !isProbablyUUID(contractorParam)) return null;
 
   try {
     const { data, error } = await supabaseClient
       .from("contractors")
-      .select("user_id,profile_id,auth_id,id")
+      .select("id,profile_id")
       .eq("id", contractorParam)
       .maybeSingle();
 
-    if (!error && data) {
-      return data.user_id || data.profile_id || data.auth_id || (isProbablyUUID(data.id) ? data.id : null);
-    }
+    if (error) return null;
+    // Listing IDs are also UUIDs. Resolve their profile link before treating a
+    // URL parameter as an Auth user ID. Database constraints verify the account.
+    return data?.profile_id || contractorParam;
   } catch (err) {
     console.warn("Could not resolve contractor auth id:", err);
   }

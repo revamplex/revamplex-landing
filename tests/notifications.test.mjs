@@ -4,6 +4,7 @@ import handler from '../api/project-notification.js';
 
 const originalFetch = globalThis.fetch;
 const originalWebhook = process.env.ZAPIER_NOTIFICATION_WEBHOOK;
+const originalServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const owner = '11111111-1111-4111-8111-111111111111';
 const contractor = '22222222-2222-4222-8222-222222222222';
 const roomId = '33333333-3333-4333-8333-333333333333';
@@ -18,6 +19,7 @@ async function call(body = {}, options = {}) {
 async function test(name, run) {
   scenario = {}; reads = []; submissions = [];
   process.env.ZAPIER_NOTIFICATION_WEBHOOK = 'https://hooks.zapier.com/hooks/catch/example/test-only/';
+  process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-server-only-key';
   await run(); checks++; console.log('PASS ' + name);
 }
 
@@ -31,10 +33,17 @@ globalThis.fetch = async (input, options) => {
     return json({}, scenario.upstreamStatus || 200);
   }
   reads.push(url);
+  if (url.pathname.startsWith('/auth/v1/admin/users/')) {
+    const id = url.pathname.split('/').at(-1);
+    assert.equal(options.headers.Authorization, 'Bearer test-server-only-key');
+    assert.equal(options.headers.apikey, 'test-server-only-key');
+    assert.equal(options.redirect, 'error');
+    return json({ id: scenario.wrongPartner ? owner : id, email: scenario.noContact ? '' : id === contractor ? 'contractor@example.com' : 'owner@example.com', email_confirmed_at: scenario.unverified ? null : '2026-01-01T00:00:00Z' });
+  }
   assert.equal(options.headers.Authorization, 'Bearer test-user-session');
   assert.equal(options.headers.apikey, globalThis.REVAMP_CONFIG.key);
   assert.equal(options.headers['Accept-Profile'], 'public');
-  if (url.pathname === '/auth/v1/user') return json({ id: scenario.user || owner, email: 'owner@example.com' }, scenario.authStatus || 200);
+  if (url.pathname === '/auth/v1/user') return json({ id: scenario.user || owner, email: scenario.user === contractor ? 'contractor@example.com' : 'owner@example.com' }, scenario.authStatus || 200);
   if (url.pathname === '/rest/v1/project_rooms') return json([{ id: roomId, job_id: 42, homeowner_id: owner, contractor_id: contractor }]);
   if (url.pathname === '/rest/v1/jobs') return json([{ id: 42, user_id: scenario.jobOwner || owner, title: 'Kitchen remodel', customer_email: 'owner@example.com' }]);
   if (url.pathname === '/rest/v1/profiles') {
@@ -71,7 +80,7 @@ try {
     scenario.jobOwner = contractor;
     assert.equal((await call()).code, 403); assert.equal(submissions.length, 0);
   });
-  await test('Recipient, sender identity, and links come from verified project data', async () => {
+  await test('Recipient comes from Auth; sender and links come from verified project data', async () => {
     const res = await call({ recipient_email: 'unrelated@example.com', sender_role: 'contractor', extra: { recipient_email: 'unrelated@example.com', subject: 'Fake subject', project_room_url: 'https://example.com', chat_sender_role: 'contractor', chat_message: 'Can we meet Tuesday?' } });
     assert.equal(res.code, 200); assert.deepEqual(res.body, { ok: true });
     const sent = submissions[0];
@@ -96,6 +105,17 @@ try {
     scenario.noContact = true;
     assert.equal((await call()).code, 422); assert.equal(submissions.length, 0);
   });
+  await test('Partner identity mismatches and unverified account email cannot receive notifications', async () => {
+    scenario.wrongPartner = true;
+    assert.equal((await call()).code, 422);
+    scenario.wrongPartner = false; scenario.unverified = true;
+    assert.equal((await call()).code, 422); assert.equal(submissions.length, 0);
+  });
+  await test('Missing server Auth credential cannot fall back to editable public contact data', async () => {
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    assert.equal((await call()).code, 503); assert.equal(submissions.length, 0);
+    assert.ok(!reads.some(url => url.pathname.startsWith('/rest/v1/profiles') || url.pathname.startsWith('/rest/v1/contractors')));
+  });
   await test('Missing or unsafe server webhook configuration cannot send requests', async () => {
     delete process.env.ZAPIER_NOTIFICATION_WEBHOOK;
     assert.equal((await call()).code, 503);
@@ -119,5 +139,7 @@ try {
   globalThis.fetch = originalFetch;
   if (originalWebhook === undefined) delete process.env.ZAPIER_NOTIFICATION_WEBHOOK;
   else process.env.ZAPIER_NOTIFICATION_WEBHOOK = originalWebhook;
+  if (originalServiceKey === undefined) delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+  else process.env.SUPABASE_SERVICE_ROLE_KEY = originalServiceKey;
 }
 console.log(checks + ' notification checks passed; no real notifications sent.');

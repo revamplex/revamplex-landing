@@ -80,22 +80,29 @@ export default async function handler(req, res) {
     if (type.endsWith('_project_room_invite') && type !== `${recipientRole}_project_room_invite`) {
       throw new NotificationError(400, 'This invitation does not match your project role.');
     }
-    const homeowner = await row('profiles', 'id', room.homeowner_id, true) || {};
-    const contractorProfile = await row('profiles', 'id', room.contractor_id, true) || {};
-    let contractor = {};
-    if (!email(contractorProfile.email)) {
-      for (const column of ['user_id', 'profile_id', 'auth_id', 'id']) {
-        const found = await row('contractors', column, room.contractor_id, true);
-        if (found && email(found.email)) { contractor = found; break; }
-      }
+    // Public profile/contact fields are not authoritative email destinations.
+    // Privileged Auth lookup occurs only after session, membership, and job checks.
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceKey) throw new NotificationError(503, 'Project notifications are temporarily unavailable. Your project changes remain saved.');
+    const recipientId = recipientRole === 'contractor' ? room.contractor_id : room.homeowner_id;
+    const partnerResponse = await fetch(`${url}/auth/v1/admin/users/${encodeURIComponent(recipientId)}`, {
+      headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }, signal, redirect: 'error'
+    });
+    if (!partnerResponse.ok) throw new NotificationError(502, 'Your project partner account could not be verified. Please try again.');
+    const partnerData = await partnerResponse.json();
+    const partner = partnerData.user || partnerData;
+    if (partner.id !== recipientId || !partner.email_confirmed_at || !email(partner.email)) {
+      throw new NotificationError(422, 'Your project partner needs a verified account email before notifications can be sent.');
     }
-    const homeownerEmail = email(homeowner.email) || email(job.customer_email) || email(job.homeowner_email) || email(job.email);
-    const contractorEmail = email(contractorProfile.email) || email(contractor.email);
-    const homeownerName = text(homeowner.full_name || homeowner.name || job.customer_name || job.homeowner_name) || 'Homeowner';
-    const contractorName = text(contractorProfile.company_name || contractorProfile.business_name || contractorProfile.company || contractorProfile.full_name || contractorProfile.name || contractor.company || contractor.name) || 'Contractor';
+    const homeowner = senderRole === 'homeowner' ? user : partner;
+    const contractor = senderRole === 'contractor' ? user : partner;
+    const homeownerEmail = email(homeowner.email);
+    const contractorEmail = email(contractor.email);
+    // Metadata is used for display names only, never for access decisions.
+    const homeownerName = text(homeowner.user_metadata?.full_name || homeowner.user_metadata?.name) || 'Homeowner';
+    const contractorName = text(contractor.user_metadata?.company || contractor.user_metadata?.full_name || contractor.user_metadata?.name) || 'Contractor';
     const recipientEmail = recipientRole === 'contractor' ? contractorEmail : homeownerEmail;
     const recipientName = recipientRole === 'contractor' ? contractorName : homeownerName;
-    if (!recipientEmail) throw new NotificationError(422, 'Your project partner needs a saved contact email before notifications can be sent.');
 
     // No recipient, sender identity, subject, or destination URL is accepted from the browser.
     const link = new URL('https://revamplex.com/project-room.html');

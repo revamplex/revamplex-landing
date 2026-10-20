@@ -9,7 +9,7 @@
   async function user(){return (await getClient()?.auth.getUser())?.data?.user;}
   async function fetchProjects(){
     const client=getClient();if(!client)return [];
-    const {data,error}=await client.from('jobs').select('*').order('created_at',{ascending:false}).limit(200);
+    const {data,error}=await client.from('jobs').select('id,title,trade,city,description,activity_photo_url,contractor_used,budget,reveal_price,price_visible,share_activity,activity_public,public_showcase,created_at').or('share_activity.eq.true,activity_public.eq.true,public_showcase.eq.true').order('created_at',{ascending:false}).limit(200);
     if(error)throw new Error('Project inspiration could not load. Please try again.');
     return (data||[]).filter(j=>j.share_activity===true||j.activity_public===true||j.public_showcase===true).map(j=>({
       id:String(j.id),title:j.activity_title||j.title||'A community project',trade:j.trade||'Renovation',category:/kitchen/i.test(j.trade)?'Kitchen':/bath/i.test(j.trade)?'Bathroom':/deck|landscap|patio|porch|fenc|pool/i.test(j.trade)?'Outdoor':'Interior',
