@@ -6234,8 +6234,7 @@ function renderMarkers(items, options = {}) {
       if (!items.length) return;
       const bounds = L.latLngBounds(items.map(item => getDisplayCoords(item)));
       map.fitBounds(bounds, {
-        paddingTopLeft: [30, 210],
-        paddingBottomRight: [30, 220],
+        padding: [32, 48],
         maxZoom: 12
       });
     }
@@ -8695,13 +8694,11 @@ cardsRow.addEventListener('scroll', () => {
     }
   }, 220);
 });
-    map.on('click', () => {
-      if (!uiCollapsed) collapseUI();
-      else expandUI();
-    });
+    // Map taps are reserved for exploration; Search & filters opens explicitly.
 
     window.addEventListener('resize', () => {
       setTimeout(() => {
+        if (!app.clientWidth || !app.clientHeight) return;
         map.invalidateSize();
         if (filteredItems.length) {
           fitMapToItems(filteredItems);

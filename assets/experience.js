@@ -34,16 +34,39 @@
   }
   function setupMap(){
     const intro=document.createElement('div');intro.className='rx-map-intro';intro.innerHTML='<div><p class="rx-kicker">YOUR NEIGHBORHOOD. YOUR NEXT PROJECT.</p><h1>'+(role()==='contractor'?'Find your next great project.':'Great work starts close to home.')+'</h1><p>Discover local expertise and projects. Exact addresses stay private during discovery.</p></div><div class="rx-row"><button class="rx-button small" id="rxMapView" aria-pressed="true">Map view</button><button class="rx-button small" id="rxListView" aria-pressed="false">List view</button></div>';document.getElementById('app').before(intro);
-    const toggle=list=>{document.body.classList.toggle('rx-list-mode',list);document.getElementById('rxMapView').setAttribute('aria-pressed',!list);document.getElementById('rxListView').setAttribute('aria-pressed',list);try{map.invalidateSize();}catch{}};
+    const toggle=list=>{document.body.classList.toggle('rx-list-mode',list);document.getElementById('rxMapView').setAttribute('aria-pressed',!list);document.getElementById('rxListView').setAttribute('aria-pressed',list);const done=document.getElementById('rxViewMapResults');if(done)done.textContent=list?'View results':'View map';requestAnimationFrame(()=>{try{map.invalidateSize({pan:false});}catch{}});};
     document.getElementById('rxMapView').onclick=()=>toggle(false);document.getElementById('rxListView').onclick=()=>toggle(true);
     const input=document.getElementById('searchInput');if(input){input.placeholder='Search a trade, town, or project…';input.setAttribute('aria-label','Search contractors and projects');}
     const params=new URLSearchParams(location.search);if(params.get('q')&&input){input.value=params.get('q');input.dispatchEvent(new Event('input',{bubbles:true}));}
     const clear=document.createElement('button');clear.className='rx-button small';clear.textContent='Clear filters';clear.type='button';clear.onclick=()=>{input.value='';document.getElementById('tradeFilter').value='all';document.getElementById('distanceFilter').value='100';document.getElementById('ratingFilter').value='0';if(typeof applyFilters==='function')applyFilters();};document.querySelector('.filter-row')?.append(clear);
+    setupMapControls(clear);
     if(window.REVAMP_REVIEW){document.getElementById('welcomeOverlay')?.remove();}
     setupPostWizard();
     if(params.get('action')==='post')setTimeout(()=>document.getElementById('postJobBtn')?.click(),500);
-    try{map.invalidateSize();}catch{}
+    requestAnimationFrame(()=>{try{map.invalidateSize({pan:false});}catch{}});
     const theme=document.getElementById('themeToggleBtn');if(theme){theme.textContent='Map style';theme.title='Switch map light / dark style';}
+  }
+  function setupMapControls(clear){
+    const app=document.getElementById('app');
+    const topbar=app?.querySelector('.topbar');
+    if(!topbar)return;
+    // Move the existing controls so their filters, account actions, and listeners stay intact.
+    const controls=document.createElement('details');controls.className='rx-map-controls';controls.id='rxMapControls';
+    const summary=document.createElement('summary');summary.setAttribute('aria-controls','rxMapFilterPanel');
+    summary.innerHTML='<span class="rx-map-controls-label">Search &amp; filters</span><span class="rx-map-filter-count" aria-live="polite">No filters</span><span class="rx-map-chevron" aria-hidden="true">⌄</span>';
+    const panel=document.createElement('div');panel.id='rxMapFilterPanel';panel.className='rx-map-filter-panel';
+    const footer=document.createElement('div');footer.className='rx-map-filter-actions';
+    const done=document.createElement('button');done.type='button';done.className='rx-button primary';done.id='rxViewMapResults';done.textContent='View map';
+    footer.append(done);panel.append(topbar,footer);controls.append(summary,panel);app.before(controls);
+    const close=()=>{controls.open=false;summary.focus({preventScroll:true});};
+    done.onclick=()=>{close();const target=document.body.classList.contains('rx-list-mode')?document.querySelector('.map-results-section'):app;target?.scrollIntoView({block:'start',behavior:'auto'});};
+    controls.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();close();}});
+    const input=document.getElementById('searchInput');
+    input?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();done.click();}});
+    const defaults={searchInput:'',tradeFilter:'all',distanceFilter:'100',ratingFilter:'0'};
+    const updateSummary=()=>{const count=Object.entries(defaults).filter(([id,value])=>(document.getElementById(id)?.value||'').trim()!==value).length;summary.querySelector('.rx-map-filter-count').textContent=count?count+' active':'No filters';};
+    for(const [id,label] of Object.entries({tradeFilter:'Trade',distanceFilter:'Distance',ratingFilter:'Minimum rating'}))document.getElementById(id)?.setAttribute('aria-label',label);
+    controls.addEventListener('input',updateSummary);controls.addEventListener('change',updateSummary);clear.addEventListener('click',updateSummary);updateSummary();
   }
   function setupPostWizard(){
     const modal=document.getElementById('jobModal');if(!modal)return;
