@@ -47,8 +47,34 @@
     const draw=()=>list.innerHTML=rows.length?rows.map(r=>'<div class="rx-comment"><small>'+esc(r.display_name||'Community member')+'</small>'+esc(r.body)+'</div>').join(''):'<p class="rx-muted" style="font-size:12px">Be the first to start a conversation.</p>';draw();
     el.querySelector('form').onsubmit=async e=>{e.preventDefault();const body=el.querySelector('textarea').value.trim();if(!body)return;const button=el.querySelector('[type=submit]');button.disabled=true;try{const u=await user();if(!u)throw new Error('Sign in from the map to comment.');const row={job_id:id,user_id:u.id,display_name:window.REVAMP_REVIEW?'You · design review':'Community member',body,created_at:new Date().toISOString()};if(window.REVAMP_REVIEW){rows.push(row);if(!write('rx_comments_'+id,rows))return;}else{const {error}=await getClient().from('community_comments').insert(row);if(error)throw new Error('Your comment could not be saved. Please try again.');rows.push(row);}el.querySelector('textarea').value='';draw();}catch(error){window.RevampUX.toast(error.message);}finally{button.disabled=false;}};
   }
+  function setupHomeRoles(){
+    const buttons=document.querySelectorAll('.rx-role-picker [data-role]');
+    if(!buttons.length)return;
+    const setRole=role=>{
+      const contractor=role==='contractor';
+      buttons.forEach(button=>button.setAttribute('aria-pressed',button.dataset.role===role));
+      document.querySelectorAll('[data-benefits-role]').forEach(section=>section.hidden=section.dataset.benefitsRole!==role);
+      document.getElementById('rxHeroTitle').innerHTML=contractor?'Great projects.<br>Local connections.<br><em>Room to grow.</em>':'Big ideas.<br>Local expertise.<br><em>A place to begin.</em>';
+      document.getElementById('rxHeroDescription').textContent=contractor?'Find your next project, show what makes your work special, and manage the details in one place. More time for the work you love.':"Find the right people, explore what's possible, and bring your next home project to life. Together, from the first idea to the final detail.";
+      const form=document.querySelector('.rx-search-form');
+      let view=form.querySelector('[name=view]');
+      if(!view){view=document.createElement('input');view.type='hidden';view.name='view';form.append(view);}
+      view.value=role;
+      form.querySelector('[name=q]').placeholder=contractor?'Search projects by trade or town…':'What are you planning? Kitchen, deck, tile…';
+    };
+    buttons.forEach(button=>button.onclick=()=>{
+      setRole(button.dataset.role);
+      // Remember the homepage experience without changing the account's role.
+      write('rx_home_view',button.dataset.role);
+    });
+    const params=new URLSearchParams(location.search);
+    let accountRole;
+    try{accountRole=window.RevampUX.role();}catch{}
+    const initialRole=[params.get('view'),params.get('mode'),read('rx_home_view',null),accountRole].find(value=>value==='homeowner'||value==='contractor')||'homeowner';
+    setRole(initialRole);
+  }
   async function init(){
-    document.querySelectorAll('[data-role]').forEach(button=>button.onclick=()=>{const contractor=button.dataset.role==='contractor';document.querySelectorAll('[data-role]').forEach(b=>b.setAttribute('aria-pressed',b===button));document.getElementById('rxHeroTitle').innerHTML=contractor?'Great projects.<br>Local connections.<br><em>Room to grow.</em>':'Big ideas.<br>Local expertise.<br><em>A place to begin.</em>';document.getElementById('rxHeroDescription').textContent=contractor?'Find your next project, show what makes your work special, and manage the details in one place. More time for the work you love.':"Find the right people, explore what's possible, and bring your next home project to life. Together, from the first idea to the final detail.";const form=document.querySelector('.rx-search-form');let view=form.querySelector('[name=view]');if(!view){view=document.createElement('input');view.type='hidden';view.name='view';form.append(view);}view.value=button.dataset.role;form.querySelector('[name=q]').placeholder=contractor?'Search projects by trade or town…':'What are you planning? Kitchen, deck, tile…';});
+    setupHomeRoles();
     document.querySelectorAll('[data-category]').forEach(b=>b.onclick=()=>{category=b.dataset.category;document.querySelectorAll('[data-category]').forEach(x=>x.setAttribute('aria-pressed',x===b));render();});
     const search=document.getElementById('rxCommunitySearch');if(search)search.oninput=()=>{query=search.value.trim().toLowerCase();render();};
     const saved=document.getElementById('rxSavedToggle');if(saved)saved.onclick=()=>{savedOnly=!savedOnly;render();};
